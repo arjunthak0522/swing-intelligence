@@ -34,7 +34,6 @@ def fetch_fred(series_id: str) -> pd.Series:
 
 
 def fetch_cboe_close(symbol: str, url: str) -> pd.Series:
-    """Fetch official Cboe daily history, tolerant of column-name variations."""
     df = fetch_csv(url)
     date_col = next((c for c in df.columns if c.strip().lower() in {"date", "trade date", "tradedate"}), None)
     close_col = next((c for c in df.columns if c.strip().lower() in {"close", "closing value", "close value"}), None)
@@ -46,7 +45,6 @@ def fetch_cboe_close(symbol: str, url: str) -> pd.Series:
 
 
 def fetch_volatility_history(symbol: str) -> tuple[pd.Series, str]:
-    """Prefer Cboe's daily-updated official history; retain FRED only as fallback."""
     if symbol == "VIX":
         try:
             return fetch_cboe_close("VIX", CBOE_VIX_URL), "Cboe VIX daily history"
@@ -103,12 +101,9 @@ def load_inputs() -> tuple[pd.Series, pd.Series, pd.Series, pd.Series, pd.DataFr
     return spy, qqq, vix, vix3m, breadth, meta
 
 
-def feature_frame(return_metadata: bool = False):
+def feature_frame(return_metadata: bool = False, require_same_day: bool = False):
     spy, qqq, vix, vix3m, breadth, meta = load_inputs()
-
-    # The latest completed equity session is the anchor. Never silently roll the
-    # whole engine back because a secondary source is stale.
-    target = min(spy.index.max(), qqq.index.max())
+    equity_target = min(spy.index.max(), qqq.index.max())
     required_latest = {
         "SPY": spy.index.max(),
         "QQQ": qqq.index.max(),
@@ -116,28 +111,26 @@ def feature_frame(return_metadata: bool = False):
         "VIX3M": vix3m.index.max(),
         "breadth": breadth.index.max(),
     }
-    stale = {name: str(dt.date()) for name, dt in required_latest.items() if dt < target}
-    if stale:
-        raise RuntimeError(
-            "Same-day input freshness check failed for equity session "
-            f"{target.date()}: stale inputs={stale}. Refusing to emit a current re-entry signal."
-        )
 
-    # Trim every source to the same completed equity-session anchor. This permits
-    # historical alignment while guaranteeing the current row is genuinely same-day.
+    if require_same_day:
+        target = equity_target
+        stale = {name: str(dt.date()) for name, dt in required_latest.items() if dt < target}
+        if stale:
+            raise RuntimeError(
+                "Same-day input freshness check failed for equity session "
+                f"{target.date()}: stale inputs={stale}. Refusing to emit a current re-entry signal."
+            )
+    else:
+        target = min(required_latest.values())
+        stale = {name: str(dt.date()) for name, dt in required_latest.items() if dt < equity_target}
+
     frame = pd.concat(
-        [
-            spy.loc[:target],
-            qqq.loc[:target],
-            vix.loc[:target],
-            vix3m.loc[:target],
-            breadth.loc[:target],
-        ],
+        [spy.loc[:target], qqq.loc[:target], vix.loc[:target], vix3m.loc[:target], breadth.loc[:target]],
         axis=1,
     ).dropna()
     if frame.empty or frame.index.max() != target:
         raise RuntimeError(
-            f"Unable to construct same-day feature row for {target.date()}; latest common row is "
+            f"Unable to construct feature row for {target.date()}; latest common row is "
             f"{None if frame.empty else frame.index.max().date()}"
         )
 
@@ -149,10 +142,13 @@ def feature_frame(return_metadata: bool = False):
     frame["curve_ratio"] = frame["VIX"] / frame["VIX3M"]
     frame = frame.dropna()
     if frame.index.max() != target:
-        raise RuntimeError(f"Same-day feature calculation lost target session {target.date()}")
+        raise RuntimeError(f"Feature calculation lost target session {target.date()}")
 
+    meta["equity_target_session"] = str(equity_target.date())
     meta["target_session"] = str(target.date())
-    meta["same_day_complete"] = True
+    meta["same_day_required"] = require_same_day
+    meta["same_day_complete"] = bool(target == equity_target and not stale)
+    meta["stale_inputs_vs_equity_target"] = stale
     if return_metadata:
         return frame, meta
     return frame
@@ -165,7 +161,6 @@ def empirical_state(row: pd.Series) -> str:
     b1 = float(row["b50_change1"])
     vix5 = float(row["vix_change5"])
     curve = float(row["curve_ratio"])
-
     if dd <= -0.05:
         base = "normal correction"
     elif dd <= -0.02:
@@ -174,7 +169,6 @@ def empirical_state(row: pd.Series) -> str:
         base = "rolling/internal correction"
     else:
         base = "no material correction"
-
     if b1 > 0 and vix5 <= 0 and curve <= 1.0:
         phase = "stabilizing"
     elif b1 > 0:
@@ -254,13 +248,12 @@ def confidence_label(stats: dict, state: str) -> tuple[str, str]:
 
 
 def main() -> None:
-    frame, freshness = feature_frame(return_metadata=True)
+    frame, freshness = feature_frame(return_metadata=True, require_same_day=True)
     target = frame.index.max()
     analogs = analogs_for_date(frame, target)
     stats = summarize_analogs(frame, analogs)
     state = empirical_state(frame.loc[target])
     label, interpretation = confidence_label(stats, state)
-
     current = frame.loc[target]
     payload = {
         "as_of": str(target.date()),
@@ -290,7 +283,7 @@ def main() -> None:
             "execution": "signal close t, hypothetical entry close t+1",
             "round_trip_cost": ROUND_TRIP_COST,
             "breadth_source": BREADTH_URL,
-            "freshness_policy": "latest completed SPY/QQQ session is anchor; VIX, VIX3M and breadth must all contain that same session or the engine fails closed",
+            "freshness_policy": "live mode anchors to latest completed SPY/QQQ session; VIX, VIX3M and breadth must all contain that same session or the engine fails closed",
             "caveat": "breadth history starts 2016-09; output is a decision-support analog framework, not a statistically proven standalone trading strategy",
         },
     }
