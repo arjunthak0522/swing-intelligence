@@ -29,7 +29,7 @@ def strategy_signal(decision: str, weak: bool) -> tuple[str, str]:
 
 
 def main() -> None:
-    frame, freshness = feature_frame(return_metadata=True)
+    frame, freshness = feature_frame(return_metadata=True, require_same_day=True)
     target = frame.index.max()
     row = frame.loc[target]
     analogs = analogs_for_date(frame, target)
