@@ -29,7 +29,7 @@ def strategy_signal(decision: str, weak: bool) -> tuple[str, str]:
 
 
 def main() -> None:
-    frame = feature_frame()
+    frame, freshness = feature_frame(return_metadata=True)
     target = frame.index.max()
     row = frame.loc[target]
     analogs = analogs_for_date(frame, target)
@@ -40,6 +40,7 @@ def main() -> None:
 
     payload = {
         "as_of": str(target.date()),
+        "data_freshness": freshness,
         "strategy": "Correction Re-entry",
         "signal": signal,
         "signal_interpretation": signal_text,
@@ -62,12 +63,13 @@ def main() -> None:
         "decision_diagnostics": diagnostics,
         "implementation": {
             "evaluate": "after each market close",
+            "freshness_policy": "SPY/QQQ define the latest completed equity session; VIX, VIX3M, and breadth must all include that same session or no signal is emitted",
             "weakness_context": "SPY >=1% below 20d high OR <=50% S&P above 50DMA OR VIX +>=10% over 5d OR VIX/VIX3M >=1.0",
             "reentry_rule": "when weakness exists and analog decision is CAUTIOUS YES / YES / STRONG YES, signal RE-ENTER",
             "execution": "actionable for the next trading session; historical validation assumed close t+1 execution and 10 bps round-trip friction",
             "exit_rule": "none; this is an entry-timing framework for redeploying cash, not a forced 7/10-day swing exit",
             "large_corrections": "fully included; there is no maximum drawdown exclusion",
-            "rolling_corrections": "included through breadth and volatility weakness even when the index drawdown is shallow",
+            "rolling_corrections": "included through breadth and volatility weakness even when the index drawdown is shallow"
         },
         "historical_validation": {
             "independent_episodes": 145,
@@ -80,13 +82,13 @@ def main() -> None:
             "QQQ_7D_positive_rate": 0.6137931034482759,
             "QQQ_10D_positive_rate": 0.6344827586206897,
             "result": "GO_TO_IMPLEMENTABLE_STRATEGY",
-            "important_limit": "the model did not prove superiority to entering immediately at the start of every weakness episode; it did show that, once its re-entry condition was present, waiting another 3-5 sessions was historically worse",
+            "important_limit": "the model did not prove superiority to entering immediately at the start of every weakness episode; it did show that, once its re-entry condition was present, waiting another 3-5 sessions was historically worse"
         },
         "caveats": [
             "true breadth history begins in September 2016",
             "historical evidence supports decision timing, not guaranteed returns",
-            "this does not claim statistically proven standalone alpha versus buy-and-hold",
-        ],
+            "this does not claim statistically proven standalone alpha versus buy-and-hold"
+        ]
     }
 
     out = Path("artifacts/reentry_strategy")
