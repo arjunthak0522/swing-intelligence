@@ -1,0 +1,72 @@
+name: Swing Intelligence Quant Research
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'engine.zip'
+      - '.github/workflows/research.yml'
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUNBUFFERED: '1'
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Expand research engine
+        run: unzip -o engine.zip -d .
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install engine
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+
+      - name: Run regression suite
+        run: pytest -q
+
+      - name: Verify Twelve Data secret is configured
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os
+          if not os.getenv('TWELVE_DATA_API_KEY'):
+              raise SystemExit('TWELVE_DATA_API_KEY repository secret is missing')
+          print('Twelve Data secret is configured')
+          PY
+
+      - name: Run real historical signal tournament
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python run_research.py
+
+      - name: List research outputs
+        if: always()
+        run: |
+          find artifacts data/cache -maxdepth 3 -type f -print 2>/dev/null || true
+
+      - name: Upload research results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: swing-intelligence-research
+          path: |
+            artifacts/research/**
+            data/cache/*.manifest.json
+          if-no-files-found: warn
+          retention-days: 30
