@@ -11,6 +11,8 @@ import numpy as np
 import pandas as pd
 
 BREADTH_URL = "https://tradermonty.github.io/market-breadth-analysis/market_breadth_data.csv"
+CBOE_VIX_URL = "https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX_History.csv"
+CBOE_VIX3M_URL = "https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX3M_History.csv"
 ROUND_TRIP_COST = 0.001
 K_ANALOGS = 40
 EXCLUSION_SESSIONS = 20
@@ -29,6 +31,33 @@ def fetch_fred(series_id: str) -> pd.Series:
     df["date"] = pd.to_datetime(df["date"])
     df[series_id] = pd.to_numeric(df[series_id], errors="coerce")
     return df.dropna().set_index("date")[series_id].sort_index()
+
+
+def fetch_cboe_close(symbol: str, url: str) -> pd.Series:
+    """Fetch official Cboe daily history, tolerant of column-name variations."""
+    df = fetch_csv(url)
+    date_col = next((c for c in df.columns if c.strip().lower() in {"date", "trade date", "tradedate"}), None)
+    close_col = next((c for c in df.columns if c.strip().lower() in {"close", "closing value", "close value"}), None)
+    if date_col is None or close_col is None:
+        raise RuntimeError(f"Unexpected Cboe {symbol} schema: {list(df.columns)}")
+    df[date_col] = pd.to_datetime(df[date_col], errors="coerce")
+    df[close_col] = pd.to_numeric(df[close_col], errors="coerce")
+    return df.dropna(subset=[date_col, close_col]).set_index(date_col)[close_col].sort_index().rename(symbol)
+
+
+def fetch_volatility_history(symbol: str) -> tuple[pd.Series, str]:
+    """Prefer Cboe's daily-updated official history; retain FRED only as fallback."""
+    if symbol == "VIX":
+        try:
+            return fetch_cboe_close("VIX", CBOE_VIX_URL), "Cboe VIX daily history"
+        except Exception:
+            return fetch_fred("VIXCLS").rename("VIX"), "FRED VIXCLS fallback"
+    if symbol == "VIX3M":
+        try:
+            return fetch_cboe_close("VIX3M", CBOE_VIX3M_URL), "Cboe VIX3M daily history"
+        except Exception:
+            return fetch_fred("VXVCLS").rename("VIX3M"), "FRED VXVCLS fallback"
+    raise ValueError(symbol)
 
 
 def fetch_twelve_close(symbol: str, start: str = "2016-09-01") -> pd.Series:
@@ -53,7 +82,7 @@ def fetch_twelve_close(symbol: str, start: str = "2016-09-01") -> pd.Series:
     return df.dropna(subset=["close"]).set_index("datetime")["close"].sort_index().rename(symbol)
 
 
-def feature_frame() -> pd.DataFrame:
+def load_inputs() -> tuple[pd.Series, pd.Series, pd.Series, pd.Series, pd.DataFrame, dict]:
     b = fetch_csv(BREADTH_URL)
     b["Date"] = pd.to_datetime(b["Date"])
     b = b.set_index("Date").sort_index()
@@ -62,9 +91,55 @@ def feature_frame() -> pd.DataFrame:
     )
     spy = fetch_twelve_close("SPY")
     qqq = fetch_twelve_close("QQQ")
-    vix = fetch_fred("VIXCLS").rename("VIX")
-    vix3m = fetch_fred("VXVCLS").rename("VIX3M")
-    frame = pd.concat([spy, qqq, vix, vix3m, breadth], axis=1).dropna()
+    vix, vix_source = fetch_volatility_history("VIX")
+    vix3m, vix3m_source = fetch_volatility_history("VIX3M")
+    meta = {
+        "SPY": {"source": "Twelve Data", "latest": str(spy.index.max().date())},
+        "QQQ": {"source": "Twelve Data", "latest": str(qqq.index.max().date())},
+        "VIX": {"source": vix_source, "latest": str(vix.index.max().date())},
+        "VIX3M": {"source": vix3m_source, "latest": str(vix3m.index.max().date())},
+        "breadth": {"source": BREADTH_URL, "latest": str(breadth.index.max().date())},
+    }
+    return spy, qqq, vix, vix3m, breadth, meta
+
+
+def feature_frame(return_metadata: bool = False):
+    spy, qqq, vix, vix3m, breadth, meta = load_inputs()
+
+    # The latest completed equity session is the anchor. Never silently roll the
+    # whole engine back because a secondary source is stale.
+    target = min(spy.index.max(), qqq.index.max())
+    required_latest = {
+        "SPY": spy.index.max(),
+        "QQQ": qqq.index.max(),
+        "VIX": vix.index.max(),
+        "VIX3M": vix3m.index.max(),
+        "breadth": breadth.index.max(),
+    }
+    stale = {name: str(dt.date()) for name, dt in required_latest.items() if dt < target}
+    if stale:
+        raise RuntimeError(
+            "Same-day input freshness check failed for equity session "
+            f"{target.date()}: stale inputs={stale}. Refusing to emit a current re-entry signal."
+        )
+
+    # Trim every source to the same completed equity-session anchor. This permits
+    # historical alignment while guaranteeing the current row is genuinely same-day.
+    frame = pd.concat(
+        [
+            spy.loc[:target],
+            qqq.loc[:target],
+            vix.loc[:target],
+            vix3m.loc[:target],
+            breadth.loc[:target],
+        ],
+        axis=1,
+    ).dropna()
+    if frame.empty or frame.index.max() != target:
+        raise RuntimeError(
+            f"Unable to construct same-day feature row for {target.date()}; latest common row is "
+            f"{None if frame.empty else frame.index.max().date()}"
+        )
 
     frame["spy_dd20"] = frame["SPY"] / frame["SPY"].rolling(20).max() - 1.0
     frame["spy_ret5"] = frame["SPY"].pct_change(5)
@@ -72,7 +147,15 @@ def feature_frame() -> pd.DataFrame:
     frame["b50_change3"] = frame["B50"].diff(3)
     frame["vix_change5"] = frame["VIX"].pct_change(5)
     frame["curve_ratio"] = frame["VIX"] / frame["VIX3M"]
-    return frame.dropna()
+    frame = frame.dropna()
+    if frame.index.max() != target:
+        raise RuntimeError(f"Same-day feature calculation lost target session {target.date()}")
+
+    meta["target_session"] = str(target.date())
+    meta["same_day_complete"] = True
+    if return_metadata:
+        return frame, meta
+    return frame
 
 
 def empirical_state(row: pd.Series) -> str:
@@ -171,7 +254,7 @@ def confidence_label(stats: dict, state: str) -> tuple[str, str]:
 
 
 def main() -> None:
-    frame = feature_frame()
+    frame, freshness = feature_frame(return_metadata=True)
     target = frame.index.max()
     analogs = analogs_for_date(frame, target)
     stats = summarize_analogs(frame, analogs)
@@ -181,6 +264,7 @@ def main() -> None:
     current = frame.loc[target]
     payload = {
         "as_of": str(target.date()),
+        "data_freshness": freshness,
         "framework": "empirical historical analogs; not a claim of proven alpha",
         "current_state": state,
         "confidence": label,
@@ -206,6 +290,7 @@ def main() -> None:
             "execution": "signal close t, hypothetical entry close t+1",
             "round_trip_cost": ROUND_TRIP_COST,
             "breadth_source": BREADTH_URL,
+            "freshness_policy": "latest completed SPY/QQQ session is anchor; VIX, VIX3M and breadth must all contain that same session or the engine fails closed",
             "caveat": "breadth history starts 2016-09; output is a decision-support analog framework, not a statistically proven standalone trading strategy",
         },
     }
