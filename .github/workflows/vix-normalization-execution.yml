@@ -1,0 +1,33 @@
+name: VIX Normalization Executable Validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/vix_normalization_execution.py'
+      - '.github/workflows/vix-normalization-execution.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  executable-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install pandas numpy
+      - name: Run executable QQQ VIX normalization validation
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/vix_normalization_execution.py
+      - name: Upload executable validation results
+        uses: actions/upload-artifact@v4
+        with:
+          name: vix-normalization-executable-validation
+          path: artifacts/vix_execution/**
+          retention-days: 14
