@@ -2,6 +2,10 @@ name: Correction Re-entry Strategy
 
 on:
   workflow_dispatch:
+  schedule:
+    # 00:30 UTC Tue-Sat = evening after the prior U.S. trading session.
+    # This allows the twice-daily breadth publisher time to include that close.
+    - cron: '30 0 * * 2-6'
   push:
     branches: [main]
     paths:
@@ -11,8 +15,8 @@ on:
       - '.github/workflows/reentry-strategy.yml'
 
 concurrency:
-  group: swing-intelligence-twelve-data
-  cancel-in-progress: false
+  group: correction-reentry-daily
+  cancel-in-progress: true
 
 jobs:
   signal:
