@@ -8,7 +8,12 @@ import time
 import pandas as pd
 
 from .data import DataRequest, fetch_twelve_data_daily, fetch_fred_vix, save_cache
-from .validation import build_manifest, validate_market_history, write_manifest
+from .validation import (
+    build_manifest,
+    validate_market_history,
+    validate_volatility_index_history,
+    write_manifest,
+)
 from .research import add_research_features, evaluate_frozen_signals, survivor_table
 from .walkforward import walk_forward_signal_table
 from .phase2 import run_phase2
@@ -38,7 +43,7 @@ def fetch_universe(cache_dir: str | Path, start="2000-01-01") -> dict[str, pd.Da
         write_manifest(build_manifest(df, symbol, "Twelve Data", now), cache_dir / f"{symbol}.manifest.json")
         frames[symbol] = df
     vix = fetch_fred_vix(start=start)
-    validate_market_history(vix, min_rows=1000)
+    validate_volatility_index_history(vix, min_rows=1000)
     _reject_stale_history(vix, "VIX", max_calendar_days=14)
     save_cache(vix, cache_dir / "VIX.csv")
     write_manifest(build_manifest(vix, "VIX", "FRED VIXCLS / Cboe", now), cache_dir / "VIX.manifest.json")
