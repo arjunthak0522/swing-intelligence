@@ -11,6 +11,10 @@ on:
       - 'tests/**'
       - '.github/workflows/research.yml'
 
+concurrency:
+  group: swing-intelligence-research
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
