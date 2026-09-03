@@ -1,0 +1,13 @@
+[project]
+name = "swing-intelligence"
+version = "0.5.0"
+description = "Institutional-grade, retail-friendly SPY/QQQ swing research engine"
+requires-python = ">=3.11"
+dependencies = ["numpy>=1.26", "pandas>=2.2"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
