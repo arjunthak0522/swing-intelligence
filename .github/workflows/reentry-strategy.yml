@@ -16,7 +16,7 @@ on:
 
 concurrency:
   group: correction-reentry-daily
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   signal:
