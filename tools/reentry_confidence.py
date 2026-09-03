@@ -13,7 +13,7 @@ import pandas as pd
 BREADTH_URL = "https://tradermonty.github.io/market-breadth-analysis/market_breadth_data.csv"
 CBOE_VIX_URL = "https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX_History.csv"
 CBOE_VIX3M_URL = "https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX3M_History.csv"
-SP500_WIKI_URL = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+SP500_CONSTITUENTS_URL = "https://raw.githubusercontent.com/datasets/s-and-p-500-companies/main/data/constituents.csv"
 ROUND_TRIP_COST = 0.001
 K_ANALOGS = 40
 EXCLUSION_SESSIONS = 20
@@ -92,17 +92,11 @@ def _normalize_daily_index(obj):
 
 
 def fetch_yahoo_same_day_vol(target: pd.Timestamp) -> tuple[float, float]:
-    """Fetch completed same-day VIX/VIX3M closes only as a live overlay."""
     import yfinance as yf
 
     raw = yf.download(
-        ["^VIX", "^VIX3M"],
-        period="1mo",
-        interval="1d",
-        auto_adjust=False,
-        progress=False,
-        threads=False,
-        group_by="column",
+        ["^VIX", "^VIX3M"], period="1mo", interval="1d", auto_adjust=False,
+        progress=False, threads=False, group_by="column",
     )
     if raw.empty:
         raise RuntimeError("Yahoo volatility overlay returned no rows")
@@ -110,7 +104,6 @@ def fetch_yahoo_same_day_vol(target: pd.Timestamp) -> tuple[float, float]:
     target = pd.Timestamp(target).normalize()
     if target not in raw.index:
         raise RuntimeError(f"Yahoo volatility overlay has no completed row for {target.date()}")
-
     close = raw["Close"] if isinstance(raw.columns, pd.MultiIndex) else raw
     if isinstance(close, pd.Series):
         raise RuntimeError("Yahoo volatility overlay schema missing both VIX series")
@@ -122,10 +115,10 @@ def fetch_yahoo_same_day_vol(target: pd.Timestamp) -> tuple[float, float]:
 
 
 def current_sp500_symbols() -> list[str]:
-    tables = pd.read_html(SP500_WIKI_URL, attrs={"id": "constituents"})
-    if not tables or "Symbol" not in tables[0].columns:
-        raise RuntimeError("Could not retrieve current S&P 500 constituent table")
-    symbols = [str(x).strip().replace(".", "-") for x in tables[0]["Symbol"].dropna()]
+    df = fetch_csv(SP500_CONSTITUENTS_URL)
+    if "Symbol" not in df.columns:
+        raise RuntimeError("Current S&P 500 constituent source has no Symbol column")
+    symbols = [str(x).strip().replace(".", "-") for x in df["Symbol"].dropna()]
     symbols = sorted(set(s for s in symbols if s))
     if len(symbols) < MIN_LIVE_BREADTH_NAMES:
         raise RuntimeError(f"Only {len(symbols)} S&P 500 constituents were retrieved")
@@ -133,22 +126,17 @@ def current_sp500_symbols() -> list[str]:
 
 
 def compute_same_day_breadth(target: pd.Timestamp) -> tuple[float, float, int, int]:
-    """Compute only the current session breadth from today's actual constituents.
+    """Compute only the current-session breadth using current membership.
 
-    Historical breadth remains the point-in-time precomputed series, so this live
-    overlay does not retrospectively apply today's membership to history.
+    Historical breadth remains the point-in-time precomputed series, so today's
+    membership is never applied retrospectively to the backtest.
     """
     import yfinance as yf
 
     symbols = current_sp500_symbols()
     raw = yf.download(
-        symbols,
-        period="18mo",
-        interval="1d",
-        auto_adjust=False,
-        progress=False,
-        threads=True,
-        group_by="column",
+        symbols, period="18mo", interval="1d", auto_adjust=False,
+        progress=False, threads=True, group_by="column",
     )
     if raw.empty:
         raise RuntimeError("Yahoo live breadth download returned no rows")
@@ -156,15 +144,9 @@ def compute_same_day_breadth(target: pd.Timestamp) -> tuple[float, float, int, i
     target = pd.Timestamp(target).normalize()
     if target not in raw.index:
         raise RuntimeError(f"Live breadth prices have no completed row for {target.date()}")
-
-    if isinstance(raw.columns, pd.MultiIndex):
-        if "Close" not in raw.columns.get_level_values(0):
-            raise RuntimeError("Live breadth download has no Close field")
-        closes = raw["Close"].copy()
-    else:
-        raise RuntimeError("Unexpected live breadth download schema")
-    closes = closes.apply(pd.to_numeric, errors="coerce")
-    closes = closes.loc[:target]
+    if not isinstance(raw.columns, pd.MultiIndex) or "Close" not in raw.columns.get_level_values(0):
+        raise RuntimeError("Live breadth download has no multi-symbol Close field")
+    closes = raw["Close"].copy().apply(pd.to_numeric, errors="coerce").loc[:target]
     ma50 = closes.rolling(50, min_periods=50).mean().loc[target]
     ma200 = closes.rolling(200, min_periods=200).mean().loc[target]
     latest = closes.loc[target]
@@ -172,12 +154,13 @@ def compute_same_day_breadth(target: pd.Timestamp) -> tuple[float, float, int, i
     valid_n = int(valid.sum())
     minimum = max(MIN_LIVE_BREADTH_NAMES, int(np.floor(len(symbols) * 0.90)))
     if valid_n < minimum:
-        raise RuntimeError(
-            f"Live breadth coverage insufficient: {valid_n}/{len(symbols)} valid; need at least {minimum}"
-        )
-    b50 = float((latest[valid] > ma50[valid]).mean())
-    b200 = float((latest[valid] > ma200[valid]).mean())
-    return b50, b200, valid_n, len(symbols)
+        raise RuntimeError(f"Live breadth coverage insufficient: {valid_n}/{len(symbols)} valid; need at least {minimum}")
+    return (
+        float((latest[valid] > ma50[valid]).mean()),
+        float((latest[valid] > ma200[valid]).mean()),
+        valid_n,
+        len(symbols),
+    )
 
 
 def load_inputs() -> tuple[pd.Series, pd.Series, pd.Series, pd.Series, pd.DataFrame, dict]:
@@ -202,15 +185,8 @@ def load_inputs() -> tuple[pd.Series, pd.Series, pd.Series, pd.Series, pd.DataFr
     return spy, qqq, vix, vix3m, breadth, meta
 
 
-def apply_live_overlays(
-    target: pd.Timestamp,
-    vix: pd.Series,
-    vix3m: pd.Series,
-    breadth: pd.DataFrame,
-    meta: dict,
-) -> tuple[pd.Series, pd.Series, pd.DataFrame, dict]:
+def apply_live_overlays(target, vix, vix3m, breadth, meta):
     target = pd.Timestamp(target).normalize()
-
     if vix.index.max() < target or vix3m.index.max() < target:
         live_vix, live_vix3m = fetch_yahoo_same_day_vol(target)
         if vix.index.max() < target:
@@ -222,58 +198,41 @@ def apply_live_overlays(
             vix3m = vix3m.sort_index()
             meta["VIX3M"] = {"source": meta["VIX3M"]["source"] + " + Yahoo same-day overlay", "latest": str(target.date())}
         meta["live_overlay_used"] = True
-
     if breadth.index.max() < target:
         b50, b200, valid_n, universe_n = compute_same_day_breadth(target)
         breadth.loc[target, ["B50", "B200"]] = [b50, b200]
         breadth = breadth.sort_index()
         meta["breadth"] = {
-            "source": "historical GitHub Pages + same-day current-constituent Yahoo overlay",
+            "source": "historical point-in-time breadth + same-day current-constituent Yahoo overlay",
             "latest": str(target.date()),
             "valid_constituents": valid_n,
             "constituent_universe": universe_n,
+            "constituent_source": SP500_CONSTITUENTS_URL,
         }
         meta["live_overlay_used"] = True
-
     return vix, vix3m, breadth, meta
 
 
 def feature_frame(return_metadata: bool = False, require_same_day: bool = False):
     spy, qqq, vix, vix3m, breadth, meta = load_inputs()
     equity_target = min(spy.index.max(), qqq.index.max())
-
     if require_same_day:
         vix, vix3m, breadth, meta = apply_live_overlays(equity_target, vix, vix3m, breadth, meta)
-
     required_latest = {
-        "SPY": spy.index.max(),
-        "QQQ": qqq.index.max(),
-        "VIX": vix.index.max(),
-        "VIX3M": vix3m.index.max(),
-        "breadth": breadth.index.max(),
+        "SPY": spy.index.max(), "QQQ": qqq.index.max(), "VIX": vix.index.max(),
+        "VIX3M": vix3m.index.max(), "breadth": breadth.index.max(),
     }
     if require_same_day:
         target = equity_target
         stale = {name: str(dt.date()) for name, dt in required_latest.items() if dt < target}
         if stale:
-            raise RuntimeError(
-                "Same-day input freshness check failed for equity session "
-                f"{target.date()}: stale inputs={stale}. Refusing to emit a current re-entry signal."
-            )
+            raise RuntimeError(f"Same-day input freshness check failed for equity session {target.date()}: stale inputs={stale}. Refusing to emit a current re-entry signal.")
     else:
         target = min(required_latest.values())
         stale = {name: str(dt.date()) for name, dt in required_latest.items() if dt < equity_target}
-
-    frame = pd.concat(
-        [spy.loc[:target], qqq.loc[:target], vix.loc[:target], vix3m.loc[:target], breadth.loc[:target]],
-        axis=1,
-    ).dropna()
+    frame = pd.concat([spy.loc[:target], qqq.loc[:target], vix.loc[:target], vix3m.loc[:target], breadth.loc[:target]], axis=1).dropna()
     if frame.empty or frame.index.max() != target:
-        raise RuntimeError(
-            f"Unable to construct feature row for {target.date()}; latest common row is "
-            f"{None if frame.empty else frame.index.max().date()}"
-        )
-
+        raise RuntimeError(f"Unable to construct feature row for {target.date()}; latest common row is {None if frame.empty else frame.index.max().date()}")
     frame["spy_dd20"] = frame["SPY"] / frame["SPY"].rolling(20).max() - 1.0
     frame["spy_ret5"] = frame["SPY"].pct_change(5)
     frame["b50_change1"] = frame["B50"].diff()
@@ -283,7 +242,6 @@ def feature_frame(return_metadata: bool = False, require_same_day: bool = False)
     frame = frame.dropna()
     if frame.index.max() != target:
         raise RuntimeError(f"Feature calculation lost target session {target.date()}")
-
     meta["equity_target_session"] = str(equity_target.date())
     meta["target_session"] = str(target.date())
     meta["same_day_required"] = require_same_day
@@ -295,12 +253,8 @@ def feature_frame(return_metadata: bool = False, require_same_day: bool = False)
 
 
 def empirical_state(row: pd.Series) -> str:
-    dd = float(row["spy_dd20"])
-    b50 = float(row["B50"])
-    b200 = float(row["B200"])
-    b1 = float(row["b50_change1"])
-    vix5 = float(row["vix_change5"])
-    curve = float(row["curve_ratio"])
+    dd, b50, b200 = float(row["spy_dd20"]), float(row["B50"]), float(row["B200"])
+    b1, vix5, curve = float(row["b50_change1"]), float(row["vix_change5"]), float(row["curve_ratio"])
     if dd <= -0.05:
         base = "normal correction"
     elif dd <= -0.02:
@@ -351,29 +305,23 @@ def analogs_for_date(frame: pd.DataFrame, target_date: pd.Timestamp) -> pd.DataF
 
 
 def summarize_analogs(frame: pd.DataFrame, analogs: pd.DataFrame) -> dict:
-    output: dict[str, dict] = {}
+    output = {}
     for symbol in ("SPY", "QQQ"):
         output[symbol] = {}
         for h in HORIZONS:
             fwd = forward_return(frame[symbol], h).reindex(analogs.index).dropna()
-            unconditional = forward_return(frame[symbol], h).loc[: analogs.index.max()].dropna()
-            med = float(fwd.median())
-            base = float(unconditional.median())
+            unconditional = forward_return(frame[symbol], h).loc[:analogs.index.max()].dropna()
+            med, base = float(fwd.median()), float(unconditional.median())
             output[symbol][str(h)] = {
-                "n": int(len(fwd)),
-                "median_return": med,
-                "positive_rate": float((fwd > 0).mean()),
-                "unconditional_median": base,
-                "median_excess": med - base,
-                "p25": float(fwd.quantile(0.25)),
-                "p75": float(fwd.quantile(0.75)),
+                "n": int(len(fwd)), "median_return": med, "positive_rate": float((fwd > 0).mean()),
+                "unconditional_median": base, "median_excess": med - base,
+                "p25": float(fwd.quantile(0.25)), "p75": float(fwd.quantile(0.75)),
             }
     return output
 
 
 def confidence_label(stats: dict, state: str) -> tuple[str, str]:
-    q7 = stats["QQQ"]["7"]
-    s7 = stats["SPY"]["7"]
+    q7, s7 = stats["QQQ"]["7"], stats["SPY"]["7"]
     best = q7 if q7["median_excess"] >= s7["median_excess"] else s7
     stressed = not state.startswith("no material correction")
     if stressed and best["n"] >= 30 and best["positive_rate"] >= 0.65 and best["median_excess"] >= 0.005 and best["p25"] > -0.015:
@@ -396,35 +344,26 @@ def main() -> None:
     label, interpretation = confidence_label(stats, state)
     current = frame.loc[target]
     payload = {
-        "as_of": str(target.date()),
-        "data_freshness": freshness,
+        "as_of": str(target.date()), "data_freshness": freshness,
         "framework": "empirical historical analogs; not a claim of proven alpha",
-        "current_state": state,
-        "confidence": label,
-        "interpretation": interpretation,
+        "current_state": state, "confidence": label, "interpretation": interpretation,
         "current_inputs": {
-            "spy_drawdown_20d": float(current["spy_dd20"]),
-            "spy_return_5d": float(current["spy_ret5"]),
-            "pct_sp500_above_50dma": float(current["B50"]),
-            "pct_sp500_above_200dma": float(current["B200"]),
-            "breadth_1d_change": float(current["b50_change1"]),
-            "breadth_3d_change": float(current["b50_change3"]),
-            "vix_5d_change": float(current["vix_change5"]),
-            "vix_vix3m_ratio": float(current["curve_ratio"]),
+            "spy_drawdown_20d": float(current["spy_dd20"]), "spy_return_5d": float(current["spy_ret5"]),
+            "pct_sp500_above_50dma": float(current["B50"]), "pct_sp500_above_200dma": float(current["B200"]),
+            "breadth_1d_change": float(current["b50_change1"]), "breadth_3d_change": float(current["b50_change3"]),
+            "vix_5d_change": float(current["vix_change5"]), "vix_vix3m_ratio": float(current["curve_ratio"]),
         },
         "analog_count": int(len(analogs)),
         "closest_analog_dates": [str(d.date()) for d in analogs.index[:10]],
         "forward_outcomes": stats,
         "methodology": {
             "features": ["SPY 20d drawdown", "SPY 5d return", "% S&P above 50DMA", "% S&P above 200DMA", "1d/3d breadth change", "VIX 5d change", "VIX/VIX3M"],
-            "normalization": "historical percentile ranks",
-            "analog_selection": f"{K_ANALOGS} nearest prior dates",
+            "normalization": "historical percentile ranks", "analog_selection": f"{K_ANALOGS} nearest prior dates",
             "lookahead_guard": f"prior data only; exclude latest {EXCLUSION_SESSIONS} sessions around target",
-            "execution": "signal close t, hypothetical entry close t+1",
-            "round_trip_cost": ROUND_TRIP_COST,
+            "execution": "signal close t, hypothetical entry close t+1", "round_trip_cost": ROUND_TRIP_COST,
             "breadth_source": BREADTH_URL,
-            "freshness_policy": "live mode anchors to latest completed SPY/QQQ session; lagging volatility/breadth publishers are overlaid from same-day completed market data; engine still fails closed if exact-session data cannot be built",
-            "caveat": "historical breadth starts 2016-09; current-session breadth overlay uses current constituents only for the current date, never retrospectively",
+            "freshness_policy": "live mode anchors to latest completed SPY/QQQ session; lagging VIX/VIX3M and breadth are overlaid from same-day completed data; otherwise fail closed",
+            "caveat": "historical breadth starts 2016-09; current-session constituent overlay is used only for the current date",
         },
     }
     out = Path("artifacts/reentry_confidence")
