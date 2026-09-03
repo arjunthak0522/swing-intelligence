@@ -11,6 +11,7 @@ from .data import DataRequest, fetch_twelve_data_daily, save_cache
 from .validation import build_manifest, validate_market_history, write_manifest
 from .research import add_research_features, evaluate_frozen_signals, survivor_table
 from .walkforward import walk_forward_signal_table
+from .phase2 import run_phase2
 
 
 UNIVERSE = ("SPY", "QQQ", "RSP", "IWM", "SMH")
@@ -55,5 +56,7 @@ def run_research(frames: dict[str, pd.DataFrame], output_dir: str | Path, *, min
             "signals_tested": int(len(survivors)),
             "walkforward_rows": int(len(walk)),
         }
+    (output_dir / "research_summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+    summary["phase2"] = run_phase2(frames, output_dir / "phase2", horizon=10, min_n=min_n)
     (output_dir / "research_summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     return summary
