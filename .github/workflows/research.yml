@@ -70,3 +70,5 @@ jobs:
             data/cache/*.manifest.json
           if-no-files-found: warn
           retention-days: 30
+
+# Triggered after repository secret and access setup were completed.
