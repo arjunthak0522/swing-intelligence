@@ -1,0 +1,38 @@
+name: Re-entry Timing Worthiness
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/reentry_worthiness.py'
+      - '.github/workflows/reentry-worthiness.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: swing-intelligence-research
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  worthiness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install pandas numpy
+      - name: Run re-entry worthiness test
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/reentry_worthiness.py
+      - name: Upload re-entry results
+        uses: actions/upload-artifact@v4
+        with:
+          name: reentry-worthiness
+          path: artifacts/reentry_worthiness/**
+          retention-days: 14
