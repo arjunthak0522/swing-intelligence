@@ -1,0 +1,38 @@
+name: Re-entry Episode Timing Validation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/reentry_episode_timing_validation.py'
+      - 'tools/reentry_walkforward_validation.py'
+      - 'tools/reentry_decision.py'
+      - 'tools/reentry_confidence.py'
+      - '.github/workflows/reentry-episode-timing-validation.yml'
+
+concurrency:
+  group: swing-intelligence-twelve-data
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install pandas numpy
+      - name: Run correction-episode timing validation
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/reentry_episode_timing_validation.py
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: reentry-episode-timing-validation
+          path: artifacts/reentry_episode_timing/**
+          retention-days: 14
