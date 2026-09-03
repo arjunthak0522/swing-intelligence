@@ -1,0 +1,33 @@
+name: VIX Term Structure Forward Return Sample
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/vix_term_forward_sample.py'
+      - '.github/workflows/vix-term-sample.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  sample:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install pandas
+      - name: Run VIX term structure sample
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/vix_term_forward_sample.py
+      - name: Upload sample results
+        uses: actions/upload-artifact@v4
+        with:
+          name: vix-term-forward-sample
+          path: artifacts/vix_term_sample/**
+          retention-days: 7
