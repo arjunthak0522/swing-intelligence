@@ -3,8 +3,6 @@ name: Correction Re-entry Strategy
 on:
   workflow_dispatch:
   schedule:
-    # 00:30 UTC Tue-Sat = evening after the prior U.S. trading session.
-    # This allows the twice-daily breadth publisher time to include that close.
     - cron: '30 0 * * 2-6'
   push:
     branches: [main]
@@ -21,14 +19,14 @@ concurrency:
 jobs:
   signal:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - name: Install dependencies
-        run: python -m pip install pandas numpy
+        run: python -m pip install pandas numpy yfinance lxml
       - name: Run correction re-entry strategy
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
