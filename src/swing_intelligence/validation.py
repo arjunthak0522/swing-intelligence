@@ -37,8 +37,7 @@ def build_manifest(df: pd.DataFrame, symbol: str, source: str, retrieved_at: str
     )
 
 
-def validate_market_history(df: pd.DataFrame, *, min_rows: int = 1000, max_abs_daily_return: float = 0.30) -> dict:
-    """Research-grade sanity checks that reject obviously bad/synthetic daily data."""
+def _validate_index(df: pd.DataFrame, min_rows: int) -> pd.DatetimeIndex:
     if len(df) < min_rows:
         raise ValueError(f"Insufficient history: {len(df)} rows < {min_rows}")
     idx = pd.DatetimeIndex(df.index)
@@ -47,6 +46,16 @@ def validate_market_history(df: pd.DataFrame, *, min_rows: int = 1000, max_abs_d
     weekend_rows = int((idx.dayofweek >= 5).sum())
     if weekend_rows:
         raise ValueError(f"History contains {weekend_rows} weekend rows")
+    return idx
+
+
+def validate_market_history(df: pd.DataFrame, *, min_rows: int = 1000, max_abs_daily_return: float = 0.30) -> dict:
+    """Research-grade sanity checks for tradable price assets such as ETFs.
+
+    The daily-move guard is intentionally strict because a huge one-day move in an ETF
+    often signals an unadjusted split or corrupted source data.
+    """
+    idx = _validate_index(df, min_rows)
     close = pd.to_numeric(df["close"], errors="coerce")
     r = close.pct_change().dropna()
     if r.empty:
@@ -59,9 +68,51 @@ def validate_market_history(df: pd.DataFrame, *, min_rows: int = 1000, max_abs_d
         "rows": len(df),
         "first_date": str(idx.min().date()),
         "last_date": str(idx.max().date()),
-        "weekend_rows": weekend_rows,
+        "weekend_rows": 0,
         "max_abs_daily_return": max_abs,
         "zero_volume_share": zero_volume_share,
+    }
+
+
+def validate_volatility_index_history(
+    df: pd.DataFrame,
+    *,
+    min_rows: int = 1000,
+    min_level: float = 5.0,
+    max_level: float = 100.0,
+    max_abs_daily_return: float = 2.0,
+) -> dict:
+    """Sanity checks for a volatility index series such as Cboe VIX.
+
+    VIX is not a tradable ETF price series and can legitimately make very large
+    percentage moves, so the ETF corporate-action threshold is inappropriate here.
+    We instead validate calendar integrity, plausible absolute index levels, and only
+    reject truly extreme day-over-day jumps that are more consistent with bad data.
+    """
+    idx = _validate_index(df, min_rows)
+    close = pd.to_numeric(df["close"], errors="coerce")
+    if close.isna().any() or (close <= 0).any():
+        raise ValueError("Volatility index contains missing or non-positive closes")
+    observed_min = float(close.min())
+    observed_max = float(close.max())
+    if observed_min < min_level or observed_max > max_level:
+        raise ValueError(
+            f"Volatility index level outside plausible range: min={observed_min:.2f}, max={observed_max:.2f}"
+        )
+    r = close.pct_change().dropna()
+    if r.empty:
+        raise ValueError("No valid volatility-index returns")
+    max_abs = float(r.abs().max())
+    if max_abs > max_abs_daily_return:
+        raise ValueError(f"Implausible volatility-index daily move {max_abs:.1%}; investigate source")
+    return {
+        "rows": len(df),
+        "first_date": str(idx.min().date()),
+        "last_date": str(idx.max().date()),
+        "weekend_rows": 0,
+        "min_level": observed_min,
+        "max_level": observed_max,
+        "max_abs_daily_return": max_abs,
     }
 
 
