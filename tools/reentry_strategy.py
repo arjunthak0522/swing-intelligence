@@ -5,6 +5,7 @@ from pathlib import Path
 
 from reentry_confidence import analogs_for_date, empirical_state, feature_frame, summarize_analogs
 from reentry_decision import decision_from_analogs
+from reentry_evidence import EVIDENCE_HORIZONS, summarize_extended_evidence
 
 
 def weakness_context(row) -> tuple[bool, list[str]]:
@@ -33,8 +34,9 @@ def main() -> None:
     target = frame.index.max()
     row = frame.loc[target]
     analogs = analogs_for_date(frame, target)
-    stats = summarize_analogs(frame, analogs)
-    decision, interpretation, diagnostics = decision_from_analogs(stats, row)
+    decision_stats = summarize_analogs(frame, analogs)
+    extended_evidence = summarize_extended_evidence(frame, analogs)
+    decision, interpretation, diagnostics = decision_from_analogs(decision_stats, row)
     weak, weak_reasons = weakness_context(row)
     signal, signal_text = strategy_signal(decision, weak)
 
@@ -59,7 +61,10 @@ def main() -> None:
             "vix_5d_change": float(row["vix_change5"]),
             "vix_vix3m_ratio": float(row["curve_ratio"]),
         },
-        "forward_analog_outcomes": stats,
+        "forward_analog_outcomes": decision_stats,
+        "extended_forward_evidence": extended_evidence,
+        "evidence_horizons": list(EVIDENCE_HORIZONS),
+        "drawdown_definition": "close-to-close maximum adverse excursion from hypothetical close t+1 entry through each horizon",
         "decision_diagnostics": diagnostics,
         "implementation": {
             "evaluate": "after each market close",
@@ -67,7 +72,8 @@ def main() -> None:
             "weakness_context": "SPY >=1% below 20d high OR <=50% S&P above 50DMA OR VIX +>=10% over 5d OR VIX/VIX3M >=1.0",
             "reentry_rule": "when weakness exists and analog decision is CAUTIOUS YES / YES / STRONG YES, signal RE-ENTER",
             "execution": "actionable for the next trading session; historical validation assumed close t+1 execution and 10 bps round-trip friction",
-            "exit_rule": "none; this is an entry-timing framework for redeploying cash, not a forced 7/10-day swing exit",
+            "exit_rule": "none; this is an entry-timing framework for redeploying cash, not a forced short-horizon swing exit",
+            "forward_evidence": "always report 5/7/10/15/30/60D return, positive rate, and drawdown-path statistics",
             "large_corrections": "fully included; there is no maximum drawdown exclusion",
             "rolling_corrections": "included through breadth and volatility weakness even when the index drawdown is shallow"
         },
@@ -87,6 +93,7 @@ def main() -> None:
         "caveats": [
             "true breadth history begins in September 2016",
             "historical evidence supports decision timing, not guaranteed returns",
+            "drawdown statistics are based on daily closes, not intraday lows",
             "this does not claim statistically proven standalone alpha versus buy-and-hold"
         ]
     }
