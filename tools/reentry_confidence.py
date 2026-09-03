@@ -104,15 +104,13 @@ def empirical_state(row: pd.Series) -> str:
 
 
 def forward_return(price: pd.Series, horizon: int) -> pd.Series:
-    # Decision at close t, implementation at close t+1, hold h sessions, cost included.
     return price.shift(-(horizon + 1)) / price.shift(-1) - 1.0 - ROUND_TRIP_COST
 
 
 def rank_scale(history: pd.DataFrame, cols: list[str]) -> pd.DataFrame:
     out = pd.DataFrame(index=history.index)
     for c in cols:
-        ranks = history[c].rank(method="average", pct=True)
-        out[c] = ranks
+        out[c] = history[c].rank(method="average", pct=True)
     return out
 
 
@@ -157,11 +155,10 @@ def summarize_analogs(frame: pd.DataFrame, analogs: pd.DataFrame) -> dict:
 
 
 def confidence_label(stats: dict, state: str) -> tuple[str, str]:
-    # Decision thresholds are frozen policy thresholds, not optimized to the sample.
     q7 = stats["QQQ"]["7"]
     s7 = stats["SPY"]["7"]
     best = q7 if q7["median_excess"] >= s7["median_excess"] else s7
-    stressed = "correction" in state
+    stressed = not state.startswith("no material correction")
     if stressed and best["n"] >= 30 and best["positive_rate"] >= 0.65 and best["median_excess"] >= 0.005 and best["p25"] > -0.015:
         return "STRONG", "historically favorable re-entry environment"
     if stressed and best["n"] >= 25 and best["positive_rate"] >= 0.60 and best["median_excess"] >= 0.0025:
@@ -181,7 +178,6 @@ def main() -> None:
     state = empirical_state(frame.loc[target])
     label, interpretation = confidence_label(stats, state)
 
-    top_dates = [str(d.date()) for d in analogs.index[:10]]
     current = frame.loc[target]
     payload = {
         "as_of": str(target.date()),
@@ -200,7 +196,7 @@ def main() -> None:
             "vix_vix3m_ratio": float(current["curve_ratio"]),
         },
         "analog_count": int(len(analogs)),
-        "closest_analog_dates": top_dates,
+        "closest_analog_dates": [str(d.date()) for d in analogs.index[:10]],
         "forward_outcomes": stats,
         "methodology": {
             "features": ["SPY 20d drawdown", "SPY 5d return", "% S&P above 50DMA", "% S&P above 200DMA", "1d/3d breadth change", "VIX 5d change", "VIX/VIX3M"],
