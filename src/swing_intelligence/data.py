@@ -9,6 +9,7 @@ from pathlib import Path
 import time
 from urllib.parse import urlencode
 from urllib.request import urlopen
+from urllib.error import HTTPError
 
 import pandas as pd
 
@@ -87,7 +88,7 @@ def _date_chunks(start: str, end: str, years_per_chunk: int = 14) -> list[tuple[
     return chunks
 
 
-def _fetch_twelve_data_slice(symbol: str, start: str, end: str, key: str, timeout: int) -> pd.DataFrame:
+def _fetch_twelve_data_slice(symbol: str, start: str, end: str, key: str, timeout: int, *, max_retries: int = 4) -> pd.DataFrame:
     params = {
         "symbol": symbol.upper(),
         "interval": "1day",
@@ -99,8 +100,23 @@ def _fetch_twelve_data_slice(symbol: str, start: str, end: str, key: str, timeou
         "order": "ASC",
     }
     url = "https://api.twelvedata.com/time_series?" + urlencode(params)
-    with urlopen(url, timeout=timeout) as resp:  # nosec - fixed HTTPS endpoint
-        payload = json.loads(resp.read().decode("utf-8"))
+    payload = None
+    for attempt in range(max_retries + 1):
+        try:
+            with urlopen(url, timeout=timeout) as resp:  # nosec - fixed HTTPS endpoint
+                payload = json.loads(resp.read().decode("utf-8"))
+            break
+        except HTTPError as exc:
+            if exc.code != 429 or attempt >= max_retries:
+                raise
+            retry_after = exc.headers.get("Retry-After") if exc.headers else None
+            try:
+                delay = float(retry_after) if retry_after else min(60.0, 15.0 * (2 ** attempt))
+            except (TypeError, ValueError):
+                delay = min(60.0, 15.0 * (2 ** attempt))
+            time.sleep(max(1.0, delay))
+    if payload is None:
+        raise RuntimeError(f"No Twelve Data response for {symbol}")
     if payload.get("status") == "error" or "values" not in payload:
         raise RuntimeError(f"Twelve Data error for {symbol}: {payload.get('message', 'missing values')}")
     df = pd.DataFrame(payload["values"]).rename(columns={"datetime": "date"})
