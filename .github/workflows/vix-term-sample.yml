@@ -1,17 +1,23 @@
-name: VIX Term Structure Forward Return Sample
+name: VIX Term Structure Worthiness
 
 on:
   push:
     branches: [main]
     paths:
       - 'tools/vix_term_forward_sample.py'
+      - 'tools/vix_term_worthiness.py'
       - '.github/workflows/vix-term-sample.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: vix-term-worthiness
+  cancel-in-progress: true
+
 jobs:
-  sample:
+  worthiness:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -20,14 +26,14 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install dependencies
-        run: python -m pip install pandas
-      - name: Run VIX term structure sample
+        run: python -m pip install pandas numpy
+      - name: Run frozen VIX term structure worthiness test
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
-        run: python tools/vix_term_forward_sample.py
-      - name: Upload sample results
+        run: python tools/vix_term_worthiness.py
+      - name: Upload worthiness results
         uses: actions/upload-artifact@v4
         with:
-          name: vix-term-forward-sample
-          path: artifacts/vix_term_sample/**
-          retention-days: 7
+          name: vix-term-worthiness
+          path: artifacts/vix_term_worthiness/**
+          retention-days: 14
