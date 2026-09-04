@@ -7,6 +7,7 @@ on:
     paths:
       - 'tools/internal_correction_v2.py'
       - 'tools/internal_correction_incremental_validation.py'
+      - 'tools/internal_correction_subtype_decomposition.py'
       - 'docs/internal-correction-v2-research-spec.md'
       - '.github/workflows/internal-correction-v2.yml'
 
@@ -36,6 +37,10 @@ jobs:
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/internal_correction_incremental_validation.py
+      - name: Run subtype decomposition and QQQ-specific research
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/internal_correction_subtype_decomposition.py
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
