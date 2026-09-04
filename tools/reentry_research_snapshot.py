@@ -3,11 +3,13 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from reentry_early_entry_policy import apply_early_entry_bias
 from reentry_engine import build_snapshot
 
 
 def main() -> None:
     snapshot = build_snapshot(require_same_day=False)
+    snapshot = apply_early_entry_bias(snapshot)
     snapshot["research_only"] = True
     out = Path("artifacts/reentry")
     out.mkdir(parents=True, exist_ok=True)
