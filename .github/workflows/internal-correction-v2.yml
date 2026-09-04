@@ -1,4 +1,4 @@
-name: RE-ENTRY V2 Research
+name: RE-ENTRY Unified Research
 
 on:
   workflow_dispatch:
@@ -9,9 +9,9 @@ on:
       - 'tools/internal_correction_incremental_validation.py'
       - 'tools/internal_correction_subtype_decomposition.py'
       - 'tools/internal_correction_full_v2.py'
-      - 'tools/reentry_v2_engine.py'
-      - 'tools/reentry_v2_policy_validation.py'
-      - 'tools/reentry_v2_hidden_policy_refinement.py'
+      - 'tools/reentry_engine.py'
+      - 'tools/reentry_research_snapshot.py'
+      - 'tests/test_reentry_engine_contract.py'
       - 'docs/internal-correction-v2-research-spec.md'
       - '.github/workflows/internal-correction-v2.yml'
 
@@ -19,7 +19,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: reentry-v2-research
+  group: reentry-unified-research
   cancel-in-progress: true
 
 jobs:
@@ -32,8 +32,8 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install dependencies
-        run: python -m pip install pandas numpy yfinance lxml
-      - name: Run legacy broad/internal validation research
+        run: python -m pip install pandas numpy yfinance lxml pytest
+      - name: Run broad and internal correction regression research
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/internal_correction_v2.py
@@ -41,29 +41,25 @@ jobs:
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/internal_correction_incremental_validation.py
-      - name: Run subtype diagnostics and QQQ-specific research
+      - name: Run subtype diagnostics
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/internal_correction_subtype_decomposition.py
-      - name: Run complete V2 sector-factor state model
+      - name: Run complete sector-factor state research
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/internal_correction_full_v2.py
-      - name: Run canonical RE-ENTRY V2 engine
+      - name: Verify unified RE-ENTRY engine contract
+        run: pytest -q tests/test_reentry_engine_contract.py
+      - name: Build unified RE-ENTRY research snapshot
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
-        run: python tools/reentry_v2_engine.py
-      - name: Validate canonical RE-ENTRY V2 decision policy
-        env:
-          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
-        run: python tools/reentry_v2_policy_validation.py
-      - name: Refine V2 hidden-correction re-entry gate
-        env:
-          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
-        run: python tools/reentry_v2_hidden_policy_refinement.py
+        run: python tools/reentry_research_snapshot.py
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
-          name: reentry-v2-results
-          path: artifacts/internal_correction_v2/**
+          name: reentry-unified-results
+          path: |
+            artifacts/internal_correction_v2/**
+            artifacts/reentry/**
           retention-days: 30
