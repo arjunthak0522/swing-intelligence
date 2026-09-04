@@ -1,0 +1,10 @@
+{
+  "analog_decision": "YES",
+  "as_of": "2026-09-03",
+  "engine_version": "reentry_v1.0",
+  "outcomes": {
+    "QQQ": {},
+    "SPY": {}
+  },
+  "signal": "NO RE-ENTRY SETUP"
+}

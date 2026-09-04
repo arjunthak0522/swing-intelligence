@@ -1,0 +1,552 @@
+{
+  "analog_count": 40,
+  "analog_decision": "YES",
+  "analog_interpretation": "historical analogs support putting cash back to work",
+  "analogs": [
+    {
+      "date": "2016-10-10",
+      "distance": 0.07389946444784176,
+      "rank": 1
+    },
+    {
+      "date": "2017-09-06",
+      "distance": 0.08433873074011491,
+      "rank": 2
+    },
+    {
+      "date": "2023-04-24",
+      "distance": 0.09794566937397928,
+      "rank": 3
+    },
+    {
+      "date": "2025-09-26",
+      "distance": 0.10099366809295768,
+      "rank": 4
+    },
+    {
+      "date": "2025-09-23",
+      "distance": 0.10342600909673925,
+      "rank": 5
+    },
+    {
+      "date": "2025-08-07",
+      "distance": 0.10556504838025682,
+      "rank": 6
+    },
+    {
+      "date": "2026-06-04",
+      "distance": 0.11297206959505333,
+      "rank": 7
+    },
+    {
+      "date": "2018-09-28",
+      "distance": 0.11415041050447117,
+      "rank": 8
+    },
+    {
+      "date": "2018-10-01",
+      "distance": 0.11878325093783307,
+      "rank": 9
+    },
+    {
+      "date": "2021-12-16",
+      "distance": 0.12301127692912134,
+      "rank": 10
+    },
+    {
+      "date": "2017-08-29",
+      "distance": 0.12382363813529357,
+      "rank": 11
+    },
+    {
+      "date": "2023-05-15",
+      "distance": 0.12395415490299373,
+      "rank": 12
+    },
+    {
+      "date": "2018-08-02",
+      "distance": 0.12585078893169865,
+      "rank": 13
+    },
+    {
+      "date": "2017-08-30",
+      "distance": 0.1261808315324577,
+      "rank": 14
+    },
+    {
+      "date": "2025-09-08",
+      "distance": 0.1269093069865357,
+      "rank": 15
+    },
+    {
+      "date": "2017-05-04",
+      "distance": 0.12802628382162962,
+      "rank": 16
+    },
+    {
+      "date": "2016-12-05",
+      "distance": 0.1281290324249295,
+      "rank": 17
+    },
+    {
+      "date": "2026-05-21",
+      "distance": 0.1287431278323047,
+      "rank": 18
+    },
+    {
+      "date": "2018-10-02",
+      "distance": 0.12960560763939666,
+      "rank": 19
+    },
+    {
+      "date": "2016-10-06",
+      "distance": 0.1301942899414053,
+      "rank": 20
+    },
+    {
+      "date": "2025-02-13",
+      "distance": 0.13567294408329256,
+      "rank": 21
+    },
+    {
+      "date": "2025-02-05",
+      "distance": 0.1384231398111183,
+      "rank": 22
+    },
+    {
+      "date": "2021-12-21",
+      "distance": 0.1396619265500091,
+      "rank": 23
+    },
+    {
+      "date": "2018-08-17",
+      "distance": 0.14132750154982848,
+      "rank": 24
+    },
+    {
+      "date": "2025-12-15",
+      "distance": 0.14194771238406143,
+      "rank": 25
+    },
+    {
+      "date": "2023-05-17",
+      "distance": 0.14254031519312554,
+      "rank": 26
+    },
+    {
+      "date": "2025-02-11",
+      "distance": 0.14311621308968944,
+      "rank": 27
+    },
+    {
+      "date": "2025-09-29",
+      "distance": 0.14397129913867956,
+      "rank": 28
+    },
+    {
+      "date": "2016-10-05",
+      "distance": 0.14437782199380667,
+      "rank": 29
+    },
+    {
+      "date": "2016-11-29",
+      "distance": 0.14646330949084396,
+      "rank": 30
+    },
+    {
+      "date": "2017-09-26",
+      "distance": 0.14662714489498538,
+      "rank": 31
+    },
+    {
+      "date": "2026-01-05",
+      "distance": 0.14808230241348216,
+      "rank": 32
+    },
+    {
+      "date": "2025-12-29",
+      "distance": 0.14811370893209186,
+      "rank": 33
+    },
+    {
+      "date": "2025-12-19",
+      "distance": 0.148222218736088,
+      "rank": 34
+    },
+    {
+      "date": "2021-12-22",
+      "distance": 0.1485684948404185,
+      "rank": 35
+    },
+    {
+      "date": "2023-05-12",
+      "distance": 0.14861558542973438,
+      "rank": 36
+    },
+    {
+      "date": "2025-09-05",
+      "distance": 0.1487840341678525,
+      "rank": 37
+    },
+    {
+      "date": "2025-08-19",
+      "distance": 0.14878425722047414,
+      "rank": 38
+    },
+    {
+      "date": "2019-11-11",
+      "distance": 0.149525638034059,
+      "rank": 39
+    },
+    {
+      "date": "2017-08-22",
+      "distance": 0.15201912572383733,
+      "rank": 40
+    }
+  ],
+  "as_of": "2026-09-03",
+  "caveats": [
+    "true breadth history begins in September 2016",
+    "historical evidence supports decision timing, not guaranteed returns",
+    "drawdown statistics are based on daily closes, not intraday lows",
+    "this does not claim statistically proven standalone alpha versus buy-and-hold"
+  ],
+  "current_inputs": {
+    "breadth_1d_change": 0.026966067864271526,
+    "breadth_3d_change": 0.005009980039920148,
+    "pct_sp500_above_200dma": 0.662,
+    "pct_sp500_above_50dma": 0.51,
+    "spy_drawdown_20d": -0.006054944207332769,
+    "spy_return_5d": 0.0026844819925140317,
+    "vix_5d_change": -0.013094417643004785,
+    "vix_vix3m_ratio": 0.8220436280137772
+  },
+  "data_freshness": {
+    "QQQ": {
+      "latest": "2026-09-03",
+      "source": "Twelve Data"
+    },
+    "SPY": {
+      "latest": "2026-09-03",
+      "source": "Twelve Data"
+    },
+    "VIX": {
+      "latest": "2026-09-03",
+      "source": "Cboe VIX daily history"
+    },
+    "VIX3M": {
+      "latest": "2026-09-03",
+      "source": "Cboe VIX3M daily history"
+    },
+    "breadth": {
+      "constituent_source": "https://raw.githubusercontent.com/datasets/s-and-p-500-companies/main/data/constituents.csv",
+      "constituent_universe": 503,
+      "latest": "2026-09-03",
+      "source": "historical point-in-time breadth + same-day current-constituent Yahoo overlay",
+      "valid_constituents": 500
+    },
+    "equity_target_session": "2026-09-03",
+    "live_overlay_used": true,
+    "same_day_complete": true,
+    "same_day_required": true,
+    "stale_inputs_vs_equity_target": {},
+    "target_session": "2026-09-03"
+  },
+  "decision_diagnostics": {
+    "median_7_10d_excess_across_spy_qqq": 0.0014176019331963437,
+    "median_7_10d_forward_return_across_spy_qqq": 0.007606296421308334,
+    "median_7_10d_positive_rate_across_spy_qqq": 0.6375,
+    "stabilizing": true,
+    "weakness_present": true,
+    "worst_25th_percentile_across_spy_qqq": -0.007720577940593359
+  },
+  "drawdown_definition": "close-to-close maximum adverse excursion from hypothetical close t+1 entry through each horizon",
+  "engine_version": "reentry_v1.0",
+  "evidence_horizons": [
+    5,
+    7,
+    10,
+    15,
+    30,
+    60
+  ],
+  "extended_forward_evidence": {
+    "QQQ": {
+      "10": {
+        "best_final_return": 0.06996300159236812,
+        "mean_return": 0.004033882877505024,
+        "median_max_drawdown": -0.011788447704325744,
+        "median_max_favorable_excursion": 0.01924366436111502,
+        "median_return": 0.00383151429485984,
+        "n": 40,
+        "p10_max_drawdown": -0.05538856010192156,
+        "p25_max_drawdown": -0.018213384480945893,
+        "p25_return": -0.007720577940593359,
+        "p75_return": 0.025918784935238193,
+        "positive_rate": 0.55,
+        "worst_final_return": -0.07737281514920324,
+        "worst_max_drawdown": -0.08900461943385074
+      },
+      "15": {
+        "best_final_return": 0.08483490664234183,
+        "mean_return": -0.0001831838763986904,
+        "median_max_drawdown": -0.01467175375130464,
+        "median_max_favorable_excursion": 0.02131663879269563,
+        "median_return": 0.010797061451611523,
+        "n": 40,
+        "p10_max_drawdown": -0.07700790193071796,
+        "p25_max_drawdown": -0.0208710257754037,
+        "p25_return": -0.013116086750115774,
+        "p75_return": 0.025811059261354685,
+        "positive_rate": 0.575,
+        "worst_final_return": -0.1225646335941789,
+        "worst_max_drawdown": -0.1215646335941789
+      },
+      "30": {
+        "best_final_return": 0.1242621737882571,
+        "mean_return": 0.004401136690476504,
+        "median_max_drawdown": -0.018229900731491222,
+        "median_max_favorable_excursion": 0.03808003382142566,
+        "median_return": 0.017032815521319855,
+        "n": 40,
+        "p10_max_drawdown": -0.12228711559198949,
+        "p25_max_drawdown": -0.042444740034119716,
+        "p25_return": -0.033955641318348995,
+        "p75_return": 0.04842199966689814,
+        "positive_rate": 0.625,
+        "worst_final_return": -0.12964444379282947,
+        "worst_max_drawdown": -0.1406328695799438
+      },
+      "5": {
+        "best_final_return": 0.04724507027616831,
+        "mean_return": 0.005529641285387549,
+        "median_max_drawdown": -0.003635060773492904,
+        "median_max_favorable_excursion": 0.011381914917727887,
+        "median_return": 0.0073935641579450095,
+        "n": 40,
+        "p10_max_drawdown": -0.020080155829049567,
+        "p25_max_drawdown": -0.012862825822923724,
+        "p25_return": 0.0014182708704879596,
+        "p75_return": 0.016296343319536777,
+        "positive_rate": 0.775,
+        "worst_final_return": -0.07747216993815542,
+        "worst_max_drawdown": -0.07647216993815542
+      },
+      "60": {
+        "best_final_return": 0.21074880517916095,
+        "mean_return": 0.008535935448031115,
+        "median_max_drawdown": -0.026978903598059767,
+        "median_max_favorable_excursion": 0.054261504538948846,
+        "median_return": 0.02867537452453328,
+        "n": 40,
+        "p10_max_drawdown": -0.2156363588959361,
+        "p25_max_drawdown": -0.09629916833764093,
+        "p25_return": -0.07530182431258203,
+        "p75_return": 0.07995880524417509,
+        "positive_rate": 0.6,
+        "worst_final_return": -0.17890190148788732,
+        "worst_max_drawdown": -0.22919911908470747
+      },
+      "7": {
+        "best_final_return": 0.04223085916188196,
+        "mean_return": 0.0048526009769779554,
+        "median_max_drawdown": -0.005501168327460504,
+        "median_max_favorable_excursion": 0.017729953053772896,
+        "median_return": 0.012374550112624672,
+        "n": 40,
+        "p10_max_drawdown": -0.02129728669527158,
+        "p25_max_drawdown": -0.014434888470356372,
+        "p25_return": -0.0025079587045878917,
+        "p75_return": 0.0204590729217336,
+        "positive_rate": 0.65,
+        "worst_final_return": -0.08794476446837152,
+        "worst_max_drawdown": -0.08792680828179611
+      }
+    },
+    "SPY": {
+      "10": {
+        "best_final_return": 0.037793550351186256,
+        "mean_return": 0.0016074053470494093,
+        "median_max_drawdown": -0.0065500977081621725,
+        "median_max_favorable_excursion": 0.015484753570057741,
+        "median_return": 0.0059024757180805585,
+        "n": 40,
+        "p10_max_drawdown": -0.031564965499857864,
+        "p25_max_drawdown": -0.016093149100368215,
+        "p25_return": -0.007599534291890918,
+        "p75_return": 0.01628064720045319,
+        "positive_rate": 0.625,
+        "worst_final_return": -0.06040431017021519,
+        "worst_max_drawdown": -0.06704829578554505
+      },
+      "15": {
+        "best_final_return": 0.038731846435100414,
+        "mean_return": -0.00017598619066436227,
+        "median_max_drawdown": -0.010818484078424506,
+        "median_max_favorable_excursion": 0.01753830908025067,
+        "median_return": 0.008327234221410906,
+        "n": 40,
+        "p10_max_drawdown": -0.05236935848357287,
+        "p25_max_drawdown": -0.01717873391050906,
+        "p25_return": -0.008902107124039549,
+        "p75_return": 0.013490676044133454,
+        "positive_rate": 0.725,
+        "worst_final_return": -0.09149770327711504,
+        "worst_max_drawdown": -0.09049770327711504
+      },
+      "30": {
+        "best_final_return": 0.06690978671541747,
+        "mean_return": 0.007890467199437479,
+        "median_max_drawdown": -0.01297405995996126,
+        "median_max_favorable_excursion": 0.029105529411959097,
+        "median_return": 0.020713000491706324,
+        "n": 40,
+        "p10_max_drawdown": -0.09099228557132819,
+        "p25_max_drawdown": -0.031011887248284686,
+        "p25_return": -0.011544997777400201,
+        "p75_return": 0.0343430076715589,
+        "positive_rate": 0.675,
+        "worst_final_return": -0.08351599011782873,
+        "worst_max_drawdown": -0.09558804173219548
+      },
+      "5": {
+        "best_final_return": 0.036815056428990744,
+        "mean_return": 0.0044824839980806665,
+        "median_max_drawdown": -0.0031641762437793486,
+        "median_max_favorable_excursion": 0.010445656465345454,
+        "median_return": 0.008312431093557615,
+        "n": 40,
+        "p10_max_drawdown": -0.014484576976116725,
+        "p25_max_drawdown": -0.009225198591788414,
+        "p25_return": -0.0004038795574712031,
+        "p75_return": 0.01236144119375071,
+        "positive_rate": 0.75,
+        "worst_final_return": -0.047003050870698115,
+        "worst_max_drawdown": -0.046003050870698114
+      },
+      "60": {
+        "best_final_return": 0.11252443970601289,
+        "mean_return": 0.008447376273980293,
+        "median_max_drawdown": -0.019953240126205696,
+        "median_max_favorable_excursion": 0.04762001395123505,
+        "median_return": 0.03545523776090742,
+        "n": 40,
+        "p10_max_drawdown": -0.18161240318650881,
+        "p25_max_drawdown": -0.07939651072744228,
+        "p25_return": -0.05136659517199474,
+        "p75_return": 0.05888935661267164,
+        "positive_rate": 0.625,
+        "worst_final_return": -0.15126066675812866,
+        "worst_max_drawdown": -0.19672302482696236
+      },
+      "7": {
+        "best_final_return": 0.03729345249744498,
+        "mean_return": 0.0027126236287611876,
+        "median_max_drawdown": -0.004123729447595759,
+        "median_max_favorable_excursion": 0.01318751197616086,
+        "median_return": 0.00931011712453611,
+        "n": 40,
+        "p10_max_drawdown": -0.0200106006082696,
+        "p25_max_drawdown": -0.010303007107979406,
+        "p25_return": -0.0011186945259272487,
+        "p75_return": 0.014064189337431865,
+        "positive_rate": 0.725,
+        "worst_final_return": -0.06750428728220614,
+        "worst_max_drawdown": -0.0670162827368711
+      }
+    }
+  },
+  "forward_analog_outcomes": {
+    "QQQ": {
+      "10": {
+        "median_excess": -0.007950055799826883,
+        "median_return": 0.00383151429485984,
+        "n": 40,
+        "p25": -0.007720577940593359,
+        "p75": 0.025918784935238193,
+        "positive_rate": 0.55,
+        "unconditional_median": 0.011781570094686722
+      },
+      "5": {
+        "median_excess": 0.0018340795081980268,
+        "median_return": 0.0073935641579450095,
+        "n": 40,
+        "p25": 0.0014182708704879596,
+        "p75": 0.016296343319536777,
+        "positive_rate": 0.775,
+        "unconditional_median": 0.005559484649746983
+      },
+      "7": {
+        "median_excess": 0.004653896067874252,
+        "median_return": 0.012374550112624672,
+        "n": 40,
+        "p25": -0.0025079587045878917,
+        "p75": 0.0204590729217336,
+        "positive_rate": 0.65,
+        "unconditional_median": 0.00772065404475042
+      }
+    },
+    "SPY": {
+      "10": {
+        "median_excess": -0.0017020967328528203,
+        "median_return": 0.0059024757180805585,
+        "n": 40,
+        "p25": -0.007599534291890918,
+        "p75": 0.01628064720045319,
+        "positive_rate": 0.625,
+        "unconditional_median": 0.007604572450933379
+      },
+      "5": {
+        "median_excess": 0.00482096755079675,
+        "median_return": 0.008312431093557615,
+        "n": 40,
+        "p25": -0.0004038795574712031,
+        "p75": 0.01236144119375071,
+        "positive_rate": 0.75,
+        "unconditional_median": 0.003491463542760865
+      },
+      "7": {
+        "median_excess": 0.004537300599245508,
+        "median_return": 0.00931011712453611,
+        "n": 40,
+        "p25": -0.0011186945259272487,
+        "p75": 0.014064189337431865,
+        "positive_rate": 0.725,
+        "unconditional_median": 0.004772816525290603
+      }
+    }
+  },
+  "historical_validation": {
+    "QQQ_10D_median_after_signal": 0.014405462638181654,
+    "QQQ_10D_positive_rate": 0.6344827586206897,
+    "QQQ_7D_median_after_signal": 0.010538951553654141,
+    "QQQ_7D_positive_rate": 0.6137931034482759,
+    "SPY_10D_median_after_signal": 0.010660180393483043,
+    "SPY_10D_positive_rate": 0.6689655172413793,
+    "SPY_7D_median_after_signal": 0.008585570190091318,
+    "SPY_7D_positive_rate": 0.6551724137931034,
+    "important_limit": "the model did not prove superiority to entering immediately at the start of every weakness episode; it did show that, once its re-entry condition was present, waiting another 3-5 sessions was historically worse",
+    "independent_episodes": 145,
+    "result": "GO_TO_IMPLEMENTABLE_STRATEGY"
+  },
+  "implementation": {
+    "decision_basis": "40 nearest prior market-state analogs; operational decision remains based on frozen 7D/10D SPY/QQQ cells",
+    "evaluate": "after each market close",
+    "execution": "actionable for the next trading session; historical validation assumed close t+1 execution and 10 bps round-trip friction",
+    "exit_rule": "none; this is an entry-timing framework for redeploying cash, not a forced short-horizon swing exit",
+    "forward_evidence": "always report 5/7/10/15/30/60D return, positive rate, and drawdown-path statistics",
+    "freshness_policy": "SPY/QQQ are filtered to the latest completed U.S. equity session; today's live daily bar is discarded before 4:15 PM ET; VIX, VIX3M, and breadth must match that completed session or no signal is emitted",
+    "large_corrections": "fully included; there is no maximum drawdown exclusion",
+    "reentry_rule": "when weakness exists and analog decision is CAUTIOUS YES / YES / STRONG YES, signal RE-ENTER",
+    "rolling_corrections": "included through breadth and volatility weakness even when the index drawdown is shallow",
+    "weakness_context": "SPY >=1% below 20d high OR <=50% S&P above 50DMA OR VIX +>=10% over 5d OR VIX/VIX3M >=1.0"
+  },
+  "market_state": "no material correction / stabilizing",
+  "question": "Does it make sense to put cash back into the market right now?",
+  "schema_version": "1.0",
+  "signal": "NO RE-ENTRY SETUP",
+  "signal_interpretation": "no qualifying weakness is currently present",
+  "strategy": "Correction Re-entry",
+  "weakness_present": false,
+  "weakness_reasons": []
+}

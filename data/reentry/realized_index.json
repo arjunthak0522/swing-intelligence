@@ -1,0 +1,14 @@
+{
+  "completed_cells": 0,
+  "definition": "signal close t, entry close t+1, horizon trading sessions after entry, 10 bps round-trip cost; drawdown uses completed daily closes only",
+  "files_written": 1,
+  "horizons": [
+    5,
+    7,
+    10,
+    15,
+    30,
+    60
+  ],
+  "snapshots": 1
+}
