@@ -11,6 +11,7 @@ on:
       - 'tools/internal_correction_full_v2.py'
       - 'tools/reentry_engine.py'
       - 'tools/reentry_early_entry_policy.py'
+      - 'tools/reentry_persistence_validation.py'
       - 'tools/reentry_research_snapshot.py'
       - 'tools/reentry_recent_path_research.py'
       - 'tests/test_reentry_engine_contract.py'
@@ -62,6 +63,10 @@ jobs:
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/reentry_recent_path_research.py
+      - name: Validate persistence windows
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/reentry_persistence_validation.py
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
