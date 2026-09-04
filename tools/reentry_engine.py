@@ -2,6 +2,10 @@ from __future__ import annotations
 
 from typing import Any
 
+import numpy as np
+import pandas as pd
+
+import reentry_confidence as confidence
 from reentry_confidence import analogs_for_date, empirical_state, feature_frame, summarize_analogs
 from reentry_decision import decision_from_analogs
 from reentry_evidence import EVIDENCE_HORIZONS, summarize_extended_evidence
@@ -33,6 +37,65 @@ def strategy_signal(decision: str, weak: bool) -> tuple[str, str]:
     if weak:
         return "WAIT", "weakness is present, but historical analogs do not yet support re-entry"
     return "NO RE-ENTRY SETUP", "no qualifying weakness is currently present"
+
+
+def _single_yahoo_close(ticker: str, target: pd.Timestamp) -> float | None:
+    """Return one completed Yahoo daily close, or None if that exact field is unavailable."""
+    try:
+        import yfinance as yf
+
+        raw = yf.download(
+            ticker,
+            period="1mo",
+            interval="1d",
+            auto_adjust=False,
+            progress=False,
+            threads=False,
+            group_by="column",
+        )
+        if raw.empty:
+            return None
+        raw = confidence._normalize_daily_index(raw)
+        target = pd.Timestamp(target).normalize()
+        if target not in raw.index:
+            return None
+        close = raw["Close"]
+        if isinstance(close, pd.DataFrame):
+            if close.shape[1] == 0:
+                return None
+            value = float(pd.to_numeric(close.iloc[:, 0], errors="coerce").loc[target])
+        else:
+            value = float(pd.to_numeric(close, errors="coerce").loc[target])
+        if np.isfinite(value) and value > 0:
+            return value
+    except Exception:
+        return None
+    return None
+
+
+def _robust_same_day_vol(target: pd.Timestamp) -> tuple[float, float]:
+    """Resolve VIX and VIX3M independently so an unused bad fallback cannot block live mode."""
+    target = pd.Timestamp(target).normalize()
+    values: dict[str, float] = {}
+    for symbol, ticker in (("VIX", "^VIX"), ("VIX3M", "^VIX3M")):
+        yahoo = _single_yahoo_close(ticker, target)
+        if yahoo is not None:
+            values[symbol] = yahoo
+            continue
+        historical, _ = confidence.fetch_volatility_history(symbol)
+        historical = confidence._normalize_daily_index(historical)
+        if target in historical.index:
+            value = float(historical.loc[target])
+            if np.isfinite(value) and value > 0:
+                values[symbol] = value
+                continue
+        raise RuntimeError(f"No valid completed {symbol} close for {target.date()}")
+    return values["VIX"], values["VIX3M"]
+
+
+def _install_live_data_hardening() -> None:
+    # Data plumbing only. This does not alter features, thresholds, analog selection, or decisions.
+    confidence.fetch_yahoo_same_day_vol = _robust_same_day_vol
 
 
 def _analog_rows(analogs) -> list[dict[str, Any]]:
@@ -67,6 +130,8 @@ def historical_validation_block() -> dict[str, Any]:
 
 def build_snapshot(require_same_day: bool = True) -> dict[str, Any]:
     """Build the one authoritative daily engine object consumed by persistence and UI."""
+    if require_same_day:
+        _install_live_data_hardening()
     frame, freshness = feature_frame(return_metadata=True, require_same_day=require_same_day)
     target = frame.index.max()
     row = frame.loc[target]
