@@ -1,0 +1,57 @@
+from tools.reentry_early_entry_policy import early_entry_decision
+
+
+def test_subsector_repair_resolves_mixed_state():
+    signal, _, source = early_entry_decision(
+        analog_decision="YES",
+        weakness_present=False,
+        internal_reset="DEVELOPING",
+        selling_pressure="MIXED",
+        existing_signal="WAIT",
+        subsector_state="HIDDEN_DAMAGE_REPAIRING",
+        subsector_supports_early_entry=True,
+    )
+    assert signal == "RE-ENTER"
+    assert source == "EARLY_SUBSECTOR_REPAIR"
+
+
+def test_subsector_damage_without_repair_does_not_trigger():
+    signal, _, source = early_entry_decision(
+        analog_decision="YES",
+        weakness_present=False,
+        internal_reset="DEVELOPING",
+        selling_pressure="MIXED",
+        existing_signal="WAIT",
+        subsector_state="HIDDEN_DAMAGE",
+        subsector_supports_early_entry=False,
+    )
+    assert signal == "WAIT"
+    assert source == "INTERNAL_SETUP_NOT_REPAIRED"
+
+
+def test_subsector_repair_requires_favorable_analogs():
+    signal, _, source = early_entry_decision(
+        analog_decision="NO",
+        weakness_present=False,
+        internal_reset="MEANINGFUL",
+        selling_pressure="MIXED",
+        existing_signal="WAIT",
+        subsector_state="REPAIRING",
+        subsector_supports_early_entry=True,
+    )
+    assert signal == "WAIT"
+    assert source == "INTERNAL_SETUP_NOT_REPAIRED"
+
+
+def test_subsector_layer_never_vetoes_existing_reenter():
+    signal, _, source = early_entry_decision(
+        analog_decision="NO",
+        weakness_present=True,
+        internal_reset="NONE",
+        selling_pressure="WORSENING",
+        existing_signal="RE-ENTER",
+        subsector_state="BROAD_SUBSECTOR_DAMAGE",
+        subsector_supports_early_entry=False,
+    )
+    assert signal == "RE-ENTER"
+    assert source == "BASE_REENTRY"
