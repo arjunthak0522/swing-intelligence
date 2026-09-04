@@ -3,105 +3,21 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from reentry_confidence import analogs_for_date, empirical_state, feature_frame, summarize_analogs
-from reentry_decision import decision_from_analogs
-from reentry_evidence import EVIDENCE_HORIZONS, summarize_extended_evidence
-
-
-def weakness_context(row) -> tuple[bool, list[str]]:
-    reasons: list[str] = []
-    if float(row["spy_dd20"]) <= -0.01:
-        reasons.append("SPY is at least 1% below its 20-day high")
-    if float(row["B50"]) <= 0.50:
-        reasons.append("50% or fewer S&P 500 stocks are above their 50DMA")
-    if float(row["vix_change5"]) >= 0.10:
-        reasons.append("VIX is up at least 10% over 5 trading days")
-    if float(row["curve_ratio"]) >= 1.0:
-        reasons.append("VIX/VIX3M is at or above 1.0")
-    return bool(reasons), reasons
-
-
-def strategy_signal(decision: str, weak: bool) -> tuple[str, str]:
-    if weak and decision in {"CAUTIOUS YES", "YES", "STRONG YES"}:
-        return "RE-ENTER", "meaningful weakness is present and historical analogs do not support continuing to wait"
-    if weak:
-        return "WAIT", "weakness is present, but historical analogs do not yet support re-entry"
-    return "NO RE-ENTRY SETUP", "no qualifying weakness is currently present"
+from reentry_engine import build_snapshot
 
 
 def main() -> None:
-    frame, freshness = feature_frame(return_metadata=True, require_same_day=True)
-    target = frame.index.max()
-    row = frame.loc[target]
-    analogs = analogs_for_date(frame, target)
-    decision_stats = summarize_analogs(frame, analogs)
-    extended_evidence = summarize_extended_evidence(frame, analogs)
-    decision, interpretation, diagnostics = decision_from_analogs(decision_stats, row)
-    weak, weak_reasons = weakness_context(row)
-    signal, signal_text = strategy_signal(decision, weak)
+    snapshot = build_snapshot(require_same_day=True)
 
-    payload = {
-        "as_of": str(target.date()),
-        "data_freshness": freshness,
-        "strategy": "Correction Re-entry",
-        "signal": signal,
-        "signal_interpretation": signal_text,
-        "analog_decision": decision,
-        "analog_interpretation": interpretation,
-        "market_state": empirical_state(row),
-        "weakness_present": weak,
-        "weakness_reasons": weak_reasons,
-        "current_inputs": {
-            "spy_drawdown_20d": float(row["spy_dd20"]),
-            "spy_return_5d": float(row["spy_ret5"]),
-            "pct_sp500_above_50dma": float(row["B50"]),
-            "pct_sp500_above_200dma": float(row["B200"]),
-            "breadth_1d_change": float(row["b50_change1"]),
-            "breadth_3d_change": float(row["b50_change3"]),
-            "vix_5d_change": float(row["vix_change5"]),
-            "vix_vix3m_ratio": float(row["curve_ratio"]),
-        },
-        "forward_analog_outcomes": decision_stats,
-        "extended_forward_evidence": extended_evidence,
-        "evidence_horizons": list(EVIDENCE_HORIZONS),
-        "drawdown_definition": "close-to-close maximum adverse excursion from hypothetical close t+1 entry through each horizon",
-        "decision_diagnostics": diagnostics,
-        "implementation": {
-            "evaluate": "after each market close",
-            "freshness_policy": "SPY/QQQ define the latest completed equity session; VIX, VIX3M, and breadth must all include that same session or no signal is emitted",
-            "weakness_context": "SPY >=1% below 20d high OR <=50% S&P above 50DMA OR VIX +>=10% over 5d OR VIX/VIX3M >=1.0",
-            "reentry_rule": "when weakness exists and analog decision is CAUTIOUS YES / YES / STRONG YES, signal RE-ENTER",
-            "execution": "actionable for the next trading session; historical validation assumed close t+1 execution and 10 bps round-trip friction",
-            "exit_rule": "none; this is an entry-timing framework for redeploying cash, not a forced short-horizon swing exit",
-            "forward_evidence": "always report 5/7/10/15/30/60D return, positive rate, and drawdown-path statistics",
-            "large_corrections": "fully included; there is no maximum drawdown exclusion",
-            "rolling_corrections": "included through breadth and volatility weakness even when the index drawdown is shallow"
-        },
-        "historical_validation": {
-            "independent_episodes": 145,
-            "SPY_7D_median_after_signal": 0.008585570190091318,
-            "SPY_10D_median_after_signal": 0.010660180393483043,
-            "QQQ_7D_median_after_signal": 0.010538951553654141,
-            "QQQ_10D_median_after_signal": 0.014405462638181654,
-            "SPY_7D_positive_rate": 0.6551724137931034,
-            "SPY_10D_positive_rate": 0.6689655172413793,
-            "QQQ_7D_positive_rate": 0.6137931034482759,
-            "QQQ_10D_positive_rate": 0.6344827586206897,
-            "result": "GO_TO_IMPLEMENTABLE_STRATEGY",
-            "important_limit": "the model did not prove superiority to entering immediately at the start of every weakness episode; it did show that, once its re-entry condition was present, waiting another 3-5 sessions was historically worse"
-        },
-        "caveats": [
-            "true breadth history begins in September 2016",
-            "historical evidence supports decision timing, not guaranteed returns",
-            "drawdown statistics are based on daily closes, not intraday lows",
-            "this does not claim statistically proven standalone alpha versus buy-and-hold"
-        ]
-    }
+    strategy_out = Path("artifacts/reentry_strategy")
+    strategy_out.mkdir(parents=True, exist_ok=True)
+    (strategy_out / "reentry_strategy.json").write_text(json.dumps(snapshot, indent=2), encoding="utf-8")
 
-    out = Path("artifacts/reentry_strategy")
-    out.mkdir(parents=True, exist_ok=True)
-    (out / "reentry_strategy.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
-    print(json.dumps(payload, indent=2))
+    canonical_out = Path("artifacts/reentry_snapshot")
+    canonical_out.mkdir(parents=True, exist_ok=True)
+    (canonical_out / "latest.json").write_text(json.dumps(snapshot, indent=2), encoding="utf-8")
+
+    print(json.dumps(snapshot, indent=2))
 
 
 if __name__ == "__main__":
