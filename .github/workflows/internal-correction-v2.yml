@@ -1,4 +1,4 @@
-name: Internal Correction V2 Research
+name: RE-ENTRY V2 Research
 
 on:
   workflow_dispatch:
@@ -9,6 +9,7 @@ on:
       - 'tools/internal_correction_incremental_validation.py'
       - 'tools/internal_correction_subtype_decomposition.py'
       - 'tools/internal_correction_full_v2.py'
+      - 'tools/reentry_v2_engine.py'
       - 'docs/internal-correction-v2-research-spec.md'
       - '.github/workflows/internal-correction-v2.yml'
 
@@ -16,7 +17,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: internal-correction-v2
+  group: reentry-v2-research
   cancel-in-progress: true
 
 jobs:
@@ -30,7 +31,7 @@ jobs:
           python-version: '3.12'
       - name: Install dependencies
         run: python -m pip install pandas numpy yfinance lxml
-      - name: Run frozen V2 research
+      - name: Run legacy broad/internal validation research
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/internal_correction_v2.py
@@ -38,7 +39,7 @@ jobs:
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/internal_correction_incremental_validation.py
-      - name: Run subtype decomposition and QQQ-specific research
+      - name: Run subtype diagnostics and QQQ-specific research
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/internal_correction_subtype_decomposition.py
@@ -46,9 +47,13 @@ jobs:
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/internal_correction_full_v2.py
+      - name: Run canonical RE-ENTRY V2 engine
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/reentry_v2_engine.py
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
-          name: internal-correction-v2-results
+          name: reentry-v2-results
           path: artifacts/internal_correction_v2/**
           retention-days: 30
