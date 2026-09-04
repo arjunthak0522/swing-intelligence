@@ -14,11 +14,14 @@ on:
       - 'tools/reentry_evidence.py'
       - 'tools/reentry_persist.py'
       - 'tools/reentry_realized_outcomes.py'
+      - 'tools/reentry_supabase_payload.py'
+      - 'tools/reentry_supabase_sync.py'
       - 'tests/test_reentry_engine_contract.py'
       - '.github/workflows/reentry-strategy.yml'
 
 permissions:
   contents: write
+  id-token: write
 
 concurrency:
   group: correction-reentry-daily
@@ -67,6 +70,8 @@ jobs:
             echo "Transient data failure on attempt $attempt; retrying in 20 seconds"
             sleep 20
           done
+      - name: Prepare API persistence payload
+        run: python tools/reentry_supabase_payload.py
       - name: Prepare artifact
         run: |
           mkdir -p artifacts/reentry_strategy
