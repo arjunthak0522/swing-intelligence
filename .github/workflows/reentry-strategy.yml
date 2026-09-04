@@ -27,7 +27,7 @@ concurrency:
 jobs:
   signal:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -40,11 +40,33 @@ jobs:
       - name: Build and persist same-day snapshot
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
-        run: python tools/reentry_persist.py
+        run: |
+          for attempt in 1 2 3; do
+            if python tools/reentry_persist.py; then
+              exit 0
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              echo "Same-day snapshot failed after 3 attempts"
+              exit 1
+            fi
+            echo "Transient data failure on attempt $attempt; retrying in 20 seconds"
+            sleep 20
+          done
       - name: Update matured realized outcomes
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
-        run: python tools/reentry_realized_outcomes.py
+        run: |
+          for attempt in 1 2 3; do
+            if python tools/reentry_realized_outcomes.py; then
+              exit 0
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              echo "Realized-outcome update failed after 3 attempts"
+              exit 1
+            fi
+            echo "Transient data failure on attempt $attempt; retrying in 20 seconds"
+            sleep 20
+          done
       - name: Prepare artifact
         run: |
           mkdir -p artifacts/reentry_strategy
