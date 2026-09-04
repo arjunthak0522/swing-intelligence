@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from typing import Any
 
 import numpy as np
@@ -54,7 +55,7 @@ def _normalize_download(raw: pd.DataFrame, symbols: list[str]) -> pd.DataFrame:
 def load_subsector_prices(start: str = "2016-09-01") -> pd.DataFrame:
     import yfinance as yf
 
-    symbols = sorted(set(SUBSECTOR_SYMBOLS + list(SUBSECTOR_GROUPS.keys()) + ["SPY"]))
+    symbols = sorted(set(SUBSECTOR_SYMBOLS + list(SUBSECTOR_GROUPS.keys()) + ["SPY", "QQQ"]))
     raw = yf.download(
         symbols,
         start=start,
@@ -65,7 +66,7 @@ def load_subsector_prices(start: str = "2016-09-01") -> pd.DataFrame:
         group_by="column",
     )
     closes = _normalize_download(raw, symbols)
-    missing = [s for s in ["SPY", "SMH", "IGV"] if s not in closes.columns]
+    missing = [s for s in ["SPY", "QQQ", "SMH", "IGV"] if s not in closes.columns]
     if missing:
         raise RuntimeError(f"Required subsector proxies missing: {missing}")
     return closes
@@ -117,21 +118,45 @@ def build_subsector_frame(prices: pd.DataFrame) -> pd.DataFrame:
         dd_cols = [f"sub_{s}_dd20" for s in syms]
         rs_cols = [f"sub_{s}_rs20_parent" for s in syms]
         repair_cols = [f"sub_{s}_repair" for s in syms]
-        out[f"sub_{parent}_coverage"] = len(syms)
-        out[f"sub_{parent}_damage_share_2"] = (out[dd_cols] <= -0.02).mean(axis=1)
-        out[f"sub_{parent}_damage_share_3"] = (out[dd_cols] <= -0.03).mean(axis=1)
+        expected = len(groups)
+        min_valid = max(2, math.ceil(expected * 0.67))
+        valid_count = out[dd_cols].notna().sum(axis=1)
+        valid = valid_count >= min_valid
+        out[f"sub_{parent}_coverage"] = valid_count / expected
+        out[f"sub_{parent}_damage_share_2"] = (out[dd_cols].le(-0.02) & out[dd_cols].notna()).sum(axis=1) / valid_count.replace(0, np.nan)
+        out[f"sub_{parent}_damage_share_3"] = (out[dd_cols].le(-0.03) & out[dd_cols].notna()).sum(axis=1) / valid_count.replace(0, np.nan)
         out[f"sub_{parent}_median_dd20"] = out[dd_cols].median(axis=1)
         out[f"sub_{parent}_dispersion_parent_rs20"] = out[rs_cols].std(axis=1, ddof=0)
-        out[f"sub_{parent}_repair_share"] = out[repair_cols].astype(float).mean(axis=1)
+        repair_valid = out[dd_cols].notna()
+        repair_values = out[repair_cols].astype(float).where(repair_valid.values)
+        out[f"sub_{parent}_repair_share"] = repair_values.sum(axis=1, min_count=1) / valid_count.replace(0, np.nan)
+        for suffix in [
+            "damage_share_2",
+            "damage_share_3",
+            "median_dd20",
+            "dispersion_parent_rs20",
+            "repair_share",
+        ]:
+            out.loc[~valid, f"sub_{parent}_{suffix}"] = np.nan
 
     all_dd_cols = [f"sub_{s}_dd20" for s in SUBSECTOR_SYMBOLS if f"sub_{s}_dd20" in out.columns]
     all_repair_cols = [f"sub_{s}_repair" for s in SUBSECTOR_SYMBOLS if f"sub_{s}_repair" in out.columns]
     if all_dd_cols:
-        out["subsector_damage_share_2"] = (out[all_dd_cols] <= -0.02).mean(axis=1)
-        out["subsector_damage_share_3"] = (out[all_dd_cols] <= -0.03).mean(axis=1)
+        valid_count = out[all_dd_cols].notna().sum(axis=1)
+        expected = len(SUBSECTOR_SYMBOLS)
+        broad_valid = valid_count >= math.ceil(expected * 0.80)
+        out["subsector_coverage"] = valid_count / expected
+        out["subsector_damage_share_2"] = (out[all_dd_cols].le(-0.02) & out[all_dd_cols].notna()).sum(axis=1) / valid_count.replace(0, np.nan)
+        out["subsector_damage_share_3"] = (out[all_dd_cols].le(-0.03) & out[all_dd_cols].notna()).sum(axis=1) / valid_count.replace(0, np.nan)
         out["subsector_median_dd20"] = out[all_dd_cols].median(axis=1)
+        out.loc[~broad_valid, ["subsector_damage_share_2", "subsector_damage_share_3", "subsector_median_dd20"]] = np.nan
     if all_repair_cols:
-        out["subsector_repair_share"] = out[all_repair_cols].astype(float).mean(axis=1)
+        valid_proxy = out[all_dd_cols].notna()
+        repair_values = out[all_repair_cols].astype(float).where(valid_proxy.values)
+        valid_count = valid_proxy.sum(axis=1)
+        broad_valid = valid_count >= math.ceil(len(SUBSECTOR_SYMBOLS) * 0.80)
+        out["subsector_repair_share"] = repair_values.sum(axis=1, min_count=1) / valid_count.replace(0, np.nan)
+        out.loc[~broad_valid, "subsector_repair_share"] = np.nan
     return out
 
 
@@ -164,7 +189,7 @@ def subsector_snapshot(row: pd.Series) -> dict[str, Any]:
             flat[symbol] = item
         if members:
             by_sector[parent] = {
-                "coverage": len(members),
+                "coverage": float(row.get(f"sub_{parent}_coverage", np.nan)),
                 "damage_share_2pct": float(row.get(f"sub_{parent}_damage_share_2", np.nan)),
                 "damage_share_3pct": float(row.get(f"sub_{parent}_damage_share_3", np.nan)),
                 "median_drawdown_20d": float(row.get(f"sub_{parent}_median_dd20", np.nan)),
@@ -174,6 +199,7 @@ def subsector_snapshot(row: pd.Series) -> dict[str, Any]:
             }
     return {
         "aggregate": {
+            "coverage": float(row.get("subsector_coverage", np.nan)),
             "damage_share_2pct": float(row.get("subsector_damage_share_2", np.nan)),
             "damage_share_3pct": float(row.get("subsector_damage_share_3", np.nan)),
             "median_drawdown_20d": float(row.get("subsector_median_dd20", np.nan)),
@@ -195,8 +221,10 @@ def build_market_commentary(snapshot: dict[str, Any], subsectors: dict[str, Any]
         dd20 = float(item.get("drawdown_20d", 0.0))
         rs20 = float(item.get("relative_strength_20d_vs_spy", 0.0))
         group = subsectors.get("by_sector", {}).get(symbol, {})
-        sub_damage = float(group.get("damage_share_3pct", 0.0) or 0.0)
-        sub_repair = float(group.get("repair_share", 0.0) or 0.0)
+        sub_damage_raw = group.get("damage_share_3pct", 0.0)
+        sub_repair_raw = group.get("repair_share", 0.0)
+        sub_damage = 0.0 if pd.isna(sub_damage_raw) else float(sub_damage_raw)
+        sub_repair = 0.0 if pd.isna(sub_repair_raw) else float(sub_repair_raw)
         warranted = dd20 <= -0.03 or rs20 <= -0.02 or sub_damage >= 0.50 or sub_repair >= 0.50
         if not warranted:
             continue
@@ -255,7 +283,6 @@ def build_market_commentary(snapshot: dict[str, Any], subsectors: dict[str, Any]
     if "GROWTH RESET" in factor_labels:
         factor_items.insert(0, {"factor": "IWF/IWD", "commentary": "Growth is resetting relative to value, consistent with internal leadership rotation."})
 
-    # Highest-signal items first so product copy stays concise.
     subsector_items.sort(key=lambda x: abs(float(subsectors["proxies"][x["symbol"]]["drawdown_20d"])), reverse=True)
     sector_items = sector_items[:6]
     subsector_items = subsector_items[:10]
