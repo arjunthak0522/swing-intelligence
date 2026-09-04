@@ -9,7 +9,13 @@ DATA_ROOT = Path("data/reentry")
 HISTORY_ROOT = DATA_ROOT / "history"
 
 
-def persist_snapshot(snapshot: dict) -> list[Path]:
+def persist_snapshot(snapshot: dict) -> tuple[dict, list[Path], bool]:
+    """Persist one completed-session snapshot without ever rewriting history.
+
+    If the immutable date already exists, that stored record remains authoritative.
+    Reruns for the same completed session are therefore idempotent even if a live
+    upstream source later republishes slightly different metadata for that date.
+    """
     DATA_ROOT.mkdir(parents=True, exist_ok=True)
     HISTORY_ROOT.mkdir(parents=True, exist_ok=True)
 
@@ -17,18 +23,17 @@ def persist_snapshot(snapshot: dict) -> list[Path]:
     canonical = json.dumps(snapshot, indent=2, sort_keys=True) + "\n"
     history_path = HISTORY_ROOT / f"{as_of}.json"
     latest_path = DATA_ROOT / "latest.json"
+    reused_existing = False
 
     if history_path.exists():
-        existing = history_path.read_text(encoding="utf-8")
-        if existing != canonical:
-            raise RuntimeError(
-                f"Immutable snapshot already exists for {as_of} with different contents. "
-                "Refusing to rewrite historical engine output."
-            )
+        authoritative = json.loads(history_path.read_text(encoding="utf-8"))
+        reused_existing = True
     else:
         history_path.write_text(canonical, encoding="utf-8")
+        authoritative = snapshot
 
-    latest_path.write_text(canonical, encoding="utf-8")
+    authoritative_text = json.dumps(authoritative, indent=2, sort_keys=True) + "\n"
+    latest_path.write_text(authoritative_text, encoding="utf-8")
 
     index_rows = []
     for path in sorted(HISTORY_ROOT.glob("*.json"), reverse=True):
@@ -43,17 +48,18 @@ def persist_snapshot(snapshot: dict) -> list[Path]:
         })
     index_path = DATA_ROOT / "index.json"
     index_path.write_text(json.dumps(index_rows, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    return [history_path, latest_path, index_path]
+    return authoritative, [history_path, latest_path, index_path], reused_existing
 
 
 def main() -> None:
     snapshot = build_snapshot(require_same_day=True)
-    paths = persist_snapshot(snapshot)
+    authoritative, paths, reused_existing = persist_snapshot(snapshot)
     print(json.dumps({
-        "as_of": snapshot["as_of"],
-        "engine_version": snapshot["engine_version"],
-        "signal": snapshot["signal"],
-        "analog_decision": snapshot["analog_decision"],
+        "as_of": authoritative["as_of"],
+        "engine_version": authoritative["engine_version"],
+        "signal": authoritative["signal"],
+        "analog_decision": authoritative["analog_decision"],
+        "immutable_existing_reused": reused_existing,
         "written": [str(p) for p in paths],
     }, indent=2))
 
