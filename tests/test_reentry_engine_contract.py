@@ -12,6 +12,8 @@ sys.path.insert(0, str(TOOLS))
 from reentry_engine import (  # noqa: E402
     ENGINE_VERSION,
     EVIDENCE_HORIZONS,
+    PROXY_CAVEAT,
+    _unified_signal,
     strategy_signal,
     validate_snapshot,
     weakness_context,
@@ -25,12 +27,15 @@ def row(**overrides):
         "B200": 0.75,
         "vix_change5": 0.00,
         "curve_ratio": 0.85,
+        "v2_meaningful": False,
+        "v2_developing": False,
+        "v2_stabilizing": False,
     }
     base.update(overrides)
     return pd.Series(base)
 
 
-def test_frozen_weakness_thresholds():
+def test_validated_broad_market_thresholds_are_unchanged():
     weak, reasons = weakness_context(row(spy_dd20=-0.01))
     assert weak and any("20-day high" in r for r in reasons)
 
@@ -47,12 +52,26 @@ def test_frozen_weakness_thresholds():
     assert not weak and reasons == []
 
 
-def test_strategy_mapping_is_frozen():
+def test_validated_broad_market_strategy_mapping_is_unchanged():
     assert strategy_signal("YES", True)[0] == "RE-ENTER"
     assert strategy_signal("CAUTIOUS YES", True)[0] == "RE-ENTER"
     assert strategy_signal("STRONG YES", True)[0] == "RE-ENTER"
     assert strategy_signal("NO", True)[0] == "WAIT"
     assert strategy_signal("YES", False)[0] == "NO RE-ENTRY SETUP"
+
+
+def test_unified_internal_only_policy_is_conservative():
+    meaningful = row(v2_meaningful=True, v2_developing=True, v2_stabilizing=True)
+    assert _unified_signal("YES", False, meaningful)[0] == "RE-ENTER"
+    assert _unified_signal("STRONG YES", False, meaningful)[0] == "RE-ENTER"
+    assert _unified_signal("CAUTIOUS YES", False, meaningful)[0] == "WAIT"
+    assert _unified_signal("NO", False, meaningful)[0] == "WAIT"
+
+    developing = row(v2_developing=True, v2_stabilizing=True)
+    assert _unified_signal("STRONG YES", False, developing)[0] == "WAIT"
+
+    no_setup = row()
+    assert _unified_signal("STRONG YES", False, no_setup)[0] == "NO RE-ENTRY SETUP"
 
 
 def valid_snapshot():
@@ -69,13 +88,17 @@ def valid_snapshot():
         for symbol in ("SPY", "QQQ")
     }
     return {
-        "schema_version": "1.0",
+        "schema_version": "2.0",
         "engine_version": ENGINE_VERSION,
         "as_of": "2026-09-03",
         "signal": "NO RE-ENTRY SETUP",
         "analog_decision": "YES",
         "market_state": "no material correction / stabilizing",
         "current_inputs": {},
+        "signal_snapshot": {},
+        "internal_reset": "NONE",
+        "selling_pressure": "MIXED",
+        "proxy_caveat": PROXY_CAVEAT,
         "analogs": [{"rank": i + 1, "date": "2020-01-01", "distance": 0.1} for i in range(40)],
         "extended_forward_evidence": evidence,
         "evidence_horizons": list(EVIDENCE_HORIZONS),
@@ -98,4 +121,11 @@ def test_contract_rejects_horizon_drift():
     snapshot = valid_snapshot()
     snapshot["evidence_horizons"] = [5, 7, 10]
     with pytest.raises(ValueError, match="horizons"):
+        validate_snapshot(snapshot, require_same_day=True)
+
+
+def test_contract_requires_exact_proxy_caveat():
+    snapshot = valid_snapshot()
+    snapshot["proxy_caveat"] = "ETF proxies"
+    with pytest.raises(ValueError, match="proxy caveat"):
         validate_snapshot(snapshot, require_same_day=True)
