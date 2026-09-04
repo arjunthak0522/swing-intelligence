@@ -6,7 +6,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from reentry_confidence import ROUND_TRIP_COST, fetch_twelve_close
+from reentry_confidence import ROUND_TRIP_COST
+from reentry_engine import fetch_completed_twelve_close
 from reentry_evidence import EVIDENCE_HORIZONS
 
 DATA_ROOT = Path("data/reentry")
@@ -47,7 +48,7 @@ def update_realized() -> dict:
     if not snapshots:
         return {"snapshots": 0, "completed_cells": 0, "files_written": 0}
 
-    prices = {symbol: fetch_twelve_close(symbol) for symbol in ("SPY", "QQQ")}
+    prices = {symbol: fetch_completed_twelve_close(symbol) for symbol in ("SPY", "QQQ")}
     completed_cells = 0
     files_written = 0
 
@@ -87,7 +88,7 @@ def update_realized() -> dict:
         "completed_cells": completed_cells,
         "files_written": files_written,
         "horizons": list(EVIDENCE_HORIZONS),
-        "definition": "signal close t, entry close t+1, horizon trading sessions after entry, 10 bps round-trip cost; drawdown uses daily closes",
+        "definition": "signal close t, entry close t+1, horizon trading sessions after entry, 10 bps round-trip cost; drawdown uses completed daily closes only",
     }
     (DATA_ROOT / "realized_index.json").write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return summary
