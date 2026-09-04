@@ -11,6 +11,7 @@ on:
       - 'tools/internal_correction_full_v2.py'
       - 'tools/reentry_v2_engine.py'
       - 'tools/reentry_v2_policy_validation.py'
+      - 'tools/reentry_v2_hidden_policy_refinement.py'
       - 'docs/internal-correction-v2-research-spec.md'
       - '.github/workflows/internal-correction-v2.yml'
 
@@ -56,6 +57,10 @@ jobs:
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/reentry_v2_policy_validation.py
+      - name: Refine V2 hidden-correction re-entry gate
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/reentry_v2_hidden_policy_refinement.py
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
