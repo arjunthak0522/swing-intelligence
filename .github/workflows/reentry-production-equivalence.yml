@@ -1,0 +1,37 @@
+name: Re-entry V1 Production Equivalence Audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/reentry_engine.py'
+      - 'tools/reentry_decision.py'
+      - 'tools/reentry_confidence.py'
+      - 'tools/reentry_walkforward_validation.py'
+      - 'tools/reentry_episode_timing_validation.py'
+      - 'tools/reentry_production_equivalence_audit.py'
+      - '.github/workflows/reentry-production-equivalence.yml'
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install pandas numpy yfinance lxml
+      - name: Run production equivalence audit
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/reentry_production_equivalence_audit.py
+      - name: Upload audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reentry-production-equivalence
+          path: artifacts/reentry_production_equivalence/**
+          retention-days: 30
