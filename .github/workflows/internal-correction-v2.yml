@@ -8,6 +8,7 @@ on:
       - 'tools/internal_correction_v2.py'
       - 'tools/internal_correction_incremental_validation.py'
       - 'tools/internal_correction_subtype_decomposition.py'
+      - 'tools/internal_correction_full_v2.py'
       - 'docs/internal-correction-v2-research-spec.md'
       - '.github/workflows/internal-correction-v2.yml'
 
@@ -41,6 +42,10 @@ jobs:
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/internal_correction_subtype_decomposition.py
+      - name: Run complete V2 sector-factor state model
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/internal_correction_full_v2.py
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
