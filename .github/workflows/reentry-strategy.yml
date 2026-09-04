@@ -8,9 +8,17 @@ on:
     branches: [main]
     paths:
       - 'tools/reentry_strategy.py'
+      - 'tools/reentry_engine.py'
       - 'tools/reentry_decision.py'
       - 'tools/reentry_confidence.py'
+      - 'tools/reentry_evidence.py'
+      - 'tools/reentry_persist.py'
+      - 'tools/reentry_realized_outcomes.py'
+      - 'tests/test_reentry_engine_contract.py'
       - '.github/workflows/reentry-strategy.yml'
+
+permissions:
+  contents: write
 
 concurrency:
   group: correction-reentry-daily
@@ -19,21 +27,44 @@ concurrency:
 jobs:
   signal:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - name: Install dependencies
-        run: python -m pip install pandas numpy yfinance lxml
-      - name: Run correction re-entry strategy
+        run: python -m pip install pandas numpy yfinance lxml pytest
+      - name: Verify frozen engine contract
+        run: pytest -q tests/test_reentry_engine_contract.py
+      - name: Build and persist same-day snapshot
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
-        run: python tools/reentry_strategy.py
+        run: python tools/reentry_persist.py
+      - name: Update matured realized outcomes
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/reentry_realized_outcomes.py
+      - name: Prepare artifact
+        run: |
+          mkdir -p artifacts/reentry_strategy
+          cp data/reentry/latest.json artifacts/reentry_strategy/reentry_strategy.json
+          cp data/reentry/index.json artifacts/reentry_strategy/history_index.json
+          cp data/reentry/realized_index.json artifacts/reentry_strategy/realized_index.json
+      - name: Commit immutable shadow history
+        run: |
+          if git diff --quiet -- data/reentry && [ -z "$(git status --porcelain -- data/reentry)" ]; then
+            echo "No re-entry history changes to commit"
+            exit 0
+          fi
+          git config user.name "re-entry-engine[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/reentry
+          git commit -m "Record re-entry snapshot $(python -c 'import json; print(json.load(open("data/reentry/latest.json"))["as_of"])')"
+          git push
       - name: Upload result
         uses: actions/upload-artifact@v4
         with:
           name: reentry-strategy
           path: artifacts/reentry_strategy/**
-          retention-days: 14
+          retention-days: 30
