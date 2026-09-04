@@ -1,0 +1,37 @@
+name: Re-entry Web QA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [reentry-app-v1]
+    paths:
+      - 'app/**'
+      - 'lib/**'
+      - 'package.json'
+      - 'tsconfig.json'
+      - 'next-env.d.ts'
+      - 'data/reentry/**'
+      - '.github/workflows/reentry-web-qa.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: reentry-web-qa
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install
+        run: npm install --no-audit --no-fund
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Build
+        run: npm run build
