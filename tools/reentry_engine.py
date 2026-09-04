@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from datetime import time
 from typing import Any
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
@@ -14,6 +16,8 @@ ENGINE_VERSION = "reentry_v1.0"
 SCHEMA_VERSION = "1.0"
 ANALOG_DECISIONS = {"NO", "CAUTIOUS YES", "YES", "STRONG YES"}
 STRATEGY_SIGNALS = {"RE-ENTER", "WAIT", "NO RE-ENTRY SETUP"}
+LIVE_CLOSE_BUFFER_ET = time(16, 15)
+_BASE_FETCH_TWELVE_CLOSE = confidence.fetch_twelve_close
 
 
 def weakness_context(row) -> tuple[bool, list[str]]:
@@ -37,6 +41,18 @@ def strategy_signal(decision: str, weak: bool) -> tuple[str, str]:
     if weak:
         return "WAIT", "weakness is present, but historical analogs do not yet support re-entry"
     return "NO RE-ENTRY SETUP", "no qualifying weakness is currently present"
+
+
+def fetch_completed_twelve_close(symbol: str, start: str = "2016-09-01") -> pd.Series:
+    """Fetch daily prices while refusing to treat today's live daily bar as a completed close."""
+    series = _BASE_FETCH_TWELVE_CLOSE(symbol, start=start)
+    now_et = pd.Timestamp.now(tz=ZoneInfo("America/New_York"))
+    today = pd.Timestamp(now_et.date())
+    if now_et.weekday() < 5 and now_et.time() < LIVE_CLOSE_BUFFER_ET and today in series.index:
+        series = series.drop(index=today)
+    if series.empty:
+        raise RuntimeError(f"No completed daily closes available for {symbol}")
+    return series
 
 
 def _single_yahoo_close(ticker: str, target: pd.Timestamp) -> float | None:
@@ -95,18 +111,15 @@ def _robust_same_day_vol(target: pd.Timestamp) -> tuple[float, float]:
 
 def _install_live_data_hardening() -> None:
     # Data plumbing only. This does not alter features, thresholds, analog selection, or decisions.
+    confidence.fetch_twelve_close = fetch_completed_twelve_close
     confidence.fetch_yahoo_same_day_vol = _robust_same_day_vol
 
 
 def _analog_rows(analogs) -> list[dict[str, Any]]:
-    rows = []
-    for rank, (date, row) in enumerate(analogs.iterrows(), start=1):
-        rows.append({
-            "rank": rank,
-            "date": str(date.date()),
-            "distance": float(row["distance"]),
-        })
-    return rows
+    return [
+        {"rank": rank, "date": str(date.date()), "distance": float(row["distance"])}
+        for rank, (date, row) in enumerate(analogs.iterrows(), start=1)
+    ]
 
 
 def historical_validation_block() -> dict[str, Any]:
@@ -175,7 +188,7 @@ def build_snapshot(require_same_day: bool = True) -> dict[str, Any]:
         "decision_diagnostics": diagnostics,
         "implementation": {
             "evaluate": "after each market close",
-            "freshness_policy": "SPY/QQQ define the latest completed equity session; VIX, VIX3M, and breadth must all include that same session or no signal is emitted",
+            "freshness_policy": "SPY/QQQ are filtered to the latest completed U.S. equity session; today's live daily bar is discarded before 4:15 PM ET; VIX, VIX3M, and breadth must match that completed session or no signal is emitted",
             "weakness_context": "SPY >=1% below 20d high OR <=50% S&P above 50DMA OR VIX +>=10% over 5d OR VIX/VIX3M >=1.0",
             "reentry_rule": "when weakness exists and analog decision is CAUTIOUS YES / YES / STRONG YES, signal RE-ENTER",
             "decision_basis": "40 nearest prior market-state analogs; operational decision remains based on frozen 7D/10D SPY/QQQ cells",
