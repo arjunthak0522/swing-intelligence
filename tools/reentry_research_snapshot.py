@@ -5,11 +5,13 @@ from pathlib import Path
 
 from reentry_early_entry_policy import apply_early_entry_bias
 from reentry_engine import build_snapshot
+from reentry_subsector_intelligence import enrich_snapshot_with_subsectors
 
 
 def main() -> None:
     snapshot = build_snapshot(require_same_day=False)
     snapshot = apply_early_entry_bias(snapshot)
+    snapshot = enrich_snapshot_with_subsectors(snapshot, require_same_day=False)
     snapshot["research_only"] = True
     out = Path("artifacts/reentry")
     out.mkdir(parents=True, exist_ok=True)
