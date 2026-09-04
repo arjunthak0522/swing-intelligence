@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from reentry_subsector_intelligence import SUBSECTOR_GROUPS, build_market_commentary
+from tools.reentry_subsector_intelligence import SUBSECTOR_GROUPS, build_market_commentary
 
 
 def test_all_11_parent_sectors_have_deeper_coverage():
