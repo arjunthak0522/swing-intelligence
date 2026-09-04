@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 FAVORABLE_ANALOGS = {"CAUTIOUS YES", "YES", "STRONG YES"}
-REENTRY_WINDOW_SESSIONS = 3
+REENTRY_WINDOW_SESSIONS = 0
 
 
 def early_entry_decision(
@@ -20,6 +20,11 @@ def early_entry_decision(
     enough once repair/stabilization is visible and historical analog evidence is
     at least cautiously favorable. Existing broad-market RE-ENTER signals are
     preserved unchanged.
+
+    RE-ENTER is re-evaluated independently each completed session. Persistence was
+    historically tested from 1-5 sessions and rejected because it materially
+    expanded active signal days beyond what is needed once the early-repair gate
+    itself is available.
     """
     if existing_signal == "RE-ENTER":
         return existing_signal, "existing validated re-entry condition remains active", "BASE_REENTRY"
@@ -65,6 +70,6 @@ def apply_early_entry_bias(snapshot: dict[str, Any]) -> dict[str, Any]:
         "required_repair_state": ["STABILIZING", "REPAIRING"],
         "required_analog_decision": sorted(FAVORABLE_ANALOGS),
         "reentry_window_sessions": REENTRY_WINDOW_SESSIONS,
-        "window_status": "research-stage persistence rule; historical validation required before production promotion",
+        "window_status": "NO PERSISTENCE - 1-5 session persistence was historically tested and rejected as unnecessarily broad; the engine re-evaluates the opportunity every completed session",
     }
     return out
