@@ -11,6 +11,7 @@ on:
       - 'tools/internal_correction_full_v2.py'
       - 'tools/reentry_engine.py'
       - 'tools/reentry_research_snapshot.py'
+      - 'tools/reentry_recent_path_research.py'
       - 'tests/test_reentry_engine_contract.py'
       - 'docs/internal-correction-v2-research-spec.md'
       - '.github/workflows/internal-correction-v2.yml'
@@ -55,6 +56,10 @@ jobs:
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/reentry_research_snapshot.py
+      - name: Diagnose recent unified decision path
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/reentry_recent_path_research.py
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
