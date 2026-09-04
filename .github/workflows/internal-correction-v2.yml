@@ -13,11 +13,14 @@ on:
       - 'tools/reentry_early_entry_policy.py'
       - 'tools/reentry_persistence_validation.py'
       - 'tools/reentry_final_policy_validation.py'
+      - 'tools/reentry_subsector_intelligence.py'
+      - 'tools/reentry_subsector_validation.py'
       - 'tools/reentry_research_snapshot.py'
       - 'tools/reentry_recent_path_research.py'
       - 'tools/reentry_live_snapshot.py'
       - 'tests/test_reentry_engine_contract.py'
       - 'tests/test_reentry_early_entry_policy.py'
+      - 'tests/test_reentry_subsector_intelligence.py'
       - 'docs/internal-correction-v2-research-spec.md'
       - '.github/workflows/internal-correction-v2.yml'
 
@@ -56,7 +59,11 @@ jobs:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/internal_correction_full_v2.py
       - name: Verify unified RE-ENTRY contracts
-        run: pytest -q tests/test_reentry_engine_contract.py tests/test_reentry_early_entry_policy.py
+        run: pytest -q tests/test_reentry_engine_contract.py tests/test_reentry_early_entry_policy.py tests/test_reentry_subsector_intelligence.py
+      - name: Validate subsector hidden-damage and repair states
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/reentry_subsector_validation.py
       - name: Build unified RE-ENTRY research snapshot
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
