@@ -1,6 +1,12 @@
 from __future__ import annotations
 
-from tools.reentry_subsector_intelligence import SUBSECTOR_GROUPS, build_market_commentary
+import sys
+from pathlib import Path
+
+TOOLS = Path(__file__).resolve().parents[1] / "tools"
+sys.path.insert(0, str(TOOLS))
+
+from reentry_subsector_intelligence import SUBSECTOR_GROUPS, build_market_commentary  # noqa: E402
 
 
 def test_all_11_parent_sectors_have_deeper_coverage():
