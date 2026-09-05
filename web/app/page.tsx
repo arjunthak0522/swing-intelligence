@@ -1,4 +1,4 @@
-import { ArrowDownRight, ArrowUpRight, ChevronRight, CircleAlert, CircleCheck, Clock3 } from "lucide-react";
+import { ChevronRight, CircleAlert, CircleCheck, Clock3 } from "lucide-react";
 import { getLatestSnapshot, pct, type ReentrySnapshot } from "../lib/reentry";
 import { sampleSnapshot } from "../lib/sampleSnapshot";
 
@@ -29,20 +29,31 @@ function StatusPill({ children }: { children: React.ReactNode }) {
 }
 
 function Hero({ s, usingPreview }: { s: ReentrySnapshot; usingPreview: boolean }) {
+  const closer = s.signal === "WAIT" && ["DEVELOPING", "MEANINGFUL", "BROAD"].includes(s.internal_reset);
   return (
     <section className="hero card">
       <div className="eyebrow-row">
-        <span className="eyebrow">RE-ENTRY</span>
-        <span className="freshness"><Clock3 size={14} /> As of {s.as_of} close</span>
+        <span className="eyebrow">RE-ENTRY DECISION</span>
+        <span className="freshness"><Clock3 size={14} /> {s.as_of} close</span>
       </div>
-      <div className={`signal ${stateClass(s.signal)}`}>{s.signal}</div>
-      <p className="hero-copy">{s.signal_interpretation}</p>
-      <div className="status-grid">
-        <div><span>Market damage</span><strong>{s.market_damage}</strong></div>
-        <div><span>Internal reset</span><strong>{s.internal_reset}</strong></div>
-        <div><span>Selling pressure</span><strong>{s.selling_pressure}</strong></div>
-        <div><span>Historical evidence</span><strong>{s.analog_decision}</strong></div>
+
+      <div className="hero-grid">
+        <div>
+          <div className={`signal ${stateClass(s.signal)}`}>{s.signal}</div>
+          <div className="signal-subline">{closer ? "Getting closer, but waiting still has value." : s.signal_interpretation}</div>
+        </div>
+
+        <div className="decision-summary">
+          <span className="summary-label">BOTTOM LINE</span>
+          <p>{s.signal_interpretation}</p>
+          <div className="decision-tags">
+            <span><small>Damage</small><b>{s.market_damage}</b></span>
+            <span><small>Repair</small><b>{s.selling_pressure}</b></span>
+            <span><small>History</small><b>{s.analog_decision}</b></span>
+          </div>
+        </div>
       </div>
+
       {usingPreview && <div className="preview-note">Research preview using the validated Sep 4 completed-close snapshot. Live API is not connected yet.</div>}
     </section>
   );
@@ -51,28 +62,20 @@ function Hero({ s, usingPreview }: { s: ReentrySnapshot; usingPreview: boolean }
 function VehicleCard({ s }: { s: ReentrySnapshot }) {
   const h = s.historical_validation;
   return (
-    <section className="card section-card">
+    <section className="card section-card action-card">
       <div className="section-heading">
         <div>
           <span className="kicker">ACTION</span>
-          <h2>What the engine is for</h2>
+          <h2>Where the signal applies</h2>
         </div>
         <StatusPill>Broad-market re-entry</StatusPill>
       </div>
-      <p className="section-intro">The validated decision is whether to redeploy cash into broad equities. SPY and QQQ are the intended vehicles. Sector and subsector ETFs are evidence, not standalone buy signals.</p>
-      <div className="vehicle-grid">
-        <div className="vehicle">
-          <div className="vehicle-title"><span>S&P 500</span><b>SPY</b></div>
-          <p>Broad, diversified re-entry vehicle.</p>
-          <div className="mini-stats"><span>10D median after signal <b>{pct(h.SPY_10D_median_after_signal, 2)}</b></span><span>60D <b>{pct(h.SPY_60D_median_after_signal, 2)}</b></span></div>
-        </div>
-        <div className="vehicle">
-          <div className="vehicle-title"><span>Nasdaq 100</span><b>QQQ</b></div>
-          <p>Growth-heavy re-entry vehicle.</p>
-          <div className="mini-stats"><span>10D median after signal <b>{pct(h.QQQ_10D_median_after_signal, 2)}</b></span><span>60D <b>{pct(h.QQQ_60D_median_after_signal, 2)}</b></span></div>
-        </div>
+      <p className="section-intro">The engine answers whether cash should go back into broad equities. SPY and QQQ are the validated destination set. Sector and subsector ETFs explain the setup but are not standalone buy calls.</p>
+      <div className="vehicle-strip">
+        <div className="vehicle-primary"><div><span>S&P 500</span><b>SPY</b></div><small>Broad market</small><strong>{pct(h.SPY_10D_median_after_signal, 2)}</strong><em>10D historical median</em></div>
+        <div className="vehicle-primary"><div><span>Nasdaq 100</span><b>QQQ</b></div><small>Growth heavy</small><strong>{pct(h.QQQ_10D_median_after_signal, 2)}</strong><em>10D historical median</em></div>
       </div>
-      <div className="notice"><CircleAlert size={16} /> No validated SPY-vs-QQQ preference rule is being invented here. The app will only show a preferred vehicle after that comparison is separately validated.</div>
+      <div className="notice"><CircleAlert size={16} /> The app will not claim SPY or QQQ is preferred until a separate vehicle-selection rule is historically validated.</div>
     </section>
   );
 }
@@ -81,14 +84,12 @@ function WhyNow({ s }: { s: ReentrySnapshot }) {
   const insights = s.market_insights;
   return (
     <section className="card section-card">
-      <div className="section-heading">
-        <div><span className="kicker">WHY</span><h2>What is driving the call</h2></div>
-      </div>
+      <div className="section-heading"><div><span className="kicker">WHY</span><h2>What is driving the decision</h2></div></div>
       <p className="section-intro">{insights?.headline || "The engine combines market damage, internal repair and historical evidence into one decision."}</p>
       <div className="two-col">
         <div className="reason-panel supportive">
           <h3><CircleCheck size={17} /> Supporting re-entry</h3>
-          {(insights?.supporting_reentry || []).map((x, i) => (
+          {(insights?.supporting_reentry || []).slice(0, 4).map((x, i) => (
             <div className="reason" key={i}>
               <div><b>{x.title}{x.symbol ? ` (${x.symbol})` : ""}</b>{x.state && <StatusPill>{x.state}</StatusPill>}</div>
               <p>{x.detail}</p>
@@ -98,7 +99,7 @@ function WhyNow({ s }: { s: ReentrySnapshot }) {
         </div>
         <div className="reason-panel holding">
           <h3><CircleAlert size={17} /> Holding it back</h3>
-          {(insights?.holding_back || []).map((x, i) => (
+          {(insights?.holding_back || []).slice(0, 4).map((x, i) => (
             <div className="reason" key={i}>
               <div><b>{x.title}</b>{x.state && <StatusPill>{x.state}</StatusPill>}</div>
               <p>{x.detail}</p>
@@ -116,9 +117,10 @@ function MarketInternals({ s }: { s: ReentrySnapshot }) {
   return (
     <section className="card section-card">
       <div className="section-heading">
-        <div><span className="kicker">UNDER THE SURFACE</span><h2>Market internals</h2></div>
+        <div><span className="kicker">UNDER THE SURFACE</span><h2>What is moving underneath</h2></div>
         <StatusPill>{pct(s.subsector_intelligence?.aggregate?.damage_share_3pct)} damaged 3%+</StatusPill>
       </div>
+      <p className="section-intro">Only material damage, relative weakness, or repair is surfaced. Expand a row when you want the evidence.</p>
       <div className="internal-list">
         {proxies.slice(0, 8).map(([symbol, x]) => (
           <details key={symbol} className="internal-row">
@@ -143,19 +145,21 @@ function MarketInternals({ s }: { s: ReentrySnapshot }) {
 }
 
 function SectorMap({ s }: { s: ReentrySnapshot }) {
-  const sectors = Object.entries(s.signal_snapshot?.sectors || {});
+  const sectors = Object.entries(s.signal_snapshot?.sectors || {})
+    .sort((a, b) => a[1].drawdown_20d - b[1].drawdown_20d);
   return (
     <section className="card section-card">
-      <div className="section-heading"><div><span className="kicker">BREADTH OF DAMAGE</span><h2>Sector map</h2></div></div>
-      <div className="sector-grid">
+      <div className="section-heading"><div><span className="kicker">SECTORS</span><h2>Damage and repair map</h2></div></div>
+      <div className="sector-table">
+        <div className="sector-table-head"><span>Sector</span><span>20D</span><span>Subsectors 3%+ down</span><span>Repair</span></div>
         {sectors.map(([symbol, x]) => {
           const group = s.subsector_intelligence?.by_sector?.[symbol];
           const repairing = (group?.repair_share || 0) > 0;
-          return <div className="sector" key={symbol}>
-            <div className="sector-top"><b>{sectorNames[symbol] || symbol}</b><span>{symbol}</span></div>
+          return <div className="sector-table-row" key={symbol}>
+            <div><b>{sectorNames[symbol] || symbol}</b><small>{symbol}</small></div>
             <strong>{pct(x.drawdown_20d)}</strong>
-            <small>20D drawdown</small>
-            <div className="sector-bottom"><span>{pct(group?.damage_share_3pct)} groups 3%+ down</span><span className={repairing ? "good-text" : "muted"}>{repairing ? "Repairing" : "No broad repair"}</span></div>
+            <span>{pct(group?.damage_share_3pct)}</span>
+            <span className={repairing ? "good-text" : "muted"}>{repairing ? "Repairing" : "No broad repair"}</span>
           </div>;
         })}
       </div>
@@ -173,16 +177,13 @@ function Historical({ s }: { s: ReentrySnapshot }) {
   ] as const;
   return (
     <section className="card section-card">
-      <div className="section-heading">
-        <div><span className="kicker">VALIDATED HISTORY</span><h2>Historical evidence</h2></div>
-        <StatusPill>{h.final_independent_reentry_episodes} independent signals</StatusPill>
-      </div>
-      <p className="section-intro">These are outcomes after the validated RE-ENTRY signal historically. They are separate from the 40 nearest analogs used to judge today.</p>
+      <div className="section-heading"><div><span className="kicker">TRUST THE EVIDENCE</span><h2>Historical backtest</h2></div><StatusPill>{h.final_independent_reentry_episodes} independent signals</StatusPill></div>
+      <p className="section-intro">Validated strategy history is separate from today&apos;s 40 nearest analogs. The first tells you how the engine behaved historically. The second helps decide whether today qualifies.</p>
       <div className="history-table">
         <div className="history-head"><span>Horizon</span><span>SPY median</span><span>QQQ median</span></div>
         {rows.map(([label, spy, qqq]) => <div className="history-row" key={label}><b>{label}</b><span>{pct(spy, 2)}</span><span>{pct(qqq, 2)}</span></div>)}
       </div>
-      <div className="history-footer"><span>Current analog verdict</span><strong className={stateClass(s.analog_decision)}>{s.analog_decision}</strong></div>
+      <div className="history-footer"><span>Today&apos;s analog verdict</span><strong className={stateClass(s.analog_decision)}>{s.analog_decision}</strong></div>
     </section>
   );
 }
