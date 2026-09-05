@@ -1,0 +1,88 @@
+name: RE-ENTRY Live Feed
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 21 * * 1-5'
+  push:
+    branches: [main, reentry-live-feed]
+    paths:
+      - '.github/workflows/reentry-live-feed.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: reentry-live-feed-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout canonical research engine
+        uses: actions/checkout@v4
+        with:
+          ref: internal-correction-v2
+          path: engine
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install engine dependencies
+        run: python -m pip install pandas numpy yfinance lxml pytest
+
+      - name: Build canonical completed-close snapshot
+        working-directory: engine
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/reentry_live_snapshot.py >/tmp/reentry-live.log
+
+      - name: Validate complete output
+        working-directory: engine
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('artifacts/reentry/live_completed_close.json')
+          d = json.loads(p.read_text())
+          sectors = d.get('signal_snapshot', {}).get('sectors', {})
+          subsectors = d.get('subsector_intelligence', {}).get('proxies', {})
+          if d.get('data_freshness', {}).get('same_day_complete') is not True:
+              raise SystemExit('snapshot freshness check failed')
+          if len(sectors) != 11:
+              raise SystemExit(f'expected 11 sectors, got {len(sectors)}')
+          if len(subsectors) < 30:
+              raise SystemExit(f'expected at least 30 subsectors, got {len(subsectors)}')
+          print({'as_of': d.get('as_of'), 'signal': d.get('signal'), 'sectors': len(sectors), 'subsectors': len(subsectors)})
+          PY
+
+      - name: Checkout publishing branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          path: publish
+          fetch-depth: 0
+
+      - name: Publish snapshot into web app
+        run: |
+          mkdir -p publish/web/public/reentry
+          cp engine/artifacts/reentry/live_completed_close.json publish/web/public/reentry/latest.json
+
+      - name: Commit fresh close snapshot
+        working-directory: publish
+        run: |
+          if git diff --quiet -- web/public/reentry/latest.json && [ -z "$(git status --porcelain -- web/public/reentry/latest.json)" ]; then
+            echo 'No snapshot change to publish'
+            exit 0
+          fi
+          git config user.name 're-entry-engine[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add web/public/reentry/latest.json
+          ASOF=$(python -c 'import json; print(json.load(open("web/public/reentry/latest.json"))["as_of"])')
+          git commit -m "Publish RE-ENTRY close feed ${ASOF} [skip ci]"
+          git push origin HEAD:${{ github.ref_name }}
