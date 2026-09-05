@@ -3,8 +3,13 @@ from __future__ import annotations
 import os
 from typing import Any
 
-FAVORABLE_ANALOGS = {"CAUTIOUS YES", "YES", "STRONG YES"}
-REENTRY_WINDOW_SESSIONS = 0
+from reentry_engine import (
+    FAVORABLE_ANALOGS,
+    REENTRY_WINDOW_SESSIONS,
+    _apply_canonical_early_entry,
+    early_entry_decision as _engine_early_entry_decision,
+)
+
 RESEARCH_SUBSECTOR_ENV = "REENTRY_RESEARCH_SUBSECTOR_CANDIDATE"
 
 
@@ -19,87 +24,26 @@ def early_entry_decision(
     subsector_supports_early_entry: bool = False,
     allow_subsector_candidate: bool | None = None,
 ) -> tuple[str, str, str]:
-    """Apply RE-ENTRY's intentional early-entry bias.
+    """Deprecated compatibility adapter to the canonical engine decision.
 
-    The validated early-entry extension uses aggregate internal repair/stabilization
-    plus favorable historical analogs. Subsector intelligence remains formal
-    decision evidence, but the tested MIXED-state WAIT -> RE-ENTER override is
-    disabled in operational use because exact incremental validation did not show
-    sufficient short-horizon or matched-control support.
-
-    The rejected subsector-promotion candidate can only be reproduced when callers
-    explicitly pass `allow_subsector_candidate=True` or the dedicated research
-    workflow sets REENTRY_RESEARCH_SUBSECTOR_CANDIDATE=1. Daily/live callers force
-    the candidate off.
+    No live or snapshot path should import this module. It exists only so frozen
+    historical validators can reproduce the rejected subsector candidate while
+    migration finishes.
     """
-    if existing_signal == "RE-ENTER":
-        return existing_signal, "existing validated re-entry condition remains active", "BASE_REENTRY"
-
     if allow_subsector_candidate is None:
         allow_subsector_candidate = os.getenv(RESEARCH_SUBSECTOR_ENV, "0") == "1"
-
-    early_repair = selling_pressure in {"STABILIZING", "REPAIRING"}
-    internal_setup = internal_reset in {"DEVELOPING", "MEANINGFUL", "BROAD"}
-    analog_favorable = analog_decision in FAVORABLE_ANALOGS
-
-    if internal_setup and early_repair and analog_favorable:
-        return (
-            "RE-ENTER",
-            "internal damage is already repairing and historical analogs are favorable; RE-ENTRY intentionally prefers being slightly early rather than waiting for full confirmation",
-            "EARLY_INTERNAL_REPAIR",
-        )
-
-    if (
-        allow_subsector_candidate
-        and internal_setup
-        and selling_pressure == "MIXED"
-        and analog_favorable
-        and subsector_supports_early_entry
-    ):
-        return (
-            "RE-ENTER",
-            f"research-only candidate: the broad repair picture is mixed, but subsector evidence ({subsector_state}) shows repair beneath damaged groups while historical analogs remain favorable",
-            "EARLY_SUBSECTOR_REPAIR_CANDIDATE",
-        )
-
-    if internal_setup:
-        return (
-            "WAIT",
-            "an internal reset is present, but aggregate repair or historical confirmation is not yet sufficient; subsector evidence remains supporting context",
-            "INTERNAL_SETUP_NOT_REPAIRED",
-        )
-
-    return existing_signal, "no early-entry override is active", "NO_EARLY_OVERRIDE"
+    return _engine_early_entry_decision(
+        analog_decision=analog_decision,
+        weakness_present=weakness_present,
+        internal_reset=internal_reset,
+        selling_pressure=selling_pressure,
+        existing_signal=existing_signal,
+        subsector_state=subsector_state,
+        subsector_supports_early_entry=subsector_supports_early_entry,
+        allow_subsector_candidate=bool(allow_subsector_candidate),
+    )
 
 
 def apply_early_entry_bias(snapshot: dict[str, Any]) -> dict[str, Any]:
-    out = dict(snapshot)
-    subsector = snapshot.get("subsector_decision_evidence", {})
-    signal, interpretation, source = early_entry_decision(
-        analog_decision=str(snapshot["analog_decision"]),
-        weakness_present=bool(snapshot.get("weakness_present", False)),
-        internal_reset=str(snapshot["internal_reset"]),
-        selling_pressure=str(snapshot["selling_pressure"]),
-        existing_signal=str(snapshot["signal"]),
-        subsector_state=str(subsector.get("state", "NEUTRAL")),
-        subsector_supports_early_entry=bool(subsector.get("supports_early_entry", False)),
-        allow_subsector_candidate=False,
-    )
-    out["pre_early_bias_signal"] = snapshot["signal"]
-    out["signal"] = signal
-    if signal != snapshot["signal"]:
-        out["signal_interpretation"] = interpretation
-        out["setup_source"] = source
-    out["early_entry_policy"] = {
-        "preference": "slightly early rather than too late",
-        "developing_reset_can_trigger": True,
-        "required_repair_state": ["STABILIZING", "REPAIRING"],
-        "subsector_is_decision_evidence": True,
-        "subsector_can_resolve_mixed_repair": False,
-        "subsector_promotion_status": "REJECTED BY EXACT INCREMENTAL HISTORICAL VALIDATION",
-        "subsector_can_veto_validated_broad_reentry": False,
-        "required_analog_decision": sorted(FAVORABLE_ANALOGS),
-        "reentry_window_sessions": REENTRY_WINDOW_SESSIONS,
-        "window_status": "NO PERSISTENCE - 1-5 session persistence was historically tested and rejected as unnecessarily broad; the engine re-evaluates the opportunity every completed session",
-    }
-    return out
+    """Deprecated compatibility adapter. Canonical snapshots apply this internally."""
+    return _apply_canonical_early_entry(snapshot)
