@@ -1,9 +1,11 @@
 import { ChevronRight, CircleAlert, CircleCheck, Clock3, Radio } from "lucide-react";
 import {
   getIntradaySnapshot,
+  getLatestEpisode,
   getLatestSnapshot,
   pct,
   type IntradaySnapshot,
+  type ReentryEpisode,
   type ReentrySnapshot,
   type SubsectorProxy,
 } from "../lib/reentry";
@@ -46,6 +48,7 @@ function StatusPill({ children }: { children: React.ReactNode }) {
 
 function Hero({ s }: { s: ReentrySnapshot }) {
   const closer = s.signal === "WAIT" && ["DEVELOPING", "MEANINGFUL", "BROAD"].includes(s.internal_reset);
+  const displaySignal = s.signal === "WAIT" ? "WAIT FOR NEW ENTRY" : s.signal;
   return (
     <section className="hero card">
       <div className="eyebrow-row">
@@ -54,8 +57,8 @@ function Hero({ s }: { s: ReentrySnapshot }) {
       </div>
       <div className="hero-grid">
         <div>
-          <div className={`signal ${stateClass(s.signal)}`}>{s.signal}</div>
-          <div className="signal-subline">{closer ? "Getting closer, but waiting still has value." : s.signal_interpretation}</div>
+          <div className={`signal ${stateClass(s.signal)}`}>{displaySignal}</div>
+          <div className="signal-subline">{closer ? "A prior entry already occurred. Wait for a new setup before deploying additional cash." : s.signal_interpretation}</div>
         </div>
         <div className="decision-summary">
           <span className="summary-label">BOTTOM LINE</span>
@@ -67,6 +70,27 @@ function Hero({ s }: { s: ReentrySnapshot }) {
           </div>
         </div>
       </div>
+    </section>
+  );
+}
+
+function EpisodeSummary({ episode, official }: { episode: ReentryEpisode | null; official: ReentrySnapshot }) {
+  if (!episode) return null;
+  return (
+    <section className="card section-card action-card">
+      <div className="section-heading">
+        <div><span className="kicker">LAST RE-ENTRY EPISODE</span><h2>{episode.episode_start}</h2></div>
+        <StatusPill>{episode.active ? "ACTIVE" : "COMPLETED"}</StatusPill>
+      </div>
+      <p className="section-intro">
+        This was one continuous re-entry opportunity, not a new entry every day. The signal first fired on {episode.episode_start} and remained favorable through {episode.favorable_through}.
+        {official.signal === "WAIT" ? " Today’s WAIT applies only to a new/additional deployment." : ""}
+      </p>
+      <div className="vehicle-strip">
+        <div className="vehicle-primary"><div><span>S&P 500</span><b>SPY</b></div><small>Close when episode first fired</small><strong>${episode.entry_closes.SPY.toFixed(2)}</strong><em>{episode.episode_start}</em></div>
+        <div className="vehicle-primary"><div><span>Nasdaq 100</span><b>QQQ</b></div><small>Close when episode first fired</small><strong>${episode.entry_closes.QQQ.toFixed(2)}</strong><em>{episode.episode_start}</em></div>
+      </div>
+      <div className="notice"><CircleCheck size={16} /> Last favorable close: <b>{episode.favorable_through}</b>{episode.ended_on ? <> · Episode ended when the official signal changed on <b>{episode.ended_on}</b>.</> : null}</div>
     </section>
   );
 }
@@ -195,7 +219,7 @@ function Historical({ s }: { s: ReentrySnapshot }) {
 }
 
 export default async function Home() {
-  const [snapshot, intraday] = await Promise.all([getLatestSnapshot(), getIntradaySnapshot()]);
+  const [snapshot, intraday, episode] = await Promise.all([getLatestSnapshot(), getIntradaySnapshot(), getLatestEpisode()]);
   if (!snapshot) {
     return <main className="shell"><section className="card data-blocked"><CircleAlert /> <div><b>OFFICIAL FEED UNAVAILABLE</b><p>No fallback decision is shown when the canonical close snapshot cannot be loaded.</p></div></section></main>;
   }
@@ -206,6 +230,7 @@ export default async function Home() {
     <header className="topbar"><div><span className="brand">RE-ENTRY</span><span className="tagline">Know when waiting stops helping.</span></div><div className="top-status">{fresh ? <><span className="live-dot" /> Official close feed</> : "DATA INCOMPLETE"}</div></header>
     {!fresh ? <section className="card data-blocked"><CircleAlert /> <div><b>DATA INCOMPLETE</b><p>The current decision is suppressed until every required input resolves to the same completed market session.</p></div></section> : <>
       <Hero s={s} />
+      <EpisodeSummary episode={episode} official={s} />
       <IntradayMonitor live={intraday} official={s} />
       <VehicleCard s={s} />
       <WhyNow s={s} />
