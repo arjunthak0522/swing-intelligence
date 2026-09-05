@@ -67,9 +67,10 @@ jobs:
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/reentry_subsector_validation.py
-      - name: Validate subsector decision contribution
+      - name: Validate rejected subsector decision candidate
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+          REENTRY_RESEARCH_SUBSECTOR_CANDIDATE: '1'
         run: python tools/reentry_subsector_decision_validation.py
       - name: Build unified RE-ENTRY research snapshot
         env:
