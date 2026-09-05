@@ -6,7 +6,6 @@ import {
   type IntradaySnapshot,
   type ReentrySnapshot,
 } from "../lib/reentry";
-import { sampleSnapshot } from "../lib/sampleSnapshot";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +35,7 @@ function StatusPill({ children }: { children: React.ReactNode }) {
   return <span className="pill">{children}</span>;
 }
 
-function Hero({ s, usingPreview }: { s: ReentrySnapshot; usingPreview: boolean }) {
+function Hero({ s }: { s: ReentrySnapshot }) {
   const closer = s.signal === "WAIT" && ["DEVELOPING", "MEANINGFUL", "BROAD"].includes(s.internal_reset);
   return (
     <section className="hero card">
@@ -59,7 +58,6 @@ function Hero({ s, usingPreview }: { s: ReentrySnapshot; usingPreview: boolean }
           </div>
         </div>
       </div>
-      {usingPreview && <div className="preview-note">Canonical close feed is not available in this build. Showing the validated Sep. 4 fallback only.</div>}
     </section>
   );
 }
@@ -68,24 +66,36 @@ function IntradayMonitor({ live, official }: { live: IntradaySnapshot | null; of
   const spy = live?.quotes?.SPY;
   const qqq = live?.quotes?.QQQ;
   const vix = live?.quotes?.["^VIX"];
-  const generated = live?.generated_at ? new Date(live.generated_at).toLocaleString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit", timeZoneName: "short" }) : null;
+  const regularSession = spy?.market_state === "REGULAR";
+  const lastBar = spy?.timestamp ? new Date(spy.timestamp) : null;
+  const barLabel = lastBar
+    ? lastBar.toLocaleString("en-US", { timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" })
+    : "latest available bar";
+  const periodLabel = regularSession ? "today" : "last session";
+  const statusLabel = live ? (regularSession ? live.status : "MARKET CLOSED") : "UNAVAILABLE";
+
   return (
     <section className="card section-card live-card">
       <div className="section-heading">
-        <div><span className="kicker">INTRADAY · PROVISIONAL</span><h2>Live market monitor</h2></div>
-        <StatusPill>{live ? live.status : "UNAVAILABLE"}</StatusPill>
+        <div><span className="kicker">INTRADAY · PROVISIONAL</span><h2>{regularSession ? "Live market monitor" : "Latest intraday session"}</h2></div>
+        <StatusPill>{statusLabel}</StatusPill>
       </div>
-      <p className="section-intro">This layer updates from intraday market bars and shows how today is developing. It does not replace the official {official.as_of} close signal.</p>
+      <p className="section-intro">
+        {regularSession
+          ? "This layer updates from 5-minute market bars and shows how the current session is developing."
+          : "The market is closed, so this panel shows the latest completed intraday session rather than implying prices are moving now."}
+        {` It does not replace the official ${official.as_of} close signal.`}
+      </p>
       {live ? <>
         <div className="live-grid">
-          <div className="live-stat"><small>SPY today</small><strong>{pct(spy?.change_pct, 2)}</strong><span>{spy?.price?.toFixed(2) ?? "-"}</span></div>
-          <div className="live-stat"><small>QQQ today</small><strong>{pct(qqq?.change_pct, 2)}</strong><span>{qqq?.price?.toFixed(2) ?? "-"}</span></div>
-          <div className="live-stat"><small>VIX today</small><strong>{pct(vix?.change_pct, 2)}</strong><span>{vix?.price?.toFixed(2) ?? "-"}</span></div>
+          <div className="live-stat"><small>SPY {periodLabel}</small><strong>{pct(spy?.change_pct, 2)}</strong><span>{spy?.price?.toFixed(2) ?? "-"}</span></div>
+          <div className="live-stat"><small>QQQ {periodLabel}</small><strong>{pct(qqq?.change_pct, 2)}</strong><span>{qqq?.price?.toFixed(2) ?? "-"}</span></div>
+          <div className="live-stat"><small>VIX {periodLabel}</small><strong>{pct(vix?.change_pct, 2)}</strong><span>{vix?.price?.toFixed(2) ?? "-"}</span></div>
           <div className="live-stat"><small>Sectors positive</small><strong>{pct(live.summary.sectors_positive_share, 0)}</strong><span>11 tracked</span></div>
           <div className="live-stat"><small>Subsectors positive</small><strong>{pct(live.summary.subsectors_positive_share, 0)}</strong><span>30+ tracked</span></div>
           <div className="live-stat"><small>Factors positive</small><strong>{pct(live.summary.factors_positive_share, 0)}</strong><span>8 tracked</span></div>
         </div>
-        <div className="live-foot"><Radio size={14} /> Updated {generated || "recently"} · {live.summary.tracked_quotes}/{live.summary.expected_quotes} quotes available · official signal remains <b>{official.signal}</b> until the close engine recalculates.</div>
+        <div className="live-foot"><Radio size={14} /> Latest bar {barLabel} · {live.summary.tracked_quotes}/{live.summary.expected_quotes} quotes available · official signal remains <b>{official.signal}</b> until the close engine recalculates.</div>
       </> : <div className="notice"><CircleAlert size={16} /> Intraday feed is temporarily unavailable. The official completed-close signal remains authoritative.</div>}
     </section>
   );
@@ -158,14 +168,16 @@ function Historical({ s }: { s: ReentrySnapshot }) {
 
 export default async function Home() {
   const [snapshot, intraday] = await Promise.all([getLatestSnapshot(), getIntradaySnapshot()]);
-  const usingPreview = !snapshot;
-  const s = snapshot || sampleSnapshot;
-  const fresh = s.data_freshness?.same_day_complete !== false;
+  if (!snapshot) {
+    return <main className="shell"><section className="card data-blocked"><CircleAlert /> <div><b>OFFICIAL FEED UNAVAILABLE</b><p>No fallback decision is shown when the canonical close snapshot cannot be loaded.</p></div></section></main>;
+  }
+  const s = snapshot;
+  const fresh = s.data_freshness?.same_day_complete === true;
 
   return <main className="shell">
     <header className="topbar"><div><span className="brand">RE-ENTRY</span><span className="tagline">Know when waiting stops helping.</span></div><div className="top-status">{fresh ? <><span className="live-dot" /> Official close feed</> : "DATA INCOMPLETE"}</div></header>
     {!fresh ? <section className="card data-blocked"><CircleAlert /> <div><b>DATA INCOMPLETE</b><p>The current decision is suppressed until every required input resolves to the same completed market session.</p></div></section> : <>
-      <Hero s={s} usingPreview={usingPreview} />
+      <Hero s={s} />
       <IntradayMonitor live={intraday} official={s} />
       <VehicleCard s={s} />
       <WhyNow s={s} />
