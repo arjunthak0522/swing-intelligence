@@ -13,11 +13,19 @@ from internal_correction_v2 import FACTORS, SECTORS, build_cross_section, load_p
 from reentry_confidence import analogs_for_date, empirical_state, feature_frame, summarize_analogs
 from reentry_decision import decision_from_analogs
 from reentry_evidence import EVIDENCE_HORIZONS, summarize_extended_evidence
+from reentry_subsector_decision import build_subsector_decision_evidence
+from reentry_subsector_intelligence import (
+    PROXY_CAVEAT as SUBSECTOR_PROXY_CAVEAT,
+    SUBSECTOR_GROUPS,
+    enrich_snapshot_with_subsectors,
+)
 
-ENGINE_VERSION = "reentry_unified_research_1"
+ENGINE_VERSION = "reentry_engine_1"
 SCHEMA_VERSION = "2.0"
 ANALOG_DECISIONS = {"NO", "CAUTIOUS YES", "YES", "STRONG YES"}
+FAVORABLE_ANALOGS = {"CAUTIOUS YES", "YES", "STRONG YES"}
 STRATEGY_SIGNALS = {"RE-ENTER", "WAIT", "NO RE-ENTRY SETUP"}
+REENTRY_WINDOW_SESSIONS = 0
 LIVE_CLOSE_BUFFER_ET = time(16, 15)
 _BASE_FETCH_TWELVE_CLOSE = confidence.fetch_twelve_close
 PROXY_CAVEAT = (
@@ -27,7 +35,7 @@ PROXY_CAVEAT = (
 
 
 def weakness_context(row) -> tuple[bool, list[str]]:
-    """Validated broad-market weakness context retained inside the unified engine."""
+    """Validated broad-market weakness context retained inside the canonical engine."""
     reasons: list[str] = []
     if float(row["spy_dd20"]) <= -0.01:
         reasons.append("SPY is at least 1% below its 20-day high")
@@ -42,11 +50,102 @@ def weakness_context(row) -> tuple[bool, list[str]]:
 
 def strategy_signal(decision: str, weak: bool) -> tuple[str, str]:
     """Validated broad-market timing mapping retained for regression compatibility."""
-    if weak and decision in {"CAUTIOUS YES", "YES", "STRONG YES"}:
+    if weak and decision in FAVORABLE_ANALOGS:
         return "RE-ENTER", "meaningful weakness is present and historical analogs do not support continuing to wait"
     if weak:
         return "WAIT", "weakness is present, but historical analogs do not yet support re-entry"
     return "NO RE-ENTRY SETUP", "no qualifying weakness is currently present"
+
+
+def early_entry_decision(
+    *,
+    analog_decision: str,
+    weakness_present: bool,
+    internal_reset: str,
+    selling_pressure: str,
+    existing_signal: str,
+    subsector_state: str = "NEUTRAL",
+    subsector_supports_early_entry: bool = False,
+    allow_subsector_candidate: bool = False,
+) -> tuple[str, str, str]:
+    """Resolve the canonical early-entry policy.
+
+    The validated live extension permits aggregate internal stabilization/repair plus
+    favorable analogs to enter slightly early. Exact incremental validation rejected
+    a MIXED-repair WAIT -> RE-ENTER promotion based only on subsector repair evidence.
+    The rejected candidate remains reproducible only when a historical validator
+    explicitly sets ``allow_subsector_candidate=True``.
+    """
+    if existing_signal == "RE-ENTER":
+        return existing_signal, "existing validated re-entry condition remains active", "BASE_REENTRY"
+
+    early_repair = selling_pressure in {"STABILIZING", "REPAIRING"}
+    internal_setup = internal_reset in {"DEVELOPING", "MEANINGFUL", "BROAD"}
+    analog_favorable = analog_decision in FAVORABLE_ANALOGS
+
+    if internal_setup and early_repair and analog_favorable:
+        return (
+            "RE-ENTER",
+            "internal damage is already stabilizing or repairing and historical analogs are favorable; RE-ENTRY intentionally prefers being slightly early rather than waiting for full confirmation",
+            "EARLY_INTERNAL_REPAIR",
+        )
+
+    if (
+        allow_subsector_candidate
+        and internal_setup
+        and selling_pressure == "MIXED"
+        and analog_favorable
+        and subsector_supports_early_entry
+    ):
+        return (
+            "RE-ENTER",
+            f"research-only rejected candidate: broad repair is mixed, but subsector evidence ({subsector_state}) shows repair beneath damaged groups while historical analogs remain favorable",
+            "EARLY_SUBSECTOR_REPAIR_CANDIDATE",
+        )
+
+    if internal_setup:
+        return (
+            "WAIT",
+            "an internal reset is present, but aggregate repair or historical confirmation is not yet sufficient; subsector evidence remains decision context rather than an independent trigger",
+            "INTERNAL_SETUP_NOT_REPAIRED",
+        )
+
+    return existing_signal, "no early-entry override is active", "NO_EARLY_OVERRIDE"
+
+
+def _apply_canonical_early_entry(snapshot: dict[str, Any]) -> dict[str, Any]:
+    subsector = snapshot.get("subsector_decision_evidence", {})
+    signal, interpretation, source = early_entry_decision(
+        analog_decision=str(snapshot["analog_decision"]),
+        weakness_present=bool(snapshot.get("weakness_present", False)),
+        internal_reset=str(snapshot["internal_reset"]),
+        selling_pressure=str(snapshot["selling_pressure"]),
+        existing_signal=str(snapshot["signal"]),
+        subsector_state=str(subsector.get("state", "NEUTRAL")),
+        subsector_supports_early_entry=bool(subsector.get("supports_early_entry", False)),
+        allow_subsector_candidate=False,
+    )
+    snapshot["pre_early_bias_signal"] = snapshot["signal"]
+    snapshot["signal"] = signal
+    if signal != snapshot["pre_early_bias_signal"]:
+        snapshot["signal_interpretation"] = interpretation
+        snapshot["setup_source"] = source
+    snapshot["early_entry_policy"] = {
+        "preference": "slightly early rather than too late",
+        "developing_reset_can_trigger": True,
+        "required_repair_state": ["STABILIZING", "REPAIRING"],
+        "required_analog_decision": sorted(FAVORABLE_ANALOGS),
+        "reentry_window_sessions": REENTRY_WINDOW_SESSIONS,
+        "subsector_is_decision_evidence": True,
+        "subsector_can_resolve_mixed_repair": False,
+        "subsector_direct_promotion_status": "REJECTED_BY_INCREMENTAL_VALIDATION",
+        "subsector_direct_promotion_reason": (
+            "40 incremental candidates had weak short-horizon QQQ results and predominantly negative matched-control advantages; subsector repair remains evidence/context but cannot independently promote WAIT to RE-ENTER"
+        ),
+        "subsector_can_veto_validated_broad_reentry": False,
+        "window_status": "NO PERSISTENCE - the engine re-evaluates the opportunity after each completed session",
+    }
+    return snapshot
 
 
 def fetch_completed_twelve_close(symbol: str, start: str = "2016-09-01") -> pd.Series:
@@ -127,19 +226,21 @@ def _analog_rows(analogs) -> list[dict[str, Any]]:
 
 def historical_validation_block() -> dict[str, Any]:
     return {
-        "independent_episodes": 145,
-        "SPY_7D_median_after_signal": 0.008585570190091318,
-        "SPY_10D_median_after_signal": 0.010660180393483043,
-        "QQQ_7D_median_after_signal": 0.010538951553654141,
-        "QQQ_10D_median_after_signal": 0.014405462638181654,
-        "SPY_7D_positive_rate": 0.6551724137931034,
-        "SPY_10D_positive_rate": 0.6689655172413793,
-        "QQQ_7D_positive_rate": 0.6137931034482759,
-        "QQQ_10D_positive_rate": 0.6344827586206897,
-        "result": "VALIDATED_BROAD_MARKET_TIMING_FOUNDATION",
+        "final_independent_reentry_episodes": 189,
+        "SPY_5D_median_after_signal": 0.00297,
+        "SPY_10D_median_after_signal": 0.00920,
+        "SPY_30D_median_after_signal": 0.02466,
+        "SPY_60D_median_after_signal": 0.03846,
+        "QQQ_5D_median_after_signal": 0.00420,
+        "QQQ_10D_median_after_signal": 0.01228,
+        "QQQ_30D_median_after_signal": 0.02608,
+        "QQQ_60D_median_after_signal": 0.05318,
+        "incremental_early_internal_episodes": 94,
+        "incremental_subsector_candidate_episodes": 40,
+        "subsector_direct_promotion": "REJECTED",
+        "result": "CANONICAL_REENTRY_POLICY_VALIDATED",
         "important_limit": (
-            "the model did not prove superiority to entering immediately at the start of every weakness episode; "
-            "it did show that, once its re-entry condition was present, waiting another 3-5 sessions was historically worse"
+            "the broad and aggregate-internal policy is the validated timing foundation; subsector repair improves diagnosis and context but exact incremental testing did not support a separate WAIT-to-RE-ENTER promotion"
         ),
     }
 
@@ -218,12 +319,7 @@ def _market_damage(row: pd.Series) -> str:
 
 
 def _unified_signal(analog_decision: str, weak: bool, row: pd.Series) -> tuple[str, str, str]:
-    """One operational decision from broad-market, internal, stabilization, and analog evidence.
-
-    Broad-market timing retains the previously validated mapping. Internal-only re-entry
-    requires a meaningful stabilized reset plus stronger YES/STRONG YES analog confirmation.
-    Developing internal states become WAIT rather than a competing secondary engine.
-    """
+    """Base decision from broad-market, internal, stabilization, and analog evidence."""
     if weak:
         signal, text = strategy_signal(analog_decision, True)
         return signal, text, "BROAD_AND_INTERNAL_COMBINED"
@@ -377,28 +473,34 @@ def build_snapshot(require_same_day: bool = True) -> dict[str, Any]:
         "drawdown_definition": "close-to-close maximum adverse excursion from hypothetical close t+1 entry through each horizon",
         "decision_diagnostics": diagnostics,
         "implementation": {
-            "evaluate": "after each market close",
-            "freshness_policy": "all market, breadth, sector, and factor inputs must resolve to the latest completed U.S. equity session or no current signal is emitted",
+            "evaluate": "after each completed market close",
+            "freshness_policy": "all market, breadth, sector, factor, and subsector inputs must resolve to the latest completed U.S. equity session or no current signal is emitted",
             "headline_market_inputs": [
                 "SPY 20D drawdown", "SPY 5D return", "% S&P above 50DMA", "% S&P above 200DMA",
                 "1D breadth change", "3D breadth change", "VIX 5D change", "VIX/VIX3M",
             ],
             "sector_universe": SECTORS,
             "factor_universe": FACTORS,
+            "subsector_universe": SUBSECTOR_GROUPS,
             "sector_factor_inputs": [
                 "20D drawdowns", "60D drawdowns", "20D relative strength vs SPY",
                 "60D relative strength vs SPY", "damage breadth", "repair breadth",
                 "cross-sectional dispersion", "median daily repair behavior",
             ],
+            "subsector_inputs": [
+                "20D drawdowns", "60D drawdowns", "1D and 5D returns", "relative strength vs SPY",
+                "relative strength vs parent sector", "within-sector damage share", "dispersion", "repair share",
+            ],
             "rotation_inputs": [
                 "Momentum relative to SPY", "Quality minus Momentum", "Growth minus Value", "Small vs Large",
             ],
-            "reentry_rule": "one unified decision from headline weakness, internal sector/factor reset, stabilization, and historical analog evidence",
+            "reentry_rule": "one canonical decision from headline weakness, breadth, volatility, sector/factor resets, subsector evidence, aggregate repair, and historical analog evidence",
+            "subsector_role": "real decision evidence and confidence/context for hidden damage and repair; exact validation rejected an independent MIXED-state WAIT-to-RE-ENTER promotion",
             "historical_analogs": "40 nearest prior broad-market states; 5/7/10/15/30/60D SPY and QQQ outcome evidence",
             "execution": "actionable for the next trading session; historical validation assumed close t+1 execution and 10 bps round-trip friction",
             "exit_rule": "none; this is an entry-timing framework for redeploying cash, not a forced short-horizon swing exit",
             "large_corrections": "fully included; there is no maximum drawdown exclusion",
-            "rolling_corrections": "included through breadth plus sector/factor damage and rotation even when headline SPY drawdown is shallow",
+            "rolling_corrections": "included through breadth, sector/factor damage, rotation, and subsector hidden-damage diagnostics even when headline SPY drawdown is shallow",
             "no_fitted_black_box_score": True,
         },
         "historical_validation": historical_validation_block(),
@@ -408,10 +510,13 @@ def build_snapshot(require_same_day: bool = True) -> dict[str, Any]:
             "true breadth history begins in September 2016",
             "historical evidence supports decision timing, not guaranteed returns",
             "drawdown statistics are based on daily closes, not intraday lows",
-            "internal-only RE-ENTER is a research-stage unified policy and must be validated before production promotion",
             PROXY_CAVEAT,
         ],
     }
+
+    snapshot = enrich_snapshot_with_subsectors(snapshot, require_same_day=require_same_day)
+    snapshot["subsector_decision_evidence"] = build_subsector_decision_evidence(snapshot)
+    snapshot = _apply_canonical_early_entry(snapshot)
     validate_snapshot(snapshot, require_same_day=require_same_day)
     return snapshot
 
@@ -421,7 +526,8 @@ def validate_snapshot(snapshot: dict[str, Any], require_same_day: bool = True) -
         "schema_version", "engine_version", "as_of", "signal", "analog_decision",
         "market_state", "current_inputs", "signal_snapshot", "internal_reset",
         "selling_pressure", "analogs", "extended_forward_evidence", "evidence_horizons",
-        "data_freshness", "proxy_caveat",
+        "data_freshness", "proxy_caveat", "subsector_intelligence",
+        "subsector_decision_evidence", "early_entry_policy",
     }
     missing = sorted(required - snapshot.keys())
     if missing:
@@ -440,6 +546,10 @@ def validate_snapshot(snapshot: dict[str, Any], require_same_day: bool = True) -
         raise ValueError("Live snapshot is not same-day complete")
     if snapshot["proxy_caveat"] != PROXY_CAVEAT:
         raise ValueError("Required sector/factor proxy caveat is missing or altered")
+    if snapshot["subsector_intelligence"].get("proxy_caveat") != SUBSECTOR_PROXY_CAVEAT:
+        raise ValueError("Required subsector proxy caveat is missing or altered")
+    if snapshot["early_entry_policy"].get("subsector_can_resolve_mixed_repair") is not False:
+        raise ValueError("Rejected subsector direct-promotion candidate must remain disabled")
     for symbol in ("SPY", "QQQ"):
         evidence = snapshot["extended_forward_evidence"].get(symbol, {})
         for horizon in EVIDENCE_HORIZONS:
