@@ -4,10 +4,11 @@ import json
 from pathlib import Path
 
 from reentry_engine import build_snapshot
+from reentry_insights import add_market_insights
 
 
 def main() -> None:
-    snapshot = build_snapshot(require_same_day=False)
+    snapshot = add_market_insights(build_snapshot(require_same_day=False))
     snapshot["research_only"] = True
     out = Path("artifacts/reentry")
     out.mkdir(parents=True, exist_ok=True)
