@@ -99,6 +99,19 @@ export interface ReentrySnapshot {
   forward_analog_outcomes?: Record<string, unknown>;
 }
 
+export interface ReentryEpisode {
+  episode_start: string;
+  favorable_through: string;
+  active: boolean;
+  ended_on?: string | null;
+  entry_closes: {
+    SPY: number;
+    QQQ: number;
+  };
+  definition?: string;
+  price_definition?: string;
+}
+
 export interface IntradayQuote {
   symbol: string;
   price: number | null;
@@ -136,6 +149,22 @@ function parsePythonJson(raw: string): ReentrySnapshot {
   return JSON.parse(strictJson) as ReentrySnapshot;
 }
 
+async function readPublicReentryFile<T>(filename: string): Promise<T | null> {
+  const candidates = [
+    path.join(process.cwd(), "public", "reentry", filename),
+    path.join(process.cwd(), "web", "public", "reentry", filename),
+  ];
+  for (const file of candidates) {
+    try {
+      const raw = await readFile(file, "utf-8");
+      return JSON.parse(raw) as T;
+    } catch {
+      // Try the next supported Vercel root layout.
+    }
+  }
+  return null;
+}
+
 export async function getLatestSnapshot(): Promise<ReentrySnapshot | null> {
   const candidates = [
     path.join(process.cwd(), "public", "reentry", "latest.json"),
@@ -150,6 +179,10 @@ export async function getLatestSnapshot(): Promise<ReentrySnapshot | null> {
     }
   }
   return null;
+}
+
+export async function getLatestEpisode(): Promise<ReentryEpisode | null> {
+  return readPublicReentryFile<ReentryEpisode>("episode.json");
 }
 
 const INTRADAY_URL = "https://gexrdfzxmlnaawzmtlrk.supabase.co/functions/v1/reentry-intraday";
