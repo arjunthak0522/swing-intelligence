@@ -1653,7 +1653,7 @@
         "members": {
           "NETL": {
             "drawdown_20d": -0.01818436011941882,
-            "drawdown_60d": -0.06505020259911676,
+            "drawdown_60d": -0.06505026623547716,
             "label": "Net Lease REITs",
             "parent_sector": "XLRE",
             "relative_strength_20d_vs_parent": 0.004097735082147169,
@@ -2007,7 +2007,7 @@
       },
       "NETL": {
         "drawdown_20d": -0.01818436011941882,
-        "drawdown_60d": -0.06505020259911676,
+        "drawdown_60d": -0.06505026623547716,
         "label": "Net Lease REITs",
         "parent_sector": "XLRE",
         "relative_strength_20d_vs_parent": 0.004097735082147169,
