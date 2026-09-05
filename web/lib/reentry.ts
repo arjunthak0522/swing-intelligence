@@ -16,12 +16,14 @@ export interface SubsectorProxy {
   repairing: boolean;
 }
 
-export interface InsightItem {
-  title: string;
-  symbol?: string;
-  state?: string;
-  detail: string;
-  why_it_matters?: string;
+export interface InsightKeyGroup {
+  label: string;
+  symbol: string;
+  parent_sector: string;
+  state: string;
+  stance: string;
+  interpretation: string;
+  why_it_matters: string;
 }
 
 export interface ReentrySnapshot {
@@ -75,11 +77,13 @@ export interface ReentrySnapshot {
   };
   market_insights?: {
     headline?: string;
-    supporting_reentry?: InsightItem[];
-    holding_back?: InsightItem[];
-    sectors?: InsightItem[];
-    subsectors?: InsightItem[];
-    factors?: InsightItem[];
+    supporting_reentry?: string[];
+    holding_back?: string[];
+    key_groups?: InsightKeyGroup[];
+    signal?: string;
+    internal_reset?: string;
+    selling_pressure?: string;
+    analog_decision?: string;
   };
   historical_validation: {
     final_independent_reentry_episodes: number;
@@ -128,29 +132,24 @@ export const pct = (value?: number | null, digits = 1) =>
 function parsePythonJson(raw: string): ReentrySnapshot {
   const strictJson = raw
     .replace(/\bNaN\b/g, "null")
-    .replace(/\bInfinity\b/g, "null")
-    .replace(/-Infinity\b/g, "null");
+    .replace(/-?\bInfinity\b/g, "null");
   return JSON.parse(strictJson) as ReentrySnapshot;
 }
 
 export async function getLatestSnapshot(): Promise<ReentrySnapshot | null> {
-  try {
-    const candidates = [
-      path.join(process.cwd(), "public", "reentry", "latest.json"),
-      path.join(process.cwd(), "web", "public", "reentry", "latest.json"),
-    ];
-    for (const file of candidates) {
-      try {
-        const raw = await readFile(file, "utf-8");
-        return parsePythonJson(raw);
-      } catch {
-        // Try the next root layout.
-      }
+  const candidates = [
+    path.join(process.cwd(), "public", "reentry", "latest.json"),
+    path.join(process.cwd(), "web", "public", "reentry", "latest.json"),
+  ];
+  for (const file of candidates) {
+    try {
+      const raw = await readFile(file, "utf-8");
+      return parsePythonJson(raw);
+    } catch {
+      // Try the next supported Vercel root layout.
     }
-    return null;
-  } catch {
-    return null;
   }
+  return null;
 }
 
 const INTRADAY_URL = "https://gexrdfzxmlnaawzmtlrk.supabase.co/functions/v1/reentry-intraday";
