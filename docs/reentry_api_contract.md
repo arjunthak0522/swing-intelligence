@@ -18,7 +18,10 @@ The UI consumes these engine-owned fields directly:
 - `factor_leadership_state`
 - `subsector_decision_evidence`
 - `market_commentary`
+- `market_insights`
 - `data_freshness`
+
+`market_insights` is a deterministic explanation layer built only from canonical engine evidence. It provides a retail-readable headline, what supports re-entry, what is holding it back, and ranked sector/subsector observations with state, stance, metrics, interpretation, and `why_it_matters`. It does not add signals, change thresholds, override analog evidence, or alter the canonical decision.
 
 Subsector evidence is part of the canonical snapshot but may not independently promote `WAIT` to `RE-ENTER`. The rejected subsector-only promotion remains research-reproducible only and must never be implemented client-side.
 
