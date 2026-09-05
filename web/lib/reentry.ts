@@ -1,4 +1,5 @@
-import officialSnapshot from "../public/reentry/latest.json";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 
 export type Signal = "RE-ENTER" | "WAIT" | "NO RE-ENTRY SETUP";
 
@@ -124,8 +125,32 @@ export const pct = (value?: number | null, digits = 1) =>
     ? `${value >= 0 ? "+" : ""}${(value * 100).toFixed(digits)}%`
     : "-";
 
+function parsePythonJson(raw: string): ReentrySnapshot {
+  const strictJson = raw
+    .replace(/\bNaN\b/g, "null")
+    .replace(/\bInfinity\b/g, "null")
+    .replace(/-Infinity\b/g, "null");
+  return JSON.parse(strictJson) as ReentrySnapshot;
+}
+
 export async function getLatestSnapshot(): Promise<ReentrySnapshot | null> {
-  return officialSnapshot as unknown as ReentrySnapshot;
+  try {
+    const candidates = [
+      path.join(process.cwd(), "public", "reentry", "latest.json"),
+      path.join(process.cwd(), "web", "public", "reentry", "latest.json"),
+    ];
+    for (const file of candidates) {
+      try {
+        const raw = await readFile(file, "utf-8");
+        return parsePythonJson(raw);
+      } catch {
+        // Try the next root layout.
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 const INTRADAY_URL = "https://gexrdfzxmlnaawzmtlrk.supabase.co/functions/v1/reentry-intraday";
