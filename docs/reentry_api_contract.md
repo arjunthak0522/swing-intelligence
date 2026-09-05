@@ -1,6 +1,26 @@
-# RE-ENTRY V1 API contract
+# RE-ENTRY canonical API contract
 
-The UI must treat the engine snapshot as authoritative. It must never recompute strategy logic client-side.
+The UI must treat the canonical engine snapshot as authoritative. It must never recompute strategy logic client-side.
+
+The only decision-producing engine is `tools/reentry_engine.py` on the active research branch until an explicit production promotion is approved. Historical `reentry_v1.0` artifacts remain frozen reference evidence and are not an alternate live engine.
+
+## Canonical decision outputs
+
+The UI consumes these engine-owned fields directly:
+
+- `signal`: `RE-ENTER`, `WAIT`, or `NO RE-ENTRY SETUP`
+- `signal_interpretation`
+- `setup_source`
+- `market_damage`
+- `internal_reset`
+- `selling_pressure`
+- `analog_decision`
+- `factor_leadership_state`
+- `subsector_decision_evidence`
+- `market_commentary`
+- `data_freshness`
+
+Subsector evidence is part of the canonical snapshot but may not independently promote `WAIT` to `RE-ENTER`. The rejected subsector-only promotion remains research-reproducible only and must never be implemented client-side.
 
 ## Public read API
 
@@ -14,19 +34,19 @@ Supported resources:
 - `?resource=analogs&date=YYYY-MM-DD` -> 40 ranked historical analogs
 - `?resource=realized&date=YYYY-MM-DD` -> matured realized SPY/QQQ outcomes
 
-The UI should show `DATA INCOMPLETE` and suppress the current decision whenever `data_freshness.same_day_complete` is not true.
+The UI must show `DATA INCOMPLETE` and suppress the current decision whenever `data_freshness.same_day_complete` is not true.
 
 ## Secure ingest API
 
 Supabase Edge Function: `reentry-ingest`
 
-Only GitHub Actions OIDC tokens from `arjunthak0522/swing-intelligence`, branch `main`, audience `reentry-supabase` are accepted.
+Production ingest remains disabled for the research branch. When production promotion is explicitly approved, only GitHub Actions OIDC tokens from the approved production branch and audience `reentry-supabase` may write canonical snapshots.
 
 Request body:
 
 ```json
 {
-  "snapshot": { "...": "canonical reentry_v1.0 snapshot" },
+  "snapshot": { "...": "canonical unified RE-ENTRY snapshot" },
   "realized": { "...": "matured realized outcomes for the same as_of date" }
 }
 ```
