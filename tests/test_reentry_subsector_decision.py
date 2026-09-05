@@ -9,7 +9,7 @@ sys.path.insert(0, str(TOOLS))
 from reentry_early_entry_policy import early_entry_decision  # noqa: E402
 
 
-def test_subsector_repair_resolves_mixed_state():
+def test_subsector_repair_is_supporting_evidence_not_live_override():
     signal, _, source = early_entry_decision(
         analog_decision="YES",
         weakness_present=False,
@@ -19,8 +19,23 @@ def test_subsector_repair_resolves_mixed_state():
         subsector_state="HIDDEN_DAMAGE_REPAIRING",
         subsector_supports_early_entry=True,
     )
+    assert signal == "WAIT"
+    assert source == "INTERNAL_SETUP_NOT_REPAIRED"
+
+
+def test_rejected_candidate_remains_reproducible_for_research_only():
+    signal, _, source = early_entry_decision(
+        analog_decision="YES",
+        weakness_present=False,
+        internal_reset="DEVELOPING",
+        selling_pressure="MIXED",
+        existing_signal="WAIT",
+        subsector_state="HIDDEN_DAMAGE_REPAIRING",
+        subsector_supports_early_entry=True,
+        allow_subsector_candidate=True,
+    )
     assert signal == "RE-ENTER"
-    assert source == "EARLY_SUBSECTOR_REPAIR"
+    assert source == "EARLY_SUBSECTOR_REPAIR_CANDIDATE"
 
 
 def test_subsector_damage_without_repair_does_not_trigger():
