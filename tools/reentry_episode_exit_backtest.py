@@ -58,6 +58,19 @@ def build_canonical_signal_history(base: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows).set_index("date")
 
 
+def summarize_episode_set(episodes: list[dict]) -> dict:
+    out: dict = {}
+    for sym in ("SPY", "QQQ"):
+        out[sym] = {
+            "entry_to_exit": summarize([e[f"{sym}_return_to_exit"] for e in episodes]),
+            "max_gain_during_episode": summarize([e[f"{sym}_max_gain_during_episode"] for e in episodes]),
+            "max_adverse_during_episode": summarize([e[f"{sym}_max_adverse_during_episode"] for e in episodes]),
+            **{f"post_exit_{h}d": summarize([e[f"{sym}_post_exit_{h}d"] for e in episodes if e[f"{sym}_post_exit_{h}d"] is not None]) for h in POST_WAIT_HORIZONS},
+        }
+    out["episode_length_sessions"] = summarize([float(e["reenter_sessions"]) for e in episodes])
+    return out
+
+
 def main() -> None:
     frame = feature_frame()
     signals = build_canonical_signal_history(frame)
@@ -74,45 +87,51 @@ def main() -> None:
         while i + 1 < len(idx) and signals.iloc[i + 1]["signal"] == "RE-ENTER":
             i += 1
         last_reenter_i = i
-        wait_i = i + 1 if i + 1 < len(idx) else None
-        if wait_i is None:
+        exit_i = i + 1 if i + 1 < len(idx) else None
+        if exit_i is None:
             break
 
         start_date = idx[start_i]
         last_date = idx[last_reenter_i]
-        wait_date = idx[wait_i]
+        exit_date = idx[exit_i]
+        exit_signal = str(signals.iloc[exit_i]["signal"])
         start_pos = price_pos[start_date]
-        wait_pos = price_pos[wait_date]
+        exit_pos = price_pos[exit_date]
         rec = {
             "start": str(pd.Timestamp(start_date).date()),
             "last_reenter": str(pd.Timestamp(last_date).date()),
-            "first_wait": str(pd.Timestamp(wait_date).date()),
+            "exit_date": str(pd.Timestamp(exit_date).date()),
+            "exit_signal": exit_signal,
             "reenter_sessions": int(last_reenter_i - start_i + 1),
         }
         for sym in ("SPY", "QQQ"):
             entry = float(frame.at[start_date, sym])
-            wait_px = float(frame.at[wait_date, sym])
-            path = frame[sym].iloc[start_pos:wait_pos + 1].astype(float)
+            exit_px = float(frame.at[exit_date, sym])
+            path = frame[sym].iloc[start_pos:exit_pos + 1].astype(float)
             rec[f"{sym}_entry_close"] = entry
-            rec[f"{sym}_first_wait_close"] = wait_px
-            rec[f"{sym}_return_to_first_wait"] = wait_px / entry - 1.0
+            rec[f"{sym}_exit_close"] = exit_px
+            rec[f"{sym}_return_to_exit"] = exit_px / entry - 1.0
             rec[f"{sym}_max_gain_during_episode"] = float(path.max() / entry - 1.0)
             rec[f"{sym}_max_adverse_during_episode"] = float(path.min() / entry - 1.0)
             for h in POST_WAIT_HORIZONS:
-                j = wait_pos + h
-                rec[f"{sym}_post_wait_{h}d"] = float(frame[sym].iloc[j] / wait_px - 1.0) if j < len(frame) else None
+                j = exit_pos + h
+                rec[f"{sym}_post_exit_{h}d"] = float(frame[sym].iloc[j] / exit_px - 1.0) if j < len(frame) else None
         episodes.append(rec)
         i += 1
 
-    out = {"episodes": episodes, "summary": {}}
-    for sym in ("SPY", "QQQ"):
-        out["summary"][sym] = {
-            "entry_to_first_wait": summarize([e[f"{sym}_return_to_first_wait"] for e in episodes]),
-            "max_gain_during_episode": summarize([e[f"{sym}_max_gain_during_episode"] for e in episodes]),
-            "max_adverse_during_episode": summarize([e[f"{sym}_max_adverse_during_episode"] for e in episodes]),
-            **{f"post_wait_{h}d": summarize([e[f"{sym}_post_wait_{h}d"] for e in episodes if e[f"{sym}_post_wait_{h}d"] is not None]) for h in POST_WAIT_HORIZONS},
-        }
-    out["summary"]["episode_length_sessions"] = summarize([float(e["reenter_sessions"]) for e in episodes])
+    wait_episodes = [e for e in episodes if e["exit_signal"] == "WAIT"]
+    no_setup_episodes = [e for e in episodes if e["exit_signal"] == "NO RE-ENTRY SETUP"]
+    out = {
+        "definition": "contiguous RE-ENTER episode measured from first RE-ENTER close to the next non-RE-ENTER close; explicit_wait_subset includes only episodes whose next state is WAIT",
+        "episode_counts": {
+            "all": len(episodes),
+            "explicit_wait": len(wait_episodes),
+            "no_setup": len(no_setup_episodes),
+        },
+        "summary_all_next_non_reenter": summarize_episode_set(episodes),
+        "summary_explicit_wait": summarize_episode_set(wait_episodes),
+        "episodes": episodes,
+    }
 
     p = Path("artifacts/reentry_episode_exit")
     p.mkdir(parents=True, exist_ok=True)
