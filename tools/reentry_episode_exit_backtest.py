@@ -7,7 +7,15 @@ import numpy as np
 import pandas as pd
 
 from reentry_confidence import feature_frame
-from reentry_engine import build_signal_frame
+from reentry_engine import (
+    _build_unified_frame,
+    _selling_pressure,
+    _internal_reset,
+    _unified_signal,
+    early_entry_decision,
+    weakness_context,
+)
+from reentry_walkforward_validation import generate_decisions
 
 POST_WAIT_HORIZONS = (5, 10, 20)
 
@@ -26,13 +34,36 @@ def summarize(values: list[float]) -> dict:
     }
 
 
+def build_canonical_signal_history(base: pd.DataFrame) -> pd.DataFrame:
+    decisions = generate_decisions(base)
+    unified = _build_unified_frame(base, require_same_day=False)
+    common = decisions.index.intersection(unified.index)
+    rows = []
+    for date in common:
+        row = unified.loc[date]
+        analog = str(decisions.at[date, "decision"])
+        weak, _ = weakness_context(row)
+        base_signal, _, _ = _unified_signal(analog, weak, row)
+        signal, _, source = early_entry_decision(
+            analog_decision=analog,
+            weakness_present=weak,
+            internal_reset=_internal_reset(row),
+            selling_pressure=_selling_pressure(row),
+            existing_signal=base_signal,
+            subsector_state="NEUTRAL",
+            subsector_supports_early_entry=False,
+            allow_subsector_candidate=False,
+        )
+        rows.append({"date": date, "signal": signal, "source": source, "analog": analog})
+    return pd.DataFrame(rows).set_index("date")
+
+
 def main() -> None:
     frame = feature_frame()
-    signals = build_signal_frame(frame)
-    if "signal" not in signals.columns:
-        raise SystemExit("build_signal_frame must return a signal column")
-
+    signals = build_canonical_signal_history(frame)
     idx = signals.index
+    price_pos = {d: i for i, d in enumerate(frame.index)}
+
     episodes = []
     i = 0
     while i < len(idx):
@@ -50,6 +81,8 @@ def main() -> None:
         start_date = idx[start_i]
         last_date = idx[last_reenter_i]
         wait_date = idx[wait_i]
+        start_pos = price_pos[start_date]
+        wait_pos = price_pos[wait_date]
         rec = {
             "start": str(pd.Timestamp(start_date).date()),
             "last_reenter": str(pd.Timestamp(last_date).date()),
@@ -59,14 +92,14 @@ def main() -> None:
         for sym in ("SPY", "QQQ"):
             entry = float(frame.at[start_date, sym])
             wait_px = float(frame.at[wait_date, sym])
-            path = frame[sym].iloc[start_i:wait_i + 1].astype(float)
+            path = frame[sym].iloc[start_pos:wait_pos + 1].astype(float)
             rec[f"{sym}_entry_close"] = entry
             rec[f"{sym}_first_wait_close"] = wait_px
             rec[f"{sym}_return_to_first_wait"] = wait_px / entry - 1.0
             rec[f"{sym}_max_gain_during_episode"] = float(path.max() / entry - 1.0)
             rec[f"{sym}_max_adverse_during_episode"] = float(path.min() / entry - 1.0)
             for h in POST_WAIT_HORIZONS:
-                j = wait_i + h
+                j = wait_pos + h
                 rec[f"{sym}_post_wait_{h}d"] = float(frame[sym].iloc[j] / wait_px - 1.0) if j < len(frame) else None
         episodes.append(rec)
         i += 1
