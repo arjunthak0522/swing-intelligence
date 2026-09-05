@@ -1,4 +1,12 @@
-from tools.reentry_early_entry_policy import early_entry_decision
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+TOOLS = Path(__file__).resolve().parents[1] / "tools"
+sys.path.insert(0, str(TOOLS))
+
+from reentry_early_entry_policy import early_entry_decision  # noqa: E402
 
 
 def test_subsector_repair_resolves_mixed_state():
