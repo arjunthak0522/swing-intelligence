@@ -1,0 +1,12 @@
+{
+  "episode_start": "2026-08-28",
+  "favorable_through": "2026-09-03",
+  "active": false,
+  "ended_on": "2026-09-04",
+  "entry_closes": {
+    "SPY": 769.35,
+    "QQQ": 716.43
+  },
+  "definition": "One re-entry episode begins on the first RE-ENTER close after a non-RE-ENTER state. Consecutive RE-ENTER closes extend the same episode rather than creating new entries.",
+  "price_definition": "Regular-session close on the first signal day."
+}
