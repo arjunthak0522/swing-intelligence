@@ -67,11 +67,42 @@ jobs:
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/reentry_subsector_validation.py
-      - name: Validate rejected subsector decision candidate
+      - name: Validate subsector DECISION contribution
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
           REENTRY_RESEARCH_SUBSECTOR_CANDIDATE: '1'
         run: python tools/reentry_subsector_decision_validation.py
+      - name: Validate entry-delay evidence
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('artifacts/internal_correction_v2/subsector_decision_validation.json')
+          d = json.loads(p.read_text())
+          timing = d.get('immediate_vs_wait', {})
+          assert set(timing) == {'SPY', 'QQQ'}
+          for symbol in ('SPY', 'QQQ'):
+              for horizon in ('5', '7', '10', '15', '30', '60'):
+                  row = timing[symbol][horizon]
+                  assert 'immediate' in row
+                  for delay in (1, 2, 3, 5):
+                      assert f'wait_{delay}d' in row
+          print('entry-delay evidence present for SPY/QQQ at 5/7/10/15/30/60D and waits 1/2/3/5')
+          PY
+      - name: Validate subsector robustness evidence
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('artifacts/internal_correction_v2/subsector_decision_validation.json')
+          d = json.loads(p.read_text())
+          assert set(d.get('era_split', {})) == {'2016_2020', '2021_present'}
+          loo = d.get('leave_one_parent_sector_out', {})
+          assert len(loo) == 11 and 'XLK' in loo
+          assert 'neighbor_threshold_robustness' in d and d['neighbor_threshold_robustness']
+          assert 'matched_controls' in d and d['matched_controls'].get('pairs', 0) > 0
+          print('era, matched-control, leave-one-sector-out, XLK-out, and neighboring-definition robustness evidence present')
+          PY
       - name: Build unified RE-ENTRY research snapshot
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
