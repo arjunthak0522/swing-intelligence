@@ -13,7 +13,9 @@ from reentry_engine import (  # noqa: E402
     ENGINE_VERSION,
     EVIDENCE_HORIZONS,
     PROXY_CAVEAT,
+    SUBSECTOR_PROXY_CAVEAT,
     _unified_signal,
+    early_entry_decision,
     strategy_signal,
     validate_snapshot,
     weakness_context,
@@ -74,6 +76,32 @@ def test_unified_internal_only_policy_is_conservative():
     assert _unified_signal("STRONG YES", False, no_setup)[0] == "NO RE-ENTRY SETUP"
 
 
+def test_canonical_early_entry_policy_preserves_validated_bias():
+    signal, _, source = early_entry_decision(
+        analog_decision="YES",
+        weakness_present=False,
+        internal_reset="DEVELOPING",
+        selling_pressure="REPAIRING",
+        existing_signal="WAIT",
+    )
+    assert signal == "RE-ENTER"
+    assert source == "EARLY_INTERNAL_REPAIR"
+
+
+def test_rejected_subsector_candidate_is_off_by_default():
+    signal, _, source = early_entry_decision(
+        analog_decision="YES",
+        weakness_present=False,
+        internal_reset="DEVELOPING",
+        selling_pressure="MIXED",
+        existing_signal="WAIT",
+        subsector_state="HIDDEN_DAMAGE_REPAIRING",
+        subsector_supports_early_entry=True,
+    )
+    assert signal == "WAIT"
+    assert source == "INTERNAL_SETUP_NOT_REPAIRED"
+
+
 def valid_snapshot():
     cell = {
         "n": 40,
@@ -103,6 +131,9 @@ def valid_snapshot():
         "extended_forward_evidence": evidence,
         "evidence_horizons": list(EVIDENCE_HORIZONS),
         "data_freshness": {"same_day_complete": True},
+        "subsector_intelligence": {"proxy_caveat": SUBSECTOR_PROXY_CAVEAT},
+        "subsector_decision_evidence": {"state": "NEUTRAL", "supports_early_entry": False},
+        "early_entry_policy": {"subsector_can_resolve_mixed_repair": False},
     }
 
 
@@ -128,4 +159,18 @@ def test_contract_requires_exact_proxy_caveat():
     snapshot = valid_snapshot()
     snapshot["proxy_caveat"] = "ETF proxies"
     with pytest.raises(ValueError, match="proxy caveat"):
+        validate_snapshot(snapshot, require_same_day=True)
+
+
+def test_contract_requires_subsector_proxy_caveat():
+    snapshot = valid_snapshot()
+    snapshot["subsector_intelligence"]["proxy_caveat"] = "ETF proxies"
+    with pytest.raises(ValueError, match="subsector proxy caveat"):
+        validate_snapshot(snapshot, require_same_day=True)
+
+
+def test_contract_rejects_reenabling_rejected_subsector_promotion():
+    snapshot = valid_snapshot()
+    snapshot["early_entry_policy"]["subsector_can_resolve_mixed_repair"] = True
+    with pytest.raises(ValueError, match="must remain disabled"):
         validate_snapshot(snapshot, require_same_day=True)
