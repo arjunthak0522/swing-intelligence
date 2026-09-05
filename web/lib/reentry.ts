@@ -1,5 +1,4 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
+import officialSnapshot from "../public/reentry/latest.json";
 
 export type Signal = "RE-ENTER" | "WAIT" | "NO RE-ENTRY SETUP";
 
@@ -126,13 +125,7 @@ export const pct = (value?: number | null, digits = 1) =>
     : "-";
 
 export async function getLatestSnapshot(): Promise<ReentrySnapshot | null> {
-  try {
-    const file = path.join(process.cwd(), "public", "reentry", "latest.json");
-    const raw = await readFile(file, "utf-8");
-    return JSON.parse(raw) as ReentrySnapshot;
-  } catch {
-    return null;
-  }
+  return officialSnapshot as unknown as ReentrySnapshot;
 }
 
 const INTRADAY_URL = "https://gexrdfzxmlnaawzmtlrk.supabase.co/functions/v1/reentry-intraday";
