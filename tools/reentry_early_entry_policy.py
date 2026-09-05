@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import os
 from typing import Any
 
 FAVORABLE_ANALOGS = {"CAUTIOUS YES", "YES", "STRONG YES"}
 REENTRY_WINDOW_SESSIONS = 0
+RESEARCH_SUBSECTOR_ENV = "REENTRY_RESEARCH_SUBSECTOR_CANDIDATE"
 
 
 def early_entry_decision(
@@ -15,7 +17,7 @@ def early_entry_decision(
     existing_signal: str,
     subsector_state: str = "NEUTRAL",
     subsector_supports_early_entry: bool = False,
-    allow_subsector_candidate: bool = False,
+    allow_subsector_candidate: bool | None = None,
 ) -> tuple[str, str, str]:
     """Apply RE-ENTRY's intentional early-entry bias.
 
@@ -25,14 +27,16 @@ def early_entry_decision(
     disabled in operational use because exact incremental validation did not show
     sufficient short-horizon or matched-control support.
 
-    `allow_subsector_candidate=True` exists only so the rejected candidate rule can
-    be reproduced by historical research. Daily/live callers must leave it False.
-
-    Existing broad-market RE-ENTER signals are preserved unchanged. RE-ENTER is
-    re-evaluated independently each completed session; persistence remains zero.
+    The rejected subsector-promotion candidate can only be reproduced when callers
+    explicitly pass `allow_subsector_candidate=True` or the dedicated research
+    workflow sets REENTRY_RESEARCH_SUBSECTOR_CANDIDATE=1. Daily/live callers force
+    the candidate off.
     """
     if existing_signal == "RE-ENTER":
         return existing_signal, "existing validated re-entry condition remains active", "BASE_REENTRY"
+
+    if allow_subsector_candidate is None:
+        allow_subsector_candidate = os.getenv(RESEARCH_SUBSECTOR_ENV, "0") == "1"
 
     early_repair = selling_pressure in {"STABILIZING", "REPAIRING"}
     internal_setup = internal_reset in {"DEVELOPING", "MEANINGFUL", "BROAD"}
@@ -45,7 +49,6 @@ def early_entry_decision(
             "EARLY_INTERNAL_REPAIR",
         )
 
-    # Research-only reproduction of the rejected subsector promotion candidate.
     if (
         allow_subsector_candidate
         and internal_setup
