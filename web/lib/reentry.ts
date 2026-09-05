@@ -1,3 +1,6 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+
 export type Signal = "RE-ENTER" | "WAIT" | "NO RE-ENTRY SETUP";
 
 export interface SubsectorProxy {
@@ -31,7 +34,7 @@ export interface ReentrySnapshot {
   selling_pressure: string;
   analog_decision: string;
   factor_leadership_state: string[];
-  data_freshness?: { same_day_complete?: boolean };
+  data_freshness?: { same_day_complete?: boolean; target_session?: string };
   current_inputs: {
     spy_drawdown_20d: number;
     spy_return_5d: number;
@@ -44,6 +47,12 @@ export interface ReentrySnapshot {
   };
   signal_snapshot?: {
     sectors?: Record<string, {
+      drawdown_20d: number;
+      drawdown_60d: number;
+      relative_strength_20d_vs_spy: number;
+      relative_strength_60d_vs_spy: number;
+    }>;
+    factors?: Record<string, {
       drawdown_20d: number;
       drawdown_60d: number;
       relative_strength_20d_vs_spy: number;
@@ -86,19 +95,57 @@ export interface ReentrySnapshot {
   forward_analog_outcomes?: Record<string, unknown>;
 }
 
-export const pct = (value?: number, digits = 1) =>
+export interface IntradayQuote {
+  symbol: string;
+  price: number | null;
+  previous_close: number | null;
+  change_pct: number | null;
+  timestamp: string | null;
+  market_state: string | null;
+}
+
+export interface IntradaySnapshot {
+  generated_at: string;
+  status: "LIVE" | "PARTIAL" | "DEGRADED";
+  official_signal_authoritative: false;
+  interpretation: string;
+  summary: {
+    sectors_positive_share: number | null;
+    subsectors_positive_share: number | null;
+    factors_positive_share: number | null;
+    tracked_quotes: number;
+    expected_quotes: number;
+  };
+  quotes: Record<string, IntradayQuote>;
+  errors: string[];
+}
+
+export const pct = (value?: number | null, digits = 1) =>
   typeof value === "number" && Number.isFinite(value)
     ? `${value >= 0 ? "+" : ""}${(value * 100).toFixed(digits)}%`
     : "-";
 
 export async function getLatestSnapshot(): Promise<ReentrySnapshot | null> {
-  const base = process.env.REENTRY_API_BASE_URL;
-  if (!base) return null;
+  try {
+    const file = path.join(process.cwd(), "public", "reentry", "latest.json");
+    const raw = await readFile(file, "utf-8");
+    return JSON.parse(raw) as ReentrySnapshot;
+  } catch {
+    return null;
+  }
+}
 
-  const response = await fetch(`${base}?resource=latest`, {
-    cache: "no-store",
-    headers: { Accept: "application/json" },
-  });
-  if (!response.ok) throw new Error(`RE-ENTRY API returned ${response.status}`);
-  return response.json();
+const INTRADAY_URL = "https://gexrdfzxmlnaawzmtlrk.supabase.co/functions/v1/reentry-intraday";
+
+export async function getIntradaySnapshot(): Promise<IntradaySnapshot | null> {
+  try {
+    const response = await fetch(INTRADAY_URL, {
+      headers: { Accept: "application/json" },
+      next: { revalidate: 60 },
+    });
+    if (!response.ok) return null;
+    return (await response.json()) as IntradaySnapshot;
+  } catch {
+    return null;
+  }
 }
