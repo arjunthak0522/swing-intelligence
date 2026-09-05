@@ -15,22 +15,21 @@ def early_entry_decision(
     existing_signal: str,
     subsector_state: str = "NEUTRAL",
     subsector_supports_early_entry: bool = False,
+    allow_subsector_candidate: bool = False,
 ) -> tuple[str, str, str]:
-    """Apply the unified engine's intentional early-entry bias.
+    """Apply RE-ENTRY's intentional early-entry bias.
 
-    The policy does not require a perfect bottom. A developing internal reset is
-    enough once repair/stabilization is visible and historical analog evidence is
-    at least cautiously favorable. Subsector repair is now an explicit decision
-    input: when the aggregate selling-pressure state is MIXED, meaningful repair
-    beneath sectors can supply the missing confirmation for an early entry.
+    The validated early-entry extension uses aggregate internal repair/stabilization
+    plus favorable historical analogs. Subsector intelligence remains formal
+    decision evidence, but the tested MIXED-state WAIT -> RE-ENTER override is
+    disabled in operational use because exact incremental validation did not show
+    sufficient short-horizon or matched-control support.
 
-    Existing broad-market RE-ENTER signals are preserved unchanged. Subsector
-    evidence cannot veto a validated broad-market RE-ENTER by itself.
+    `allow_subsector_candidate=True` exists only so the rejected candidate rule can
+    be reproduced by historical research. Daily/live callers must leave it False.
 
-    RE-ENTER is re-evaluated independently each completed session. Persistence was
-    historically tested from 1-5 sessions and rejected because it materially
-    expanded active signal days beyond what is needed once the early-repair gate
-    itself is available.
+    Existing broad-market RE-ENTER signals are preserved unchanged. RE-ENTER is
+    re-evaluated independently each completed session; persistence remains zero.
     """
     if existing_signal == "RE-ENTER":
         return existing_signal, "existing validated re-entry condition remains active", "BASE_REENTRY"
@@ -46,25 +45,24 @@ def early_entry_decision(
             "EARLY_INTERNAL_REPAIR",
         )
 
-    # New role for subsectors: resolve an otherwise ambiguous MIXED repair state.
-    # This is deliberately narrower than allowing subsector evidence to become a
-    # standalone trigger.
+    # Research-only reproduction of the rejected subsector promotion candidate.
     if (
-        internal_setup
+        allow_subsector_candidate
+        and internal_setup
         and selling_pressure == "MIXED"
         and analog_favorable
         and subsector_supports_early_entry
     ):
         return (
             "RE-ENTER",
-            f"the broad repair picture is mixed, but subsector evidence ({subsector_state}) shows repair beneath damaged groups while historical analogs remain favorable",
-            "EARLY_SUBSECTOR_REPAIR",
+            f"research-only candidate: the broad repair picture is mixed, but subsector evidence ({subsector_state}) shows repair beneath damaged groups while historical analogs remain favorable",
+            "EARLY_SUBSECTOR_REPAIR_CANDIDATE",
         )
 
     if internal_setup:
         return (
             "WAIT",
-            "an internal reset is present, but repair or historical confirmation is not yet sufficient",
+            "an internal reset is present, but aggregate repair or historical confirmation is not yet sufficient; subsector evidence remains supporting context",
             "INTERNAL_SETUP_NOT_REPAIRED",
         )
 
@@ -82,6 +80,7 @@ def apply_early_entry_bias(snapshot: dict[str, Any]) -> dict[str, Any]:
         existing_signal=str(snapshot["signal"]),
         subsector_state=str(subsector.get("state", "NEUTRAL")),
         subsector_supports_early_entry=bool(subsector.get("supports_early_entry", False)),
+        allow_subsector_candidate=False,
     )
     out["pre_early_bias_signal"] = snapshot["signal"]
     out["signal"] = signal
@@ -92,7 +91,9 @@ def apply_early_entry_bias(snapshot: dict[str, Any]) -> dict[str, Any]:
         "preference": "slightly early rather than too late",
         "developing_reset_can_trigger": True,
         "required_repair_state": ["STABILIZING", "REPAIRING"],
-        "subsector_can_resolve_mixed_repair": True,
+        "subsector_is_decision_evidence": True,
+        "subsector_can_resolve_mixed_repair": False,
+        "subsector_promotion_status": "REJECTED BY EXACT INCREMENTAL HISTORICAL VALIDATION",
         "subsector_can_veto_validated_broad_reentry": False,
         "required_analog_decision": sorted(FAVORABLE_ANALOGS),
         "reentry_window_sessions": REENTRY_WINDOW_SESSIONS,
