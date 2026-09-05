@@ -3,17 +3,11 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from reentry_early_entry_policy import apply_early_entry_bias
 from reentry_engine import build_snapshot
-from reentry_subsector_decision import attach_subsector_decision_evidence
-from reentry_subsector_intelligence import enrich_snapshot_with_subsectors
 
 
 def main() -> None:
     snapshot = build_snapshot(require_same_day=True)
-    snapshot = enrich_snapshot_with_subsectors(snapshot, require_same_day=True)
-    snapshot = attach_subsector_decision_evidence(snapshot)
-    snapshot = apply_early_entry_bias(snapshot)
     out = Path("artifacts/reentry")
     out.mkdir(parents=True, exist_ok=True)
     path = out / "live_completed_close.json"
