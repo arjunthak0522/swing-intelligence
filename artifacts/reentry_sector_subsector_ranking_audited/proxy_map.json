@@ -1,0 +1,14 @@
+{
+  "primary_cybersecurity_proxy": "CIBR",
+  "cybersecurity_supporting": ["BUG", "HACK"],
+  "removed_from_primary_subsector_breadth": ["RHS", "RYU"],
+  "primary_proxy_count": 31,
+  "validated_live_coverage": {
+    "as_of": "2026-09-04",
+    "available": 30,
+    "expected": 31,
+    "coverage_rate": 0.967741935483871,
+    "missing": ["PBS"]
+  },
+  "decision_role": "diagnostic_context_only"
+}
