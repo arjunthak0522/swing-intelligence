@@ -26,6 +26,30 @@ export interface InsightKeyGroup {
   why_it_matters: string;
 }
 
+export interface OutperformanceCandidate {
+  rank: number;
+  symbol: string;
+  label: string;
+  parent_sector?: string | null;
+  predicted_median_excess_vs_spy: number;
+  neighbor_positive_excess_rate: number;
+  neighbors: number;
+}
+
+export interface OutperformanceIntelligence {
+  status: "INACTIVE" | "NO_HIGH_CONFIDENCE_EDGE" | "HIGH_CONFIDENCE_CANDIDATES";
+  label: string;
+  as_of?: string | null;
+  candidate_count: number;
+  candidates: OutperformanceCandidate[];
+  gate: {
+    minimum_predicted_median_excess_vs_spy: number;
+    minimum_neighbor_positive_excess_rate: number;
+  };
+  interpretation: string;
+  methodology: string;
+}
+
 export interface ReentrySnapshot {
   engine_version: string;
   as_of: string;
@@ -75,6 +99,7 @@ export interface ReentrySnapshot {
     }>;
     proxies?: Record<string, SubsectorProxy>;
   };
+  outperformance_intelligence?: OutperformanceIntelligence;
   market_insights?: {
     headline?: string;
     supporting_reentry?: string[];
