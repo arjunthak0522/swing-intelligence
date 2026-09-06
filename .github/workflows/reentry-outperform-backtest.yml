@@ -9,6 +9,7 @@ on:
       - 'tools/reentry_outperform_ranking.py'
       - 'tools/reentry_outperform_backtest.py'
       - 'tools/reentry_conditional_outperform_backtest.py'
+      - 'tools/reentry_outperform_confidence_test.py'
       - '.github/workflows/reentry-outperform-backtest.yml'
 
 permissions:
@@ -32,6 +33,10 @@ jobs:
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/reentry_conditional_outperform_backtest.py
+      - name: Run confidence-gated highlight test
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/reentry_outperform_confidence_test.py
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -39,3 +44,4 @@ jobs:
           path: |
             artifacts/reentry_outperform_backtest/
             artifacts/reentry_conditional_outperform/
+            artifacts/reentry_outperform_confidence/
