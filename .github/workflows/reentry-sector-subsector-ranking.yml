@@ -1,0 +1,33 @@
+name: RE-ENTRY Sector Subsector Ranking
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - sector-subsector-reentry-ranking
+    paths:
+      - 'tools/reentry_sector_subsector_ranking.py'
+      - '.github/workflows/reentry-sector-subsector-ranking.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  rank:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install pandas numpy yfinance lxml pytest
+      - name: Run ranking
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/reentry_sector_subsector_ranking.py
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: reentry-sector-subsector-ranking
+          path: artifacts/reentry_sector_subsector_ranking/
