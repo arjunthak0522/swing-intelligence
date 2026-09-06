@@ -8,6 +8,7 @@ on:
     paths:
       - 'tools/reentry_outperform_ranking.py'
       - 'tools/reentry_outperform_backtest.py'
+      - 'tools/reentry_conditional_outperform_backtest.py'
       - '.github/workflows/reentry-outperform-backtest.yml'
 
 permissions:
@@ -23,12 +24,18 @@ jobs:
           python-version: '3.12'
       - name: Install dependencies
         run: python -m pip install pandas numpy yfinance lxml pytest
-      - name: Run dynamic ranking backtest
+      - name: Run simple dynamic ranking backtest
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/reentry_outperform_backtest.py
+      - name: Run prior-only conditional ranking backtest
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/reentry_conditional_outperform_backtest.py
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: reentry-outperform-backtest
-          path: artifacts/reentry_outperform_backtest/
+          path: |
+            artifacts/reentry_outperform_backtest/
+            artifacts/reentry_conditional_outperform/
