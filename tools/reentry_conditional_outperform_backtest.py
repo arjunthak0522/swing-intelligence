@@ -68,7 +68,9 @@ def predict_for_symbol(px,sf,dates,i,sym):
     if len(hist)<MIN_HISTORY:return None
     X=np.vstack([x[0] for x in hist]); y=np.array([x[1] for x in hist])
     mu=X.mean(0); sd=X.std(0); sd[sd==0]=1
-    dist=np.sqrt((((X-mu)/sd)-((cur-mu)/sd))**2).mean(1))
+    normalized_hist=(X-mu)/sd
+    normalized_cur=(cur-mu)/sd
+    dist=np.sqrt(((normalized_hist-normalized_cur)**2).mean(axis=1))
     ix=np.argsort(dist)[:min(K,len(hist))]
     neigh=y[ix]
     return {"score":float(np.median(neigh)),"mean_excess":float(np.mean(neigh)),"positive_excess_rate":float(np.mean(neigh>0)),"neighbors":int(len(ix))}
