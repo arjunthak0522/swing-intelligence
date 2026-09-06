@@ -1,4 +1,12 @@
-from tools.reentry_insights import build_market_insights
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+TOOLS = Path(__file__).resolve().parents[1] / "tools"
+sys.path.insert(0, str(TOOLS))
+
+from reentry_insights import build_market_insights  # noqa: E402
 
 
 def test_semiconductor_repair_is_explained_without_changing_signal():
