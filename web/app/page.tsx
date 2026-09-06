@@ -149,6 +149,23 @@ function VehicleCard({ s }: { s: ReentrySnapshot }) {
   );
 }
 
+function OutperformanceCard({ s }: { s: ReentrySnapshot }) {
+  const o = s.outperformance_intelligence;
+  const candidates = o?.candidates || [];
+  const active = s.signal === "RE-ENTER";
+  const status = !o ? "AWAITING FEED" : o.status === "HIGH_CONFIDENCE_CANDIDATES" ? "HIGH CONFIDENCE" : o.status === "INACTIVE" ? "INACTIVE" : "NO EDGE";
+  return (
+    <section className="card section-card action-card">
+      <div className="section-heading"><div><span className="kicker">RELATIVE OPPORTUNITY</span><h2>Best sector / subsector setups</h2></div><StatusPill>{status}</StatusPill></div>
+      <p className="section-intro">{o?.interpretation || "The completed-close feed has not published the validated outperformance layer yet."}</p>
+      {active && candidates.length > 0 ? <div className="vehicle-strip">
+        {candidates.map((x) => <div className="vehicle-primary" key={x.symbol}><div><span>{x.label}</span><b>{x.symbol}</b></div><small>{sectorNames[x.parent_sector || ""] || x.parent_sector || "Subsector ETF"}</small><strong>{pct(x.predicted_median_excess_vs_spy, 1)}</strong><em>{pct(x.neighbor_positive_excess_rate, 0)} of nearest historical states beat SPY · {x.neighbors} analogs</em></div>)}
+      </div> : <div className="notice"><CircleAlert size={16} /> {active ? "No ETF currently clears both the +1% predicted median excess and 60% historical outperformance gates." : "This layer activates only when the official close signal is RE-ENTER. It does not create an ETF recommendation during WAIT or NO RE-ENTRY SETUP."}</div>}
+      <div className="notice"><CircleCheck size={16} /> Advisory only: these candidates never change the official RE-ENTRY decision and are not a replacement for SPY/QQQ.</div>
+    </section>
+  );
+}
+
 function WhyNow({ s }: { s: ReentrySnapshot }) {
   const insights = s.market_insights;
   const support = insights?.supporting_reentry || [];
@@ -233,6 +250,7 @@ export default async function Home() {
       <EpisodeSummary episode={episode} official={s} />
       <IntradayMonitor live={intraday} official={s} />
       <VehicleCard s={s} />
+      <OutperformanceCard s={s} />
       <WhyNow s={s} />
       <SectorMap s={s} />
       <MarketInternals s={s} />
