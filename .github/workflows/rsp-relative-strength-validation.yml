@@ -7,6 +7,7 @@ on:
       - rsp-relative-strength-validation
     paths:
       - 'tools/rsp_relative_strength_validation.py'
+      - 'tools/rsp_breadth_integration_validation.py'
       - '.github/workflows/rsp-relative-strength-validation.yml'
 
 permissions:
@@ -26,8 +27,14 @@ jobs:
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/rsp_relative_strength_validation.py
+      - name: Run RSP breadth integration validation
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/rsp_breadth_integration_validation.py
       - name: Upload validation artifact
         uses: actions/upload-artifact@v4
         with:
           name: rsp-relative-strength-validation
-          path: artifacts/rsp_relative_strength/
+          path: |
+            artifacts/rsp_relative_strength/
+            artifacts/rsp_breadth_integration/
