@@ -9,6 +9,7 @@ on:
       - 'tools/reentry_sector_subsector_ranking.py'
       - 'tools/reentry_sector_subsector_ranking_audited.py'
       - 'tools/reentry_subsector_proxy_universe.py'
+      - 'tools/reentry_subsector_intelligence.py'
       - '.github/workflows/reentry-sector-subsector-ranking.yml'
 
 permissions:
@@ -32,6 +33,10 @@ jobs:
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/reentry_sector_subsector_ranking_audited.py
+      - name: Build canonical completed-close snapshot with audited universe
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/reentry_live_snapshot.py
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -39,3 +44,4 @@ jobs:
           path: |
             artifacts/reentry_sector_subsector_ranking/
             artifacts/reentry_sector_subsector_ranking_audited/
+            artifacts/reentry/live_completed_close.json
