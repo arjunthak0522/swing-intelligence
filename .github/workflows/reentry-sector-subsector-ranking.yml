@@ -7,6 +7,8 @@ on:
       - sector-subsector-reentry-ranking
     paths:
       - 'tools/reentry_sector_subsector_ranking.py'
+      - 'tools/reentry_sector_subsector_ranking_audited.py'
+      - 'tools/reentry_subsector_proxy_universe.py'
       - '.github/workflows/reentry-sector-subsector-ranking.yml'
 
 permissions:
@@ -22,12 +24,18 @@ jobs:
           python-version: '3.12'
       - name: Install dependencies
         run: python -m pip install pandas numpy yfinance lxml pytest
-      - name: Run ranking
+      - name: Run original ranking for comparison
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/reentry_sector_subsector_ranking.py
+      - name: Run audited proxy ranking
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/reentry_sector_subsector_ranking_audited.py
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: reentry-sector-subsector-ranking
-          path: artifacts/reentry_sector_subsector_ranking/
+          path: |
+            artifacts/reentry_sector_subsector_ranking/
+            artifacts/reentry_sector_subsector_ranking_audited/
