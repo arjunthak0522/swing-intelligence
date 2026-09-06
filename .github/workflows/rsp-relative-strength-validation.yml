@@ -8,6 +8,8 @@ on:
     paths:
       - 'tools/rsp_relative_strength_validation.py'
       - 'tools/rsp_breadth_integration_validation.py'
+      - 'tools/reentry_rsp_breadth.py'
+      - 'tools/reentry_live_snapshot.py'
       - '.github/workflows/rsp-relative-strength-validation.yml'
 
 permissions:
@@ -31,6 +33,23 @@ jobs:
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/rsp_breadth_integration_validation.py
+      - name: Build canonical live snapshot with RSP breadth
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: |
+          python tools/reentry_live_snapshot.py > /tmp/reentry-rsp-live.log
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('artifacts/reentry/live_completed_close.json')
+          x = json.loads(p.read_text())
+          assert x['data_freshness']['same_day_complete'] is True
+          assert x['rsp_breadth']['state'] in {'BROADENING','REPAIRING','COOLING','NARROWING'}
+          assert 'rsp_spy_relative_5d' in x['current_inputs']
+          assert 'rsp_spy_relative_20d' in x['current_inputs']
+          assert x['rsp_breadth']['decision_role'].startswith('canonical breadth/participation input')
+          print(json.dumps(x['rsp_breadth'], indent=2))
+          PY
       - name: Upload validation artifact
         uses: actions/upload-artifact@v4
         with:
@@ -38,3 +57,4 @@ jobs:
           path: |
             artifacts/rsp_relative_strength/
             artifacts/rsp_breadth_integration/
+            artifacts/reentry/live_completed_close.json
