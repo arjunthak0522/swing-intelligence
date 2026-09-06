@@ -1,0 +1,47 @@
+name: RE-ENTRY Contract Diagnostic
+
+on:
+  push:
+    branches: [internal-correction-v2]
+    paths:
+      - '.github/workflows/reentry-contract-diagnostic.yml'
+      - 'tools/reentry_engine.py'
+      - 'tools/reentry_early_entry_policy.py'
+      - 'tools/reentry_subsector_intelligence.py'
+      - 'tools/reentry_subsector_proxy_universe.py'
+      - 'tools/reentry_subsector_decision.py'
+      - 'tools/reentry_insights.py'
+      - 'tests/test_reentry_engine_contract.py'
+      - 'tests/test_reentry_early_entry_policy.py'
+      - 'tests/test_reentry_subsector_intelligence.py'
+      - 'tests/test_reentry_subsector_decision.py'
+      - 'tests/test_reentry_insights.py'
+
+permissions:
+  contents: read
+
+jobs:
+  contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install pandas numpy yfinance lxml pytest
+      - name: Engine contract
+        run: pytest -q tests/test_reentry_engine_contract.py
+      - name: Early-entry policy contract
+        if: always()
+        run: pytest -q tests/test_reentry_early_entry_policy.py
+      - name: Subsector intelligence contract
+        if: always()
+        run: pytest -q tests/test_reentry_subsector_intelligence.py
+      - name: Subsector decision contract
+        if: always()
+        run: pytest -q tests/test_reentry_subsector_decision.py
+      - name: Insights contract
+        if: always()
+        run: pytest -q tests/test_reentry_insights.py
