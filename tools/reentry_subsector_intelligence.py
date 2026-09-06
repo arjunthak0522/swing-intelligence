@@ -6,33 +6,18 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-# Liquid ETF proxies used to look beneath the 11 headline sector ETFs.
-# These are diagnostics, not proprietary point-in-time industry indexes.
-SUBSECTOR_GROUPS: dict[str, list[tuple[str, str]]] = {
-    "XLC": [("FDN", "Internet"), ("IYZ", "Telecom"), ("PBS", "Media")],
-    "XLY": [("XRT", "Retail"), ("ITB", "Homebuilders"), ("PEJ", "Leisure & Entertainment")],
-    "XLP": [("PBJ", "Food & Beverage"), ("RHS", "Equal-Weight Consumer Staples")],
-    "XLE": [("XOP", "Oil & Gas Exploration/Production"), ("OIH", "Oil Services"), ("CRAK", "Refiners")],
-    "XLF": [("KRE", "Regional Banks"), ("KBE", "Banks"), ("IAI", "Broker-Dealers"), ("KIE", "Insurance")],
-    "XLV": [("XBI", "Biotech"), ("IBB", "Large-Cap Biotech"), ("IHI", "Medical Devices"), ("IHF", "Healthcare Providers")],
-    "XLI": [("ITA", "Aerospace & Defense"), ("XTN", "Transportation"), ("PAVE", "Infrastructure")],
-    "XLB": [("XME", "Metals & Mining"), ("COPX", "Copper Miners"), ("SLX", "Steel")],
-    "XLRE": [("REZ", "Residential & Specialized REITs"), ("SRVR", "Data Centers & Digital Infrastructure"), ("NETL", "Net Lease REITs")],
-    "XLK": [("SMH", "Semiconductors"), ("IGV", "Software"), ("HACK", "Cybersecurity")],
-    "XLU": [("RNRG", "Renewable Power Producers"), ("RYU", "Equal-Weight Utilities")],
-}
-
-SUBSECTOR_SYMBOLS = [symbol for groups in SUBSECTOR_GROUPS.values() for symbol, _ in groups]
-PARENT_BY_SYMBOL = {
-    symbol: parent for parent, groups in SUBSECTOR_GROUPS.items() for symbol, _ in groups
-}
-LABEL_BY_SYMBOL = {
-    symbol: label for groups in SUBSECTOR_GROUPS.values() for symbol, label in groups
-}
+from reentry_subsector_proxy_universe import (
+    AUDIT_NOTES,
+    LABEL_BY_SYMBOL,
+    PARENT_BY_SYMBOL,
+    SUBSECTOR_GROUPS,
+    SUBSECTOR_SYMBOLS,
+)
 
 PROXY_CAVEAT = (
-    "Subsector and industry histories use liquid ETF proxies. Coverage is intentionally diagnostic, "
-    "can be uneven across sectors, and is not a proprietary point-in-time industry classification."
+    "Subsector and industry histories use audited liquid ETF proxies. Weighting-method ETFs are excluded "
+    "from the primary subsector breadth calculation; broad thematic proxies are explicitly labeled. "
+    "Coverage can be uneven across sectors and is not a proprietary point-in-time industry classification."
 )
 
 
@@ -66,7 +51,7 @@ def load_subsector_prices(start: str = "2016-09-01") -> pd.DataFrame:
         group_by="column",
     )
     closes = _normalize_download(raw, symbols)
-    missing = [s for s in ["SPY", "QQQ", "SMH", "IGV"] if s not in closes.columns]
+    missing = [s for s in ["SPY", "QQQ", "SMH", "IGV", "CIBR"] if s not in closes.columns]
     if missing:
         raise RuntimeError(f"Required subsector proxies missing: {missing}")
     return closes
@@ -119,7 +104,7 @@ def build_subsector_frame(prices: pd.DataFrame) -> pd.DataFrame:
         rs_cols = [f"sub_{s}_rs20_parent" for s in syms]
         repair_cols = [f"sub_{s}_repair" for s in syms]
         expected = len(groups)
-        min_valid = max(2, math.ceil(expected * 0.67))
+        min_valid = 1 if expected == 1 else max(2, math.ceil(expected * 0.67))
         valid_count = out[dd_cols].notna().sum(axis=1)
         valid = valid_count >= min_valid
         out[f"sub_{parent}_coverage"] = valid_count / expected
@@ -207,6 +192,7 @@ def subsector_snapshot(row: pd.Series) -> dict[str, Any]:
         },
         "by_sector": by_sector,
         "proxies": flat,
+        "proxy_audit_notes": AUDIT_NOTES,
         "proxy_caveat": PROXY_CAVEAT,
     }
 
@@ -338,6 +324,7 @@ def enrich_snapshot_with_subsectors(
     snapshot["subsector_intelligence"] = subsectors
     snapshot["market_commentary"] = build_market_commentary(snapshot, subsectors)
     snapshot.setdefault("implementation", {})["subsector_universe"] = SUBSECTOR_GROUPS
+    snapshot["implementation"]["subsector_proxy_audit"] = AUDIT_NOTES
     snapshot["implementation"]["subsector_role"] = (
         "diagnostic market-state and commentary layer; does not change the validated final RE-ENTRY decision until incremental historical validation supports promotion"
     )
