@@ -16,6 +16,6 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install dependencies
-        run: pip install -e .
+        run: pip install -e . pytest
       - name: Run full pytest regression
         run: pytest -q
