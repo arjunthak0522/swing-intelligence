@@ -5,7 +5,7 @@ on:
   schedule:
     - cron: '30 21 * * 1-5'
   push:
-    branches: [main, reentry-live-feed]
+    branches: [main, reentry-live-feed, reentry-retail-candidate]
     paths:
       - '.github/workflows/reentry-live-feed.yml'
 
@@ -21,10 +21,10 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
-      - name: Checkout canonical research engine
+      - name: Checkout validated canonical engine
         uses: actions/checkout@v4
         with:
-          ref: internal-correction-v2
+          ref: 47f38bf3362a97bcf9c9dd2d6545c4fae212e046
           path: engine
           fetch-depth: 1
 
@@ -52,13 +52,16 @@ jobs:
           d = json.loads(p.read_text())
           sectors = d.get('signal_snapshot', {}).get('sectors', {})
           subsectors = d.get('subsector_intelligence', {}).get('proxies', {})
+          opportunities = d.get('opportunity_evidence', {})
           if d.get('data_freshness', {}).get('same_day_complete') is not True:
               raise SystemExit('snapshot freshness check failed')
           if len(sectors) != 11:
               raise SystemExit(f'expected 11 sectors, got {len(sectors)}')
           if len(subsectors) < 30:
               raise SystemExit(f'expected at least 30 subsectors, got {len(subsectors)}')
-          print({'as_of': d.get('as_of'), 'signal': d.get('signal'), 'sectors': len(sectors), 'subsectors': len(subsectors)})
+          if opportunities.get('status') not in {'CURRENT_REPAIR_PLUS_CANONICAL_HISTORY', 'HISTORICAL_RANKING_UNAVAILABLE'}:
+              raise SystemExit(f'unexpected opportunity evidence status: {opportunities.get("status")}')
+          print({'as_of': d.get('as_of'), 'signal': d.get('signal'), 'sectors': len(sectors), 'subsectors': len(subsectors), 'opportunity_status': opportunities.get('status')})
           PY
 
       - name: Checkout publishing branch
@@ -72,6 +75,20 @@ jobs:
         run: |
           mkdir -p publish/web/public/reentry
           cp engine/artifacts/reentry/live_completed_close.json publish/web/public/reentry/latest.json
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+          p = Path('publish/web/public/reentry/latest.json')
+          d = json.loads(p.read_text())
+          d['retail_metadata'] = {
+              'published_at_utc': datetime.now(timezone.utc).isoformat(),
+              'engine_commit': '47f38bf3362a97bcf9c9dd2d6545c4fae212e046',
+              'engine_validation': 'CANONICAL_WORKFLOW_PASS',
+              'feed_mode': 'COMPLETED_CLOSE_ONLY',
+          }
+          p.write_text(json.dumps(d, indent=2, allow_nan=False) + '\n')
+          PY
 
       - name: Update re-entry episode state
         run: |
