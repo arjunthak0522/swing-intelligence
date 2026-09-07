@@ -90,22 +90,45 @@ def build_market_insights(snapshot: dict[str, Any]) -> dict[str, Any]:
     pressure = str(snapshot.get("selling_pressure", "MIXED"))
 
     if signal == "RE-ENTER":
-        headline = f"RE-ENTER - internal repair and historical evidence are sufficiently favorable."
+        headline = "RE-ENTER - the market has repaired enough that waiting is no longer helping."
     elif signal == "WAIT":
-        headline = f"WAIT - a reset is developing, but the full historical evidence is not favorable enough yet."
+        headline = "WAIT - conditions are improving, but waiting still has value."
     else:
-        headline = "NO RE-ENTRY SETUP - current conditions do not show a meaningful enough reset."
+        headline = "NO RE-ENTRY SETUP - there has not been enough of a correction to create a re-entry opportunity."
 
-    supporting: list[str] = []
-    holding_back: list[str] = []
+    supporting: list[dict[str, Any]] = []
+    holding_back: list[dict[str, Any]] = []
+
     if reset in {"DEVELOPING", "MEANINGFUL", "BROAD"}:
-        supporting.append(f"Internal reset is {reset.lower()}.")
+        supporting.append({
+            "title": "Market reset",
+            "state": reset,
+            "detail": f"Weakness beneath the major indexes is {reset.lower()}, creating a potential re-entry setup.",
+        })
+
     if pressure in {"STABILIZING", "REPAIRING"}:
-        supporting.append(f"Selling pressure is {pressure.lower()}.")
+        supporting.append({
+            "title": "Selling pressure",
+            "state": pressure,
+            "detail": (
+                "Selling pressure is beginning to stabilize."
+                if pressure == "STABILIZING"
+                else "Selling pressure is repairing rather than continuing to worsen."
+            ),
+        })
+
     if analog in {"CAUTIOUS YES", "YES", "STRONG YES"}:
-        supporting.append(f"Historical analog decision is {analog}.")
+        supporting.append({
+            "title": "Historical setups",
+            "state": analog,
+            "detail": "Similar prior market conditions were favorable enough to support putting cash back to work.",
+        })
     else:
-        holding_back.append(f"Historical analog decision is {analog}.")
+        holding_back.append({
+            "title": "Historical setups",
+            "state": analog,
+            "detail": "Similar prior market conditions are not favorable enough yet to justify re-entry.",
+        })
 
     proxies = snapshot.get("subsector_intelligence", {}).get("proxies", {})
     key_groups: list[dict[str, Any]] = []
@@ -126,7 +149,12 @@ def build_market_insights(snapshot: dict[str, Any]) -> dict[str, Any]:
     repairing_groups = [x for x in key_groups if x["metrics"]["repairing"]]
     if repairing_groups:
         names = ", ".join(x["label"] for x in repairing_groups[:5])
-        supporting.append(f"Repair is visible beneath the indexes in {names}.")
+        supporting.append({
+            "title": "Repair under the surface",
+            "state": "REPAIRING",
+            "detail": f"Repair is visible in {names}.",
+            "why_it_matters": "This is supporting evidence only. It cannot independently trigger or veto the market decision.",
+        })
 
     return {
         "headline": headline,
