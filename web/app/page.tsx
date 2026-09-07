@@ -1,5 +1,5 @@
 import { ChevronRight, CircleAlert, CircleCheck, Clock3 } from "lucide-react";
-import { getLatestSnapshot, pct, type ReentrySnapshot } from "../lib/reentry";
+import { getLatestSnapshot, pct, type OpportunityHistoryRow, type ReentrySnapshot } from "../lib/reentry";
 import { sampleSnapshot } from "../lib/sampleSnapshot";
 
 const sectorNames: Record<string, string> = {
@@ -131,22 +131,40 @@ function Historical({ s }: { s: ReentrySnapshot }) {
         <div className="history-head"><span>After signal</span><span>SPY median</span><span>QQQ median</span></div>
         {rows.map(([label, spy, qqq]) => <div className="history-row" key={label}><b>{label}</b><span>{pct(spy, 2)}</span><span>{pct(qqq, 2)}</span></div>)}
       </div>
-      <div className="history-footer"><span>Do today&apos;s historical setups support re-entry?</span><strong className={stateClass(s.analog_decision)}>{s.analog_decision}</strong></div>
+      <div className="history-footer"><span>Do today&apos;s historical setups support broad-market re-entry?</span><strong className={stateClass(s.analog_decision)}>{s.analog_decision}</strong></div>
     </section>
   );
 }
 
+function OpportunityHistory({ history }: { history?: Record<string, OpportunityHistoryRow> | null }) {
+  if (!history) return <small>Historical post-RE-ENTRY evidence is not available for this ETF&apos;s usable history.</small>;
+  const rows = ["10", "30", "60"].map((h) => [h, history[h]] as const).filter(([, row]) => row);
+  if (!rows.length) return <small>Historical post-RE-ENTRY evidence is not available for this ETF&apos;s usable history.</small>;
+  return (
+    <small>
+      {rows.map(([h, row], index) => (
+        <span key={h}>{index ? " · " : ""}{h}D: {pct(row?.median, 1)} median, {pct(row?.positive_rate, 0)} positive{row?.n ? ` (n=${row.n})` : ""}</span>
+      ))}
+    </small>
+  );
+}
+
 function Opportunities({ s }: { s: ReentrySnapshot }) {
+  const evidence = s.opportunity_evidence;
+  const evidenceSectors = evidence?.sectors || [];
+  const evidenceSubsectors = evidence?.subsectors || [];
+
   const proxies = Object.entries(s.subsector_intelligence?.proxies || {});
-  const repairingSubsectors = proxies
+  const fallbackSubsectors = proxies
     .filter(([, x]) => x.repairing)
     .sort((a, b) => a[1].drawdown_20d - b[1].drawdown_20d);
-
-  const repairingSectors = Object.entries(s.subsector_intelligence?.by_sector || {})
+  const fallbackSectors = Object.entries(s.subsector_intelligence?.by_sector || {})
     .filter(([, group]) => (group.damage_share_3pct || 0) >= 0.50 && (group.repair_share || 0) >= 0.25)
     .sort((a, b) => (b[1].repair_share || 0) - (a[1].repair_share || 0));
 
-  const hasCandidates = repairingSubsectors.length > 0 || repairingSectors.length > 0;
+  const hasEvidenceCandidates = evidenceSectors.length > 0 || evidenceSubsectors.length > 0;
+  const hasFallbackCandidates = fallbackSubsectors.length > 0 || fallbackSectors.length > 0;
+  const hasCandidates = evidence ? hasEvidenceCandidates : hasFallbackCandidates;
 
   return (
     <section className="card section-card">
@@ -154,38 +172,61 @@ function Opportunities({ s }: { s: ReentrySnapshot }) {
         <div><span className="kicker">3 · SECTOR / SUBSECTOR OPPORTUNITIES</span><h2>Is anything under the surface attractive right now?</h2></div>
         <StatusPill>{hasCandidates ? "REPAIR CANDIDATES PRESENT" : "NO REPAIR CANDIDATES"}</StatusPill>
       </div>
-      <p className="section-intro">This section identifies sectors and subsectors already damaged enough to reset and now showing repair. These are potential opportunities to investigate, not independent buy signals. The validated broad-market RE-ENTRY decision above remains the timing decision.</p>
+      <p className="section-intro">A candidate must first be damaged enough to reset and then show current repair. When historical evidence is available, the same row also shows what that ETF did after past canonical RE-ENTRY episodes. This does not create a separate sector timing engine: the broad-market RE-ENTRY decision above remains the controlling timing call.</p>
 
       {!hasCandidates ? (
         <div className="notice"><CircleAlert size={16} /> No sector or subsector currently meets the existing repair-candidate conditions.</div>
-      ) : (
+      ) : evidence ? (
         <div className="two-col">
           <div className="reason-panel supportive">
-            <h3><CircleCheck size={17} /> Sectors showing repair</h3>
-            {repairingSectors.slice(0, 6).map(([symbol, group]) => (
-              <div className="reason" key={symbol}>
-                <div><b>{sectorNames[symbol] || symbol} ({symbol})</b><StatusPill>REPAIRING</StatusPill></div>
-                <p>{pct(group.damage_share_3pct)} of tracked subsectors are down 3%+ and {pct(group.repair_share)} are repairing.</p>
-                <small>Potential sector opportunity. Not a standalone validated entry call.</small>
+            <h3><CircleCheck size={17} /> Sectors showing repair now</h3>
+            {evidenceSectors.slice(0, 6).map((x) => (
+              <div className="reason" key={x.symbol}>
+                <div><b>{x.label} ({x.symbol})</b><StatusPill>{x.current_state}</StatusPill></div>
+                <p>{pct(x.damage_share_3pct)} of tracked subsectors are down 3%+ and {pct(x.repair_share)} are repairing.</p>
+                <OpportunityHistory history={x.historical_after_reentry} />
               </div>
             ))}
-            {repairingSectors.length === 0 && <div className="reason"><p>No sector currently meets the existing sector-repair threshold.</p></div>}
+            {evidenceSectors.length === 0 && <div className="reason"><p>No sector currently meets the existing sector-repair threshold.</p></div>}
           </div>
 
           <div className="reason-panel supportive">
-            <h3><CircleCheck size={17} /> Subsectors showing repair</h3>
-            {repairingSubsectors.slice(0, 6).map(([symbol, x]) => (
+            <h3><CircleCheck size={17} /> Subsectors showing repair now</h3>
+            {evidenceSubsectors.slice(0, 6).map((x) => (
+              <div className="reason" key={x.symbol}>
+                <div><b>{x.label} ({x.symbol})</b><StatusPill>{x.current_state}</StatusPill></div>
+                <p>{pct(x.drawdown_20d)} from its 20-day high, {pct(x.return_5d)} over the last 5 days. Parent: {sectorNames[x.parent_sector] || x.parent_sector}.</p>
+                <OpportunityHistory history={x.historical_after_reentry} />
+              </div>
+            ))}
+            {evidenceSubsectors.length === 0 && <div className="reason"><p>No tracked subsector is currently flagged as repairing.</p></div>}
+          </div>
+        </div>
+      ) : (
+        <div className="two-col">
+          <div className="reason-panel supportive">
+            <h3><CircleCheck size={17} /> Sectors showing repair now</h3>
+            {fallbackSectors.slice(0, 6).map(([symbol, group]) => (
+              <div className="reason" key={symbol}>
+                <div><b>{sectorNames[symbol] || symbol} ({symbol})</b><StatusPill>REPAIRING</StatusPill></div>
+                <p>{pct(group.damage_share_3pct)} of tracked subsectors are down 3%+ and {pct(group.repair_share)} are repairing.</p>
+                <small>Historical candidate evidence has not yet been attached to this snapshot.</small>
+              </div>
+            ))}
+          </div>
+          <div className="reason-panel supportive">
+            <h3><CircleCheck size={17} /> Subsectors showing repair now</h3>
+            {fallbackSubsectors.slice(0, 6).map(([symbol, x]) => (
               <div className="reason" key={symbol}>
                 <div><b>{x.label} ({symbol})</b><StatusPill>REPAIRING</StatusPill></div>
                 <p>{pct(x.drawdown_20d)} from its 20-day high, {pct(x.return_5d)} over the last 5 days.</p>
-                <small>{sectorNames[x.parent_sector] || x.parent_sector}. Current repair evidence only, not an independent buy trigger.</small>
+                <small>Historical candidate evidence has not yet been attached to this snapshot.</small>
               </div>
             ))}
-            {repairingSubsectors.length === 0 && <div className="reason"><p>No tracked subsector is currently flagged as repairing.</p></div>}
           </div>
         </div>
       )}
-      <div className="notice"><CircleAlert size={16} /> Historical sector/subsector rankings are evaluated after canonical RE-ENTRY episodes. Current repair candidates and historical post-signal performance answer different questions and should not be confused.</div>
+      <div className="notice"><CircleAlert size={16} /> “REPAIRING” means a current opportunity candidate. It is not a standalone buy call. Historical statistics are outcomes after canonical broad-market RE-ENTRY episodes, not forecasts for this specific trade.</div>
     </section>
   );
 }
