@@ -167,11 +167,34 @@ export const pct = (value?: number | null, digits = 1) =>
     ? `${value >= 0 ? "+" : ""}${(value * 100).toFixed(digits)}%`
     : "-";
 
+function normalizeInsightList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item) => {
+    if (typeof item === "string") return item.trim() ? [item] : [];
+    if (!item || typeof item !== "object") return [];
+    const row = item as Record<string, unknown>;
+    const title = typeof row.title === "string" ? row.title.trim() : "";
+    const detail = typeof row.detail === "string" ? row.detail.trim() : "";
+    const text = title && detail ? `${title}: ${detail}` : detail || title;
+    return text ? [text] : [];
+  });
+}
+
 function parsePythonJson(raw: string): ReentrySnapshot {
   const strictJson = raw
     .replace(/\bNaN\b/g, "null")
     .replace(/-?\bInfinity\b/g, "null");
-  return JSON.parse(strictJson) as ReentrySnapshot;
+  const parsed = JSON.parse(strictJson) as ReentrySnapshot;
+  const insights = parsed.market_insights as unknown;
+  if (insights && typeof insights === "object") {
+    const row = insights as Record<string, unknown>;
+    parsed.market_insights = {
+      ...(row as ReentrySnapshot["market_insights"]),
+      supporting_reentry: normalizeInsightList(row.supporting_reentry),
+      holding_back: normalizeInsightList(row.holding_back),
+    };
+  }
+  return parsed;
 }
 
 async function readPublicReentryFile<T>(filename: string): Promise<T | null> {
