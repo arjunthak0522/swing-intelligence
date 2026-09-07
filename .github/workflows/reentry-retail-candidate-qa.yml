@@ -1,0 +1,61 @@
+name: RE-ENTRY Retail Candidate QA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [reentry-retail-candidate]
+    paths:
+      - 'web/**'
+      - 'tools/**'
+      - 'tests/**'
+      - '.github/workflows/reentry-retail-candidate-qa.yml'
+      - '.github/workflows/reentry-live-feed.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: reentry-retail-candidate-qa
+  cancel-in-progress: true
+
+jobs:
+  qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Python dependencies
+        run: python -m pip install pandas numpy yfinance lxml pytest
+      - name: Run repository regression suite
+        run: pytest -q
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install web dependencies
+        working-directory: web
+        run: npm install
+      - name: Typecheck retail UI
+        working-directory: web
+        run: npx tsc --noEmit
+      - name: Build retail UI
+        working-directory: web
+        run: npm run build
+      - name: Verify retail completed-close contract when snapshot exists
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('web/public/reentry/latest.json')
+          if not p.exists():
+              print('No published candidate snapshot yet; live-feed workflow will create it.')
+              raise SystemExit(0)
+          d = json.loads(p.read_text())
+          if d.get('data_freshness', {}).get('same_day_complete') is not True:
+              raise SystemExit('retail snapshot is not completed-close complete')
+          if d.get('signal') not in {'RE-ENTER', 'WAIT', 'NO RE-ENTRY SETUP'}:
+              raise SystemExit(f'bad signal: {d.get("signal")}')
+          print({'as_of': d.get('as_of'), 'signal': d.get('signal'), 'complete': True})
+          PY
