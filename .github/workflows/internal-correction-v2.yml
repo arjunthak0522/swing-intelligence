@@ -53,24 +53,34 @@ jobs:
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/internal_correction_v2.py
+      - name: Pace Twelve Data requests
+        run: sleep 30
       - name: Run incremental-value validation
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/internal_correction_incremental_validation.py
+      - name: Pace Twelve Data requests
+        run: sleep 30
       - name: Run subtype diagnostics
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/internal_correction_subtype_decomposition.py
+      - name: Pace Twelve Data requests
+        run: sleep 30
       - name: Run complete sector-factor state research
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/internal_correction_full_v2.py
       - name: Verify unified RE-ENTRY contracts
         run: pytest -q tests/test_reentry_engine_contract.py tests/test_reentry_early_entry_policy.py tests/test_reentry_subsector_intelligence.py tests/test_reentry_subsector_decision.py tests/test_reentry_insights.py
+      - name: Pace Twelve Data requests
+        run: sleep 30
       - name: Validate subsector hidden-damage and repair states
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/reentry_subsector_validation.py
+      - name: Pace Twelve Data requests
+        run: sleep 30
       - name: Validate subsector DECISION contribution
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
@@ -107,26 +117,38 @@ jobs:
           assert 'matched_controls' in d and d['matched_controls'].get('pairs', 0) > 0
           print('era, matched-control, leave-one-sector-out, XLK-out, and neighboring-definition robustness evidence present')
           PY
+      - name: Pace Twelve Data requests
+        run: sleep 30
       - name: Build unified RE-ENTRY research snapshot
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/reentry_research_snapshot.py
+      - name: Pace Twelve Data requests
+        run: sleep 30
       - name: Diagnose recent unified decision path
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/reentry_recent_path_research.py
+      - name: Pace Twelve Data requests
+        run: sleep 30
       - name: Validate persistence windows
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/reentry_persistence_validation.py
+      - name: Pace Twelve Data requests
+        run: sleep 30
       - name: Validate exact final unified policy
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/reentry_final_policy_validation.py
+      - name: Pace Twelve Data requests
+        run: sleep 30
       - name: Build sector and subsector historical ranking
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/reentry_sector_subsector_ranking.py
+      - name: Pace Twelve Data requests
+        run: sleep 30
       - name: Build same-day completed-close snapshot
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
