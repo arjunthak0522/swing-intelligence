@@ -1165,7 +1165,7 @@
         "neighbor_positive_excess_rate": 0.8,
         "neighbors": 15,
         "parent_sector": "XLRE",
-        "predicted_median_excess_vs_spy": 0.024917076047495712,
+        "predicted_median_excess_vs_spy": 0.024917092209354008,
         "rank": 1,
         "symbol": "REZ"
       },
@@ -1174,7 +1174,7 @@
         "neighbor_positive_excess_rate": 0.8,
         "neighbors": 15,
         "parent_sector": "XLI",
-        "predicted_median_excess_vs_spy": 0.019666168552940122,
+        "predicted_median_excess_vs_spy": 0.019666096029900604,
         "rank": 2,
         "symbol": "ITA"
       },
@@ -1183,7 +1183,7 @@
         "neighbor_positive_excess_rate": 0.6,
         "neighbors": 15,
         "parent_sector": "XLI",
-        "predicted_median_excess_vs_spy": 0.013418168851069945,
+        "predicted_median_excess_vs_spy": 0.013418371772867532,
         "rank": 3,
         "symbol": "XTN"
       }
@@ -1733,12 +1733,12 @@
         "members": {
           "NETL": {
             "drawdown_20d": -0.01818436011941882,
-            "drawdown_60d": -0.06505020259911676,
+            "drawdown_60d": -0.06505026623547716,
             "label": "Net Lease REITs",
             "parent_sector": "XLRE",
             "relative_strength_20d_vs_parent": 0.004097735082147169,
             "relative_strength_20d_vs_spy": -0.015275743015674803,
-            "relative_strength_60d_vs_parent": 0.0019849704457871598,
+            "relative_strength_60d_vs_parent": 0.0019850413620734475,
             "repairing": false,
             "return_1d": -0.0011056208209256901,
             "return_5d": -0.005428373640490092
@@ -2087,12 +2087,12 @@
       },
       "NETL": {
         "drawdown_20d": -0.01818436011941882,
-        "drawdown_60d": -0.06505020259911676,
+        "drawdown_60d": -0.06505026623547716,
         "label": "Net Lease REITs",
         "parent_sector": "XLRE",
         "relative_strength_20d_vs_parent": 0.004097735082147169,
         "relative_strength_20d_vs_spy": -0.015275743015674803,
-        "relative_strength_60d_vs_parent": 0.0019849704457871598,
+        "relative_strength_60d_vs_parent": 0.0019850413620734475,
         "repairing": false,
         "return_1d": -0.0011056208209256901,
         "return_5d": -0.005428373640490092
@@ -2281,5 +2281,11 @@
   "weakness_present": true,
   "weakness_reasons": [
     "50% or fewer S&P 500 stocks are above their 50DMA"
-  ]
+  ],
+  "retail_metadata": {
+    "published_at_utc": "2026-09-07T22:11:35.548248+00:00",
+    "engine_commit": "47f38bf3362a97bcf9c9dd2d6545c4fae212e046",
+    "engine_validation": "CANONICAL_WORKFLOW_PASS",
+    "feed_mode": "COMPLETED_CLOSE_ONLY"
+  }
 }
