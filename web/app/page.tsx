@@ -35,22 +35,20 @@ function Hero({ s, usingPreview }: { s: ReentrySnapshot; usingPreview: boolean }
   return (
     <section className="hero card">
       <div className="eyebrow-row">
-        <span className="eyebrow">RE-ENTRY DECISION</span>
+        <span className="eyebrow">1 · BROAD-MARKET RE-ENTRY</span>
         <span className="freshness"><Clock3 size={14} /> {s.as_of} close</span>
       </div>
-
       <div className="hero-grid">
         <div>
           <div className={`signal ${stateClass(s.signal)}`}>{s.signal}</div>
           <div className="signal-subline">
             {noSetup
-              ? "No meaningful pullback is creating a re-entry opportunity right now."
+              ? "There is no meaningful pullback creating a broad-market re-entry opportunity right now."
               : closer
-                ? "Getting closer, but waiting still has value."
+                ? "The setup is getting closer, but waiting still has value."
                 : s.signal_interpretation}
           </div>
         </div>
-
         <div className="decision-summary">
           <span className="summary-label">WHY THIS DECISION</span>
           <p>{s.signal_interpretation}</p>
@@ -61,29 +59,34 @@ function Hero({ s, usingPreview }: { s: ReentrySnapshot; usingPreview: boolean }
           </div>
         </div>
       </div>
-
       {usingPreview && <div className="preview-note">Research preview using the validated Sep 4 completed-close snapshot. Live API is not connected yet.</div>}
     </section>
   );
 }
 
-function VehicleCard({ s }: { s: ReentrySnapshot }) {
+function BroadMarketAction({ s }: { s: ReentrySnapshot }) {
   const h = s.historical_validation;
+  if (s.signal === "NO RE-ENTRY SETUP") {
+    return (
+      <section className="card section-card action-card">
+        <div className="section-heading"><div><span className="kicker">BROAD MARKET</span><h2>No re-entry action right now</h2></div><StatusPill>SPY + QQQ universe</StatusPill></div>
+        <p className="section-intro">SPY and QQQ remain the validated broad-market universe, but the engine is not identifying a correction-based re-entry setup today.</p>
+      </section>
+    );
+  }
+  const heading = s.signal === "RE-ENTER" ? "Where the RE-ENTRY signal applies" : "What we are waiting to re-enter";
+  const intro = s.signal === "RE-ENTER"
+    ? "The validated broad-market RE-ENTRY signal applies to SPY and QQQ. The engine does not choose between them unless a separate vehicle-selection rule is validated."
+    : "The engine is still waiting before putting cash back into the validated broad-market universe of SPY and QQQ.";
   return (
     <section className="card section-card action-card">
-      <div className="section-heading">
-        <div>
-          <span className="kicker">ACTION</span>
-          <h2>Where the signal applies</h2>
-        </div>
-        <StatusPill>Broad-market re-entry</StatusPill>
-      </div>
-      <p className="section-intro">The engine answers whether cash should go back into broad equities. SPY and QQQ are the validated destination set. Sector and subsector ETFs explain the setup but are not standalone buy calls.</p>
+      <div className="section-heading"><div><span className="kicker">BROAD MARKET</span><h2>{heading}</h2></div><StatusPill>{s.signal}</StatusPill></div>
+      <p className="section-intro">{intro}</p>
       <div className="vehicle-strip">
-        <div className="vehicle-primary"><div><span>S&P 500</span><b>SPY</b></div><small>Broad market</small><strong>{pct(h.SPY_10D_median_after_signal, 2)}</strong><em>10D median after past RE-ENTRY signals</em></div>
-        <div className="vehicle-primary"><div><span>Nasdaq 100</span><b>QQQ</b></div><small>Growth heavy</small><strong>{pct(h.QQQ_10D_median_after_signal, 2)}</strong><em>10D median after past RE-ENTRY signals</em></div>
+        <div className="vehicle-primary"><div><span>S&P 500</span><b>SPY</b></div><small>Validated broad-market vehicle</small><strong>{pct(h.SPY_10D_median_after_signal, 2)}</strong><em>10D median after past RE-ENTRY signals</em></div>
+        <div className="vehicle-primary"><div><span>Nasdaq 100</span><b>QQQ</b></div><small>Validated broad-market vehicle</small><strong>{pct(h.QQQ_10D_median_after_signal, 2)}</strong><em>10D median after past RE-ENTRY signals</em></div>
       </div>
-      <div className="notice"><CircleAlert size={16} /> These are historical results after past RE-ENTRY signals, not forecasts for buying today. The app will not claim SPY or QQQ is preferred until a separate vehicle-selection rule is historically validated.</div>
+      <div className="notice"><CircleAlert size={16} /> Historical returns shown here describe past RE-ENTRY signals. They are not a forecast for buying today.</div>
     </section>
   );
 }
@@ -92,84 +95,21 @@ function WhyNow({ s }: { s: ReentrySnapshot }) {
   const insights = s.market_insights;
   return (
     <section className="card section-card">
-      <div className="section-heading"><div><span className="kicker">WHY</span><h2>What is driving the decision</h2></div></div>
+      <div className="section-heading"><div><span className="kicker">WHY</span><h2>What is driving the broad-market decision</h2></div></div>
       <p className="section-intro">{insights?.headline || "The engine combines market damage, internal repair and historical evidence into one decision."}</p>
       <div className="two-col">
         <div className="reason-panel supportive">
           <h3><CircleCheck size={17} /> Supporting re-entry</h3>
           {(insights?.supporting_reentry || []).slice(0, 4).map((x, i) => (
-            <div className="reason" key={i}>
-              <div><b>{x.title}{x.symbol ? ` (${x.symbol})` : ""}</b>{x.state && <StatusPill>{x.state}</StatusPill>}</div>
-              <p>{x.detail}</p>
-              {x.why_it_matters && <small>{x.why_it_matters}</small>}
-            </div>
+            <div className="reason" key={i}><div><b>{x.title}{x.symbol ? ` (${x.symbol})` : ""}</b>{x.state && <StatusPill>{x.state}</StatusPill>}</div><p>{x.detail}</p>{x.why_it_matters && <small>{x.why_it_matters}</small>}</div>
           ))}
         </div>
         <div className="reason-panel holding">
           <h3><CircleAlert size={17} /> Why waiting may still help</h3>
           {(insights?.holding_back || []).slice(0, 4).map((x, i) => (
-            <div className="reason" key={i}>
-              <div><b>{x.title}</b>{x.state && <StatusPill>{x.state}</StatusPill>}</div>
-              <p>{x.detail}</p>
-            </div>
+            <div className="reason" key={i}><div><b>{x.title}</b>{x.state && <StatusPill>{x.state}</StatusPill>}</div><p>{x.detail}</p></div>
           ))}
         </div>
-      </div>
-    </section>
-  );
-}
-
-function MarketInternals({ s }: { s: ReentrySnapshot }) {
-  const proxies = Object.entries(s.subsector_intelligence?.proxies || {})
-    .sort((a, b) => Math.abs(b[1].drawdown_20d) - Math.abs(a[1].drawdown_20d));
-  return (
-    <section className="card section-card">
-      <div className="section-heading">
-        <div><span className="kicker">UNDER THE SURFACE</span><h2>What is moving underneath</h2></div>
-        <StatusPill>{pct(s.subsector_intelligence?.aggregate?.damage_share_3pct)} damaged 3%+</StatusPill>
-      </div>
-      <p className="section-intro">Only material damage, relative weakness, or repair is surfaced. Expand a row when you want the evidence.</p>
-      <div className="internal-list">
-        {proxies.slice(0, 8).map(([symbol, x]) => (
-          <details key={symbol} className="internal-row">
-            <summary>
-              <div className="name-wrap"><span className="state-dot" data-state={x.repairing ? "repair" : "damage"} /><div><b>{x.label} <span>({symbol})</span></b><small>{sectorNames[x.parent_sector] || x.parent_sector}</small></div></div>
-              <div className="row-metrics"><span>{pct(x.drawdown_20d)}</span><strong className={x.repairing ? "good-text" : "muted"}>{x.repairing ? "REPAIRING" : "DAMAGED"}</strong><ChevronRight size={17} /></div>
-            </summary>
-            <div className="detail-grid">
-              <span>20D drawdown <b>{pct(x.drawdown_20d)}</b></span>
-              <span>60D drawdown <b>{pct(x.drawdown_60d)}</b></span>
-              <span>1D return <b>{pct(x.return_1d)}</b></span>
-              <span>5D return <b>{pct(x.return_5d)}</b></span>
-              <span>vs SPY 20D <b>{pct(x.relative_strength_20d_vs_spy)}</b></span>
-              <span>vs {x.parent_sector} 20D <b>{pct(x.relative_strength_20d_vs_parent)}</b></span>
-            </div>
-            <p className="detail-copy">{x.repairing ? `${x.label} is repairing after a meaningful reset. That is constructive early evidence, but it remains context rather than an independent re-entry trigger.` : `${x.label} remains materially damaged or lagging. The engine tracks whether this weakness begins to stabilize and broaden into repair.`}</p>
-          </details>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function SectorMap({ s }: { s: ReentrySnapshot }) {
-  const sectors = Object.entries(s.signal_snapshot?.sectors || {})
-    .sort((a, b) => a[1].drawdown_20d - b[1].drawdown_20d);
-  return (
-    <section className="card section-card">
-      <div className="section-heading"><div><span className="kicker">SECTORS</span><h2>Damage and repair map</h2></div></div>
-      <div className="sector-table">
-        <div className="sector-table-head"><span>Sector</span><span>20D</span><span>Subsectors 3%+ down</span><span>Repair</span></div>
-        {sectors.map(([symbol, x]) => {
-          const group = s.subsector_intelligence?.by_sector?.[symbol];
-          const repairing = (group?.repair_share || 0) > 0;
-          return <div className="sector-table-row" key={symbol}>
-            <div><b>{sectorNames[symbol] || symbol}</b><small>{symbol}</small></div>
-            <strong>{pct(x.drawdown_20d)}</strong>
-            <span>{pct(group?.damage_share_3pct)}</span>
-            <span className={repairing ? "good-text" : "muted"}>{repairing ? "Repairing" : "No broad repair"}</span>
-          </div>;
-        })}
       </div>
     </section>
   );
@@ -185,13 +125,86 @@ function Historical({ s }: { s: ReentrySnapshot }) {
   ] as const;
   return (
     <section className="card section-card">
-      <div className="section-heading"><div><span className="kicker">HISTORICAL EVIDENCE</span><h2>What happened after past RE-ENTRY signals</h2></div><StatusPill>{h.final_independent_reentry_episodes} independent signals</StatusPill></div>
-      <p className="section-intro">These medians describe returns after historical RE-ENTRY signals. They are validation evidence for the strategy, not expected returns from buying today. Today&apos;s nearest historical setups are evaluated separately below.</p>
+      <div className="section-heading"><div><span className="kicker">2 · HISTORICAL BACKTEST</span><h2>What happened after past RE-ENTRY signals?</h2></div><StatusPill>{h.final_independent_reentry_episodes} independent signals</StatusPill></div>
+      <p className="section-intro">This is the strategy&apos;s historical evidence. These medians show what SPY and QQQ did after prior validated RE-ENTRY signals. They do not predict today&apos;s return and they are separate from today&apos;s nearest historical-setup verdict.</p>
       <div className="history-table">
-        <div className="history-head"><span>Horizon</span><span>SPY median</span><span>QQQ median</span></div>
+        <div className="history-head"><span>After signal</span><span>SPY median</span><span>QQQ median</span></div>
         {rows.map(([label, spy, qqq]) => <div className="history-row" key={label}><b>{label}</b><span>{pct(spy, 2)}</span><span>{pct(qqq, 2)}</span></div>)}
       </div>
-      <div className="history-footer"><span>Today&apos;s historical-setup verdict</span><strong className={stateClass(s.analog_decision)}>{s.analog_decision}</strong></div>
+      <div className="history-footer"><span>Do today&apos;s historical setups support re-entry?</span><strong className={stateClass(s.analog_decision)}>{s.analog_decision}</strong></div>
+    </section>
+  );
+}
+
+function Opportunities({ s }: { s: ReentrySnapshot }) {
+  const proxies = Object.entries(s.subsector_intelligence?.proxies || {});
+  const repairingSubsectors = proxies
+    .filter(([, x]) => x.repairing)
+    .sort((a, b) => a[1].drawdown_20d - b[1].drawdown_20d);
+
+  const repairingSectors = Object.entries(s.subsector_intelligence?.by_sector || {})
+    .filter(([, group]) => (group.damage_share_3pct || 0) >= 0.50 && (group.repair_share || 0) >= 0.25)
+    .sort((a, b) => (b[1].repair_share || 0) - (a[1].repair_share || 0));
+
+  const hasCandidates = repairingSubsectors.length > 0 || repairingSectors.length > 0;
+
+  return (
+    <section className="card section-card">
+      <div className="section-heading">
+        <div><span className="kicker">3 · SECTOR / SUBSECTOR OPPORTUNITIES</span><h2>Is anything under the surface attractive right now?</h2></div>
+        <StatusPill>{hasCandidates ? "REPAIR CANDIDATES PRESENT" : "NO REPAIR CANDIDATES"}</StatusPill>
+      </div>
+      <p className="section-intro">This section identifies sectors and subsectors already damaged enough to reset and now showing repair. These are potential opportunities to investigate, not independent buy signals. The validated broad-market RE-ENTRY decision above remains the timing decision.</p>
+
+      {!hasCandidates ? (
+        <div className="notice"><CircleAlert size={16} /> No sector or subsector currently meets the existing repair-candidate conditions.</div>
+      ) : (
+        <div className="two-col">
+          <div className="reason-panel supportive">
+            <h3><CircleCheck size={17} /> Sectors showing repair</h3>
+            {repairingSectors.slice(0, 6).map(([symbol, group]) => (
+              <div className="reason" key={symbol}>
+                <div><b>{sectorNames[symbol] || symbol} ({symbol})</b><StatusPill>REPAIRING</StatusPill></div>
+                <p>{pct(group.damage_share_3pct)} of tracked subsectors are down 3%+ and {pct(group.repair_share)} are repairing.</p>
+                <small>Potential sector opportunity. Not a standalone validated entry call.</small>
+              </div>
+            ))}
+            {repairingSectors.length === 0 && <div className="reason"><p>No sector currently meets the existing sector-repair threshold.</p></div>}
+          </div>
+
+          <div className="reason-panel supportive">
+            <h3><CircleCheck size={17} /> Subsectors showing repair</h3>
+            {repairingSubsectors.slice(0, 6).map(([symbol, x]) => (
+              <div className="reason" key={symbol}>
+                <div><b>{x.label} ({symbol})</b><StatusPill>REPAIRING</StatusPill></div>
+                <p>{pct(x.drawdown_20d)} from its 20-day high, {pct(x.return_5d)} over the last 5 days.</p>
+                <small>{sectorNames[x.parent_sector] || x.parent_sector}. Current repair evidence only, not an independent buy trigger.</small>
+              </div>
+            ))}
+            {repairingSubsectors.length === 0 && <div className="reason"><p>No tracked subsector is currently flagged as repairing.</p></div>}
+          </div>
+        </div>
+      )}
+      <div className="notice"><CircleAlert size={16} /> Historical sector/subsector rankings are evaluated after canonical RE-ENTRY episodes. Current repair candidates and historical post-signal performance answer different questions and should not be confused.</div>
+    </section>
+  );
+}
+
+function MarketInternals({ s }: { s: ReentrySnapshot }) {
+  const proxies = Object.entries(s.subsector_intelligence?.proxies || {}).sort((a, b) => Math.abs(b[1].drawdown_20d) - Math.abs(a[1].drawdown_20d));
+  return (
+    <section className="card section-card">
+      <div className="section-heading"><div><span className="kicker">DEEPER EVIDENCE</span><h2>What is moving underneath</h2></div><StatusPill>{pct(s.subsector_intelligence?.aggregate?.damage_share_3pct)} damaged 3%+</StatusPill></div>
+      <p className="section-intro">Use this only when you want the underlying evidence behind the opportunity section.</p>
+      <div className="internal-list">
+        {proxies.slice(0, 8).map(([symbol, x]) => (
+          <details key={symbol} className="internal-row">
+            <summary><div className="name-wrap"><span className="state-dot" data-state={x.repairing ? "repair" : "damage"} /><div><b>{x.label} <span>({symbol})</span></b><small>{sectorNames[x.parent_sector] || x.parent_sector}</small></div></div><div className="row-metrics"><span>{pct(x.drawdown_20d)}</span><strong className={x.repairing ? "good-text" : "muted"}>{x.repairing ? "REPAIRING" : "DAMAGED"}</strong><ChevronRight size={17} /></div></summary>
+            <div className="detail-grid"><span>20D drawdown <b>{pct(x.drawdown_20d)}</b></span><span>60D drawdown <b>{pct(x.drawdown_60d)}</b></span><span>1D return <b>{pct(x.return_1d)}</b></span><span>5D return <b>{pct(x.return_5d)}</b></span><span>vs SPY 20D <b>{pct(x.relative_strength_20d_vs_spy)}</b></span><span>vs {x.parent_sector} 20D <b>{pct(x.relative_strength_20d_vs_parent)}</b></span></div>
+            <p className="detail-copy">{x.repairing ? `${x.label} is repairing after a meaningful reset. That is constructive evidence, but it remains context rather than an independent re-entry trigger.` : `${x.label} remains materially damaged or lagging. The engine tracks whether this weakness begins to stabilize and repair.`}</p>
+          </details>
+        ))}
+      </div>
     </section>
   );
 }
@@ -209,15 +222,19 @@ export default async function Home() {
         <div><span className="brand">RE-ENTRY</span><span className="tagline">Know when waiting stops helping.</span></div>
         <div className="top-status">{fresh ? <><span className="live-dot" /> Completed-close data</> : "DATA INCOMPLETE"}</div>
       </header>
-      {!fresh ? <section className="card data-blocked"><CircleAlert /> <div><b>DATA INCOMPLETE</b><p>The current decision is suppressed until every required input resolves to the same completed market session.</p></div></section> : <>
-        <Hero s={s} usingPreview={usingPreview} />
-        <VehicleCard s={s} />
-        <WhyNow s={s} />
-        <MarketInternals s={s} />
-        <SectorMap s={s} />
-        <Historical s={s} />
-      </>}
-      <footer>RE-ENTRY uses completed-close data and reevaluates after every market session. Historical evidence supports decision timing, not guaranteed returns.</footer>
+      {!fresh ? (
+        <section className="card data-blocked"><CircleAlert /> <div><b>DATA INCOMPLETE</b><p>No re-entry, historical-comparison, or opportunity conclusion is shown until every required input resolves to the same completed market session.</p></div></section>
+      ) : (
+        <>
+          <Hero s={s} usingPreview={usingPreview} />
+          <BroadMarketAction s={s} />
+          <WhyNow s={s} />
+          <Historical s={s} />
+          <Opportunities s={s} />
+          <MarketInternals s={s} />
+        </>
+      )}
+      <footer>RE-ENTRY uses completed-close data and reevaluates after every market session. Historical evidence supports decision timing, not guaranteed returns. Sector/subsector repair candidates are supporting evidence unless separately validated as standalone entry rules.</footer>
     </main>
   );
 }
