@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -24,6 +25,14 @@ def _history(rec: dict[str, Any] | None) -> dict[str, Any] | None:
             "median_excess_vs_spy": row.get("median_excess_vs_spy"),
         }
     return out or None
+
+
+def _finite_float(value: Any) -> float | None:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    return number if math.isfinite(number) else None
 
 
 def attach_opportunity_evidence(snapshot: dict[str, Any], ranking_path: Path = RANKING_PATH) -> dict[str, Any]:
@@ -53,9 +62,9 @@ def attach_opportunity_evidence(snapshot: dict[str, Any], ranking_path: Path = R
 
     sectors: list[dict[str, Any]] = []
     for symbol, group in by_sector.items():
-        damage3 = float(group.get("damage_share_3pct", 0.0) or 0.0)
-        repair = float(group.get("repair_share", 0.0) or 0.0)
-        if damage3 < 0.50 or repair < 0.25:
+        damage3 = _finite_float(group.get("damage_share_3pct"))
+        repair = _finite_float(group.get("repair_share"))
+        if damage3 is None or repair is None or damage3 < 0.50 or repair < 0.25:
             continue
         rec = sector_results.get(symbol)
         sectors.append({
@@ -71,14 +80,18 @@ def attach_opportunity_evidence(snapshot: dict[str, Any], ranking_path: Path = R
     for symbol, item in proxies.items():
         if not bool(item.get("repairing", False)):
             continue
+        drawdown20 = _finite_float(item.get("drawdown_20d"))
+        return5 = _finite_float(item.get("return_5d"))
+        if drawdown20 is None or return5 is None:
+            continue
         rec = subsector_results.get(symbol)
         subsectors.append({
             "symbol": symbol,
             "label": str(item.get("label", (rec or {}).get("label", symbol))),
             "parent_sector": str(item.get("parent_sector", (rec or {}).get("parent") or "")),
             "current_state": "REPAIRING",
-            "drawdown_20d": float(item.get("drawdown_20d", 0.0) or 0.0),
-            "return_5d": float(item.get("return_5d", 0.0) or 0.0),
+            "drawdown_20d": drawdown20,
+            "return_5d": return5,
             "historical_after_reentry": _history(rec),
         })
 
