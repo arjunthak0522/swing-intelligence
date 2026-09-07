@@ -1151,10 +1151,248 @@
   },
   "market_state": "no material correction / neutral",
   "opportunity_evidence": {
-    "role": "context only; broad-market RE-ENTRY remains the timing decision",
-    "sectors": [],
-    "status": "HISTORICAL_RANKING_UNAVAILABLE",
-    "subsectors": []
+    "methodology": {
+      "execution": "next-session close",
+      "horizons": [
+        5,
+        10,
+        15,
+        30,
+        60
+      ],
+      "independent_episode_cooldown_sessions": 10,
+      "proxy_caveat": "Sector/subsector results use liquid ETF proxies and their actual available histories; newer ETFs therefore have smaller samples.",
+      "ranking_sample": "10-session cooldown subset used to reduce double-counting of clustered signals",
+      "round_trip_cost": 0.001,
+      "signal": "first completed-close RE-ENTER day of each contiguous canonical episode"
+    },
+    "role": "Current repair candidates plus historical outcomes after canonical RE-ENTRY episodes. This is not a standalone sector/subsector timing signal; the broad-market RE-ENTRY decision remains controlling.",
+    "sectors": [
+      {
+        "current_state": "REPAIRING",
+        "damage_share_3pct": 1.0,
+        "historical_after_reentry": {
+          "10": {
+            "median": 0.014981923643441308,
+            "median_excess_vs_spy": 0.0037490448001649135,
+            "n": 131,
+            "positive_rate": 0.6564885496183206
+          },
+          "30": {
+            "median": 0.026368716620460808,
+            "median_excess_vs_spy": -0.002030192433570166,
+            "n": 129,
+            "positive_rate": 0.6666666666666666
+          },
+          "60": {
+            "median": 0.0611333650837137,
+            "median_excess_vs_spy": 0.018265415141740182,
+            "n": 128,
+            "positive_rate": 0.7734375
+          }
+        },
+        "label": "Technology",
+        "repair_share": 0.3333333333333333,
+        "symbol": "XLK"
+      },
+      {
+        "current_state": "REPAIRING",
+        "damage_share_3pct": 0.5,
+        "historical_after_reentry": {
+          "10": {
+            "median": 0.010018715387987487,
+            "median_excess_vs_spy": -0.001214163455288908,
+            "n": 131,
+            "positive_rate": 0.6259541984732825
+          },
+          "30": {
+            "median": 0.023234473618570672,
+            "median_excess_vs_spy": -0.005164435435460302,
+            "n": 129,
+            "positive_rate": 0.6511627906976745
+          },
+          "60": {
+            "median": 0.0433645057572265,
+            "median_excess_vs_spy": 0.0004965558152529859,
+            "n": 128,
+            "positive_rate": 0.734375
+          }
+        },
+        "label": "Financials",
+        "repair_share": 0.5,
+        "symbol": "XLF"
+      },
+      {
+        "current_state": "REPAIRING",
+        "damage_share_3pct": 0.6666666666666666,
+        "historical_after_reentry": {
+          "10": {
+            "median": 0.007604930978401759,
+            "median_excess_vs_spy": -0.0036279478648746357,
+            "n": 131,
+            "positive_rate": 0.5801526717557252
+          },
+          "30": {
+            "median": 0.018217777472655627,
+            "median_excess_vs_spy": -0.010181131581375347,
+            "n": 129,
+            "positive_rate": 0.5891472868217055
+          },
+          "60": {
+            "median": 0.023870190659085466,
+            "median_excess_vs_spy": -0.01899775928288805,
+            "n": 128,
+            "positive_rate": 0.65625
+          }
+        },
+        "label": "Real Estate",
+        "repair_share": 0.3333333333333333,
+        "symbol": "XLRE"
+      }
+    ],
+    "status": "CURRENT_REPAIR_PLUS_CANONICAL_HISTORY",
+    "subsectors": [
+      {
+        "current_state": "REPAIRING",
+        "drawdown_20d": -0.04555018301710956,
+        "historical_after_reentry": {
+          "10": {
+            "median": 0.01681778264798306,
+            "median_excess_vs_spy": 0.005584903804706665,
+            "n": 131,
+            "positive_rate": 0.6259541984732825
+          },
+          "30": {
+            "median": 0.04366842596186815,
+            "median_excess_vs_spy": 0.015269516907837177,
+            "n": 129,
+            "positive_rate": 0.6356589147286822
+          },
+          "60": {
+            "median": 0.0956439596194234,
+            "median_excess_vs_spy": 0.05277600967744989,
+            "n": 128,
+            "positive_rate": 0.7421875
+          }
+        },
+        "label": "Semiconductors",
+        "parent_sector": "XLK",
+        "return_5d": 0.02513066981646972,
+        "symbol": "SMH"
+      },
+      {
+        "current_state": "REPAIRING",
+        "drawdown_20d": -0.04109853593534407,
+        "historical_after_reentry": {
+          "10": {
+            "median": 0.008934530126992968,
+            "median_excess_vs_spy": -0.002298348716283427,
+            "n": 124,
+            "positive_rate": 0.5887096774193549
+          },
+          "30": {
+            "median": 0.020514707308637692,
+            "median_excess_vs_spy": -0.007884201745393282,
+            "n": 122,
+            "positive_rate": 0.5655737704918032
+          },
+          "60": {
+            "median": 0.007644312348846439,
+            "median_excess_vs_spy": -0.03522363759312708,
+            "n": 121,
+            "positive_rate": 0.5702479338842975
+          }
+        },
+        "label": "Digital Infrastructure REITs",
+        "parent_sector": "XLRE",
+        "return_5d": 0.0003658232827083996,
+        "symbol": "SRVR"
+      },
+      {
+        "current_state": "REPAIRING",
+        "drawdown_20d": -0.03251014218756154,
+        "historical_after_reentry": {
+          "10": {
+            "median": 0.011457331814718752,
+            "median_excess_vs_spy": 0.0002244529714423571,
+            "n": 131,
+            "positive_rate": 0.6183206106870229
+          },
+          "30": {
+            "median": 0.018217897264537375,
+            "median_excess_vs_spy": -0.0101810117894936,
+            "n": 129,
+            "positive_rate": 0.6046511627906976
+          },
+          "60": {
+            "median": 0.02959797307869827,
+            "median_excess_vs_spy": -0.013269976863275246,
+            "n": 128,
+            "positive_rate": 0.6484375
+          }
+        },
+        "label": "Banks",
+        "parent_sector": "XLF",
+        "return_5d": 0.012854181495564276,
+        "symbol": "KBE"
+      },
+      {
+        "current_state": "REPAIRING",
+        "drawdown_20d": -0.020729277729891415,
+        "historical_after_reentry": {
+          "10": {
+            "median": 0.012570037461844152,
+            "median_excess_vs_spy": 0.0013371586185677575,
+            "n": 131,
+            "positive_rate": 0.5801526717557252
+          },
+          "30": {
+            "median": 0.016480277564440704,
+            "median_excess_vs_spy": -0.01191863148959027,
+            "n": 129,
+            "positive_rate": 0.5736434108527132
+          },
+          "60": {
+            "median": 0.0163556677677148,
+            "median_excess_vs_spy": -0.026512282174258717,
+            "n": 128,
+            "positive_rate": 0.546875
+          }
+        },
+        "label": "Oil Services",
+        "parent_sector": "XLE",
+        "return_5d": 0.02204107306665959,
+        "symbol": "OIH"
+      },
+      {
+        "current_state": "REPAIRING",
+        "drawdown_20d": -0.034133243316986195,
+        "historical_after_reentry": {
+          "10": {
+            "median": 0.011388570373323748,
+            "median_excess_vs_spy": 0.0001556915300473527,
+            "n": 131,
+            "positive_rate": 0.6183206106870229
+          },
+          "30": {
+            "median": 0.01632470779380457,
+            "median_excess_vs_spy": -0.012074201260226403,
+            "n": 129,
+            "positive_rate": 0.5968992248062015
+          },
+          "60": {
+            "median": 0.024862777577510098,
+            "median_excess_vs_spy": -0.018005172364463418,
+            "n": 128,
+            "positive_rate": 0.625
+          }
+        },
+        "label": "Regional Banks",
+        "parent_sector": "XLF",
+        "return_5d": 0.013055094905351394,
+        "symbol": "KRE"
+      }
+    ]
   },
   "outperformance_intelligence": {
     "as_of": "2026-09-04",
@@ -1165,7 +1403,7 @@
         "neighbor_positive_excess_rate": 0.8,
         "neighbors": 15,
         "parent_sector": "XLRE",
-        "predicted_median_excess_vs_spy": 0.024917092209354008,
+        "predicted_median_excess_vs_spy": 0.024917379485098978,
         "rank": 1,
         "symbol": "REZ"
       },
@@ -1174,7 +1412,7 @@
         "neighbor_positive_excess_rate": 0.8,
         "neighbors": 15,
         "parent_sector": "XLI",
-        "predicted_median_excess_vs_spy": 0.019666096029900604,
+        "predicted_median_excess_vs_spy": 0.01966597030939954,
         "rank": 2,
         "symbol": "ITA"
       },
@@ -1183,7 +1421,7 @@
         "neighbor_positive_excess_rate": 0.6,
         "neighbors": 15,
         "parent_sector": "XLI",
-        "predicted_median_excess_vs_spy": 0.013418371772867532,
+        "predicted_median_excess_vs_spy": 0.01341815556345416,
         "rank": 3,
         "symbol": "XTN"
       }
@@ -2283,9 +2521,10 @@
     "50% or fewer S&P 500 stocks are above their 50DMA"
   ],
   "retail_metadata": {
-    "published_at_utc": "2026-09-07T22:11:35.548248+00:00",
+    "published_at_utc": "2026-09-07T22:14:49.125621+00:00",
     "engine_commit": "47f38bf3362a97bcf9c9dd2d6545c4fae212e046",
     "engine_validation": "CANONICAL_WORKFLOW_PASS",
-    "feed_mode": "COMPLETED_CLOSE_ONLY"
+    "feed_mode": "COMPLETED_CLOSE_ONLY",
+    "historical_opportunity_evidence": "REQUIRED"
   }
 }
