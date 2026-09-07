@@ -18,6 +18,7 @@ const sectorNames: Record<string, string> = {
 
 function stateClass(value: string) {
   const v = value.toUpperCase();
+  if (v === "NO RE-ENTRY SETUP") return "neutral";
   if (v.includes("REPAIR") || v.includes("YES")) return "good";
   if (v.includes("WAIT") || v.includes("STABIL") || v.includes("DEVELOP")) return "warn";
   if (v.includes("NO") || v.includes("WORSEN") || v.includes("HEAVY")) return "bad";
@@ -30,6 +31,7 @@ function StatusPill({ children }: { children: React.ReactNode }) {
 
 function Hero({ s, usingPreview }: { s: ReentrySnapshot; usingPreview: boolean }) {
   const closer = s.signal === "WAIT" && ["DEVELOPING", "MEANINGFUL", "BROAD"].includes(s.internal_reset);
+  const noSetup = s.signal === "NO RE-ENTRY SETUP";
   return (
     <section className="hero card">
       <div className="eyebrow-row">
@@ -40,16 +42,22 @@ function Hero({ s, usingPreview }: { s: ReentrySnapshot; usingPreview: boolean }
       <div className="hero-grid">
         <div>
           <div className={`signal ${stateClass(s.signal)}`}>{s.signal}</div>
-          <div className="signal-subline">{closer ? "Getting closer, but waiting still has value." : s.signal_interpretation}</div>
+          <div className="signal-subline">
+            {noSetup
+              ? "No meaningful pullback is creating a re-entry opportunity right now."
+              : closer
+                ? "Getting closer, but waiting still has value."
+                : s.signal_interpretation}
+          </div>
         </div>
 
         <div className="decision-summary">
-          <span className="summary-label">BOTTOM LINE</span>
+          <span className="summary-label">WHY THIS DECISION</span>
           <p>{s.signal_interpretation}</p>
           <div className="decision-tags">
-            <span><small>Damage</small><b>{s.market_damage}</b></span>
-            <span><small>Repair</small><b>{s.selling_pressure}</b></span>
-            <span><small>History</small><b>{s.analog_decision}</b></span>
+            <span><small>Market pullback</small><b>{s.market_damage}</b></span>
+            <span><small>Recovery</small><b>{s.selling_pressure}</b></span>
+            <span><small>Past setups</small><b>{s.analog_decision}</b></span>
           </div>
         </div>
       </div>
@@ -72,10 +80,10 @@ function VehicleCard({ s }: { s: ReentrySnapshot }) {
       </div>
       <p className="section-intro">The engine answers whether cash should go back into broad equities. SPY and QQQ are the validated destination set. Sector and subsector ETFs explain the setup but are not standalone buy calls.</p>
       <div className="vehicle-strip">
-        <div className="vehicle-primary"><div><span>S&P 500</span><b>SPY</b></div><small>Broad market</small><strong>{pct(h.SPY_10D_median_after_signal, 2)}</strong><em>10D historical median</em></div>
-        <div className="vehicle-primary"><div><span>Nasdaq 100</span><b>QQQ</b></div><small>Growth heavy</small><strong>{pct(h.QQQ_10D_median_after_signal, 2)}</strong><em>10D historical median</em></div>
+        <div className="vehicle-primary"><div><span>S&P 500</span><b>SPY</b></div><small>Broad market</small><strong>{pct(h.SPY_10D_median_after_signal, 2)}</strong><em>10D median after past RE-ENTRY signals</em></div>
+        <div className="vehicle-primary"><div><span>Nasdaq 100</span><b>QQQ</b></div><small>Growth heavy</small><strong>{pct(h.QQQ_10D_median_after_signal, 2)}</strong><em>10D median after past RE-ENTRY signals</em></div>
       </div>
-      <div className="notice"><CircleAlert size={16} /> The app will not claim SPY or QQQ is preferred until a separate vehicle-selection rule is historically validated.</div>
+      <div className="notice"><CircleAlert size={16} /> These are historical results after past RE-ENTRY signals, not forecasts for buying today. The app will not claim SPY or QQQ is preferred until a separate vehicle-selection rule is historically validated.</div>
     </section>
   );
 }
@@ -98,7 +106,7 @@ function WhyNow({ s }: { s: ReentrySnapshot }) {
           ))}
         </div>
         <div className="reason-panel holding">
-          <h3><CircleAlert size={17} /> Holding it back</h3>
+          <h3><CircleAlert size={17} /> Why waiting may still help</h3>
           {(insights?.holding_back || []).slice(0, 4).map((x, i) => (
             <div className="reason" key={i}>
               <div><b>{x.title}</b>{x.state && <StatusPill>{x.state}</StatusPill>}</div>
@@ -177,13 +185,13 @@ function Historical({ s }: { s: ReentrySnapshot }) {
   ] as const;
   return (
     <section className="card section-card">
-      <div className="section-heading"><div><span className="kicker">TRUST THE EVIDENCE</span><h2>Historical backtest</h2></div><StatusPill>{h.final_independent_reentry_episodes} independent signals</StatusPill></div>
-      <p className="section-intro">Validated strategy history is separate from today&apos;s 40 nearest analogs. The first tells you how the engine behaved historically. The second helps decide whether today qualifies.</p>
+      <div className="section-heading"><div><span className="kicker">HISTORICAL EVIDENCE</span><h2>What happened after past RE-ENTRY signals</h2></div><StatusPill>{h.final_independent_reentry_episodes} independent signals</StatusPill></div>
+      <p className="section-intro">These medians describe returns after historical RE-ENTRY signals. They are validation evidence for the strategy, not expected returns from buying today. Today&apos;s nearest historical setups are evaluated separately below.</p>
       <div className="history-table">
         <div className="history-head"><span>Horizon</span><span>SPY median</span><span>QQQ median</span></div>
         {rows.map(([label, spy, qqq]) => <div className="history-row" key={label}><b>{label}</b><span>{pct(spy, 2)}</span><span>{pct(qqq, 2)}</span></div>)}
       </div>
-      <div className="history-footer"><span>Today&apos;s analog verdict</span><strong className={stateClass(s.analog_decision)}>{s.analog_decision}</strong></div>
+      <div className="history-footer"><span>Today&apos;s historical-setup verdict</span><strong className={stateClass(s.analog_decision)}>{s.analog_decision}</strong></div>
     </section>
   );
 }
