@@ -28,6 +28,7 @@ on:
       - 'tests/test_reentry_subsector_intelligence.py'
       - 'tests/test_reentry_subsector_decision.py'
       - 'tests/test_reentry_insights.py'
+      - 'tests/test_reentry_sector_subsector_ranking.py'
       - 'docs/internal-correction-v2-research-spec.md'
       - '.github/workflows/internal-correction-v2.yml'
 
@@ -72,7 +73,7 @@ jobs:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/internal_correction_full_v2.py
       - name: Verify unified RE-ENTRY contracts
-        run: pytest -q tests/test_reentry_engine_contract.py tests/test_reentry_early_entry_policy.py tests/test_reentry_subsector_intelligence.py tests/test_reentry_subsector_decision.py tests/test_reentry_insights.py
+        run: pytest -q tests/test_reentry_engine_contract.py tests/test_reentry_early_entry_policy.py tests/test_reentry_subsector_intelligence.py tests/test_reentry_subsector_decision.py tests/test_reentry_insights.py tests/test_reentry_sector_subsector_ranking.py
       - name: Pace Twelve Data requests
         run: sleep 30
       - name: Validate subsector hidden-damage and repair states
