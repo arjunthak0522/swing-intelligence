@@ -21,6 +21,32 @@ export interface InsightItem {
   why_it_matters?: string;
 }
 
+export interface OpportunityHistoryRow {
+  n: number;
+  median?: number | null;
+  positive_rate?: number | null;
+  median_excess_vs_spy?: number | null;
+}
+
+export interface SectorOpportunityEvidence {
+  symbol: string;
+  label: string;
+  current_state: "REPAIRING";
+  damage_share_3pct: number;
+  repair_share: number;
+  historical_after_reentry?: Record<string, OpportunityHistoryRow> | null;
+}
+
+export interface SubsectorOpportunityEvidence {
+  symbol: string;
+  label: string;
+  parent_sector: string;
+  current_state: "REPAIRING";
+  drawdown_20d: number;
+  return_5d: number;
+  historical_after_reentry?: Record<string, OpportunityHistoryRow> | null;
+}
+
 export interface ReentrySnapshot {
   engine_version: string;
   as_of: string;
@@ -72,6 +98,13 @@ export interface ReentrySnapshot {
     subsectors?: InsightItem[];
     factors?: InsightItem[];
   };
+  opportunity_evidence?: {
+    status: string;
+    role: string;
+    methodology?: Record<string, unknown>;
+    sectors: SectorOpportunityEvidence[];
+    subsectors: SubsectorOpportunityEvidence[];
+  };
   historical_validation: {
     final_independent_reentry_episodes: number;
     SPY_5D_median_after_signal: number;
@@ -86,7 +119,7 @@ export interface ReentrySnapshot {
   forward_analog_outcomes?: Record<string, unknown>;
 }
 
-export const pct = (value?: number, digits = 1) =>
+export const pct = (value?: number | null, digits = 1) =>
   typeof value === "number" && Number.isFinite(value)
     ? `${value >= 0 ? "+" : ""}${(value * 100).toFixed(digits)}%`
     : "-";
