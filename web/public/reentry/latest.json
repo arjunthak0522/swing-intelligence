@@ -1,206 +1,206 @@
 {
   "analog_count": 40,
-  "analog_decision": "NO",
-  "analog_interpretation": "historical analogs do not support deploying cash yet",
+  "analog_decision": "CAUTIOUS YES",
+  "analog_interpretation": "putting some cash back to work makes sense, but the edge is modest",
   "analogs": [
     {
       "date": "2016-10-07",
-      "distance": 0.07747780932408597,
+      "distance": 0.07362539424644039,
       "rank": 1
     },
     {
-      "date": "2016-10-04",
-      "distance": 0.10285422664916595,
+      "date": "2018-10-02",
+      "distance": 0.09961859625662599,
       "rank": 2
     },
     {
-      "date": "2025-09-24",
-      "distance": 0.10714184315017632,
+      "date": "2018-10-01",
+      "distance": 0.10311559791112743,
       "rank": 3
     },
     {
-      "date": "2018-10-02",
-      "distance": 0.10898709051717097,
+      "date": "2017-08-29",
+      "distance": 0.11513622083842355,
       "rank": 4
     },
     {
-      "date": "2025-02-12",
-      "distance": 0.11349980571506461,
+      "date": "2017-09-05",
+      "distance": 0.11538627883579126,
       "rank": 5
     },
     {
-      "date": "2023-09-15",
-      "distance": 0.11576326074146398,
+      "date": "2025-09-24",
+      "distance": 0.11606613785796785,
       "rank": 6
     },
     {
-      "date": "2018-10-01",
-      "distance": 0.11614514595577755,
+      "date": "2025-12-30",
+      "distance": 0.11874641956298733,
       "rank": 7
     },
     {
       "date": "2023-04-20",
-      "distance": 0.11769681625722087,
+      "distance": 0.11918116973149344,
       "rank": 8
     },
     {
-      "date": "2025-12-30",
-      "distance": 0.11818365275274682,
+      "date": "2017-08-23",
+      "distance": 0.12352371284081264,
       "rank": 9
     },
     {
-      "date": "2026-05-19",
-      "distance": 0.11844249503510039,
+      "date": "2025-08-06",
+      "distance": 0.13003496682666182,
       "rank": 10
     },
     {
-      "date": "2017-08-29",
-      "distance": 0.12335053942306713,
+      "date": "2025-02-12",
+      "distance": 0.13064742198317061,
       "rank": 11
     },
     {
-      "date": "2025-08-06",
-      "distance": 0.12448817774112689,
+      "date": "2023-09-15",
+      "distance": 0.13373523478552962,
       "rank": 12
     },
     {
-      "date": "2017-09-05",
-      "distance": 0.12494190058823236,
+      "date": "2025-12-19",
+      "distance": 0.13503162244378114,
       "rank": 13
     },
     {
-      "date": "2026-06-03",
-      "distance": 0.12963226854631701,
+      "date": "2026-05-19",
+      "distance": 0.136823423522391,
       "rank": 14
     },
     {
-      "date": "2025-12-16",
-      "distance": 0.13218998225675005,
+      "date": "2026-01-07",
+      "distance": 0.14220339957254358,
       "rank": 15
     },
     {
-      "date": "2026-05-04",
-      "distance": 0.13489737319824335,
+      "date": "2016-11-28",
+      "distance": 0.14308940281613336,
       "rank": 16
     },
     {
-      "date": "2025-12-19",
-      "distance": 0.1354333964613358,
+      "date": "2016-10-26",
+      "distance": 0.14349181504490705,
       "rank": 17
     },
     {
-      "date": "2025-12-08",
-      "distance": 0.13666293379599012,
+      "date": "2025-02-07",
+      "distance": 0.14417763530633113,
       "rank": 18
     },
     {
-      "date": "2025-11-03",
-      "distance": 0.1381908630154579,
+      "date": "2017-05-12",
+      "distance": 0.1444843508759337,
       "rank": 19
     },
     {
-      "date": "2017-08-23",
-      "distance": 0.13890251540133414,
+      "date": "2025-12-16",
+      "distance": 0.14524722357537576,
       "rank": 20
     },
     {
-      "date": "2023-04-21",
-      "distance": 0.14146842392513048,
+      "date": "2026-05-04",
+      "distance": 0.14535456927096824,
       "rank": 21
     },
     {
-      "date": "2023-09-12",
-      "distance": 0.14207488135145316,
+      "date": "2021-09-16",
+      "distance": 0.14655438297363294,
       "rank": 22
     },
     {
-      "date": "2026-01-07",
-      "distance": 0.14320430764181186,
+      "date": "2023-05-09",
+      "distance": 0.14718656009376438,
       "rank": 23
     },
     {
-      "date": "2023-05-09",
-      "distance": 0.14368945161087593,
+      "date": "2025-09-05",
+      "distance": 0.1488652355971693,
       "rank": 24
     },
     {
-      "date": "2016-10-26",
-      "distance": 0.14588540982817513,
+      "date": "2025-08-25",
+      "distance": 0.14945270846804712,
       "rank": 25
     },
     {
-      "date": "2025-08-15",
-      "distance": 0.14690562316028138,
+      "date": "2026-07-14",
+      "distance": 0.14964601543641287,
       "rank": 26
     },
     {
-      "date": "2025-02-07",
-      "distance": 0.14706267668718861,
+      "date": "2025-09-29",
+      "distance": 0.14982258763751602,
       "rank": 27
     },
     {
-      "date": "2017-09-07",
-      "distance": 0.14888885462494295,
+      "date": "2024-06-28",
+      "distance": 0.15003428518988224,
       "rank": 28
     },
     {
-      "date": "2023-09-13",
-      "distance": 0.1494943523056595,
+      "date": "2023-04-21",
+      "distance": 0.1503560088771235,
       "rank": 29
     },
     {
-      "date": "2025-09-25",
-      "distance": 0.15091056143050519,
+      "date": "2025-08-15",
+      "distance": 0.15048963370522397,
       "rank": 30
     },
     {
-      "date": "2018-07-27",
-      "distance": 0.15129853201946733,
+      "date": "2024-06-25",
+      "distance": 0.15055066964883307,
       "rank": 31
     },
     {
-      "date": "2026-07-14",
-      "distance": 0.1516708122959726,
+      "date": "2026-06-03",
+      "distance": 0.15126155569028157,
       "rank": 32
     },
     {
-      "date": "2016-11-28",
-      "distance": 0.15192427927759583,
+      "date": "2019-10-31",
+      "distance": 0.15129189568006873,
       "rank": 33
     },
     {
-      "date": "2024-06-25",
-      "distance": 0.15303767025637255,
+      "date": "2021-12-16",
+      "distance": 0.1519974983159604,
       "rank": 34
     },
     {
-      "date": "2023-05-12",
-      "distance": 0.15362724854916215,
+      "date": "2017-09-07",
+      "distance": 0.15302687132155654,
       "rank": 35
     },
     {
-      "date": "2021-09-16",
-      "distance": 0.153960502542796,
+      "date": "2025-10-07",
+      "distance": 0.15344641536393266,
       "rank": 36
     },
     {
-      "date": "2024-12-16",
-      "distance": 0.15588249454934913,
+      "date": "2018-07-27",
+      "distance": 0.15408589460019437,
       "rank": 37
     },
     {
-      "date": "2025-10-07",
-      "distance": 0.15614237340116827,
+      "date": "2023-09-12",
+      "distance": 0.15415761527765282,
       "rank": 38
     },
     {
-      "date": "2025-12-31",
-      "distance": 0.1562914836269097,
+      "date": "2025-12-12",
+      "distance": 0.15420176256052268,
       "rank": 39
     },
     {
-      "date": "2017-05-12",
-      "distance": 0.15669610075895932,
+      "date": "2025-11-03",
+      "distance": 0.15537459921032715,
       "rank": 40
     }
   ],
@@ -210,13 +210,16 @@
     "historical evidence supports decision timing, not guaranteed returns",
     "drawdown statistics are based on daily closes, not intraday lows",
     "Sector and factor histories use liquid ETF proxies and are not proprietary point-in-time factor-index constituent histories.",
-    "Subsector and industry histories use liquid ETF proxies. Coverage is intentionally diagnostic, can be uneven across sectors, and is not a proprietary point-in-time industry classification."
+    "Subsector and industry histories use audited liquid ETF proxies. Weighting-method ETFs are excluded from the primary subsector breadth calculation; broad thematic proxies are explicitly labeled. Coverage can be uneven across sectors and is not a proprietary point-in-time industry classification."
   ],
   "current_inputs": {
-    "breadth_1d_change": -0.03992015968063867,
-    "breadth_3d_change": 0.005988023952095856,
-    "pct_sp500_above_200dma": 0.6407185628742516,
-    "pct_sp500_above_50dma": 0.47105788423153694,
+    "breadth_1d_change": -0.03193612774451099,
+    "breadth_3d_change": 0.013972055888223534,
+    "pct_sp500_above_200dma": 0.6646706586826348,
+    "pct_sp500_above_50dma": 0.4790419161676646,
+    "rsp_breadth_state": "NARROWING",
+    "rsp_spy_relative_20d": -0.0009861998147275841,
+    "rsp_spy_relative_5d": -0.008740114372044916,
     "spy_drawdown_20d": -0.009885843574844344,
     "spy_return_5d": 0.0010918567905857657,
     "vix_5d_change": 0.006930006930006893,
@@ -240,26 +243,23 @@
       "source": "Cboe VIX3M daily history"
     },
     "breadth": {
-      "constituent_source": "https://raw.githubusercontent.com/datasets/s-and-p-500-companies/main/data/constituents.csv",
-      "constituent_universe": 503,
       "latest": "2026-09-04",
-      "source": "historical point-in-time breadth + same-day current-constituent Yahoo overlay",
-      "valid_constituents": 501
+      "source": "https://tradermonty.github.io/market-breadth-analysis/market_breadth_data.csv"
     },
     "equity_target_session": "2026-09-04",
-    "live_overlay_used": true,
+    "live_overlay_used": false,
     "same_day_complete": true,
     "same_day_required": true,
     "stale_inputs_vs_equity_target": {},
     "target_session": "2026-09-04"
   },
   "decision_diagnostics": {
-    "median_7_10d_excess_across_spy_qqq": -0.007399573318874392,
-    "median_7_10d_forward_return_across_spy_qqq": -0.00010288881919218087,
-    "median_7_10d_positive_rate_across_spy_qqq": 0.5,
+    "median_7_10d_excess_across_spy_qqq": -0.001823860785450604,
+    "median_7_10d_forward_return_across_spy_qqq": 0.006225333591864114,
+    "median_7_10d_positive_rate_across_spy_qqq": 0.6,
     "stabilizing": true,
     "weakness_present": true,
-    "worst_25th_percentile_across_spy_qqq": -0.027544900547634754
+    "worst_25th_percentile_across_spy_qqq": -0.01927931790770704
   },
   "drawdown_definition": "close-to-close maximum adverse excursion from hypothetical close t+1 entry through each horizon",
   "early_entry_policy": {
@@ -294,184 +294,184 @@
   "extended_forward_evidence": {
     "QQQ": {
       "10": {
-        "best_final_return": 0.06996300159236812,
-        "mean_return": -0.005608598814358287,
-        "median_max_drawdown": -0.02006588668864384,
-        "median_max_favorable_excursion": 0.011517392608368482,
-        "median_return": 0.0001393638348705659,
+        "best_final_return": 0.042568600452053684,
+        "mean_return": -0.0006871699569836493,
+        "median_max_drawdown": -0.01734869401119038,
+        "median_max_favorable_excursion": 0.015933428260992644,
+        "median_return": 0.006029539537901752,
         "n": 40,
         "p10_max_drawdown": -0.06366648609605831,
-        "p25_max_drawdown": -0.04017877011129578,
-        "p25_return": -0.027544900547634754,
-        "p75_return": 0.016365338156420772,
-        "positive_rate": 0.5,
+        "p25_max_drawdown": -0.03563814199220672,
+        "p25_return": -0.01927931790770704,
+        "p75_return": 0.01952831361484253,
+        "positive_rate": 0.6,
         "worst_final_return": -0.07903662995007432,
         "worst_max_drawdown": -0.08792680828179611
       },
       "15": {
-        "best_final_return": 0.08483490664234183,
-        "mean_return": -0.002244640814399185,
-        "median_max_drawdown": -0.020519927979055996,
-        "median_max_favorable_excursion": 0.014430519900240357,
-        "median_return": 0.0004027203933593135,
+        "best_final_return": 0.08164132119575196,
+        "mean_return": 0.00047468420525848264,
+        "median_max_drawdown": -0.01848465428738999,
+        "median_max_favorable_excursion": 0.02002434705095202,
+        "median_return": 0.004729141181080921,
         "n": 40,
         "p10_max_drawdown": -0.065111190628451,
-        "p25_max_drawdown": -0.053409061013022646,
-        "p25_return": -0.018563183711705955,
-        "p75_return": 0.020647972600137343,
-        "positive_rate": 0.5,
+        "p25_max_drawdown": -0.0380069605489024,
+        "p25_return": -0.012413630922513158,
+        "p75_return": 0.025307636920375354,
+        "positive_rate": 0.55,
         "worst_final_return": -0.11183624630276945,
         "worst_max_drawdown": -0.11083624630276945
       },
       "30": {
         "best_final_return": 0.12208906082959115,
-        "mean_return": -0.0009255361046923066,
-        "median_max_drawdown": -0.03236553033351519,
-        "median_max_favorable_excursion": 0.03168156568926406,
-        "median_return": -0.005715735818088318,
+        "mean_return": 0.0034395417531096735,
+        "median_max_drawdown": -0.027708243746882855,
+        "median_max_favorable_excursion": 0.03534687698174199,
+        "median_return": 0.016828136665572924,
         "n": 40,
-        "p10_max_drawdown": -0.09694290203045641,
-        "p25_max_drawdown": -0.058839417120123416,
-        "p25_return": -0.03471699335090506,
-        "p75_return": 0.03310829525145925,
-        "positive_rate": 0.475,
+        "p10_max_drawdown": -0.11394564870829026,
+        "p25_max_drawdown": -0.06346179883302888,
+        "p25_return": -0.037897660136089084,
+        "p75_return": 0.03994174920457849,
+        "positive_rate": 0.55,
         "worst_final_return": -0.12594871711331534,
         "worst_max_drawdown": -0.12606832893941688
       },
       "5": {
-        "best_final_return": 0.03817326689295297,
-        "mean_return": -0.0011694432430612966,
-        "median_max_drawdown": -0.013445130254490845,
-        "median_max_favorable_excursion": 0.008532904779726458,
-        "median_return": 0.0019289415873406943,
+        "best_final_return": 0.04724507027616831,
+        "mean_return": 0.002820140973894064,
+        "median_max_drawdown": -0.008651338596374292,
+        "median_max_favorable_excursion": 0.01133266564776192,
+        "median_return": 0.006892173464366214,
         "n": 40,
-        "p10_max_drawdown": -0.03649992938033714,
-        "p25_max_drawdown": -0.026674382788222345,
-        "p25_return": -0.018570822515405455,
-        "p75_return": 0.018278530694031236,
-        "positive_rate": 0.525,
+        "p10_max_drawdown": -0.03466797064589525,
+        "p25_max_drawdown": -0.022301891960863407,
+        "p25_return": -0.016625038006037623,
+        "p75_return": 0.01895117094659593,
+        "positive_rate": 0.6,
         "worst_final_return": -0.07747216993815542,
         "worst_max_drawdown": -0.07647216993815542
       },
       "60": {
         "best_final_return": 0.2170600807953028,
-        "mean_return": 0.019300015958477558,
-        "median_max_drawdown": -0.043269635491202996,
-        "median_max_favorable_excursion": 0.047026229781210294,
-        "median_return": 0.02244524928990399,
+        "mean_return": 0.02294620288323329,
+        "median_max_drawdown": -0.03146587859060024,
+        "median_max_favorable_excursion": 0.05896367240201883,
+        "median_return": 0.03553630074621761,
         "n": 39,
-        "p10_max_drawdown": -0.143497874926725,
-        "p25_max_drawdown": -0.08926573620339806,
-        "p25_return": -0.030932454841459567,
-        "p75_return": 0.07130470646442866,
-        "positive_rate": 0.6666666666666666,
+        "p10_max_drawdown": -0.18148666227462193,
+        "p25_max_drawdown": -0.08642330036278034,
+        "p25_return": -0.02002854034077184,
+        "p75_return": 0.07403758123949589,
+        "positive_rate": 0.717948717948718,
         "worst_final_return": -0.17747375504710639,
         "worst_max_drawdown": -0.22828717397149767
       },
       "7": {
         "best_final_return": 0.055014422558566145,
-        "mean_return": -0.004349723158996052,
-        "median_max_drawdown": -0.01819248483212421,
-        "median_max_favorable_excursion": 0.008532904779726458,
-        "median_return": 0.0034092493631414653,
+        "mean_return": 0.0007035220160945654,
+        "median_max_drawdown": -0.011585423058563915,
+        "median_max_favorable_excursion": 0.012112044136221689,
+        "median_return": 0.006421127645826475,
         "n": 40,
-        "p10_max_drawdown": -0.04716426393961524,
-        "p25_max_drawdown": -0.03786258269337711,
-        "p25_return": -0.022178365824166185,
-        "p75_return": 0.01456090470264515,
-        "positive_rate": 0.525,
+        "p10_max_drawdown": -0.04461111246682185,
+        "p25_max_drawdown": -0.030769951983640076,
+        "p25_return": -0.01337293864410019,
+        "p75_return": 0.019811786188886626,
+        "positive_rate": 0.625,
         "worst_final_return": -0.08794476446837152,
         "worst_max_drawdown": -0.08792680828179611
       }
     },
     "SPY": {
       "10": {
-        "best_final_return": 0.030008057580010017,
-        "mean_return": -0.004526271761293094,
-        "median_max_drawdown": -0.016056757514760878,
-        "median_max_favorable_excursion": 0.011123634516563952,
-        "median_return": -0.00034514147325492763,
+        "best_final_return": 0.037793550351186256,
+        "mean_return": 0.00043880794532852595,
+        "median_max_drawdown": -0.01134033733085349,
+        "median_max_favorable_excursion": 0.01330148520859531,
+        "median_return": 0.005077733115010919,
         "n": 40,
-        "p10_max_drawdown": -0.042256534378881536,
-        "p25_max_drawdown": -0.02829303417271764,
-        "p25_return": -0.01755121706995924,
-        "p75_return": 0.012039358163542124,
-        "positive_rate": 0.5,
-        "worst_final_return": -0.04949453877996568,
+        "p10_max_drawdown": -0.04061103466689843,
+        "p25_max_drawdown": -0.021867441685434447,
+        "p25_return": -0.010334269993469314,
+        "p75_return": 0.015821141889212964,
+        "positive_rate": 0.575,
+        "worst_final_return": -0.046822090304313724,
         "worst_max_drawdown": -0.0670162827368711
       },
       "15": {
         "best_final_return": 0.03587635472936557,
-        "mean_return": -0.0031797411192870688,
-        "median_max_drawdown": -0.017171764053316663,
-        "median_max_favorable_excursion": 0.015594415458287436,
-        "median_return": 0.005005428655246892,
+        "mean_return": 0.0008637983057074444,
+        "median_max_drawdown": -0.01287653636992614,
+        "median_max_favorable_excursion": 0.01788394078704525,
+        "median_return": 0.011187130802340794,
         "n": 40,
-        "p10_max_drawdown": -0.05630111066076375,
-        "p25_max_drawdown": -0.033596545021748886,
-        "p25_return": -0.011748873865137427,
-        "p75_return": 0.01899257543519517,
-        "positive_rate": 0.575,
+        "p10_max_drawdown": -0.05029400058494282,
+        "p25_max_drawdown": -0.029142603743392115,
+        "p25_return": -0.0032869786704428075,
+        "p75_return": 0.019627911348175486,
+        "positive_rate": 0.675,
         "worst_final_return": -0.09149770327711504,
         "worst_max_drawdown": -0.09049770327711504
       },
       "30": {
         "best_final_return": 0.06157911526012094,
-        "mean_return": 0.0028433097126057878,
+        "mean_return": 0.00660891612212636,
         "median_max_drawdown": -0.01883163108167546,
-        "median_max_favorable_excursion": 0.02763950245576252,
-        "median_return": 0.012678344297055277,
+        "median_max_favorable_excursion": 0.035597181570303005,
+        "median_return": 0.018091679264106486,
         "n": 40,
-        "p10_max_drawdown": -0.08439314943418925,
-        "p25_max_drawdown": -0.036250314608182815,
-        "p25_return": -0.012984468302885022,
-        "p75_return": 0.034732510204197986,
-        "positive_rate": 0.6,
+        "p10_max_drawdown": -0.07567986143082137,
+        "p25_max_drawdown": -0.036858567826257765,
+        "p25_return": -0.012658069161456537,
+        "p75_return": 0.03485764059426982,
+        "positive_rate": 0.625,
         "worst_final_return": -0.08967861475336991,
         "worst_max_drawdown": -0.09563249620758352
       },
       "5": {
-        "best_final_return": 0.02726925742421027,
-        "mean_return": -0.0006495606514285157,
-        "median_max_drawdown": -0.006490190920240502,
-        "median_max_favorable_excursion": 0.00814916917743791,
-        "median_return": 0.0038228896788654607,
+        "best_final_return": 0.036815056428990744,
+        "mean_return": 0.002200304535382655,
+        "median_max_drawdown": -0.006181742136199764,
+        "median_max_favorable_excursion": 0.008172558534640717,
+        "median_return": 0.004893905186161619,
         "n": 40,
-        "p10_max_drawdown": -0.029871985114881382,
-        "p25_max_drawdown": -0.017880018736138176,
-        "p25_return": -0.011301875263705713,
-        "p75_return": 0.010930236235453028,
-        "positive_rate": 0.6,
+        "p10_max_drawdown": -0.021512207372143818,
+        "p25_max_drawdown": -0.017516049686389673,
+        "p25_return": -0.005885414785783027,
+        "p75_return": 0.012519414506123094,
+        "positive_rate": 0.675,
         "worst_final_return": -0.047003050870698115,
         "worst_max_drawdown": -0.046003050870698114
       },
       "60": {
         "best_final_return": 0.10331828956044908,
-        "mean_return": 0.017107984069874578,
-        "median_max_drawdown": -0.027790675913889173,
-        "median_max_favorable_excursion": 0.04669019730728685,
-        "median_return": 0.033252780808499804,
+        "mean_return": 0.019758389499764464,
+        "median_max_drawdown": -0.021672843270629016,
+        "median_max_favorable_excursion": 0.04760325406517474,
+        "median_return": 0.03532653391465568,
         "n": 39,
-        "p10_max_drawdown": -0.10631950415688898,
-        "p25_max_drawdown": -0.07376135360564368,
-        "p25_return": -0.01581519809683063,
+        "p10_max_drawdown": -0.1117159836035716,
+        "p25_max_drawdown": -0.05225695066694297,
+        "p25_return": -0.012777790357317187,
         "p75_return": 0.059022001899433296,
-        "positive_rate": 0.6923076923076923,
+        "positive_rate": 0.717948717948718,
         "worst_final_return": -0.15126066675812866,
         "worst_max_drawdown": -0.19669546140134386
       },
       "7": {
-        "best_final_return": 0.03271231099072047,
-        "mean_return": -0.003719693564877652,
-        "median_max_drawdown": -0.009674174787327294,
-        "median_max_favorable_excursion": 0.009011772013229002,
-        "median_return": -0.002258943155939385,
+        "best_final_return": 0.03729345249744498,
+        "mean_return": 0.0003769442510886928,
+        "median_max_drawdown": -0.006799401966688601,
+        "median_max_favorable_excursion": 0.011228791042196873,
+        "median_return": 0.006979665952165149,
         "n": 40,
-        "p10_max_drawdown": -0.040191543953637755,
-        "p25_max_drawdown": -0.02176264440299891,
-        "p25_return": -0.014555275797820538,
-        "p75_return": 0.013360987541034597,
-        "positive_rate": 0.475,
+        "p10_max_drawdown": -0.03643260574633278,
+        "p25_max_drawdown": -0.019275504176682168,
+        "p25_return": -0.01031601178763153,
+        "p75_return": 0.016585406484801724,
+        "positive_rate": 0.6,
         "worst_final_return": -0.06750428728220614,
         "worst_max_drawdown": -0.0670162827368711
       }
@@ -483,60 +483,60 @@
   "forward_analog_outcomes": {
     "QQQ": {
       "10": {
-        "median_excess": -0.011385324223493698,
-        "median_return": 0.0001393638348705659,
+        "median_excess": -0.005553552599684929,
+        "median_return": 0.006029539537901752,
         "n": 40,
-        "p25": -0.027544900547634754,
-        "p75": 0.016365338156420772,
-        "positive_rate": 0.5,
-        "unconditional_median": 0.011524688058364263
+        "p25": -0.01927931790770704,
+        "p75": 0.01952831361484253,
+        "positive_rate": 0.6,
+        "unconditional_median": 0.011583092137586681
       },
       "5": {
-        "median_excess": -0.003602138332453042,
-        "median_return": 0.0019289415873406943,
+        "median_excess": 0.0013362815088041593,
+        "median_return": 0.006892173464366214,
         "n": 40,
-        "p25": -0.018570822515405455,
-        "p75": 0.018278530694031236,
-        "positive_rate": 0.525,
-        "unconditional_median": 0.005531079919793736
+        "p25": -0.016625038006037623,
+        "p75": 0.01895117094659593,
+        "positive_rate": 0.6,
+        "unconditional_median": 0.005555891955562054
       },
       "7": {
-        "median_excess": -0.004204972439176058,
-        "median_return": 0.0034092493631414653,
+        "median_excess": -0.0012047937044197266,
+        "median_return": 0.006421127645826475,
         "n": 40,
-        "p25": -0.022178365824166185,
-        "p75": 0.01456090470264515,
-        "positive_rate": 0.525,
-        "unconditional_median": 0.007614221802317523
+        "p25": -0.01337293864410019,
+        "p75": 0.019811786188886626,
+        "positive_rate": 0.625,
+        "unconditional_median": 0.007625921350246202
       }
     },
     "SPY": {
       "10": {
-        "median_excess": -0.007827846338936184,
-        "median_return": -0.00034514147325492763,
+        "median_excess": -0.0024429278664814813,
+        "median_return": 0.005077733115010919,
         "n": 40,
-        "p25": -0.01755121706995924,
-        "p75": 0.012039358163542124,
-        "positive_rate": 0.5,
-        "unconditional_median": 0.0074827048656812565
+        "p25": -0.010334269993469314,
+        "p75": 0.015821141889212964,
+        "positive_rate": 0.575,
+        "unconditional_median": 0.007520660981492401
       },
       "5": {
-        "median_excess": 0.0003314261361045956,
-        "median_return": 0.0038228896788654607,
+        "median_excess": 0.0013649461463329793,
+        "median_return": 0.004893905186161619,
         "n": 40,
-        "p25": -0.011301875263705713,
-        "p75": 0.010930236235453028,
-        "positive_rate": 0.6,
-        "unconditional_median": 0.003491463542760865
+        "p25": -0.005885414785783027,
+        "p75": 0.012519414506123094,
+        "positive_rate": 0.675,
+        "unconditional_median": 0.0035289590398286394
       },
       "7": {
-        "median_excess": -0.006971300298812599,
-        "median_return": -0.002258943155939385,
+        "median_excess": 0.0022382551462519773,
+        "median_return": 0.006979665952165149,
         "n": 40,
-        "p25": -0.014555275797820538,
-        "p75": 0.013360987541034597,
-        "positive_rate": 0.475,
-        "unconditional_median": 0.0047123571428732145
+        "p25": -0.01031601178763153,
+        "p75": 0.016585406484801724,
+        "positive_rate": 0.6,
+        "unconditional_median": 0.004741410805913172
       }
     }
   },
@@ -579,7 +579,8 @@
       "1D breadth change",
       "3D breadth change",
       "VIX 5D change",
-      "VIX/VIX3M"
+      "VIX/VIX3M",
+      "RSP/SPY 5D and 20D relative strength (breadth context; non-gating)"
     ],
     "historical_analogs": "40 nearest prior broad-market states; 5/7/10/15/30/60D SPY and QQQ outcome evidence",
     "large_corrections": "fully included; there is no maximum drawdown exclusion",
@@ -625,6 +626,16 @@
       "dispersion",
       "repair share"
     ],
+    "subsector_proxy_audit": {
+      "BUG": "Pure-play cybersecurity confirmer; newer 2019 inception means it is not used as the sole historical proxy.",
+      "CIBR": "Primary cybersecurity backtest proxy: inception 2015 gives full 2016+ model history and high liquidity.",
+      "HACK": "Retained only as a comparator; broader holdings can include networking, semiconductors and defense exposure.",
+      "PAVE": "Kept but explicitly labeled a cross-industry U.S. infrastructure theme rather than a pure GICS subsector.",
+      "RHS": "Removed from subsector breadth because equal-weighting is a construction method, not an industry/subindustry.",
+      "RNRG": "Kept as a renewable power producer proxy; it is global and thematic, so interpretation should remain contextual.",
+      "RYU": "Removed from subsector breadth because equal-weighting is a construction method, not an industry/subindustry.",
+      "SRVR": "Relabeled Digital Infrastructure REITs to reflect towers/connectivity/data-center exposure more accurately."
+    },
     "subsector_role": "diagnostic market-state and commentary layer; does not change the validated final RE-ENTRY decision until incremental historical validation supports promotion",
     "subsector_universe": {
       "XLB": [
@@ -698,7 +709,7 @@
         ],
         [
           "PAVE",
-          "Infrastructure"
+          "U.S. Infrastructure Theme"
         ]
       ],
       "XLK": [
@@ -711,7 +722,7 @@
           "Software"
         ],
         [
-          "HACK",
+          "CIBR",
           "Cybersecurity"
         ]
       ],
@@ -719,10 +730,6 @@
         [
           "PBJ",
           "Food & Beverage"
-        ],
-        [
-          "RHS",
-          "Equal-Weight Consumer Staples"
         ]
       ],
       "XLRE": [
@@ -732,7 +739,7 @@
         ],
         [
           "SRVR",
-          "Data Centers & Digital Infrastructure"
+          "Digital Infrastructure REITs"
         ],
         [
           "NETL",
@@ -743,10 +750,6 @@
         [
           "RNRG",
           "Renewable Power Producers"
-        ],
-        [
-          "RYU",
-          "Equal-Weight Utilities"
         ]
       ],
       "XLV": [
@@ -827,10 +830,10 @@
         "symbol": "ITA"
       },
       {
-        "commentary": "HACK (Cybersecurity) is in a deep internal correction: -9.1% from its 20-day high, -3.7% relative to XLK over 20 days.",
+        "commentary": "CIBR (Cybersecurity) is in a deep internal correction: -7.4% from its 20-day high, -3.0% relative to XLK over 20 days.",
         "label": "Cybersecurity",
         "parent_sector": "XLK",
-        "symbol": "HACK"
+        "symbol": "CIBR"
       },
       {
         "commentary": "ITB (Homebuilders) is in a deep internal correction: -6.6% from its 20-day high, -3.0% relative to XLY over 20 days.",
@@ -845,8 +848,8 @@
         "symbol": "PEJ"
       },
       {
-        "commentary": "PAVE (Infrastructure) is in a deep internal correction: -6.1% from its 20-day high, -0.7% relative to XLI over 20 days.",
-        "label": "Infrastructure",
+        "commentary": "PAVE (U.S. Infrastructure Theme) is in a deep internal correction: -6.1% from its 20-day high, -0.7% relative to XLI over 20 days.",
+        "label": "U.S. Infrastructure Theme",
         "parent_sector": "XLI",
         "symbol": "PAVE"
       },
@@ -885,11 +888,9 @@
   },
   "market_damage": "LIGHT",
   "market_insights": {
-    "analog_decision": "NO",
-    "headline": "WAIT - a reset is developing, but the full historical evidence is not favorable enough yet.",
-    "holding_back": [
-      "Historical analog decision is NO."
-    ],
+    "analog_decision": "CAUTIOUS YES",
+    "headline": "RE-ENTER - the market has repaired enough that waiting is no longer helping.",
+    "holding_back": [],
     "insight_policy": "Insights are deterministic explanations of existing engine evidence. They do not add signals, alter thresholds, override historical analogs, or change the canonical WAIT/RE-ENTER decision.",
     "internal_reset": "DEVELOPING",
     "key_groups": [
@@ -913,8 +914,8 @@
         "why_it_matters": "A damaged group beginning to recover is constructive early re-entry evidence, but lingering relative weakness means the repair is context and confirmation rather than an independent market trigger."
       },
       {
-        "interpretation": "SRVR (Data Centers & Digital Infrastructure) is repairing after a meaningful reset: -4.1% from its 20-day high, -8.0% from its 60-day high, +0.3% today and +0.0% over 5 days. It is still +0.6% versus XLRE over 20 days.",
-        "label": "Data Centers & Digital Infrastructure",
+        "interpretation": "SRVR (Digital Infrastructure REITs) is repairing after a meaningful reset: -4.1% from its 20-day high, -8.0% from its 60-day high, +0.3% today and +0.0% over 5 days. It is still +0.6% versus XLRE over 20 days.",
+        "label": "Digital Infrastructure REITs",
         "metrics": {
           "drawdown_20d": -0.04109853593534407,
           "drawdown_60d": -0.07953375951957886,
@@ -1008,22 +1009,22 @@
         "why_it_matters": "Deep internal damage creates potential reset fuel, but the group has not yet met the engine's repair condition."
       },
       {
-        "interpretation": "HACK (Cybersecurity) remains in a deep internal correction at -9.1% from its 20-day high and -9.1% from its 60-day high.",
+        "interpretation": "CIBR (Cybersecurity) remains in a deep internal correction at -7.4% from its 20-day high and -7.4% from its 60-day high.",
         "label": "Cybersecurity",
         "metrics": {
-          "drawdown_20d": -0.09139387517787212,
-          "drawdown_60d": -0.09139387517787212,
-          "relative_strength_20d_vs_parent": -0.03679009859772586,
-          "relative_strength_20d_vs_spy": -0.036490696601037875,
-          "relative_strength_60d_vs_parent": 0.11537968284326694,
+          "drawdown_20d": -0.07446184772594022,
+          "drawdown_60d": -0.07446184772594022,
+          "relative_strength_20d_vs_parent": -0.02964551131499238,
+          "relative_strength_20d_vs_spy": -0.029346109318304392,
+          "relative_strength_60d_vs_parent": 0.075633447642387,
           "repairing": false,
-          "return_1d": -0.006993623131301141,
-          "return_5d": -0.041457511490149423
+          "return_1d": -0.007658449006197721,
+          "return_5d": -0.04028004585068057
         },
         "parent_sector": "XLK",
         "stance": "RESET PRESENT",
         "state": "DEEP CORRECTION",
-        "symbol": "HACK",
+        "symbol": "CIBR",
         "why_it_matters": "Deep internal damage creates potential reset fuel, but the group has not yet met the engine's repair condition."
       },
       {
@@ -1065,8 +1066,8 @@
         "why_it_matters": "Deep internal damage creates potential reset fuel, but the group has not yet met the engine's repair condition."
       },
       {
-        "interpretation": "PAVE (Infrastructure) remains in a deep internal correction at -6.1% from its 20-day high and -7.9% from its 60-day high.",
-        "label": "Infrastructure",
+        "interpretation": "PAVE (U.S. Infrastructure Theme) remains in a deep internal correction at -6.1% from its 20-day high and -7.9% from its 60-day high.",
+        "label": "U.S. Infrastructure Theme",
         "metrics": {
           "drawdown_20d": -0.06078664605227546,
           "drawdown_60d": -0.07890102806066057,
@@ -1123,29 +1124,108 @@
       }
     ],
     "selling_pressure": "STABILIZING",
-    "signal": "WAIT",
+    "signal": "RE-ENTER",
     "supporting_reentry": [
-      "Internal reset is developing.",
-      "Selling pressure is stabilizing.",
-      "Repair is visible beneath the indexes in Semiconductors, Data Centers & Digital Infrastructure, Regional Banks, Banks, Oil Services."
+      {
+        "detail": "Weakness beneath the major indexes is developing, creating a potential re-entry setup.",
+        "state": "DEVELOPING",
+        "title": "Market reset"
+      },
+      {
+        "detail": "Selling pressure is beginning to stabilize.",
+        "state": "STABILIZING",
+        "title": "Selling pressure"
+      },
+      {
+        "detail": "Similar prior market conditions were favorable enough to support putting cash back to work.",
+        "state": "CAUTIOUS YES",
+        "title": "Historical setups"
+      },
+      {
+        "detail": "Repair is visible in Semiconductors, Digital Infrastructure REITs, Regional Banks, Banks, Oil Services.",
+        "state": "REPAIRING",
+        "title": "Repair under the surface",
+        "why_it_matters": "This is supporting evidence only. It cannot independently trigger or veto the market decision."
+      }
     ]
   },
   "market_state": "no material correction / neutral",
-  "pre_early_bias_signal": "WAIT",
+  "opportunity_evidence": {
+    "role": "context only; broad-market RE-ENTRY remains the timing decision",
+    "sectors": [],
+    "status": "HISTORICAL_RANKING_UNAVAILABLE",
+    "subsectors": []
+  },
+  "outperformance_intelligence": {
+    "as_of": "2026-09-04",
+    "candidate_count": 3,
+    "candidates": [
+      {
+        "label": "Residential & Specialized REITs",
+        "neighbor_positive_excess_rate": 0.8,
+        "neighbors": 15,
+        "parent_sector": "XLRE",
+        "predicted_median_excess_vs_spy": 0.024917076047495712,
+        "rank": 1,
+        "symbol": "REZ"
+      },
+      {
+        "label": "Aerospace & Defense",
+        "neighbor_positive_excess_rate": 0.8,
+        "neighbors": 15,
+        "parent_sector": "XLI",
+        "predicted_median_excess_vs_spy": 0.019666168552940122,
+        "rank": 2,
+        "symbol": "ITA"
+      },
+      {
+        "label": "Transportation",
+        "neighbor_positive_excess_rate": 0.6,
+        "neighbors": 15,
+        "parent_sector": "XLI",
+        "predicted_median_excess_vs_spy": 0.013418168851069945,
+        "rank": 3,
+        "symbol": "XTN"
+      }
+    ],
+    "gate": {
+      "minimum_neighbor_positive_excess_rate": 0.6,
+      "minimum_predicted_median_excess_vs_spy": 0.01
+    },
+    "interpretation": "These ETFs have the strongest historically supported relative setups among the tracked subsectors for this RE-ENTRY state.",
+    "label": "OUTPERFORMANCE CANDIDATE",
+    "methodology": "Prior-only nearest-neighbor comparison using historical RE-ENTRY episodes; advisory only and never changes the official RE-ENTRY decision.",
+    "status": "HIGH_CONFIDENCE_CANDIDATES"
+  },
+  "pre_early_bias_signal": "RE-ENTER",
   "proxy_caveat": "Sector and factor histories use liquid ETF proxies and are not proprietary point-in-time factor-index constituent histories.",
   "question": "Does it make sense to put cash back into the market right now?",
   "research_only": true,
+  "rsp_breadth": {
+    "as_of": "2026-09-04",
+    "decision_role": "canonical breadth/participation input; diagnostic/context only, not an independent gate, veto, or trigger",
+    "interpretation": "equal-weight participation is lagging cap-weighted SPY over both 5D and 20D",
+    "rsp_close": 219.0,
+    "rsp_spy_relative_20d": -0.0009861998147275841,
+    "rsp_spy_relative_5d": -0.008740114372044916,
+    "spy_close": 770.19,
+    "state": "NARROWING",
+    "validation_note": "direct inclusion in analog-distance decision math was rejected because incremental walk-forward results weakened and many signals shifted materially earlier"
+  },
   "schema_version": "2.0",
   "selling_pressure": "STABILIZING",
   "setup_source": "BROAD_AND_INTERNAL_COMBINED",
-  "signal": "WAIT",
-  "signal_interpretation": "weakness is present, but historical analogs do not yet support re-entry",
+  "signal": "RE-ENTER",
+  "signal_interpretation": "meaningful weakness is present and historical analogs do not support continuing to wait",
   "signal_snapshot": {
     "breadth": {
-      "breadth_1d_change": -0.03992015968063867,
-      "breadth_3d_change": 0.005988023952095856,
-      "pct_sp500_above_200dma": 0.6407185628742516,
-      "pct_sp500_above_50dma": 0.47105788423153694
+      "breadth_1d_change": -0.03193612774451099,
+      "breadth_3d_change": 0.013972055888223534,
+      "equal_weight_participation_state": "NARROWING",
+      "pct_sp500_above_200dma": 0.6646706586826348,
+      "pct_sp500_above_50dma": 0.4790419161676646,
+      "rsp_spy_relative_20d": -0.0009861998147275841,
+      "rsp_spy_relative_5d": -0.008740114372044916
     },
     "factor_aggregates": {
       "damage_count_2pct": 4,
@@ -1340,7 +1420,7 @@
   },
   "subsector_intelligence": {
     "aggregate": {
-      "coverage": 0.9090909090909091,
+      "coverage": 0.967741935483871,
       "damage_share_2pct": 0.7,
       "damage_share_3pct": 0.6,
       "median_drawdown_20d": -0.03399379768281863,
@@ -1552,7 +1632,7 @@
           "PAVE": {
             "drawdown_20d": -0.06078664605227546,
             "drawdown_60d": -0.07890102806066057,
-            "label": "Infrastructure",
+            "label": "U.S. Infrastructure Theme",
             "parent_sector": "XLI",
             "relative_strength_20d_vs_parent": -0.006631075310503776,
             "relative_strength_20d_vs_spy": -0.05617629974446692,
@@ -1583,17 +1663,17 @@
         "damage_share_3pct": 1.0,
         "median_drawdown_20d": -0.05212110239218726,
         "members": {
-          "HACK": {
-            "drawdown_20d": -0.09139387517787212,
-            "drawdown_60d": -0.09139387517787212,
+          "CIBR": {
+            "drawdown_20d": -0.07446184772594022,
+            "drawdown_60d": -0.07446184772594022,
             "label": "Cybersecurity",
             "parent_sector": "XLK",
-            "relative_strength_20d_vs_parent": -0.03679009859772586,
-            "relative_strength_20d_vs_spy": -0.036490696601037875,
-            "relative_strength_60d_vs_parent": 0.11537968284326694,
+            "relative_strength_20d_vs_parent": -0.02964551131499238,
+            "relative_strength_20d_vs_spy": -0.029346109318304392,
+            "relative_strength_60d_vs_parent": 0.075633447642387,
             "repairing": false,
-            "return_1d": -0.006993623131301141,
-            "return_5d": -0.041457511490149423
+            "return_1d": -0.007658449006197721,
+            "return_5d": -0.04028004585068057
           },
           "IGV": {
             "drawdown_20d": -0.05212110239218726,
@@ -1620,14 +1700,14 @@
             "return_5d": 0.02513066981646972
           }
         },
-        "relative_strength_dispersion_vs_parent": 0.025128588303043903,
+        "relative_strength_dispersion_vs_parent": 0.022978140528000186,
         "repair_share": 0.3333333333333333
       },
       "XLP": {
-        "coverage": 0.5,
-        "damage_share_2pct": NaN,
-        "damage_share_3pct": NaN,
-        "median_drawdown_20d": NaN,
+        "coverage": 1.0,
+        "damage_share_2pct": 1.0,
+        "damage_share_3pct": 0.0,
+        "median_drawdown_20d": -0.02286186381320987,
         "members": {
           "PBJ": {
             "drawdown_20d": -0.02286186381320987,
@@ -1642,8 +1722,8 @@
             "return_5d": -0.006640375678426791
           }
         },
-        "relative_strength_dispersion_vs_parent": NaN,
-        "repair_share": NaN
+        "relative_strength_dispersion_vs_parent": 0.0,
+        "repair_share": 0.0
       },
       "XLRE": {
         "coverage": 1.0,
@@ -1653,7 +1733,7 @@
         "members": {
           "NETL": {
             "drawdown_20d": -0.01818436011941882,
-            "drawdown_60d": -0.06505026623547716,
+            "drawdown_60d": -0.06505020259911676,
             "label": "Net Lease REITs",
             "parent_sector": "XLRE",
             "relative_strength_20d_vs_parent": 0.004097735082147169,
@@ -1678,7 +1758,7 @@
           "SRVR": {
             "drawdown_20d": -0.04109853593534407,
             "drawdown_60d": -0.07953375951957886,
-            "label": "Data Centers & Digital Infrastructure",
+            "label": "Digital Infrastructure REITs",
             "parent_sector": "XLRE",
             "relative_strength_20d_vs_parent": 0.005772783212754207,
             "relative_strength_20d_vs_spy": -0.013600694885067766,
@@ -1692,10 +1772,10 @@
         "repair_share": 0.3333333333333333
       },
       "XLU": {
-        "coverage": 0.5,
-        "damage_share_2pct": NaN,
-        "damage_share_3pct": NaN,
-        "median_drawdown_20d": NaN,
+        "coverage": 1.0,
+        "damage_share_2pct": 0.0,
+        "damage_share_3pct": 0.0,
+        "median_drawdown_20d": -0.014293946511243716,
         "members": {
           "RNRG": {
             "drawdown_20d": -0.014293946511243716,
@@ -1710,8 +1790,8 @@
             "return_5d": 0.0017209143389462778
           }
         },
-        "relative_strength_dispersion_vs_parent": NaN,
-        "repair_share": NaN
+        "relative_strength_dispersion_vs_parent": 0.0,
+        "repair_share": 0.0
       },
       "XLV": {
         "coverage": 1.0,
@@ -1820,11 +1900,23 @@
     },
     "coverage": {
       "available_proxies": 30,
-      "coverage_rate": 0.9090909090909091,
-      "expected_proxies": 33,
+      "coverage_rate": 0.967741935483871,
+      "expected_proxies": 31,
       "same_day_target": "2026-09-04"
     },
     "proxies": {
+      "CIBR": {
+        "drawdown_20d": -0.07446184772594022,
+        "drawdown_60d": -0.07446184772594022,
+        "label": "Cybersecurity",
+        "parent_sector": "XLK",
+        "relative_strength_20d_vs_parent": -0.02964551131499238,
+        "relative_strength_20d_vs_spy": -0.029346109318304392,
+        "relative_strength_60d_vs_parent": 0.075633447642387,
+        "repairing": false,
+        "return_1d": -0.007658449006197721,
+        "return_5d": -0.04028004585068057
+      },
       "COPX": {
         "drawdown_20d": -0.060031036488678025,
         "drawdown_60d": -0.060031036488678025,
@@ -1860,18 +1952,6 @@
         "repairing": false,
         "return_1d": -0.008690676142903642,
         "return_5d": -0.012024076970511888
-      },
-      "HACK": {
-        "drawdown_20d": -0.09139387517787212,
-        "drawdown_60d": -0.09139387517787212,
-        "label": "Cybersecurity",
-        "parent_sector": "XLK",
-        "relative_strength_20d_vs_parent": -0.03679009859772586,
-        "relative_strength_20d_vs_spy": -0.036490696601037875,
-        "relative_strength_60d_vs_parent": 0.11537968284326694,
-        "repairing": false,
-        "return_1d": -0.006993623131301141,
-        "return_5d": -0.041457511490149423
       },
       "IAI": {
         "drawdown_20d": -0.008078313967732065,
@@ -2007,7 +2087,7 @@
       },
       "NETL": {
         "drawdown_20d": -0.01818436011941882,
-        "drawdown_60d": -0.06505026623547716,
+        "drawdown_60d": -0.06505020259911676,
         "label": "Net Lease REITs",
         "parent_sector": "XLRE",
         "relative_strength_20d_vs_parent": 0.004097735082147169,
@@ -2032,7 +2112,7 @@
       "PAVE": {
         "drawdown_20d": -0.06078664605227546,
         "drawdown_60d": -0.07890102806066057,
-        "label": "Infrastructure",
+        "label": "U.S. Infrastructure Theme",
         "parent_sector": "XLI",
         "relative_strength_20d_vs_parent": -0.006631075310503776,
         "relative_strength_20d_vs_spy": -0.05617629974446692,
@@ -2116,7 +2196,7 @@
       "SRVR": {
         "drawdown_20d": -0.04109853593534407,
         "drawdown_60d": -0.07953375951957886,
-        "label": "Data Centers & Digital Infrastructure",
+        "label": "Digital Infrastructure REITs",
         "parent_sector": "XLRE",
         "relative_strength_20d_vs_parent": 0.005772783212754207,
         "relative_strength_20d_vs_spy": -0.013600694885067766,
@@ -2186,7 +2266,17 @@
         "return_5d": -0.009852707654730453
       }
     },
-    "proxy_caveat": "Subsector and industry histories use liquid ETF proxies. Coverage is intentionally diagnostic, can be uneven across sectors, and is not a proprietary point-in-time industry classification."
+    "proxy_audit_notes": {
+      "BUG": "Pure-play cybersecurity confirmer; newer 2019 inception means it is not used as the sole historical proxy.",
+      "CIBR": "Primary cybersecurity backtest proxy: inception 2015 gives full 2016+ model history and high liquidity.",
+      "HACK": "Retained only as a comparator; broader holdings can include networking, semiconductors and defense exposure.",
+      "PAVE": "Kept but explicitly labeled a cross-industry U.S. infrastructure theme rather than a pure GICS subsector.",
+      "RHS": "Removed from subsector breadth because equal-weighting is a construction method, not an industry/subindustry.",
+      "RNRG": "Kept as a renewable power producer proxy; it is global and thematic, so interpretation should remain contextual.",
+      "RYU": "Removed from subsector breadth because equal-weighting is a construction method, not an industry/subindustry.",
+      "SRVR": "Relabeled Digital Infrastructure REITs to reflect towers/connectivity/data-center exposure more accurately."
+    },
+    "proxy_caveat": "Subsector and industry histories use audited liquid ETF proxies. Weighting-method ETFs are excluded from the primary subsector breadth calculation; broad thematic proxies are explicitly labeled. Coverage can be uneven across sectors and is not a proprietary point-in-time industry classification."
   },
   "weakness_present": true,
   "weakness_reasons": [
