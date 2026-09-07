@@ -87,7 +87,7 @@ jobs:
               'engine_validation': 'CANONICAL_WORKFLOW_PASS',
               'feed_mode': 'COMPLETED_CLOSE_ONLY',
           }
-          p.write_text(json.dumps(d, indent=2, allow_nan=False) + '\n')
+          p.write_text(json.dumps(d, indent=2) + '\n')
           PY
 
       - name: Update re-entry episode state
