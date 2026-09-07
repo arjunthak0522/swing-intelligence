@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -10,6 +11,7 @@ TOOLS = Path(__file__).resolve().parents[1] / "tools"
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
+import reentry_opportunity_evidence as opportunity
 import reentry_sector_subsector_ranking as ranking
 import reentry_walkforward_validation as walkforward
 
@@ -95,3 +97,70 @@ def test_ranking_uses_only_dates_present_in_canonical_signal_history() -> None:
 
     assert results["XLK"]["horizons"]["5"]["n"] > 0
     assert results["XLK"]["horizons"]["10"]["n"] > 0
+
+
+def test_opportunity_evidence_rejects_nonfinite_current_repair_metrics(tmp_path: Path) -> None:
+    ranking_path = tmp_path / "ranking.json"
+    ranking_path.write_text(
+        json.dumps(
+            {
+                "methodology": {"signal": "canonical RE-ENTRY"},
+                "sector_results": {
+                    "XLK": {
+                        "label": "Technology",
+                        "horizons": {"10": {"n": 5, "median": 0.01, "positive_rate": 0.6}},
+                    },
+                    "XLC": {
+                        "label": "Communication Services",
+                        "horizons": {"10": {"n": 5, "median": 0.02, "positive_rate": 0.7}},
+                    },
+                },
+                "subsector_results": {
+                    "SMH": {
+                        "label": "Semiconductors",
+                        "parent": "XLK",
+                        "horizons": {"10": {"n": 5, "median": 0.03, "positive_rate": 0.8}},
+                    },
+                    "BAD": {
+                        "label": "Unavailable proxy",
+                        "parent": "XLK",
+                        "horizons": {"10": {"n": 5, "median": 0.01, "positive_rate": 0.6}},
+                    },
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    snapshot = {
+        "subsector_intelligence": {
+            "by_sector": {
+                "XLK": {"damage_share_3pct": 0.75, "repair_share": 0.50},
+                "XLC": {"damage_share_3pct": float("nan"), "repair_share": float("nan")},
+            },
+            "proxies": {
+                "SMH": {
+                    "repairing": True,
+                    "label": "Semiconductors",
+                    "parent_sector": "XLK",
+                    "drawdown_20d": -0.04,
+                    "return_5d": 0.02,
+                },
+                "BAD": {
+                    "repairing": True,
+                    "label": "Unavailable proxy",
+                    "parent_sector": "XLK",
+                    "drawdown_20d": float("nan"),
+                    "return_5d": float("nan"),
+                },
+            },
+        }
+    }
+
+    out = opportunity.attach_opportunity_evidence(snapshot, ranking_path)
+    sectors = out["opportunity_evidence"]["sectors"]
+    subsectors = out["opportunity_evidence"]["subsectors"]
+
+    assert [row["symbol"] for row in sectors] == ["XLK"]
+    assert [row["symbol"] for row in subsectors] == ["SMH"]
+    assert sectors[0]["historical_after_reentry"]["10"]["n"] == 5
+    assert subsectors[0]["historical_after_reentry"]["10"]["n"] == 5
