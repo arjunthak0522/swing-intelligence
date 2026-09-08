@@ -32,28 +32,36 @@ jobs:
       - name: Install canonical dependencies
         run: python -m pip install pandas numpy yfinance lxml
 
-      - name: Build frozen episode evidence at archived Sep 4 sample end
+      - name: Build frozen continuous-episode evidence
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/build_historical_episode_evidence.py --canonical-root canonical
 
-      - name: Inspect evidence counts
+      - name: Validate evidence schema
         run: |
           python - <<'PY'
           import json
           p = json.load(open('web/public/reentry/historical_episodes.json'))
+          s = p['continuous_episode_summary']
+          v = p['archived_entry_timing_validation']
           check = {
-            'validated_independent_reentry_signals': p['validated_independent_reentry_signals'],
-            'reconstructed_signal_rows': p['reconstructed_signal_rows'],
-            'completed_episode_count': p['summary_completed_episodes']['completed_episode_count'],
-            'active_at_sample_end_count': p['summary_completed_episodes']['active_at_sample_end_count'],
+            'continuous_episode_count': p['continuous_episode_count'],
+            'completed_episode_count': s['completed_episode_count'],
+            'active_at_sample_end_count': s['active_at_sample_end_count'],
+            'archived_validation_event_count': v['validation_event_count'],
+            'reconstructed_cooldown_count': p['reconstruction_diagnostic']['current_cooldown_event_count'],
+            'diagnostic_status': p['reconstruction_diagnostic']['status'],
           }
           print(json.dumps(check, indent=2))
-          if p['reconstructed_signal_rows'] != p['validated_independent_reentry_signals']:
-            raise SystemExit('Historical evidence does not match validated independent signal count')
+          if p['continuous_episode_count'] != len(p['continuous_episodes']):
+            raise SystemExit('Continuous episode row count mismatch')
+          if v['validation_event_count'] != 193:
+            raise SystemExit('Archived validation-event count changed')
+          if not p['continuous_episodes']:
+            raise SystemExit('No continuous RE-ENTRY episodes reconstructed')
           PY
 
-      - name: Upload evidence artifact
+      - name: Upload frozen evidence artifact
         uses: actions/upload-artifact@v4
         with:
           name: reentry-historical-episode-evidence
