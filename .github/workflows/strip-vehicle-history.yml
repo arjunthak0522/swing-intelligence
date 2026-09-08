@@ -1,0 +1,31 @@
+name: Keep historical performance in evidence section
+
+on:
+  push:
+    branches: [product-clarity-historical-evidence-20260908]
+    paths:
+      - 'tools/strip_vehicle_history.py'
+      - '.github/workflows/strip-vehicle-history.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python tools/strip_vehicle_history.py
+      - name: Commit page cleanup
+        run: |
+          if git diff --quiet -- web/app/page.tsx; then exit 0; fi
+          git config user.name "re-entry-ui[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/app/page.tsx
+          git commit -m "Keep historical metrics in evidence section [ui-bot]"
+          git push origin HEAD:${GITHUB_REF_NAME}
