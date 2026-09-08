@@ -28,10 +28,18 @@ const sectorNames: Record<string, string> = {
 
 function stateClass(value: string) {
   const v = value.toUpperCase();
-  if (v.includes("REPAIR") || v.includes("YES") || v.includes("LIVE")) return "good";
+  if (v.includes("REPAIR") || v.includes("YES") || v.includes("LIVE") || v.includes("FAVORABLE")) return "good";
   if (v.includes("WAIT") || v.includes("STABIL") || v.includes("DEVELOP") || v.includes("PARTIAL") || v.includes("RESET")) return "warn";
   if (v.includes("NO") || v.includes("WORSEN") || v.includes("HEAVY") || v.includes("DEGRADED") || v.includes("DEEP")) return "bad";
   return "neutral";
+}
+
+function retailHistoryLabel(value: string) {
+  const v = value.toUpperCase();
+  if (v === "CAUTIOUS YES") return "FAVORABLE";
+  if (v.includes("YES")) return "FAVORABLE";
+  if (v.includes("NO")) return "UNFAVORABLE";
+  return value;
 }
 
 function subsectorState(x: SubsectorProxy) {
@@ -53,7 +61,7 @@ function Hero({ s }: { s: ReentrySnapshot }) {
     <section className="hero card">
       <div className="eyebrow-row">
         <span className="eyebrow">OFFICIAL RE-ENTRY DECISION</span>
-        <span className="freshness"><Clock3 size={14} /> {s.as_of} close</span>
+        <span className="freshness"><Clock3 size={14} /> {s.as_of} completed close</span>
       </div>
       <div className="hero-grid">
         <div>
@@ -64,9 +72,9 @@ function Hero({ s }: { s: ReentrySnapshot }) {
           <span className="summary-label">BOTTOM LINE</span>
           <p>{s.signal_interpretation}</p>
           <div className="decision-tags">
-            <span><small>Damage</small><b>{s.market_damage}</b></span>
-            <span><small>Repair</small><b>{s.selling_pressure}</b></span>
-            <span><small>History</small><b>{s.analog_decision}</b></span>
+            <span><small>Pullback</small><b>{s.market_damage}</b></span>
+            <span><small>Selling</small><b>{s.selling_pressure}</b></span>
+            <span><small>Similar past markets</small><b>{retailHistoryLabel(s.analog_decision)}</b></span>
           </div>
         </div>
       </div>
@@ -79,11 +87,11 @@ function EpisodeSummary({ episode, official }: { episode: ReentryEpisode | null;
   return (
     <section className="card section-card action-card">
       <div className="section-heading">
-        <div><span className="kicker">LAST RE-ENTRY EPISODE</span><h2>{episode.episode_start}</h2></div>
+        <div><span className="kicker">CURRENT RE-ENTRY EPISODE</span><h2>{episode.episode_start}</h2></div>
         <StatusPill>{episode.active ? "ACTIVE" : "COMPLETED"}</StatusPill>
       </div>
       <p className="section-intro">
-        This was one continuous re-entry opportunity, not a new entry every day. The signal first fired on {episode.episode_start} and remained favorable through {episode.favorable_through}.
+        This is one continuous re-entry opportunity, not a new entry every day. The signal first fired on {episode.episode_start} and remained favorable through {episode.favorable_through}.
         {official.signal === "WAIT" ? " Today’s WAIT applies only to a new/additional deployment." : ""}
       </p>
       <div className="vehicle-strip">
@@ -104,18 +112,21 @@ function IntradayMonitor({ live, official }: { live: IntradaySnapshot | null; of
   const barLabel = lastBar
     ? lastBar.toLocaleString("en-US", { timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" })
     : "latest available bar";
+  const updateLabel = lastBar
+    ? lastBar.toLocaleString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit", timeZoneName: "short" })
+    : "Unavailable";
   const periodLabel = regularSession ? "today" : "last session";
   const statusLabel = live ? (regularSession ? live.status : "MARKET CLOSED") : "UNAVAILABLE";
 
   return (
     <section className="card section-card live-card">
       <div className="section-heading">
-        <div><span className="kicker">INTRADAY · PROVISIONAL</span><h2>{regularSession ? "Live market monitor" : "Latest intraday session"}</h2></div>
-        <StatusPill>{statusLabel}</StatusPill>
+        <div><span className="kicker">RIGHT NOW · PROVISIONAL</span><h2>{regularSession ? "Live market context" : "Latest intraday session"}</h2></div>
+        <div className="eyebrow-row"><span className="freshness"><Radio size={14} /> Updated {updateLabel}</span><StatusPill>{statusLabel}</StatusPill></div>
       </div>
       <p className="section-intro">
         {regularSession
-          ? "This layer updates from 5-minute market bars and shows how the current session is developing."
+          ? "This layer updates from 5-minute market bars so you can see what is happening now while the official completed-close decision remains in force."
           : "The market is closed, so this panel shows the latest completed intraday session rather than implying prices are moving now."}
         {` It does not replace the official ${official.as_of} close signal.`}
       </p>
@@ -128,7 +139,7 @@ function IntradayMonitor({ live, official }: { live: IntradaySnapshot | null; of
           <div className="live-stat"><small>Subsectors positive</small><strong>{pct(live.summary.subsectors_positive_share, 0)}</strong><span>30+ tracked</span></div>
           <div className="live-stat"><small>Factors positive</small><strong>{pct(live.summary.factors_positive_share, 0)}</strong><span>8 tracked</span></div>
         </div>
-        <div className="live-foot"><Radio size={14} /> Latest bar {barLabel} · {live.summary.tracked_quotes}/{live.summary.expected_quotes} quotes available · official signal remains <b>{official.signal}</b> until the close engine recalculates.</div>
+        <div className="live-foot"><Radio size={14} /> Latest verified bar {barLabel} · {live.summary.tracked_quotes}/{live.summary.expected_quotes} quotes available · official decision remains <b>{official.signal}</b> until the close engine recalculates.</div>
       </> : <div className="notice"><CircleAlert size={16} /> Intraday feed is temporarily unavailable. The official completed-close signal remains authoritative.</div>}
     </section>
   );
@@ -138,11 +149,11 @@ function VehicleCard({ s }: { s: ReentrySnapshot }) {
   const h = s.historical_validation;
   return (
     <section className="card section-card action-card">
-      <div className="section-heading"><div><span className="kicker">ACTION</span><h2>Where the signal applies</h2></div><StatusPill>Broad-market re-entry</StatusPill></div>
+      <div className="section-heading"><div><span className="kicker">WHERE IT APPLIES</span><h2>Broad-market re-entry</h2></div><StatusPill>SPY + QQQ</StatusPill></div>
       <p className="section-intro">The engine answers whether cash should go back into broad equities. SPY and QQQ are the validated destination set. Sector and subsector ETFs explain the setup but are not standalone buy calls.</p>
       <div className="vehicle-strip">
-        <div className="vehicle-primary"><div><span>S&P 500</span><b>SPY</b></div><small>Broad market</small><strong>{pct(h.SPY_10D_median_after_signal, 2)}</strong><em>10D historical median</em></div>
-        <div className="vehicle-primary"><div><span>Nasdaq 100</span><b>QQQ</b></div><small>Growth heavy</small><strong>{pct(h.QQQ_10D_median_after_signal, 2)}</strong><em>10D historical median</em></div>
+        <div className="vehicle-primary"><div><span>S&P 500</span><b>SPY</b></div><small>Broad market</small><strong>{pct(h.SPY_10D_median_after_signal, 2)}</strong><em>10D historical median after RE-ENTRY signals</em></div>
+        <div className="vehicle-primary"><div><span>Nasdaq 100</span><b>QQQ</b></div><small>Growth heavy</small><strong>{pct(h.QQQ_10D_median_after_signal, 2)}</strong><em>10D historical median after RE-ENTRY signals</em></div>
       </div>
       <div className="notice"><CircleAlert size={16} /> The app will not claim SPY or QQQ is preferred until a separate vehicle-selection rule is historically validated.</div>
     </section>
@@ -153,15 +164,22 @@ function OutperformanceCard({ s }: { s: ReentrySnapshot }) {
   const o = s.outperformance_intelligence;
   const candidates = o?.candidates || [];
   const active = s.signal === "RE-ENTER";
-  const status = !o ? "AWAITING FEED" : o.status === "HIGH_CONFIDENCE_CANDIDATES" ? "HIGH CONFIDENCE" : o.status === "INACTIVE" ? "INACTIVE" : "NO EDGE";
+  const status = !o ? "AWAITING FEED" : o.status === "HIGH_CONFIDENCE_CANDIDATES" ? "HISTORICAL EDGE" : o.status === "INACTIVE" ? "INACTIVE" : "NO EDGE";
   return (
     <section className="card section-card action-card">
-      <div className="section-heading"><div><span className="kicker">RELATIVE OPPORTUNITY</span><h2>Best sector / subsector setups</h2></div><StatusPill>{status}</StatusPill></div>
-      <p className="section-intro">{o?.interpretation || "The completed-close feed has not published the validated outperformance layer yet."}</p>
+      <div className="section-heading"><div><span className="kicker">HISTORICAL OPPORTUNITY</span><h2>Historically favored after similar RE-ENTRY setups</h2></div><StatusPill>{status}</StatusPill></div>
+      <p className="section-intro">These are not today&apos;s returns and they are not standalone buy signals. They show which tracked ETFs historically had the strongest relative outcomes after prior RE-ENTRY states that most closely resembled the current setup.</p>
       {active && candidates.length > 0 ? <div className="vehicle-strip">
-        {candidates.map((x) => <div className="vehicle-primary" key={x.symbol}><div><span>{x.label}</span><b>{x.symbol}</b></div><small>{sectorNames[x.parent_sector || ""] || x.parent_sector || "Subsector ETF"}</small><strong>{pct(x.predicted_median_excess_vs_spy, 1)}</strong><em>{pct(x.neighbor_positive_excess_rate, 0)} of nearest historical states beat SPY · {x.neighbors} analogs</em></div>)}
+        {candidates.map((x) => <div className="vehicle-primary" key={x.symbol}>
+          <div><span>{x.label}</span><b>{x.symbol}</b></div>
+          <small>{sectorNames[x.parent_sector || ""] || x.parent_sector || "Subsector ETF"}</small>
+          <strong>{pct(x.predicted_median_excess_vs_spy, 1)}</strong>
+          <em>Predicted median excess vs SPY</em>
+          <em>Median across {x.neighbors} nearest prior RE-ENTRY states; each historical outcome averages its 10D and 30D forward excess return vs SPY.</em>
+          <em><b>{pct(x.neighbor_positive_excess_rate, 0)}</b> of those similar states beat SPY on that same measure.</em>
+        </div>)}
       </div> : <div className="notice"><CircleAlert size={16} /> {active ? "No ETF currently clears both the +1% predicted median excess and 60% historical outperformance gates." : "This layer activates only when the official close signal is RE-ENTER. It does not create an ETF recommendation during WAIT or NO RE-ENTRY SETUP."}</div>}
-      <div className="notice"><CircleCheck size={16} /> Advisory only: these candidates never change the official RE-ENTRY decision and are not a replacement for SPY/QQQ.</div>
+      <div className="notice"><CircleCheck size={16} /> Advisory only. This historical relative-opportunity layer never changes the official RE-ENTRY decision and is not a replacement for SPY/QQQ.</div>
     </section>
   );
 }
@@ -170,21 +188,22 @@ function WhyNow({ s }: { s: ReentrySnapshot }) {
   const insights = s.market_insights;
   const support = insights?.supporting_reentry || [];
   const hold = insights?.holding_back || [];
-  const repairingGroups = (insights?.key_groups || []).filter(x => x.state === "REPAIRING").slice(0, 3);
+  const repairingGroups = (insights?.key_groups || []).filter(x => x.state === "REPAIRING");
   return (
     <section className="card section-card">
-      <div className="section-heading"><div><span className="kicker">WHY</span><h2>What is driving the decision</h2></div></div>
+      <div className="section-heading"><div><span className="kicker">WHY</span><h2>Why {s.signal === "RE-ENTER" ? "RE-ENTER" : "this decision"}?</h2></div></div>
       <p className="section-intro">{insights?.headline || s.signal_interpretation}</p>
       <div className="two-col">
         <div className="reason-panel supportive">
-          <h3><CircleCheck size={17} /> Supporting re-entry</h3>
+          <h3><CircleCheck size={17} /> What supports re-entry</h3>
           {support.slice(0, 4).map((text, i) => <div className="reason" key={`support-${i}`}><p>{text}</p></div>)}
+          <div className="reason"><p className="summary-label">REPAIR HAPPENING NOW</p><small>These groups are recovering from recent weakness. They are supporting evidence, not separate buy signals.</small></div>
           {repairingGroups.map(x => <div className="reason" key={x.symbol}><div><b>{x.label} ({x.symbol})</b><StatusPill>{x.state}</StatusPill></div><p>{x.interpretation}</p><small>{x.why_it_matters}</small></div>)}
         </div>
         <div className="reason-panel holding">
-          <h3><CircleAlert size={17} /> Holding it back</h3>
+          <h3><CircleAlert size={17} /> Reasons to keep waiting</h3>
           {hold.slice(0, 4).map((text, i) => <div className="reason" key={`hold-${i}`}><p>{text}</p></div>)}
-          {hold.length === 0 && <div className="reason"><p>No additional canonical blockers are being surfaced.</p></div>}
+          {hold.length === 0 && <div className="reason"><p>No additional validated reasons to keep waiting are being surfaced.</p></div>}
         </div>
       </div>
     </section>
@@ -196,7 +215,7 @@ function MarketInternals({ s }: { s: ReentrySnapshot }) {
   return (
     <section className="card section-card">
       <div className="section-heading"><div><span className="kicker">ALL SUBSECTORS</span><h2>What is moving underneath</h2></div><StatusPill>{proxies.length} tracked</StatusPill></div>
-      <p className="section-intro">Every tracked subsector proxy is listed below. Expand any row for the underlying evidence.</p>
+      <p className="section-intro">Every tracked subsector remains visible below. The first number is how far it sits below its recent 20-day high; REPAIRING means the group is recovering from a meaningful reset.</p>
       <div className="internal-list">
         {proxies.map(([symbol, x]) => {
           const state = subsectorState(x);
@@ -207,7 +226,7 @@ function MarketInternals({ s }: { s: ReentrySnapshot }) {
               : `${x.label} remains in a reset or correction. The engine tracks whether this weakness begins to stabilize and broaden into repair.`;
           return <details key={symbol} className="internal-row">
             <summary><div className="name-wrap"><span className="state-dot" data-state={state.dot} /><div><b>{x.label} <span>({symbol})</span></b><small>{sectorNames[x.parent_sector] || x.parent_sector}</small></div></div><div className="row-metrics"><span>{pct(x.drawdown_20d)}</span><strong className={state.cls}>{state.label}</strong><ChevronRight size={17} /></div></summary>
-            <div className="detail-grid"><span>20D drawdown <b>{pct(x.drawdown_20d)}</b></span><span>60D drawdown <b>{pct(x.drawdown_60d)}</b></span><span>1D return <b>{pct(x.return_1d)}</b></span><span>5D return <b>{pct(x.return_5d)}</b></span><span>vs SPY 20D <b>{pct(x.relative_strength_20d_vs_spy)}</b></span><span>vs {x.parent_sector} 20D <b>{pct(x.relative_strength_20d_vs_parent)}</b></span></div>
+            <div className="detail-grid"><span>Below 20D high <b>{pct(x.drawdown_20d)}</b></span><span>Below 60D high <b>{pct(x.drawdown_60d)}</b></span><span>1D return <b>{pct(x.return_1d)}</b></span><span>5D return <b>{pct(x.return_5d)}</b></span><span>vs SPY 20D <b>{pct(x.relative_strength_20d_vs_spy)}</b></span><span>vs {x.parent_sector} 20D <b>{pct(x.relative_strength_20d_vs_parent)}</b></span></div>
             <p className="detail-copy">{explanation}</p>
           </details>;
         })}
@@ -221,9 +240,10 @@ function SectorMap({ s }: { s: ReentrySnapshot }) {
   return (
     <section className="card section-card">
       <div className="section-heading"><div><span className="kicker">ALL 11 SECTORS</span><h2>Damage and repair map</h2></div><StatusPill>{sectors.length}/11 loaded</StatusPill></div>
+      <p className="section-intro">This is current market repair evidence, not the historical opportunity ranking above.</p>
       <div className="sector-table">
-        <div className="sector-table-head"><span>Sector</span><span>20D</span><span>Subsectors 3%+ down</span><span>Repair</span></div>
-        {sectors.map(([symbol, x]) => { const group = s.subsector_intelligence?.by_sector?.[symbol]; const repairing = (group?.repair_share || 0) > 0; return <div className="sector-table-row" key={symbol}><div><b>{sectorNames[symbol] || symbol}</b><small>{symbol}</small></div><strong>{pct(x.drawdown_20d)}</strong><span>{pct(group?.damage_share_3pct)}</span><span className={repairing ? "good-text" : "muted"}>{repairing ? "Repairing" : "No broad repair"}</span></div>; })}
+        <div className="sector-table-head"><span>Sector</span><span>Below 20D high</span><span>Subsectors 3%+ down</span><span>Repair now</span></div>
+        {sectors.map(([symbol, x]) => { const group = s.subsector_intelligence?.by_sector?.[symbol]; const repairing = (group?.repair_share || 0) > 0; return <div className="sector-table-row" key={symbol}><div><b>{sectorNames[symbol] || symbol}</b><small>{symbol}</small></div><strong>{pct(x.drawdown_20d)}</strong><span>{pct(group?.damage_share_3pct)}</span><span className={repairing ? "good-text" : "muted"}>{repairing ? "Repairing now" : "No broad repair"}</span></div>; })}
       </div>
     </section>
   );
@@ -232,7 +252,8 @@ function SectorMap({ s }: { s: ReentrySnapshot }) {
 function Historical({ s }: { s: ReentrySnapshot }) {
   const h = s.historical_validation;
   const rows = [["5D", h.SPY_5D_median_after_signal, h.QQQ_5D_median_after_signal], ["10D", h.SPY_10D_median_after_signal, h.QQQ_10D_median_after_signal], ["30D", h.SPY_30D_median_after_signal, h.QQQ_30D_median_after_signal], ["60D", h.SPY_60D_median_after_signal, h.QQQ_60D_median_after_signal]] as const;
-  return <section className="card section-card"><div className="section-heading"><div><span className="kicker">TRUST THE EVIDENCE</span><h2>Historical backtest</h2></div><StatusPill>{h.final_independent_reentry_episodes} independent signals</StatusPill></div><p className="section-intro">Validated strategy history is separate from today&apos;s nearest analogs. The first tells you how the engine behaved historically. The second helps decide whether today qualifies.</p><div className="history-table"><div className="history-head"><span>Horizon</span><span>SPY median</span><span>QQQ median</span></div>{rows.map(([label, spy, qqq]) => <div className="history-row" key={label}><b>{label}</b><span>{pct(spy, 2)}</span><span>{pct(qqq, 2)}</span></div>)}</div><div className="history-footer"><span>Today&apos;s analog verdict</span><strong className={stateClass(s.analog_decision)}>{s.analog_decision}</strong></div></section>;
+  const historyLabel = retailHistoryLabel(s.analog_decision);
+  return <section className="card section-card"><div className="section-heading"><div><span className="kicker">SIMILAR PAST MARKETS</span><h2>What happened after prior RE-ENTRY signals</h2></div><StatusPill>{h.final_independent_reentry_episodes} independent signals</StatusPill></div><p className="section-intro">This is the validated strategy history. It is separate from today&apos;s nearest-market comparison and from the ETF opportunity estimates.</p><div className="history-table"><div className="history-head"><span>Horizon</span><span>SPY median</span><span>QQQ median</span></div>{rows.map(([label, spy, qqq]) => <div className="history-row" key={label}><b>{label}</b><span>{pct(spy, 2)}</span><span>{pct(qqq, 2)}</span></div>)}</div><div className="history-footer"><span>Similar past markets today</span><strong className={stateClass(historyLabel)}>{historyLabel}</strong></div></section>;
 }
 
 export default async function Home() {
@@ -247,15 +268,15 @@ export default async function Home() {
     <header className="topbar"><div><span className="brand">RE-ENTRY</span><span className="tagline">Know when waiting stops helping.</span></div><div className="top-status">{fresh ? <><span className="live-dot" /> Official close feed</> : "DATA INCOMPLETE"}</div></header>
     {!fresh ? <section className="card data-blocked"><CircleAlert /> <div><b>DATA INCOMPLETE</b><p>The current decision is suppressed until every required input resolves to the same completed market session.</p></div></section> : <>
       <Hero s={s} />
-      <EpisodeSummary episode={episode} official={s} />
       <IntradayMonitor live={intraday} official={s} />
-      <VehicleCard s={s} />
-      <OutperformanceCard s={s} />
       <WhyNow s={s} />
+      <EpisodeSummary episode={episode} official={s} />
+      <VehicleCard s={s} />
+      <Historical s={s} />
+      <OutperformanceCard s={s} />
       <SectorMap s={s} />
       <MarketInternals s={s} />
-      <Historical s={s} />
     </>}
-    <footer>Official RE-ENTRY decisions use completed-close data. Intraday data is provisional market context only and never overwrites the validated close signal.</footer>
+    <footer>Official RE-ENTRY decisions use completed-close data. Intraday data is provisional market context only and never overwrites the validated close signal. Historical opportunity estimates are conditional historical comparisons, not today&apos;s ETF returns.</footer>
   </main>;
 }
