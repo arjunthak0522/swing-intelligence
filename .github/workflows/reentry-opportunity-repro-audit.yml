@@ -1,0 +1,67 @@
+name: RE-ENTRY Reproducibility Audit
+
+on:
+  push:
+    branches:
+      - retail-hierarchy-cleanup-20260908
+    paths:
+      - 'tools/reentry_opportunity_repro_audit.py'
+      - 'tools/reentry_core_repro_audit.py'
+      - '.github/workflows/reentry-opportunity-repro-audit.yml'
+      - 'web/public/reentry/latest.json'
+
+permissions:
+  contents: read
+
+jobs:
+  core-audit:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout retail branch
+        uses: actions/checkout@v4
+      - name: Checkout frozen validated engine
+        uses: actions/checkout@v4
+        with:
+          ref: 47f38bf3362a97bcf9c9dd2d6545c4fae212e046
+          path: frozen
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install pandas numpy yfinance lxml
+      - name: Reproduce published core decision
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/reentry_core_repro_audit.py
+      - name: Upload core audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reentry-core-repro-audit
+          path: artifacts/reentry_core_repro_audit/results.json
+
+  opportunity-audit:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout retail branch
+        uses: actions/checkout@v4
+      - name: Checkout frozen validated engine
+        uses: actions/checkout@v4
+        with:
+          ref: 47f38bf3362a97bcf9c9dd2d6545c4fae212e046
+          path: frozen
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install pandas numpy yfinance lxml
+      - name: Reproduce published opportunity candidates
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/reentry_opportunity_repro_audit.py
+      - name: Upload opportunity audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reentry-opportunity-repro-audit
+          path: artifacts/reentry_opportunity_repro_audit/results.json
