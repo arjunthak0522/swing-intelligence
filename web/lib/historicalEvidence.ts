@@ -37,7 +37,8 @@ export interface HistoricalEpisodeEvidence {
   schema_version: string;
   canonical_engine_commit: string;
   validated_independent_reentry_signals: number;
-  reconstructed_contiguous_reentry_episodes: number;
+  reconstructed_signal_rows: number;
+  signal_selection_definition: string;
   definition: string;
   return_definition: string;
   summary_completed_episodes: {
