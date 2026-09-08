@@ -33,34 +33,52 @@ export interface HistoricalEpisodeRow {
   QQQ_max_adverse_during_episode: number;
 }
 
+interface EpisodeSummary {
+  completed_episode_count: number;
+  active_at_sample_end_count: number;
+  episode_length_sessions: HistoricalEpisodeMetricSummary;
+  SPY: {
+    return_during_episode: HistoricalEpisodeMetricSummary;
+    max_gain_during_episode: HistoricalEpisodeMetricSummary;
+    max_adverse_during_episode: HistoricalEpisodeMetricSummary;
+  };
+  QQQ: {
+    return_during_episode: HistoricalEpisodeMetricSummary;
+    max_gain_during_episode: HistoricalEpisodeMetricSummary;
+    max_adverse_during_episode: HistoricalEpisodeMetricSummary;
+  };
+}
+
+interface FixedHorizonStat {
+  median: number;
+  n: number;
+}
+
 export interface HistoricalEpisodeEvidence {
   schema_version: string;
   canonical_engine_commit: string;
-  validated_independent_reentry_signals: number;
-  reconstructed_signal_rows: number;
-  signal_selection_definition: string;
-  definition: string;
+  canonical_sample_end: string;
+  frozen_reconstruction_generated_at: string;
+  continuous_episode_count: number;
+  continuous_episode_definition: string;
   return_definition: string;
-  summary_completed_episodes: {
-    completed_episode_count: number;
-    active_at_sample_end_count: number;
-    episode_length_sessions: HistoricalEpisodeMetricSummary;
-    SPY: {
-      return_during_episode: HistoricalEpisodeMetricSummary;
-      max_gain_during_episode: HistoricalEpisodeMetricSummary;
-      max_adverse_during_episode: HistoricalEpisodeMetricSummary;
-    };
-    QQQ: {
-      return_during_episode: HistoricalEpisodeMetricSummary;
-      max_gain_during_episode: HistoricalEpisodeMetricSummary;
-      max_adverse_during_episode: HistoricalEpisodeMetricSummary;
+  continuous_episode_summary: EpisodeSummary;
+  continuous_episodes: HistoricalEpisodeRow[];
+  archived_entry_timing_validation: {
+    source: string;
+    validation_event_count: number;
+    event_definition: string;
+    fixed_horizon: {
+      SPY: Record<"5D" | "10D" | "30D" | "60D", FixedHorizonStat>;
+      QQQ: Record<"5D" | "10D" | "30D" | "60D", FixedHorizonStat>;
     };
   };
-  fixed_horizon_validation: {
-    SPY: Record<"5D_median" | "10D_median" | "30D_median" | "60D_median", number>;
-    QQQ: Record<"5D_median" | "10D_median" | "30D_median" | "60D_median", number>;
+  reconstruction_diagnostic: {
+    current_cooldown_event_count: number;
+    archived_cooldown_event_count: number;
+    status: string;
+    note: string;
   };
-  episodes: HistoricalEpisodeRow[];
 }
 
 export async function getHistoricalEpisodeEvidence(): Promise<HistoricalEpisodeEvidence | null> {
