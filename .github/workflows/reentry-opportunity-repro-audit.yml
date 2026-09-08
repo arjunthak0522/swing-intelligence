@@ -33,6 +33,7 @@ jobs:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/reentry_opportunity_repro_audit.py
       - name: Upload audit artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: reentry-opportunity-repro-audit
