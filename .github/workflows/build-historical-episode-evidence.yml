@@ -32,7 +32,7 @@ jobs:
       - name: Install canonical dependencies
         run: python -m pip install pandas numpy yfinance lxml
 
-      - name: Build frozen episode evidence
+      - name: Build frozen episode evidence at archived Sep 4 sample end
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/build_historical_episode_evidence.py --canonical-root canonical
