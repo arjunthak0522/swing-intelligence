@@ -1,0 +1,74 @@
+name: Build historical RE-ENTRY episode evidence
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [product-clarity-historical-evidence-20260908]
+    paths:
+      - 'tools/build_historical_episode_evidence.py'
+      - '.github/workflows/build-historical-episode-evidence.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout product branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Checkout frozen canonical engine
+        uses: actions/checkout@v4
+        with:
+          ref: 47f38bf3362a97bcf9c9dd2d6545c4fae212e046
+          path: canonical
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install canonical dependencies
+        run: python -m pip install pandas numpy yfinance lxml
+
+      - name: Build frozen episode evidence
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/build_historical_episode_evidence.py --canonical-root canonical
+
+      - name: Inspect evidence counts
+        run: |
+          python - <<'PY'
+          import json
+          p = json.load(open('web/public/reentry/historical_episodes.json'))
+          print(json.dumps({
+            'validated_independent_reentry_signals': p['validated_independent_reentry_signals'],
+            'reconstructed_contiguous_reentry_episodes': p['reconstructed_contiguous_reentry_episodes'],
+            'completed_episode_count': p['summary_completed_episodes']['completed_episode_count'],
+            'active_at_sample_end_count': p['summary_completed_episodes']['active_at_sample_end_count'],
+          }, indent=2))
+          if not p['episodes']:
+            raise SystemExit('No historical episodes were reconstructed')
+          PY
+
+      - name: Commit frozen evidence artifact
+        run: |
+          if git diff --quiet -- web/public/reentry/historical_episodes.json && [ -z "$(git status --porcelain -- web/public/reentry/historical_episodes.json)" ]; then
+            echo "Historical episode evidence unchanged"
+            exit 0
+          fi
+          git config user.name "re-entry-evidence[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/public/reentry/historical_episodes.json
+          git commit -m "Freeze canonical historical episode evidence [skip ci]"
+          git push origin HEAD:${GITHUB_REF_NAME}
+
+      - name: Upload evidence artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: reentry-historical-episode-evidence
+          path: web/public/reentry/historical_episodes.json
+          retention-days: 30
