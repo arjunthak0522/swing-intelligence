@@ -51,45 +51,51 @@ def main() -> None:
     from reentry_confidence import feature_frame  # type: ignore
     from reentry_engine import historical_validation_block  # type: ignore
     from reentry_episode_exit_backtest import build_canonical_signal_history  # type: ignore
+    from internal_correction_v2 import PRIMARY_COOLDOWN, cooldown_dates  # type: ignore
 
     frame = feature_frame()
     signals = build_canonical_signal_history(frame)
-    idx = signals.index
+    idx = list(signals.index)
+    pos = {d: i for i, d in enumerate(idx)}
     price_pos = {d: i for i, d in enumerate(frame.index)}
 
+    reenter_mask = signals["signal"].eq("RE-ENTER")
+    validated_signal_dates = cooldown_dates(reenter_mask, PRIMARY_COOLDOWN)
+
+    validated = historical_validation_block()
+    expected = int(validated["final_independent_reentry_episodes"])
+    if len(validated_signal_dates) != expected:
+        raise RuntimeError(
+            f"Validated signal-date mismatch: reconstructed={len(validated_signal_dates)} expected={expected}"
+        )
+
     episodes: list[dict[str, Any]] = []
-    i = 0
-    while i < len(idx):
-        if str(signals.iloc[i]["signal"]) != "RE-ENTER":
-            i += 1
-            continue
+    for signal_date in validated_signal_dates:
+        start_i = pos[signal_date]
+        last_i = start_i
+        while last_i + 1 < len(idx) and str(signals.iloc[last_i + 1]["signal"]) == "RE-ENTER":
+            last_i += 1
 
-        start_i = i
-        while i + 1 < len(idx) and str(signals.iloc[i + 1]["signal"]) == "RE-ENTER":
-            i += 1
-        last_i = i
-        next_i = i + 1 if i + 1 < len(idx) else None
-
-        start_date = idx[start_i]
+        next_i = last_i + 1 if last_i + 1 < len(idx) else None
         last_date = idx[last_i]
         next_date = idx[next_i] if next_i is not None else None
         next_signal = str(signals.iloc[next_i]["signal"]) if next_i is not None else None
-        start_pos = price_pos[start_date]
+        start_pos = price_pos[signal_date]
         last_pos = price_pos[last_date]
 
         rec: dict[str, Any] = {
-            "start": str(pd.Timestamp(start_date).date()),
+            "start": str(pd.Timestamp(signal_date).date()),
             "last_favorable": str(pd.Timestamp(last_date).date()),
             "next_state_date": str(pd.Timestamp(next_date).date()) if next_date is not None else None,
             "next_state": next_signal,
             "active_at_sample_end": next_i is None,
             "reenter_sessions": int(last_i - start_i + 1),
-            "setup_source": str(signals.iloc[start_i]["source"]),
-            "analog_at_start": str(signals.iloc[start_i]["analog"]),
+            "setup_source": str(signals.loc[signal_date, "source"]),
+            "analog_at_start": str(signals.loc[signal_date, "analog"]),
         }
 
         for sym in ("SPY", "QQQ"):
-            entry = float(frame.at[start_date, sym])
+            entry = float(frame.at[signal_date, sym])
             last = float(frame.at[last_date, sym])
             path = frame[sym].iloc[start_pos : last_pos + 1].astype(float)
             rec[f"{sym}_entry_close"] = entry
@@ -99,12 +105,8 @@ def main() -> None:
             rec[f"{sym}_max_adverse_during_episode"] = float(path.min() / entry - 1.0)
 
         episodes.append(rec)
-        i += 1
 
     completed = [e for e in episodes if not e["active_at_sample_end"]]
-    validated = historical_validation_block()
-    expected = int(validated["final_independent_reentry_episodes"])
-
     summary = {
         "completed_episode_count": len(completed),
         "active_at_sample_end_count": len(episodes) - len(completed),
@@ -122,15 +124,18 @@ def main() -> None:
     }
 
     payload = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "canonical_engine_commit": CANONICAL_ENGINE_COMMIT,
         "validated_independent_reentry_signals": expected,
-        "reconstructed_contiguous_reentry_episodes": len(episodes),
-        "definition": (
-            "Each episode starts at the first completed close with canonical RE-ENTER and ends at the last consecutive completed close that still says RE-ENTER. "
-            "The next WAIT or NO RE-ENTRY SETUP close is reported separately and is not included in the episode return."
+        "reconstructed_signal_rows": len(episodes),
+        "signal_selection_definition": (
+            f"Canonical RE-ENTER dates selected with the validated {PRIMARY_COOLDOWN}-session cooldown; this reproduces the {expected} independent signal dates used by the canonical validation."
         ),
-        "return_definition": "close at last favorable RE-ENTER session divided by close at first RE-ENTER session minus one; no sell rule is implied",
+        "definition": (
+            "For each validated RE-ENTRY signal date, performance is measured from that completed signal close through the last consecutive completed close that still says RE-ENTER. "
+            "The following WAIT or NO RE-ENTRY SETUP close is reported separately and is not included in the episode return."
+        ),
+        "return_definition": "close at last favorable RE-ENTER session divided by close at validated RE-ENTRY signal session minus one; this is historical evidence, not an exit or sell rule",
         "summary_completed_episodes": summary,
         "fixed_horizon_validation": {
             "SPY": {
@@ -155,7 +160,7 @@ def main() -> None:
 
     print(json.dumps({
         "validated_independent_reentry_signals": expected,
-        "reconstructed_contiguous_reentry_episodes": len(episodes),
+        "reconstructed_signal_rows": len(episodes),
         "completed_episode_count": len(completed),
         "active_at_sample_end_count": len(episodes) - len(completed),
         "output": str(out),
