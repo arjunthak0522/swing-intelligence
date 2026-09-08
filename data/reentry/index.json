@@ -1,5 +1,13 @@
 [
   {
+    "analog_decision": "CAUTIOUS YES",
+    "as_of": "2026-09-04",
+    "engine_version": "reentry_v1.0",
+    "market_state": "no material correction / neutral",
+    "signal": "RE-ENTER",
+    "weakness_present": true
+  },
+  {
     "analog_decision": "YES",
     "as_of": "2026-09-03",
     "engine_version": "reentry_v1.0",
