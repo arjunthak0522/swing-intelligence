@@ -1,97 +1,72 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
-export interface HistoricalEpisodeMetricSummary {
+export interface HorizonMetric {
   n: number;
-  median: number | null;
-  mean: number | null;
-  positive_rate: number | null;
-  p25: number | null;
-  p75: number | null;
-  min: number | null;
-  max: number | null;
+  median_return: number;
+  mean_return: number;
+  positive_rate: number;
+  p25_return: number;
+  p75_return: number;
+  median_mae: number;
+  p10_mae: number;
+  median_mfe: number;
+  false_start_rate_return_lt_minus_2pct: number;
 }
 
-export interface HistoricalEpisodeRow {
-  start: string;
-  last_favorable: string;
-  next_state_date: string | null;
-  next_state: string | null;
-  active_at_sample_end: boolean;
-  reenter_sessions: number;
-  setup_source: string;
-  analog_at_start: string;
-  SPY_entry_close: number;
-  SPY_last_favorable_close: number;
-  SPY_return_during_episode: number;
-  SPY_max_gain_during_episode: number;
-  SPY_max_adverse_during_episode: number;
-  QQQ_entry_close: number;
-  QQQ_last_favorable_close: number;
-  QQQ_return_during_episode: number;
-  QQQ_max_gain_during_episode: number;
-  QQQ_max_adverse_during_episode: number;
-}
-
-interface EpisodeSummary {
-  completed_episode_count: number;
-  active_at_sample_end_count: number;
-  episode_length_sessions: HistoricalEpisodeMetricSummary;
-  SPY: {
-    return_during_episode: HistoricalEpisodeMetricSummary;
-    max_gain_during_episode: HistoricalEpisodeMetricSummary;
-    max_adverse_during_episode: HistoricalEpisodeMetricSummary;
-  };
-  QQQ: {
-    return_during_episode: HistoricalEpisodeMetricSummary;
-    max_gain_during_episode: HistoricalEpisodeMetricSummary;
-    max_adverse_during_episode: HistoricalEpisodeMetricSummary;
-  };
-}
-
-interface FixedHorizonStat {
-  median: number;
-  n: number;
-}
-
-export interface HistoricalEpisodeEvidence {
-  schema_version: string;
-  canonical_engine_commit: string;
-  canonical_sample_end: string;
-  frozen_reconstruction_generated_at: string;
-  continuous_episode_count: number;
-  continuous_episode_definition: string;
-  return_definition: string;
-  continuous_episode_summary: EpisodeSummary;
-  continuous_episodes: HistoricalEpisodeRow[];
-  archived_entry_timing_validation: {
+export interface CanonicalHistoricalEvidence {
+  provenance: {
     source: string;
-    validation_event_count: number;
-    event_definition: string;
-    fixed_horizon: {
-      SPY: Record<"5D" | "10D" | "30D" | "60D", FixedHorizonStat>;
-      QQQ: Record<"5D" | "10D" | "30D" | "60D", FixedHorizonStat>;
-    };
-  };
-  reconstruction_diagnostic: {
-    current_cooldown_event_count: number;
-    archived_cooldown_event_count: number;
+    workflow_run_id: number;
+    artifact_id: number;
+    engine_commit: string;
+    sample_start: string;
+    sample_end: string;
     status: string;
     note: string;
   };
+  retail_validation_summary: {
+    final_independent_reentry_episodes: number;
+    incremental_early_internal_episodes: number;
+    incremental_subsector_candidate_episodes: number;
+    result: string;
+    subsector_direct_promotion: string;
+    SPY_5D_median_after_signal: number;
+    SPY_10D_median_after_signal: number;
+    SPY_30D_median_after_signal: number;
+    SPY_60D_median_after_signal: number;
+    QQQ_5D_median_after_signal: number;
+    QQQ_10D_median_after_signal: number;
+    QQQ_30D_median_after_signal: number;
+    QQQ_60D_median_after_signal: number;
+    important_limit: string;
+  };
+  final_policy_validation: {
+    count: number;
+    SPY: Record<string, HorizonMetric>;
+    QQQ: Record<string, HorizonMetric>;
+  };
+  latest_policy_rows: Array<{
+    date: string;
+    final_policy_signal: string;
+    SPY?: number;
+    QQQ?: number;
+  }>;
 }
 
-export async function getHistoricalEpisodeEvidence(): Promise<HistoricalEpisodeEvidence | null> {
+export async function getHistoricalEpisodeEvidence(): Promise<CanonicalHistoricalEvidence | null> {
+  const relative = path.join("reentry", "validation", "canonical_historical_evidence_2026-09-04.json");
   const candidates = [
-    path.join(process.cwd(), "public", "reentry", "historical_episodes.json"),
-    path.join(process.cwd(), "web", "public", "reentry", "historical_episodes.json"),
+    path.join(process.cwd(), "public", relative),
+    path.join(process.cwd(), "web", "public", relative),
   ];
+
   for (const file of candidates) {
     try {
       const raw = await readFile(file, "utf-8");
-      return JSON.parse(raw) as HistoricalEpisodeEvidence;
+      return JSON.parse(raw) as CanonicalHistoricalEvidence;
     } catch {
-      // Try the other supported Vercel root layout.
+      // Support both repository-root and web-root Vercel layouts.
     }
   }
   return null;
