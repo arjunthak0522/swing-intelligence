@@ -26,17 +26,15 @@ function MetricRow({ horizon, spy, qqq }: { horizon: string; spy: HorizonMetric;
 
 function FullMetricTable({ evidence }: { evidence: CanonicalHistoricalEvidence }) {
   const horizons = ["5", "7", "10", "15", "30", "60"];
-  return <div className="episode-table-wrap">
-    <div className="validation-detail-table">
-      <div className="validation-detail-head"><span>Horizon</span><span>Asset</span><span>n</span><span>Median</span><span>Mean</span><span>Positive</span><span>25th–75th</span><span>Median adverse</span><span>10th-pct adverse</span><span>Median favorable</span><span>False start*</span></div>
-      {horizons.flatMap((h) => (["SPY", "QQQ"] as const).map((asset) => {
-        const x = evidence.final_policy_validation[asset][h];
-        return <div className="validation-detail-row" key={`${asset}-${h}`}>
-          <b>{h}D</b><b>{asset}</b><span>{x.n}</span><strong>{pct(x.median_return, 2)}</strong><span>{pct(x.mean_return, 2)}</span><span>{pct(x.positive_rate, 0)}</span><span>{pct(x.p25_return, 2)} to {pct(x.p75_return, 2)}</span><span>{pct(x.median_mae, 2)}</span><span>{pct(x.p10_mae, 2)}</span><span>{pct(x.median_mfe, 2)}</span><span>{pct(x.false_start_rate_return_lt_minus_2pct, 0)}</span>
-        </div>;
-      }))}
-    </div>
-  </div>;
+  return <div className="validation-scroll"><div className="validation-detail-table">
+    <div className="validation-detail-head"><span>Horizon</span><span>Asset</span><span>n</span><span>Median</span><span>Mean</span><span>Positive</span><span>25th–75th</span><span>Median adverse</span><span>10th-pct adverse</span><span>Median favorable</span><span>False start*</span></div>
+    {horizons.flatMap((h) => (["SPY", "QQQ"] as const).map((asset) => {
+      const x = evidence.final_policy_validation[asset][h];
+      return <div className="validation-detail-row" key={`${asset}-${h}`}>
+        <b>{h}D</b><b>{asset}</b><span>{x.n}</span><strong>{pct(x.median_return, 2)}</strong><span>{pct(x.mean_return, 2)}</span><span>{pct(x.positive_rate, 0)}</span><span>{pct(x.p25_return, 2)} to {pct(x.p75_return, 2)}</span><span>{pct(x.median_mae, 2)}</span><span>{pct(x.p10_mae, 2)}</span><span>{pct(x.median_mfe, 2)}</span><span>{pct(x.false_start_rate_return_lt_minus_2pct, 0)}</span>
+      </div>;
+    }))}
+  </div></div>;
 }
 
 export default function HistoricalEvidence({ evidence }: { evidence: CanonicalHistoricalEvidence | null }) {
@@ -47,6 +45,9 @@ export default function HistoricalEvidence({ evidence }: { evidence: CanonicalHi
   const headlineHorizons = ["5", "10", "30", "60"];
 
   return <section className="card section-card historical-evidence-card">
+    <style>{`
+      .historical-evidence-card .history-summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 16px}.historical-evidence-card .history-summary-grid>div{border:1px solid var(--line);border-radius:13px;padding:14px;background:rgba(255,255,255,.35)}.historical-evidence-card .history-summary-grid small,.historical-evidence-card .history-summary-grid span{display:block;color:var(--muted);font-size:10px}.historical-evidence-card .history-summary-grid strong{display:block;margin:7px 0 3px;font-size:22px}.history-head-wide,.history-row-wide{grid-template-columns:.55fr 1fr 1fr 1fr 1fr!important}.history-row-wide span{display:flex;gap:6px;align-items:baseline}.history-row-wide small{color:var(--muted);font-size:9px}.history-details{margin-top:12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.25);overflow:hidden}.history-details>summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:15px 16px}.history-details>summary::-webkit-details-marker{display:none}.history-details>summary span{display:block}.history-details>summary small{display:block;color:var(--muted);font-weight:400;margin-top:3px}.history-details>summary svg{transition:transform .16s}.history-details[open]>summary svg{transform:rotate(180deg)}.history-details-body{border-top:1px solid var(--line);padding:0 16px 16px}.history-note{font-size:11px;line-height:1.5;color:var(--muted)}.validation-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px}.validation-detail-table{min-width:1080px}.validation-detail-head,.validation-detail-row{display:grid;grid-template-columns:70px 55px 45px 78px 78px 72px 135px 105px 115px 105px 85px;gap:8px;align-items:center;padding:9px 12px}.validation-detail-head{background:#efede7;color:var(--muted);font-size:9px;font-weight:800;text-transform:uppercase}.validation-detail-row{border-top:1px solid var(--line);font-size:10px;font-variant-numeric:tabular-nums}.compact-history-table{margin-top:14px}.history-method{margin-top:15px;color:var(--muted);font-size:10px;line-height:1.5}@media(max-width:760px){.historical-evidence-card .history-summary-grid{grid-template-columns:1fr 1fr}.history-head-wide,.history-row-wide{grid-template-columns:.55fr 1fr 1fr!important}.history-head-wide span:nth-child(3),.history-head-wide span:nth-child(5),.history-row-wide span:nth-child(3),.history-row-wide span:nth-child(5){display:none}.historical-evidence-card .history-summary-grid strong{font-size:18px}}
+    `}</style>
     <div className="section-heading">
       <div><span className="kicker">HISTORICAL EVIDENCE</span><h2>What happened after prior RE-ENTRY signals?</h2></div>
       <span className="pill">{retail.final_independent_reentry_episodes} independent episodes</span>
