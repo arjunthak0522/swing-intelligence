@@ -160,26 +160,13 @@ function VehicleCard({ s }: { s: ReentrySnapshot }) {
   );
 }
 
-function OutperformanceCard({ s }: { s: ReentrySnapshot }) {
-  const o = s.outperformance_intelligence;
-  const candidates = o?.candidates || [];
-  const active = s.signal === "RE-ENTER";
-  const status = !o ? "AWAITING FEED" : o.status === "HIGH_CONFIDENCE_CANDIDATES" ? "HISTORICAL EDGE" : o.status === "INACTIVE" ? "INACTIVE" : "NO EDGE";
+function OutperformanceCard() {
   return (
     <section className="card section-card action-card">
-      <div className="section-heading"><div><span className="kicker">HISTORICAL OPPORTUNITY</span><h2>Historically favored after similar RE-ENTRY setups</h2></div><StatusPill>{status}</StatusPill></div>
-      <p className="section-intro">These are not today&apos;s returns and they are not standalone buy signals. They show which tracked ETFs historically had the strongest relative outcomes after prior RE-ENTRY states that most closely resembled the current setup.</p>
-      {active && candidates.length > 0 ? <div className="vehicle-strip">
-        {candidates.map((x) => <div className="vehicle-primary" key={x.symbol}>
-          <div><span>{x.label}</span><b>{x.symbol}</b></div>
-          <small>{sectorNames[x.parent_sector || ""] || x.parent_sector || "Subsector ETF"}</small>
-          <strong>{pct(x.predicted_median_excess_vs_spy, 1)}</strong>
-          <em>Predicted median excess vs SPY</em>
-          <em>Median across {x.neighbors} nearest prior RE-ENTRY states; each historical outcome averages its 10D and 30D forward excess return vs SPY.</em>
-          <em><b>{pct(x.neighbor_positive_excess_rate, 0)}</b> of those similar states beat SPY on that same measure.</em>
-        </div>)}
-      </div> : <div className="notice"><CircleAlert size={16} /> {active ? "No ETF currently clears both the +1% predicted median excess and 60% historical outperformance gates." : "This layer activates only when the official close signal is RE-ENTER. It does not create an ETF recommendation during WAIT or NO RE-ENTRY SETUP."}</div>}
-      <div className="notice"><CircleCheck size={16} /> Advisory only. This historical relative-opportunity layer never changes the official RE-ENTRY decision and is not a replacement for SPY/QQQ.</div>
+      <div className="section-heading"><div><span className="kicker">HISTORICAL OPPORTUNITY</span><h2>ETF relative-opportunity layer</h2></div><StatusPill>UNDER VALIDATION</StatusPill></div>
+      <p className="section-intro">This section remains visible, but its ETF ranking numbers are temporarily suppressed. A reproducibility audit found that mutable adjusted historical ETF prices could change a previously published nearest-neighbor estimate after the fact.</p>
+      <div className="notice"><CircleAlert size={16} /> No REZ, ITA, XTN, or other relative-opportunity percentage will be displayed until the historical input series is point-in-time reproducible and the layer passes a fresh backtest.</div>
+      <div className="notice"><CircleCheck size={16} /> This does not affect the official RE-ENTRY decision. The Sep 4 core decision was independently rebuilt from the frozen engine and reproduced as RE-ENTER with the same headline inputs and decision states.</div>
     </section>
   );
 }
@@ -273,10 +260,10 @@ export default async function Home() {
       <EpisodeSummary episode={episode} official={s} />
       <VehicleCard s={s} />
       <Historical s={s} />
-      <OutperformanceCard s={s} />
+      <OutperformanceCard />
       <SectorMap s={s} />
       <MarketInternals s={s} />
     </>}
-    <footer>Official RE-ENTRY decisions use completed-close data. Intraday data is provisional market context only and never overwrites the validated close signal. Historical opportunity estimates are conditional historical comparisons, not today&apos;s ETF returns.</footer>
+    <footer>Official RE-ENTRY decisions use completed-close data. Intraday data is provisional market context only and never overwrites the validated close signal. Historical ETF opportunity estimates remain suppressed until their input history is reproducible.</footer>
   </main>;
 }
