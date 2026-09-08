@@ -58,6 +58,8 @@ def build_exact_policy(canonical_tools: Path):
     xs = build_cross_section(prices)
     df = base.join(xs, how="inner").dropna(subset=["spy_dd20", "sector_dispersion_pct"]).copy()
     df = build_full_v2_state(df)
+    # Match the archived canonical validation window exactly.
+    df = df.loc[:pd.Timestamp("2026-09-04")].copy()
 
     final_signal, source, analog_labels = [], [], []
     for target in df.index:
