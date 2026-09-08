@@ -1,210 +1,210 @@
 {
   "analog_count": 40,
-  "analog_decision": "CAUTIOUS YES",
-  "analog_interpretation": "putting some cash back to work makes sense, but the edge is modest",
+  "analog_decision": "YES",
+  "analog_interpretation": "historical analogs support putting cash back to work",
   "analogs": [
     {
-      "date": "2016-10-07",
-      "distance": 0.07362539424644039,
+      "date": "2025-09-25",
+      "distance": 0.06511036688514142,
       "rank": 1
     },
     {
-      "date": "2018-10-02",
-      "distance": 0.09961859625662599,
+      "date": "2023-05-16",
+      "distance": 0.07637901747477865,
       "rank": 2
     },
     {
-      "date": "2018-10-01",
-      "distance": 0.10311559791112743,
+      "date": "2026-05-15",
+      "distance": 0.07746555808720985,
       "rank": 3
     },
     {
-      "date": "2017-08-29",
-      "distance": 0.11513622083842355,
+      "date": "2025-02-12",
+      "distance": 0.08111881687238509,
       "rank": 4
     },
     {
-      "date": "2017-09-05",
-      "distance": 0.11538627883579126,
+      "date": "2016-12-01",
+      "distance": 0.09830872199320871,
       "rank": 5
     },
     {
-      "date": "2025-09-24",
-      "distance": 0.11606613785796785,
+      "date": "2023-09-19",
+      "distance": 0.10254904236999193,
       "rank": 6
     },
     {
-      "date": "2025-12-30",
-      "distance": 0.11874641956298733,
+      "date": "2023-09-15",
+      "distance": 0.10521503657491554,
       "rank": 7
     },
     {
-      "date": "2023-04-20",
-      "distance": 0.11918116973149344,
+      "date": "2018-09-26",
+      "distance": 0.10812827098005307,
       "rank": 8
     },
     {
-      "date": "2017-08-23",
-      "distance": 0.12352371284081264,
+      "date": "2023-09-06",
+      "distance": 0.10819625959604894,
       "rank": 9
     },
     {
-      "date": "2025-08-06",
-      "distance": 0.13003496682666182,
+      "date": "2025-09-24",
+      "distance": 0.10975266044679512,
       "rank": 10
     },
     {
-      "date": "2025-02-12",
-      "distance": 0.13064742198317061,
+      "date": "2025-11-03",
+      "distance": 0.11157708514897743,
       "rank": 11
     },
     {
-      "date": "2023-09-15",
-      "distance": 0.13373523478552962,
+      "date": "2025-12-31",
+      "distance": 0.11188059083707289,
       "rank": 12
     },
     {
-      "date": "2025-12-19",
-      "distance": 0.13503162244378114,
+      "date": "2016-10-27",
+      "distance": 0.11214693802805217,
       "rank": 13
     },
     {
-      "date": "2026-05-19",
-      "distance": 0.136823423522391,
+      "date": "2025-12-09",
+      "distance": 0.1163153398103904,
       "rank": 14
     },
     {
-      "date": "2026-01-07",
-      "distance": 0.14220339957254358,
+      "date": "2022-01-14",
+      "distance": 0.11755296879621327,
       "rank": 15
     },
     {
-      "date": "2016-11-28",
-      "distance": 0.14308940281613336,
+      "date": "2024-12-17",
+      "distance": 0.11892004162294977,
       "rank": 16
     },
     {
-      "date": "2016-10-26",
-      "distance": 0.14349181504490705,
+      "date": "2018-10-04",
+      "distance": 0.11897328882953144,
       "rank": 17
     },
     {
-      "date": "2025-02-07",
-      "distance": 0.14417763530633113,
+      "date": "2025-01-31",
+      "distance": 0.11996355216188308,
       "rank": 18
     },
     {
-      "date": "2017-05-12",
-      "distance": 0.1444843508759337,
+      "date": "2025-07-31",
+      "distance": 0.12053643769888926,
       "rank": 19
     },
     {
-      "date": "2025-12-16",
-      "distance": 0.14524722357537576,
+      "date": "2023-04-25",
+      "distance": 0.12133370568431133,
       "rank": 20
     },
     {
-      "date": "2026-05-04",
-      "distance": 0.14535456927096824,
+      "date": "2023-08-15",
+      "distance": 0.1215937299066399,
       "rank": 21
     },
     {
-      "date": "2021-09-16",
-      "distance": 0.14655438297363294,
+      "date": "2021-12-14",
+      "distance": 0.12279752964370369,
       "rank": 22
     },
     {
-      "date": "2023-05-09",
-      "distance": 0.14718656009376438,
+      "date": "2023-08-16",
+      "distance": 0.12306117217497779,
       "rank": 23
     },
     {
-      "date": "2025-09-05",
-      "distance": 0.1488652355971693,
+      "date": "2026-05-19",
+      "distance": 0.12615776647532406,
       "rank": 24
     },
     {
-      "date": "2025-08-25",
-      "distance": 0.14945270846804712,
+      "date": "2023-05-23",
+      "distance": 0.12710536074060147,
       "rank": 25
     },
     {
-      "date": "2026-07-14",
-      "distance": 0.14964601543641287,
+      "date": "2025-11-13",
+      "distance": 0.1306202931839222,
       "rank": 26
     },
     {
-      "date": "2025-09-29",
-      "distance": 0.14982258763751602,
+      "date": "2023-09-12",
+      "distance": 0.13090365412269334,
       "rank": 27
     },
     {
-      "date": "2024-06-28",
-      "distance": 0.15003428518988224,
+      "date": "2026-07-21",
+      "distance": 0.13167801958585323,
       "rank": 28
     },
     {
-      "date": "2023-04-21",
-      "distance": 0.1503560088771235,
+      "date": "2025-12-16",
+      "distance": 0.13266563634351378,
       "rank": 29
     },
     {
-      "date": "2025-08-15",
-      "distance": 0.15048963370522397,
+      "date": "2016-11-30",
+      "distance": 0.1328681252866632,
       "rank": 30
     },
     {
-      "date": "2024-06-25",
-      "distance": 0.15055066964883307,
+      "date": "2022-04-08",
+      "distance": 0.13595861337774548,
       "rank": 31
     },
     {
-      "date": "2026-06-03",
-      "distance": 0.15126155569028157,
+      "date": "2024-06-26",
+      "distance": 0.13682450742163563,
       "rank": 32
     },
     {
-      "date": "2019-10-31",
-      "distance": 0.15129189568006873,
+      "date": "2018-08-01",
+      "distance": 0.13782567127786743,
       "rank": 33
     },
     {
-      "date": "2021-12-16",
-      "distance": 0.1519974983159604,
+      "date": "2026-04-29",
+      "distance": 0.13851084098595712,
       "rank": 34
     },
     {
-      "date": "2017-09-07",
-      "distance": 0.15302687132155654,
+      "date": "2016-10-11",
+      "distance": 0.13966381840050507,
       "rank": 35
     },
     {
-      "date": "2025-10-07",
-      "distance": 0.15344641536393266,
+      "date": "2018-07-30",
+      "distance": 0.13996977490207316,
       "rank": 36
     },
     {
-      "date": "2018-07-27",
-      "distance": 0.15408589460019437,
+      "date": "2026-07-08",
+      "distance": 0.14129300379455453,
       "rank": 37
     },
     {
-      "date": "2023-09-12",
-      "distance": 0.15415761527765282,
+      "date": "2025-11-14",
+      "distance": 0.14179729488098192,
       "rank": 38
     },
     {
-      "date": "2025-12-12",
-      "distance": 0.15420176256052268,
+      "date": "2021-12-20",
+      "distance": 0.1418820401845545,
       "rank": 39
     },
     {
-      "date": "2025-11-03",
-      "distance": 0.15537459921032715,
+      "date": "2025-01-29",
+      "distance": 0.14270001191538279,
       "rank": 40
     }
   ],
-  "as_of": "2026-09-04",
+  "as_of": "2026-09-08",
   "caveats": [
     "true breadth history begins in September 2016",
     "historical evidence supports decision timing, not guaranteed returns",
@@ -213,53 +213,56 @@
     "Subsector and industry histories use audited liquid ETF proxies. Weighting-method ETFs are excluded from the primary subsector breadth calculation; broad thematic proxies are explicitly labeled. Coverage can be uneven across sectors and is not a proprietary point-in-time industry classification."
   ],
   "current_inputs": {
-    "breadth_1d_change": -0.03193612774451099,
-    "breadth_3d_change": 0.013972055888223534,
-    "pct_sp500_above_200dma": 0.6646706586826348,
-    "pct_sp500_above_50dma": 0.4790419161676646,
+    "breadth_1d_change": -0.0538922155688622,
+    "breadth_3d_change": -0.05788423153692607,
+    "pct_sp500_above_200dma": 0.6047904191616766,
+    "pct_sp500_above_50dma": 0.4251497005988024,
     "rsp_breadth_state": "NARROWING",
-    "rsp_spy_relative_20d": -0.0009861998147275841,
-    "rsp_spy_relative_5d": -0.008740114372044916,
-    "spy_drawdown_20d": -0.009885843574844344,
-    "spy_return_5d": 0.0010918567905857657,
-    "vix_5d_change": 0.006930006930006893,
-    "vix_vix3m_ratio": 0.825099375354912
+    "rsp_spy_relative_20d": -0.00671793513867025,
+    "rsp_spy_relative_5d": -0.010673079974949484,
+    "spy_drawdown_20d": -0.015323674602766513,
+    "spy_return_5d": -0.0014209869200858538,
+    "vix_5d_change": 0.05361932084643484,
+    "vix_vix3m_ratio": 0.8548124409333833
   },
   "data_freshness": {
     "QQQ": {
-      "latest": "2026-09-04",
+      "latest": "2026-09-08",
       "source": "Twelve Data"
     },
     "SPY": {
-      "latest": "2026-09-04",
+      "latest": "2026-09-08",
       "source": "Twelve Data"
     },
     "VIX": {
-      "latest": "2026-09-04",
-      "source": "Cboe VIX daily history"
+      "latest": "2026-09-08",
+      "source": "Cboe VIX daily history + Yahoo same-day overlay"
     },
     "VIX3M": {
-      "latest": "2026-09-04",
-      "source": "Cboe VIX3M daily history"
+      "latest": "2026-09-08",
+      "source": "Cboe VIX3M daily history + Yahoo same-day overlay"
     },
     "breadth": {
-      "latest": "2026-09-04",
-      "source": "https://tradermonty.github.io/market-breadth-analysis/market_breadth_data.csv"
+      "constituent_source": "https://raw.githubusercontent.com/datasets/s-and-p-500-companies/main/data/constituents.csv",
+      "constituent_universe": 503,
+      "latest": "2026-09-08",
+      "source": "historical point-in-time breadth + same-day current-constituent Yahoo overlay",
+      "valid_constituents": 501
     },
-    "equity_target_session": "2026-09-04",
-    "live_overlay_used": false,
+    "equity_target_session": "2026-09-08",
+    "live_overlay_used": true,
     "same_day_complete": true,
     "same_day_required": true,
     "stale_inputs_vs_equity_target": {},
-    "target_session": "2026-09-04"
+    "target_session": "2026-09-08"
   },
   "decision_diagnostics": {
-    "median_7_10d_excess_across_spy_qqq": -0.001823860785450604,
-    "median_7_10d_forward_return_across_spy_qqq": 0.006225333591864114,
-    "median_7_10d_positive_rate_across_spy_qqq": 0.6,
+    "median_7_10d_excess_across_spy_qqq": 0.003118738629252104,
+    "median_7_10d_forward_return_across_spy_qqq": 0.011602489463514887,
+    "median_7_10d_positive_rate_across_spy_qqq": 0.6125,
     "stabilizing": true,
     "weakness_present": true,
-    "worst_25th_percentile_across_spy_qqq": -0.01927931790770704
+    "worst_25th_percentile_across_spy_qqq": -0.017919257634719882
   },
   "drawdown_definition": "close-to-close maximum adverse excursion from hypothetical close t+1 entry through each horizon",
   "early_entry_policy": {
@@ -294,186 +297,186 @@
   "extended_forward_evidence": {
     "QQQ": {
       "10": {
-        "best_final_return": 0.042568600452053684,
-        "mean_return": -0.0006871699569836493,
-        "median_max_drawdown": -0.01734869401119038,
-        "median_max_favorable_excursion": 0.015933428260992644,
-        "median_return": 0.006029539537901752,
+        "best_final_return": 0.07694948749437625,
+        "mean_return": 0.006841587451186487,
+        "median_max_drawdown": -0.01146907146578563,
+        "median_max_favorable_excursion": 0.026038726066457962,
+        "median_return": 0.012462407438664336,
         "n": 40,
-        "p10_max_drawdown": -0.06366648609605831,
-        "p25_max_drawdown": -0.03563814199220672,
-        "p25_return": -0.01927931790770704,
-        "p75_return": 0.01952831361484253,
-        "positive_rate": 0.6,
-        "worst_final_return": -0.07903662995007432,
-        "worst_max_drawdown": -0.08792680828179611
+        "p10_max_drawdown": -0.062306110415948766,
+        "p25_max_drawdown": -0.04172857322745613,
+        "p25_return": -0.014248510106390166,
+        "p75_return": 0.03775364349367466,
+        "positive_rate": 0.625,
+        "worst_final_return": -0.08833783565624498,
+        "worst_max_drawdown": -0.08733783565624498
       },
       "15": {
-        "best_final_return": 0.08164132119575196,
-        "mean_return": 0.00047468420525848264,
-        "median_max_drawdown": -0.01848465428738999,
-        "median_max_favorable_excursion": 0.02002434705095202,
-        "median_return": 0.004729141181080921,
+        "best_final_return": 0.11541797426256528,
+        "mean_return": 0.0021728123036207523,
+        "median_max_drawdown": -0.020100465622469033,
+        "median_max_favorable_excursion": 0.026762507008693537,
+        "median_return": 0.004679911947451877,
         "n": 40,
-        "p10_max_drawdown": -0.065111190628451,
-        "p25_max_drawdown": -0.0380069605489024,
-        "p25_return": -0.012413630922513158,
-        "p75_return": 0.025307636920375354,
-        "positive_rate": 0.55,
-        "worst_final_return": -0.11183624630276945,
-        "worst_max_drawdown": -0.11083624630276945
+        "p10_max_drawdown": -0.08119463269792311,
+        "p25_max_drawdown": -0.045279279851787424,
+        "p25_return": -0.022614977407839743,
+        "p75_return": 0.0268594656624902,
+        "positive_rate": 0.575,
+        "worst_final_return": -0.08331014807575499,
+        "worst_max_drawdown": -0.08900915883526184
       },
       "30": {
-        "best_final_return": 0.12208906082959115,
-        "mean_return": 0.0034395417531096735,
-        "median_max_drawdown": -0.027708243746882855,
-        "median_max_favorable_excursion": 0.03534687698174199,
-        "median_return": 0.016828136665572924,
+        "best_final_return": 0.13136281142783857,
+        "mean_return": -0.007680266484761847,
+        "median_max_drawdown": -0.030954247638057042,
+        "median_max_favorable_excursion": 0.03727300299936975,
+        "median_return": 0.001325242849843867,
         "n": 40,
-        "p10_max_drawdown": -0.11394564870829026,
-        "p25_max_drawdown": -0.06346179883302888,
-        "p25_return": -0.037897660136089084,
-        "p75_return": 0.03994174920457849,
-        "positive_rate": 0.55,
-        "worst_final_return": -0.12594871711331534,
-        "worst_max_drawdown": -0.12606832893941688
+        "p10_max_drawdown": -0.12181580954887378,
+        "p25_max_drawdown": -0.08730429992695593,
+        "p25_return": -0.06262878485495416,
+        "p75_return": 0.027136376449104826,
+        "positive_rate": 0.5,
+        "worst_final_return": -0.15838220078669962,
+        "worst_max_drawdown": -0.15738220078669962
       },
       "5": {
-        "best_final_return": 0.04724507027616831,
-        "mean_return": 0.002820140973894064,
-        "median_max_drawdown": -0.008651338596374292,
-        "median_max_favorable_excursion": 0.01133266564776192,
-        "median_return": 0.006892173464366214,
+        "best_final_return": 0.06039008175456295,
+        "mean_return": 0.0037805725792413787,
+        "median_max_drawdown": -0.005150392128456249,
+        "median_max_favorable_excursion": 0.016196788667487305,
+        "median_return": 0.011889762832110518,
         "n": 40,
-        "p10_max_drawdown": -0.03466797064589525,
-        "p25_max_drawdown": -0.022301891960863407,
-        "p25_return": -0.016625038006037623,
-        "p75_return": 0.01895117094659593,
-        "positive_rate": 0.6,
-        "worst_final_return": -0.07747216993815542,
-        "worst_max_drawdown": -0.07647216993815542
+        "p10_max_drawdown": -0.04141736954695683,
+        "p25_max_drawdown": -0.026465073488951996,
+        "p25_return": -0.020917556171946045,
+        "p75_return": 0.02668789705164043,
+        "positive_rate": 0.675,
+        "worst_final_return": -0.06965470432208076,
+        "worst_max_drawdown": -0.06865470432208076
       },
       "60": {
-        "best_final_return": 0.2170600807953028,
-        "mean_return": 0.02294620288323329,
-        "median_max_drawdown": -0.03146587859060024,
-        "median_max_favorable_excursion": 0.05896367240201883,
-        "median_return": 0.03553630074621761,
-        "n": 39,
-        "p10_max_drawdown": -0.18148666227462193,
-        "p25_max_drawdown": -0.08642330036278034,
-        "p25_return": -0.02002854034077184,
-        "p75_return": 0.07403758123949589,
-        "positive_rate": 0.717948717948718,
-        "worst_final_return": -0.17747375504710639,
-        "worst_max_drawdown": -0.22828717397149767
+        "best_final_return": 0.20536807002917878,
+        "mean_return": -0.000321286480234346,
+        "median_max_drawdown": -0.05991188050831797,
+        "median_max_favorable_excursion": 0.04545875832577051,
+        "median_return": 0.01036634634621636,
+        "n": 38,
+        "p10_max_drawdown": -0.20357249593094048,
+        "p25_max_drawdown": -0.09624040369952189,
+        "p25_return": -0.06572220805512782,
+        "p75_return": 0.05244850415864766,
+        "positive_rate": 0.5789473684210527,
+        "worst_final_return": -0.2287888392616908,
+        "worst_max_drawdown": -0.2277888392616908
       },
       "7": {
-        "best_final_return": 0.055014422558566145,
-        "mean_return": 0.0007035220160945654,
-        "median_max_drawdown": -0.011585423058563915,
-        "median_max_favorable_excursion": 0.012112044136221689,
-        "median_return": 0.006421127645826475,
+        "best_final_return": 0.06910402744170152,
+        "mean_return": 0.006808225568359902,
+        "median_max_drawdown": -0.005150392128456249,
+        "median_max_favorable_excursion": 0.017849142644787652,
+        "median_return": 0.012091611343419073,
         "n": 40,
-        "p10_max_drawdown": -0.04461111246682185,
-        "p25_max_drawdown": -0.030769951983640076,
-        "p25_return": -0.01337293864410019,
-        "p75_return": 0.019811786188886626,
-        "positive_rate": 0.625,
-        "worst_final_return": -0.08794476446837152,
-        "worst_max_drawdown": -0.08792680828179611
+        "p10_max_drawdown": -0.04376087332618678,
+        "p25_max_drawdown": -0.03688560505768729,
+        "p25_return": -0.017919257634719882,
+        "p75_return": 0.030596237878553312,
+        "positive_rate": 0.6,
+        "worst_final_return": -0.08047640209084872,
+        "worst_max_drawdown": -0.07947640209084872
       }
     },
     "SPY": {
       "10": {
-        "best_final_return": 0.037793550351186256,
-        "mean_return": 0.00043880794532852595,
-        "median_max_drawdown": -0.01134033733085349,
-        "median_max_favorable_excursion": 0.01330148520859531,
-        "median_return": 0.005077733115010919,
+        "best_final_return": 0.042883344706836524,
+        "mean_return": 0.003357534609141874,
+        "median_max_drawdown": -0.008795140984535488,
+        "median_max_favorable_excursion": 0.017304755468508626,
+        "median_return": 0.0111133675836107,
         "n": 40,
-        "p10_max_drawdown": -0.04061103466689843,
-        "p25_max_drawdown": -0.021867441685434447,
-        "p25_return": -0.010334269993469314,
-        "p75_return": 0.015821141889212964,
-        "positive_rate": 0.575,
-        "worst_final_return": -0.046822090304313724,
-        "worst_max_drawdown": -0.0670162827368711
+        "p10_max_drawdown": -0.04699713529496354,
+        "p25_max_drawdown": -0.029218344381183675,
+        "p25_return": -0.015472239041462943,
+        "p75_return": 0.022969056538829413,
+        "positive_rate": 0.675,
+        "worst_final_return": -0.06471044755581545,
+        "worst_max_drawdown": -0.06371044755581545
       },
       "15": {
-        "best_final_return": 0.03587635472936557,
-        "mean_return": 0.0008637983057074444,
-        "median_max_drawdown": -0.01287653636992614,
-        "median_max_favorable_excursion": 0.01788394078704525,
-        "median_return": 0.011187130802340794,
+        "best_final_return": 0.07564991682259292,
+        "mean_return": 0.0007279108910160231,
+        "median_max_drawdown": -0.012656158486769487,
+        "median_max_favorable_excursion": 0.021682070615121507,
+        "median_return": 0.002909567834822769,
         "n": 40,
-        "p10_max_drawdown": -0.05029400058494282,
-        "p25_max_drawdown": -0.029142603743392115,
-        "p25_return": -0.0032869786704428075,
-        "p75_return": 0.019627911348175486,
-        "positive_rate": 0.675,
-        "worst_final_return": -0.09149770327711504,
-        "worst_max_drawdown": -0.09049770327711504
+        "p10_max_drawdown": -0.05630111066076375,
+        "p25_max_drawdown": -0.03330185899895552,
+        "p25_return": -0.010361360653644708,
+        "p75_return": 0.025185696997914897,
+        "positive_rate": 0.525,
+        "worst_final_return": -0.07913918149749222,
+        "worst_max_drawdown": -0.078173855945596
       },
       "30": {
-        "best_final_return": 0.06157911526012094,
-        "mean_return": 0.00660891612212636,
-        "median_max_drawdown": -0.01883163108167546,
-        "median_max_favorable_excursion": 0.035597181570303005,
-        "median_return": 0.018091679264106486,
+        "best_final_return": 0.06849817382566525,
+        "mean_return": -0.0036586653100848633,
+        "median_max_drawdown": -0.023938251189490223,
+        "median_max_favorable_excursion": 0.03191343782634748,
+        "median_return": 0.01057844621219417,
         "n": 40,
-        "p10_max_drawdown": -0.07567986143082137,
-        "p25_max_drawdown": -0.036858567826257765,
-        "p25_return": -0.012658069161456537,
-        "p75_return": 0.03485764059426982,
-        "positive_rate": 0.625,
-        "worst_final_return": -0.08967861475336991,
-        "worst_max_drawdown": -0.09563249620758352
+        "p10_max_drawdown": -0.0841363787734301,
+        "p25_max_drawdown": -0.06582316348523104,
+        "p25_return": -0.03850951777953027,
+        "p75_return": 0.02915433882978241,
+        "positive_rate": 0.55,
+        "worst_final_return": -0.10563265810527689,
+        "worst_max_drawdown": -0.11470271606876892
       },
       "5": {
-        "best_final_return": 0.036815056428990744,
-        "mean_return": 0.002200304535382655,
-        "median_max_drawdown": -0.006181742136199764,
-        "median_max_favorable_excursion": 0.008172558534640717,
-        "median_return": 0.004893905186161619,
+        "best_final_return": 0.030140698964024826,
+        "mean_return": 0.0019648139199223537,
+        "median_max_drawdown": -0.004117615375624439,
+        "median_max_favorable_excursion": 0.011394293971252134,
+        "median_return": 0.008270874114887583,
         "n": 40,
-        "p10_max_drawdown": -0.021512207372143818,
-        "p25_max_drawdown": -0.017516049686389673,
-        "p25_return": -0.005885414785783027,
-        "p75_return": 0.012519414506123094,
-        "positive_rate": 0.675,
-        "worst_final_return": -0.047003050870698115,
-        "worst_max_drawdown": -0.046003050870698114
+        "p10_max_drawdown": -0.029158647166852104,
+        "p25_max_drawdown": -0.017912411196963657,
+        "p25_return": -0.012491872237844287,
+        "p75_return": 0.015367070064960853,
+        "positive_rate": 0.65,
+        "worst_final_return": -0.049237618529159755,
+        "worst_max_drawdown": -0.05437425980215915
       },
       "60": {
-        "best_final_return": 0.10331828956044908,
-        "mean_return": 0.019758389499764464,
-        "median_max_drawdown": -0.021672843270629016,
-        "median_max_favorable_excursion": 0.04760325406517474,
-        "median_return": 0.03532653391465568,
-        "n": 39,
-        "p10_max_drawdown": -0.1117159836035716,
-        "p25_max_drawdown": -0.05225695066694297,
-        "p25_return": -0.012777790357317187,
-        "p75_return": 0.059022001899433296,
-        "positive_rate": 0.717948717948718,
-        "worst_final_return": -0.15126066675812866,
-        "worst_max_drawdown": -0.19669546140134386
+        "best_final_return": 0.122256556614318,
+        "mean_return": 0.0018255689497851477,
+        "median_max_drawdown": -0.05498373515509919,
+        "median_max_favorable_excursion": 0.04047568340947527,
+        "median_return": 0.02420207796745033,
+        "n": 38,
+        "p10_max_drawdown": -0.17244034975323125,
+        "p25_max_drawdown": -0.07938656776707517,
+        "p25_return": -0.043901102909881945,
+        "p75_return": 0.05036830116528401,
+        "positive_rate": 0.5789473684210527,
+        "worst_final_return": -0.1948491176167051,
+        "worst_max_drawdown": -0.1938491176167051
       },
       "7": {
-        "best_final_return": 0.03729345249744498,
-        "mean_return": 0.0003769442510886928,
-        "median_max_drawdown": -0.006799401966688601,
-        "median_max_favorable_excursion": 0.011228791042196873,
-        "median_return": 0.006979665952165149,
+        "best_final_return": 0.03794527756885635,
+        "mean_return": 0.0039037726785366962,
+        "median_max_drawdown": -0.005532611319996716,
+        "median_max_favorable_excursion": 0.013269149126452495,
+        "median_return": 0.0073691322576778795,
         "n": 40,
-        "p10_max_drawdown": -0.03643260574633278,
-        "p25_max_drawdown": -0.019275504176682168,
-        "p25_return": -0.01031601178763153,
-        "p75_return": 0.016585406484801724,
+        "p10_max_drawdown": -0.033476005193045485,
+        "p25_max_drawdown": -0.02068397468534644,
+        "p25_return": -0.005355819878942097,
+        "p75_return": 0.019716375269451303,
         "positive_rate": 0.6,
-        "worst_final_return": -0.06750428728220614,
-        "worst_max_drawdown": -0.0670162827368711
+        "worst_final_return": -0.056313370617392944,
+        "worst_max_drawdown": -0.05531337061739294
       }
     }
   },
@@ -483,60 +486,60 @@
   "forward_analog_outcomes": {
     "QQQ": {
       "10": {
-        "median_excess": -0.005553552599684929,
-        "median_return": 0.006029539537901752,
+        "median_excess": 0.0008793153010776544,
+        "median_return": 0.012462407438664336,
         "n": 40,
-        "p25": -0.01927931790770704,
-        "p75": 0.01952831361484253,
-        "positive_rate": 0.6,
+        "p25": -0.014248510106390166,
+        "p75": 0.03775364349367466,
+        "positive_rate": 0.625,
         "unconditional_median": 0.011583092137586681
       },
       "5": {
-        "median_excess": 0.0013362815088041593,
-        "median_return": 0.006892173464366214,
+        "median_excess": 0.006358835739831869,
+        "median_return": 0.011889762832110518,
         "n": 40,
-        "p25": -0.016625038006037623,
-        "p75": 0.01895117094659593,
-        "positive_rate": 0.6,
-        "unconditional_median": 0.005555891955562054
+        "p25": -0.020917556171946045,
+        "p75": 0.02668789705164043,
+        "positive_rate": 0.675,
+        "unconditional_median": 0.005530927092278649
       },
       "7": {
-        "median_excess": -0.0012047937044197266,
-        "median_return": 0.006421127645826475,
+        "median_excess": 0.0044799258929647525,
+        "median_return": 0.012091611343419073,
         "n": 40,
-        "p25": -0.01337293864410019,
-        "p75": 0.019811786188886626,
-        "positive_rate": 0.625,
-        "unconditional_median": 0.007625921350246202
+        "p25": -0.017919257634719882,
+        "p75": 0.030596237878553312,
+        "positive_rate": 0.6,
+        "unconditional_median": 0.0076116854504543205
       }
     },
     "SPY": {
       "10": {
-        "median_excess": -0.0024429278664814813,
-        "median_return": 0.005077733115010919,
+        "median_excess": 0.003576218533461905,
+        "median_return": 0.0111133675836107,
         "n": 40,
-        "p25": -0.010334269993469314,
-        "p75": 0.015821141889212964,
-        "positive_rate": 0.575,
-        "unconditional_median": 0.007520660981492401
+        "p25": -0.015472239041462943,
+        "p75": 0.022969056538829413,
+        "positive_rate": 0.675,
+        "unconditional_median": 0.007537149050148796
       },
       "5": {
-        "median_excess": 0.0013649461463329793,
-        "median_return": 0.004893905186161619,
+        "median_excess": 0.004786055244069164,
+        "median_return": 0.008270874114887583,
         "n": 40,
-        "p25": -0.005885414785783027,
-        "p75": 0.012519414506123094,
-        "positive_rate": 0.675,
-        "unconditional_median": 0.0035289590398286394
+        "p25": -0.012491872237844287,
+        "p75": 0.015367070064960853,
+        "positive_rate": 0.65,
+        "unconditional_median": 0.003484818870818419
       },
       "7": {
-        "median_excess": 0.0022382551462519773,
-        "median_return": 0.006979665952165149,
+        "median_excess": 0.002661258725042303,
+        "median_return": 0.0073691322576778795,
         "n": 40,
-        "p25": -0.01031601178763153,
-        "p75": 0.016585406484801724,
+        "p25": -0.005355819878942097,
+        "p75": 0.019716375269451303,
         "positive_rate": 0.6,
-        "unconditional_median": 0.004741410805913172
+        "unconditional_median": 0.004707873532635577
       }
     }
   },
@@ -791,159 +794,144 @@
     "commentary_policy": "Only conditions crossing material damage, relative-strength, or repair thresholds are surfaced.",
     "factors": [
       {
-        "commentary": "MTUM is -5.3% from its 20-day high and -1.0% versus SPY over 20 days.",
+        "commentary": "MTUM is -4.2% from its 20-day high and +1.4% versus SPY over 20 days.",
         "factor": "MTUM"
+      },
+      {
+        "commentary": "IWM is -3.4% from its 20-day high and -0.9% versus SPY over 20 days.",
+        "factor": "IWM"
       }
     ],
-    "noteworthy_count": 17,
+    "noteworthy_count": 18,
     "sectors": [
       {
-        "commentary": "XLY is -4.0% from its 20-day high with -3.7% 20-day relative strength versus SPY.",
+        "commentary": "XLY is -4.4% from its 20-day high with -3.8% 20-day relative strength versus SPY.",
         "sector": "XLY"
       },
       {
-        "commentary": "XLP is -3.3% from its 20-day high with -0.2% 20-day relative strength versus SPY.",
+        "commentary": "XLP is -3.9% from its 20-day high with -0.2% 20-day relative strength versus SPY.",
         "sector": "XLP"
       },
       {
-        "commentary": "XLF looks milder at the headline sector level (-0.8% from its 20-day high), but 50% of tracked groups are down at least 3%, indicating hidden internal damage.",
+        "commentary": "XLF looks milder at the headline sector level (-2.2% from its 20-day high), but 75% of tracked groups are down at least 3%, indicating hidden internal damage.",
         "sector": "XLF"
       },
       {
-        "commentary": "XLV looks milder at the headline sector level (-2.4% from its 20-day high), but 50% of tracked groups are down at least 3%, indicating hidden internal damage.",
+        "commentary": "XLV is -4.9% from its 20-day high with +0.1% 20-day relative strength versus SPY.",
         "sector": "XLV"
       },
       {
-        "commentary": "XLI is -6.0% from its 20-day high with -5.0% 20-day relative strength versus SPY.",
+        "commentary": "XLI is -6.5% from its 20-day high with -4.6% 20-day relative strength versus SPY.",
         "sector": "XLI"
       },
       {
-        "commentary": "XLB looks milder at the headline sector level (-2.3% from its 20-day high), but 67% of tracked groups are down at least 3%, indicating hidden internal damage.",
+        "commentary": "XLB is -3.2% from its 20-day high with -1.4% 20-day relative strength versus SPY.",
         "sector": "XLB"
       }
     ],
     "subsectors": [
       {
-        "commentary": "ITA (Aerospace & Defense) is in a deep internal correction: -10.9% from its 20-day high, -4.7% relative to XLI over 20 days.",
+        "commentary": "ITA (Aerospace & Defense) is in a deep internal correction: -11.7% from its 20-day high, -5.5% relative to XLI over 20 days.",
         "label": "Aerospace & Defense",
         "parent_sector": "XLI",
         "symbol": "ITA"
       },
       {
-        "commentary": "CIBR (Cybersecurity) is in a deep internal correction: -7.4% from its 20-day high, -3.0% relative to XLK over 20 days.",
-        "label": "Cybersecurity",
-        "parent_sector": "XLK",
-        "symbol": "CIBR"
-      },
-      {
-        "commentary": "ITB (Homebuilders) is in a deep internal correction: -6.6% from its 20-day high, -3.0% relative to XLY over 20 days.",
+        "commentary": "ITB (Homebuilders) is in a deep internal correction: -9.4% from its 20-day high, -2.7% relative to XLY over 20 days.",
         "label": "Homebuilders",
         "parent_sector": "XLY",
         "symbol": "ITB"
       },
       {
-        "commentary": "PEJ (Leisure & Entertainment) is in a deep internal correction: -6.1% from its 20-day high, +0.1% relative to XLY over 20 days.",
-        "label": "Leisure & Entertainment",
-        "parent_sector": "XLY",
-        "symbol": "PEJ"
-      },
-      {
-        "commentary": "PAVE (U.S. Infrastructure Theme) is in a deep internal correction: -6.1% from its 20-day high, -0.7% relative to XLI over 20 days.",
-        "label": "U.S. Infrastructure Theme",
-        "parent_sector": "XLI",
-        "symbol": "PAVE"
-      },
-      {
-        "commentary": "XTN (Transportation) is in a deep internal correction: -6.0% from its 20-day high, -0.8% relative to XLI over 20 days.",
-        "label": "Transportation",
-        "parent_sector": "XLI",
-        "symbol": "XTN"
-      },
-      {
-        "commentary": "COPX (Copper Miners) is in a deep internal correction: -6.0% from its 20-day high, +3.8% relative to XLB over 20 days.",
-        "label": "Copper Miners",
-        "parent_sector": "XLB",
-        "symbol": "COPX"
-      },
-      {
-        "commentary": "IHI (Medical Devices) is in a deep internal correction: -5.3% from its 20-day high, -4.9% relative to XLV over 20 days.",
+        "commentary": "IHI (Medical Devices) is in a deep internal correction: -8.7% from its 20-day high, -5.9% relative to XLV over 20 days.",
         "label": "Medical Devices",
         "parent_sector": "XLV",
         "symbol": "IHI"
       },
       {
-        "commentary": "IGV (Software) is in a deep internal correction: -5.2% from its 20-day high, +2.2% relative to XLK over 20 days.",
+        "commentary": "CIBR (Cybersecurity) is in a deep internal correction: -8.0% from its 20-day high, -7.4% relative to XLK over 20 days.",
+        "label": "Cybersecurity",
+        "parent_sector": "XLK",
+        "symbol": "CIBR"
+      },
+      {
+        "commentary": "PEJ (Leisure & Entertainment) is in a deep internal correction: -7.6% from its 20-day high, -0.2% relative to XLY over 20 days.",
+        "label": "Leisure & Entertainment",
+        "parent_sector": "XLY",
+        "symbol": "PEJ"
+      },
+      {
+        "commentary": "XTN (Transportation) is in a deep internal correction: -7.6% from its 20-day high, -0.4% relative to XLI over 20 days.",
+        "label": "Transportation",
+        "parent_sector": "XLI",
+        "symbol": "XTN"
+      },
+      {
+        "commentary": "IGV (Software) is in a deep internal correction: -6.9% from its 20-day high, -3.1% relative to XLK over 20 days.",
         "label": "Software",
         "parent_sector": "XLK",
         "symbol": "IGV"
       },
       {
-        "commentary": "IYZ (Telecom) is in a meaningful internal correction: -4.7% from its 20-day high, -2.8% relative to XLC over 20 days.",
-        "label": "Telecom",
-        "parent_sector": "XLC",
-        "symbol": "IYZ"
+        "commentary": "PAVE (U.S. Infrastructure Theme) is repairing after a meaningful reset: -6.7% from its 20-day high, -0.5% relative to XLI over 20 days.",
+        "label": "U.S. Infrastructure Theme",
+        "parent_sector": "XLI",
+        "symbol": "PAVE"
+      },
+      {
+        "commentary": "KRE (Regional Banks) is repairing after a meaningful reset: -4.6% from its 20-day high, -1.4% relative to XLF over 20 days.",
+        "label": "Regional Banks",
+        "parent_sector": "XLF",
+        "symbol": "KRE"
+      },
+      {
+        "commentary": "KBE (Banks) is repairing after a meaningful reset: -4.6% from its 20-day high, -1.3% relative to XLF over 20 days.",
+        "label": "Banks",
+        "parent_sector": "XLF",
+        "symbol": "KBE"
       }
     ],
-    "summary": "Noteworthy internal market structure is present across 6 sectors, 10 subsector/industry proxies, and 1 factor observations."
+    "summary": "Noteworthy internal market structure is present across 6 sectors, 10 subsector/industry proxies, and 2 factor observations."
   },
-  "market_damage": "LIGHT",
+  "market_damage": "MODERATE",
   "market_insights": {
-    "analog_decision": "CAUTIOUS YES",
+    "analog_decision": "YES",
     "headline": "RE-ENTER - the market has repaired enough that waiting is no longer helping.",
     "holding_back": [],
     "insight_policy": "Insights are deterministic explanations of existing engine evidence. They do not add signals, alter thresholds, override historical analogs, or change the canonical WAIT/RE-ENTER decision.",
     "internal_reset": "DEVELOPING",
     "key_groups": [
       {
-        "interpretation": "SMH (Semiconductors) is repairing after a meaningful reset: -4.6% from its 20-day high, -15.2% from its 60-day high, +2.6% today and +2.5% over 5 days. It is still -2.3% versus XLK over 20 days.",
-        "label": "Semiconductors",
+        "interpretation": "PAVE (U.S. Infrastructure Theme) is repairing after a meaningful reset: -6.7% from its 20-day high, -8.5% from its 60-day high, -0.6% today and +0.2% over 5 days. It is still -0.5% versus XLI over 20 days.",
+        "label": "U.S. Infrastructure Theme",
         "metrics": {
-          "drawdown_20d": -0.04555018301710956,
-          "drawdown_60d": -0.1523373360691226,
-          "relative_strength_20d_vs_parent": -0.023255569339157622,
-          "relative_strength_20d_vs_spy": -0.022956167342469636,
-          "relative_strength_60d_vs_parent": -0.06839089787338704,
+          "drawdown_20d": -0.06674609568362422,
+          "drawdown_60d": -0.0847455392206512,
+          "relative_strength_20d_vs_parent": -0.004716439524369176,
+          "relative_strength_20d_vs_spy": -0.0507169049921935,
+          "relative_strength_60d_vs_parent": -0.03804940015399283,
           "repairing": true,
-          "return_1d": 0.02607679119856665,
-          "return_5d": 0.02513066981646972
+          "return_1d": -0.006345150019747781,
+          "return_5d": 0.002010980051504685
         },
-        "parent_sector": "XLK",
+        "parent_sector": "XLI",
         "stance": "SUPPORTIVE FOR RE-ENTRY",
         "state": "REPAIRING",
-        "symbol": "SMH",
+        "symbol": "PAVE",
         "why_it_matters": "A damaged group beginning to recover is constructive early re-entry evidence, but lingering relative weakness means the repair is context and confirmation rather than an independent market trigger."
       },
       {
-        "interpretation": "SRVR (Digital Infrastructure REITs) is repairing after a meaningful reset: -4.1% from its 20-day high, -8.0% from its 60-day high, +0.3% today and +0.0% over 5 days. It is still +0.6% versus XLRE over 20 days.",
-        "label": "Digital Infrastructure REITs",
-        "metrics": {
-          "drawdown_20d": -0.04109853593534407,
-          "drawdown_60d": -0.07953375951957886,
-          "relative_strength_20d_vs_parent": 0.005772783212754207,
-          "relative_strength_20d_vs_spy": -0.013600694885067766,
-          "relative_strength_60d_vs_parent": -0.04116300504436221,
-          "repairing": true,
-          "return_1d": 0.003149215120762605,
-          "return_5d": 0.0003658232827083996
-        },
-        "parent_sector": "XLRE",
-        "stance": "SUPPORTIVE FOR RE-ENTRY",
-        "state": "REPAIRING",
-        "symbol": "SRVR",
-        "why_it_matters": "A damaged group beginning to recover is constructive early re-entry evidence, but lingering relative weakness means the repair is context and confirmation rather than an independent market trigger."
-      },
-      {
-        "interpretation": "KRE (Regional Banks) is repairing after a meaningful reset: -3.4% from its 20-day high, -3.4% from its 60-day high, +0.5% today and +1.3% over 5 days. It is still -2.1% versus XLF over 20 days.",
+        "interpretation": "KRE (Regional Banks) is repairing after a meaningful reset: -4.6% from its 20-day high, -4.6% from its 60-day high, -1.3% today and +1.0% over 5 days. It is still -1.4% versus XLF over 20 days.",
         "label": "Regional Banks",
         "metrics": {
-          "drawdown_20d": -0.034133243316986195,
-          "drawdown_60d": -0.034133243316986195,
-          "relative_strength_20d_vs_parent": -0.021014927294483177,
-          "relative_strength_20d_vs_spy": -0.008364158016165413,
-          "relative_strength_60d_vs_parent": -0.059469614208726984,
+          "drawdown_20d": -0.04645197911466714,
+          "drawdown_60d": -0.04645197911466714,
+          "relative_strength_20d_vs_parent": -0.013800625516435017,
+          "relative_strength_20d_vs_spy": -0.01347682749325696,
+          "relative_strength_60d_vs_parent": -0.0596568496602885,
           "repairing": true,
-          "return_1d": 0.005342512111803588,
-          "return_5d": 0.013055094905351394
+          "return_1d": -0.012754073698515112,
+          "return_5d": 0.010195758902827423
         },
         "parent_sector": "XLF",
         "stance": "SUPPORTIVE FOR RE-ENTRY",
@@ -952,17 +940,17 @@
         "why_it_matters": "A damaged group beginning to recover is constructive early re-entry evidence, but lingering relative weakness means the repair is context and confirmation rather than an independent market trigger."
       },
       {
-        "interpretation": "KBE (Banks) is repairing after a meaningful reset: -3.3% from its 20-day high, -3.3% from its 60-day high, +0.3% today and +1.3% over 5 days. It is still -1.8% versus XLF over 20 days.",
+        "interpretation": "KBE (Banks) is repairing after a meaningful reset: -4.6% from its 20-day high, -4.6% from its 60-day high, -1.4% today and +0.9% over 5 days. It is still -1.3% versus XLF over 20 days.",
         "label": "Banks",
         "metrics": {
-          "drawdown_20d": -0.03251014218756154,
-          "drawdown_60d": -0.03251014218756154,
-          "relative_strength_20d_vs_parent": -0.017684484209427476,
-          "relative_strength_20d_vs_spy": -0.005033714931109712,
-          "relative_strength_60d_vs_parent": -0.048222647857371514,
+          "drawdown_20d": -0.04562573917412627,
+          "drawdown_60d": -0.04562573917412627,
+          "relative_strength_20d_vs_parent": -0.013196845784864353,
+          "relative_strength_20d_vs_spy": -0.012873047761686296,
+          "relative_strength_60d_vs_parent": -0.05066689669826774,
           "repairing": true,
-          "return_1d": 0.003327965931237742,
-          "return_5d": 0.012854181495564276
+          "return_1d": -0.013556314705169159,
+          "return_5d": 0.008700840414797906
         },
         "parent_sector": "XLF",
         "stance": "SUPPORTIVE FOR RE-ENTRY",
@@ -971,36 +959,74 @@
         "why_it_matters": "A damaged group beginning to recover is constructive early re-entry evidence, but lingering relative weakness means the repair is context and confirmation rather than an independent market trigger."
       },
       {
-        "interpretation": "OIH (Oil Services) is repairing after a meaningful reset: -2.1% from its 20-day high, -2.1% from its 60-day high, -0.5% today and +2.2% over 5 days. It is still -1.3% versus XLE over 20 days.",
-        "label": "Oil Services",
+        "interpretation": "SMH (Semiconductors) is repairing after a meaningful reset: -3.4% from its 20-day high, -14.2% from its 60-day high, +1.2% today and +3.1% over 5 days. It is still -0.1% versus XLK over 20 days.",
+        "label": "Semiconductors",
         "metrics": {
-          "drawdown_20d": -0.020729277729891415,
-          "drawdown_60d": -0.020729277729891415,
-          "relative_strength_20d_vs_parent": -0.013000069199522235,
-          "relative_strength_20d_vs_spy": 0.10505705835578372,
-          "relative_strength_60d_vs_parent": -0.09677313414886068,
+          "drawdown_20d": -0.03423843419916672,
+          "drawdown_60d": -0.14229118490839976,
+          "relative_strength_20d_vs_parent": -0.0007321416026135896,
+          "relative_strength_20d_vs_spy": 0.016732651472825877,
+          "relative_strength_60d_vs_parent": -0.08526823783278581,
           "repairing": true,
-          "return_1d": -0.0053046666951623855,
-          "return_5d": 0.02204107306665959
+          "return_1d": 0.011851590954986335,
+          "return_5d": 0.03072054225595977
         },
-        "parent_sector": "XLE",
+        "parent_sector": "XLK",
         "stance": "SUPPORTIVE FOR RE-ENTRY",
         "state": "REPAIRING",
-        "symbol": "OIH",
+        "symbol": "SMH",
         "why_it_matters": "A damaged group beginning to recover is constructive early re-entry evidence, but lingering relative weakness means the repair is context and confirmation rather than an independent market trigger."
       },
       {
-        "interpretation": "ITA (Aerospace & Defense) remains in a deep internal correction at -10.9% from its 20-day high and -10.9% from its 60-day high.",
+        "interpretation": "SRVR (Digital Infrastructure REITs) is repairing after a meaningful reset: -3.0% from its 20-day high, -6.9% from its 60-day high, +1.1% today and +1.3% over 5 days. It is still +1.6% versus XLRE over 20 days.",
+        "label": "Digital Infrastructure REITs",
+        "metrics": {
+          "drawdown_20d": -0.030123523539927644,
+          "drawdown_60d": -0.06899865369544811,
+          "relative_strength_20d_vs_parent": 0.015517399068256221,
+          "relative_strength_20d_vs_spy": 0.01340197607387461,
+          "relative_strength_60d_vs_parent": -0.04346796712200507,
+          "repairing": true,
+          "return_1d": 0.01144540164627017,
+          "return_5d": 0.013438495472463341
+        },
+        "parent_sector": "XLRE",
+        "stance": "SUPPORTIVE FOR RE-ENTRY",
+        "state": "REPAIRING",
+        "symbol": "SRVR",
+        "why_it_matters": "A damaged group beginning to recover is constructive early re-entry evidence, but lingering relative weakness means the repair is context and confirmation rather than an independent market trigger."
+      },
+      {
+        "interpretation": "XME (Metals & Mining) is repairing after a meaningful reset: -2.5% from its 20-day high, -2.5% from its 60-day high, +1.1% today and +1.5% over 5 days. It is still +4.4% versus XLB over 20 days.",
+        "label": "Metals & Mining",
+        "metrics": {
+          "drawdown_20d": -0.024796772778518772,
+          "drawdown_60d": -0.024796772778518772,
+          "relative_strength_20d_vs_parent": 0.043820692324803234,
+          "relative_strength_20d_vs_spy": 0.029649462296604367,
+          "relative_strength_60d_vs_parent": -0.0036360492036773273,
+          "repairing": true,
+          "return_1d": 0.011212225348717464,
+          "return_5d": 0.015406753044443722
+        },
+        "parent_sector": "XLB",
+        "stance": "SUPPORTIVE FOR RE-ENTRY",
+        "state": "REPAIRING",
+        "symbol": "XME",
+        "why_it_matters": "A damaged group beginning to recover is constructive early re-entry evidence, but lingering relative weakness means the repair is context and confirmation rather than an independent market trigger."
+      },
+      {
+        "interpretation": "ITA (Aerospace & Defense) remains in a deep internal correction at -11.7% from its 20-day high and -11.7% from its 60-day high.",
         "label": "Aerospace & Defense",
         "metrics": {
-          "drawdown_20d": -0.10903562308368786,
-          "drawdown_60d": -0.10903562308368786,
-          "relative_strength_20d_vs_parent": -0.04674378197212803,
-          "relative_strength_20d_vs_spy": -0.09628900640609117,
-          "relative_strength_60d_vs_parent": -0.03161271768297058,
+          "drawdown_20d": -0.11724983136513312,
+          "drawdown_60d": -0.11724983136513312,
+          "relative_strength_20d_vs_parent": -0.05475695618672671,
+          "relative_strength_20d_vs_spy": -0.10075742165455104,
+          "relative_strength_60d_vs_parent": -0.05061697064137971,
           "repairing": false,
-          "return_1d": -0.0016372914602299504,
-          "return_5d": -0.03096815774868833
+          "return_1d": -0.009219457583562685,
+          "return_5d": -0.021107979835278567
         },
         "parent_sector": "XLI",
         "stance": "RESET PRESENT",
@@ -1009,36 +1035,17 @@
         "why_it_matters": "Deep internal damage creates potential reset fuel, but the group has not yet met the engine's repair condition."
       },
       {
-        "interpretation": "CIBR (Cybersecurity) remains in a deep internal correction at -7.4% from its 20-day high and -7.4% from its 60-day high.",
-        "label": "Cybersecurity",
-        "metrics": {
-          "drawdown_20d": -0.07446184772594022,
-          "drawdown_60d": -0.07446184772594022,
-          "relative_strength_20d_vs_parent": -0.02964551131499238,
-          "relative_strength_20d_vs_spy": -0.029346109318304392,
-          "relative_strength_60d_vs_parent": 0.075633447642387,
-          "repairing": false,
-          "return_1d": -0.007658449006197721,
-          "return_5d": -0.04028004585068057
-        },
-        "parent_sector": "XLK",
-        "stance": "RESET PRESENT",
-        "state": "DEEP CORRECTION",
-        "symbol": "CIBR",
-        "why_it_matters": "Deep internal damage creates potential reset fuel, but the group has not yet met the engine's repair condition."
-      },
-      {
-        "interpretation": "ITB (Homebuilders) remains in a deep internal correction at -6.6% from its 20-day high and -10.5% from its 60-day high.",
+        "interpretation": "ITB (Homebuilders) remains in a deep internal correction at -9.4% from its 20-day high and -13.2% from its 60-day high.",
         "label": "Homebuilders",
         "metrics": {
-          "drawdown_20d": -0.06557210286458337,
-          "drawdown_60d": -0.10476642234421985,
-          "relative_strength_20d_vs_parent": -0.030186872847981494,
-          "relative_strength_20d_vs_spy": -0.06751481489527067,
-          "relative_strength_60d_vs_parent": -0.009462223544678627,
+          "drawdown_20d": -0.09402982038051932,
+          "drawdown_60d": -0.13203048877653534,
+          "relative_strength_20d_vs_parent": -0.02713717836588092,
+          "relative_strength_20d_vs_spy": -0.0654552027078289,
+          "relative_strength_60d_vs_parent": -0.049007200386824046,
           "repairing": false,
-          "return_1d": 0.0030976384001220048,
-          "return_5d": -0.025930919044063305
+          "return_1d": -0.030454695972986223,
+          "return_5d": -0.03844122183755194
         },
         "parent_sector": "XLY",
         "stance": "RESET PRESENT",
@@ -1047,17 +1054,55 @@
         "why_it_matters": "Deep internal damage creates potential reset fuel, but the group has not yet met the engine's repair condition."
       },
       {
-        "interpretation": "PEJ (Leisure & Entertainment) remains in a deep internal correction at -6.1% from its 20-day high and -6.1% from its 60-day high.",
+        "interpretation": "IHI (Medical Devices) remains in a deep internal correction at -8.7% from its 20-day high and -8.7% from its 60-day high.",
+        "label": "Medical Devices",
+        "metrics": {
+          "drawdown_20d": -0.08651125995734332,
+          "drawdown_60d": -0.08651125995734332,
+          "relative_strength_20d_vs_parent": -0.0591298706508504,
+          "relative_strength_20d_vs_spy": -0.05776126822340688,
+          "relative_strength_60d_vs_parent": -0.04615897021613358,
+          "repairing": false,
+          "return_1d": -0.035241457244201024,
+          "return_5d": -0.058759313634867194
+        },
+        "parent_sector": "XLV",
+        "stance": "RESET PRESENT",
+        "state": "DEEP CORRECTION",
+        "symbol": "IHI",
+        "why_it_matters": "Deep internal damage creates potential reset fuel, but the group has not yet met the engine's repair condition."
+      },
+      {
+        "interpretation": "CIBR (Cybersecurity) remains in a deep internal correction at -8.0% from its 20-day high and -8.0% from its 60-day high.",
+        "label": "Cybersecurity",
+        "metrics": {
+          "drawdown_20d": -0.08013693793121568,
+          "drawdown_60d": -0.08013693793121568,
+          "relative_strength_20d_vs_parent": -0.0738258780369857,
+          "relative_strength_20d_vs_spy": -0.05636108496154624,
+          "relative_strength_60d_vs_parent": 0.07420596950978031,
+          "repairing": false,
+          "return_1d": -0.006131665335817549,
+          "return_5d": -0.06130803091462611
+        },
+        "parent_sector": "XLK",
+        "stance": "RESET PRESENT",
+        "state": "DEEP CORRECTION",
+        "symbol": "CIBR",
+        "why_it_matters": "Deep internal damage creates potential reset fuel, but the group has not yet met the engine's repair condition."
+      },
+      {
+        "interpretation": "PEJ (Leisure & Entertainment) remains in a deep internal correction at -7.6% from its 20-day high and -7.6% from its 60-day high.",
         "label": "Leisure & Entertainment",
         "metrics": {
-          "drawdown_20d": -0.06142254003691461,
-          "drawdown_60d": -0.06142254003691461,
-          "relative_strength_20d_vs_parent": 0.0014344580358498504,
-          "relative_strength_20d_vs_spy": -0.035893484011439325,
-          "relative_strength_60d_vs_parent": 0.006691677839804067,
+          "drawdown_20d": -0.07619873119729437,
+          "drawdown_60d": -0.07619873119729437,
+          "relative_strength_20d_vs_parent": -0.002021844460983746,
+          "relative_strength_20d_vs_spy": -0.04033986880293172,
+          "relative_strength_60d_vs_parent": -0.00013138038695170717,
           "repairing": false,
-          "return_1d": -0.0018487558128437165,
-          "return_5d": -0.031539619764214044
+          "return_1d": -0.015743177085203897,
+          "return_5d": -0.024476093339341642
         },
         "parent_sector": "XLY",
         "stance": "RESET PRESENT",
@@ -1066,60 +1111,22 @@
         "why_it_matters": "Deep internal damage creates potential reset fuel, but the group has not yet met the engine's repair condition."
       },
       {
-        "interpretation": "PAVE (U.S. Infrastructure Theme) remains in a deep internal correction at -6.1% from its 20-day high and -7.9% from its 60-day high.",
-        "label": "U.S. Infrastructure Theme",
-        "metrics": {
-          "drawdown_20d": -0.06078664605227546,
-          "drawdown_60d": -0.07890102806066057,
-          "relative_strength_20d_vs_parent": -0.006631075310503776,
-          "relative_strength_20d_vs_spy": -0.05617629974446692,
-          "relative_strength_60d_vs_parent": -0.03639028220840845,
-          "repairing": false,
-          "return_1d": 0.008593915386817974,
-          "return_5d": -0.0027120145028841636
-        },
-        "parent_sector": "XLI",
-        "stance": "RESET PRESENT",
-        "state": "DEEP CORRECTION",
-        "symbol": "PAVE",
-        "why_it_matters": "Deep internal damage creates potential reset fuel, but the group has not yet met the engine's repair condition."
-      },
-      {
-        "interpretation": "XTN (Transportation) remains in a deep internal correction at -6.0% from its 20-day high and -10.4% from its 60-day high.",
+        "interpretation": "XTN (Transportation) remains in a deep internal correction at -7.6% from its 20-day high and -11.8% from its 60-day high.",
         "label": "Transportation",
         "metrics": {
-          "drawdown_20d": -0.06045767129488988,
-          "drawdown_60d": -0.10355961716267026,
-          "relative_strength_20d_vs_parent": -0.007861555831134681,
-          "relative_strength_20d_vs_spy": -0.05740678026509782,
-          "relative_strength_60d_vs_parent": -0.09209170517610021,
+          "drawdown_20d": -0.0760395432389882,
+          "drawdown_60d": -0.11842666340862373,
+          "relative_strength_20d_vs_parent": -0.004482168986159274,
+          "relative_strength_20d_vs_spy": -0.0504826344539836,
+          "relative_strength_60d_vs_parent": -0.10457244209474503,
           "repairing": false,
-          "return_1d": 0.01189104217764636,
-          "return_5d": -0.009852707654730453
+          "return_1d": -0.016584534265287942,
+          "return_5d": -0.017608640146881904
         },
         "parent_sector": "XLI",
         "stance": "RESET PRESENT",
         "state": "DEEP CORRECTION",
         "symbol": "XTN",
-        "why_it_matters": "Deep internal damage creates potential reset fuel, but the group has not yet met the engine's repair condition."
-      },
-      {
-        "interpretation": "COPX (Copper Miners) remains in a deep internal correction at -6.0% from its 20-day high and -6.0% from its 60-day high.",
-        "label": "Copper Miners",
-        "metrics": {
-          "drawdown_20d": -0.060031036488678025,
-          "drawdown_60d": -0.060031036488678025,
-          "relative_strength_20d_vs_parent": 0.03782178835054317,
-          "relative_strength_20d_vs_spy": 0.03384644795017855,
-          "relative_strength_60d_vs_parent": 0.11332838812096435,
-          "repairing": false,
-          "return_1d": -0.006465713291952002,
-          "return_5d": -0.03982201418928433
-        },
-        "parent_sector": "XLB",
-        "stance": "RESET PRESENT",
-        "state": "DEEP CORRECTION",
-        "symbol": "COPX",
         "why_it_matters": "Deep internal damage creates potential reset fuel, but the group has not yet met the engine's repair condition."
       }
     ],
@@ -1138,11 +1145,11 @@
       },
       {
         "detail": "Similar prior market conditions were favorable enough to support putting cash back to work.",
-        "state": "CAUTIOUS YES",
+        "state": "YES",
         "title": "Historical setups"
       },
       {
-        "detail": "Repair is visible in Semiconductors, Digital Infrastructure REITs, Regional Banks, Banks, Oil Services.",
+        "detail": "Repair is visible in U.S. Infrastructure Theme, Regional Banks, Banks, Semiconductors, Digital Infrastructure REITs.",
         "state": "REPAIRING",
         "title": "Repair under the surface",
         "why_it_matters": "This is supporting evidence only. It cannot independently trigger or veto the market decision."
@@ -1173,22 +1180,22 @@
         "damage_share_3pct": 1.0,
         "historical_after_reentry": {
           "10": {
-            "median": 0.014981923643441308,
-            "median_excess_vs_spy": 0.0037490448001649135,
+            "median": 0.017014465383730415,
+            "median_excess_vs_spy": 0.005587090508035519,
             "n": 131,
-            "positive_rate": 0.6564885496183206
+            "positive_rate": 0.6641221374045801
           },
           "30": {
-            "median": 0.026368716620460808,
-            "median_excess_vs_spy": -0.002030192433570166,
-            "n": 129,
-            "positive_rate": 0.6666666666666666
+            "median": 0.026746709322388984,
+            "median_excess_vs_spy": -0.002448619142526698,
+            "n": 130,
+            "positive_rate": 0.6692307692307692
           },
           "60": {
-            "median": 0.0611333650837137,
-            "median_excess_vs_spy": 0.018265415141740182,
+            "median": 0.061133397284695135,
+            "median_excess_vs_spy": 0.018265454427544126,
             "n": 128,
-            "positive_rate": 0.7734375
+            "positive_rate": 0.765625
           }
         },
         "label": "Technology",
@@ -1197,23 +1204,23 @@
       },
       {
         "current_state": "REPAIRING",
-        "damage_share_3pct": 0.5,
+        "damage_share_3pct": 0.75,
         "historical_after_reentry": {
           "10": {
             "median": 0.010018715387987487,
-            "median_excess_vs_spy": -0.001214163455288908,
+            "median_excess_vs_spy": -0.0014086594877074088,
             "n": 131,
-            "positive_rate": 0.6259541984732825
+            "positive_rate": 0.6335877862595419
           },
           "30": {
-            "median": 0.023234473618570672,
-            "median_excess_vs_spy": -0.005164435435460302,
-            "n": 129,
-            "positive_rate": 0.6511627906976745
+            "median": 0.023111522985886368,
+            "median_excess_vs_spy": -0.006083805479029314,
+            "n": 130,
+            "positive_rate": 0.6615384615384615
           },
           "60": {
-            "median": 0.0433645057572265,
-            "median_excess_vs_spy": 0.0004965558152529859,
+            "median": 0.041830193529228454,
+            "median_excess_vs_spy": -0.0010377493279225547,
             "n": 128,
             "positive_rate": 0.734375
           }
@@ -1224,25 +1231,52 @@
       },
       {
         "current_state": "REPAIRING",
+        "damage_share_3pct": 1.0,
+        "historical_after_reentry": {
+          "10": {
+            "median": 0.01057753727354338,
+            "median_excess_vs_spy": -0.0008498376021515153,
+            "n": 131,
+            "positive_rate": 0.6870229007633588
+          },
+          "30": {
+            "median": 0.019335126401754388,
+            "median_excess_vs_spy": -0.009860202063161294,
+            "n": 130,
+            "positive_rate": 0.6153846153846154
+          },
+          "60": {
+            "median": 0.03461059845889103,
+            "median_excess_vs_spy": -0.00825734439825998,
+            "n": 128,
+            "positive_rate": 0.7265625
+          }
+        },
+        "label": "Industrials",
+        "repair_share": 0.3333333333333333,
+        "symbol": "XLI"
+      },
+      {
+        "current_state": "REPAIRING",
         "damage_share_3pct": 0.6666666666666666,
         "historical_after_reentry": {
           "10": {
-            "median": 0.007604930978401759,
-            "median_excess_vs_spy": -0.0036279478648746357,
+            "median": 0.00946597699195284,
+            "median_excess_vs_spy": -0.0019613978837420554,
             "n": 131,
-            "positive_rate": 0.5801526717557252
+            "positive_rate": 0.5877862595419847
           },
           "30": {
-            "median": 0.018217777472655627,
-            "median_excess_vs_spy": -0.010181131581375347,
-            "n": 129,
-            "positive_rate": 0.5891472868217055
+            "median": 0.017799569279953298,
+            "median_excess_vs_spy": -0.011395759184962384,
+            "n": 130,
+            "positive_rate": 0.6
           },
           "60": {
-            "median": 0.023870190659085466,
-            "median_excess_vs_spy": -0.01899775928288805,
+            "median": 0.022993975571763636,
+            "median_excess_vs_spy": -0.019873967285387373,
             "n": 128,
-            "positive_rate": 0.65625
+            "positive_rate": 0.6484375
           }
         },
         "label": "Real Estate",
@@ -1254,176 +1288,204 @@
     "subsectors": [
       {
         "current_state": "REPAIRING",
-        "drawdown_20d": -0.04555018301710956,
+        "drawdown_20d": -0.03423843419916672,
         "historical_after_reentry": {
           "10": {
             "median": 0.01681778264798306,
-            "median_excess_vs_spy": 0.005584903804706665,
+            "median_excess_vs_spy": 0.005390407772288164,
             "n": 131,
-            "positive_rate": 0.6259541984732825
+            "positive_rate": 0.6335877862595419
           },
           "30": {
-            "median": 0.04366842596186815,
-            "median_excess_vs_spy": 0.015269516907837177,
-            "n": 129,
-            "positive_rate": 0.6356589147286822
+            "median": 0.04356967759375441,
+            "median_excess_vs_spy": 0.014374349128838726,
+            "n": 130,
+            "positive_rate": 0.6384615384615384
           },
           "60": {
-            "median": 0.0956439596194234,
-            "median_excess_vs_spy": 0.05277600967744989,
+            "median": 0.09564396314178414,
+            "median_excess_vs_spy": 0.05277602028463313,
             "n": 128,
             "positive_rate": 0.7421875
           }
         },
         "label": "Semiconductors",
         "parent_sector": "XLK",
-        "return_5d": 0.02513066981646972,
+        "return_5d": 0.03072054225595977,
         "symbol": "SMH"
       },
       {
         "current_state": "REPAIRING",
-        "drawdown_20d": -0.04109853593534407,
+        "drawdown_20d": -0.06674609568362422,
         "historical_after_reentry": {
           "10": {
-            "median": 0.008934530126992968,
-            "median_excess_vs_spy": -0.002298348716283427,
-            "n": 124,
-            "positive_rate": 0.5887096774193549
+            "median": 0.013988183775283436,
+            "median_excess_vs_spy": 0.0025608088995885403,
+            "n": 131,
+            "positive_rate": 0.6946564885496184
           },
           "30": {
-            "median": 0.020514707308637692,
-            "median_excess_vs_spy": -0.007884201745393282,
-            "n": 122,
-            "positive_rate": 0.5655737704918032
+            "median": 0.023237788029243034,
+            "median_excess_vs_spy": -0.005957540435672648,
+            "n": 130,
+            "positive_rate": 0.6230769230769231
           },
           "60": {
-            "median": 0.007644312348846439,
-            "median_excess_vs_spy": -0.03522363759312708,
+            "median": 0.049970696898863465,
+            "median_excess_vs_spy": 0.007102754041712456,
+            "n": 128,
+            "positive_rate": 0.734375
+          }
+        },
+        "label": "U.S. Infrastructure Theme",
+        "parent_sector": "XLI",
+        "return_5d": 0.002010980051504685,
+        "symbol": "PAVE"
+      },
+      {
+        "current_state": "REPAIRING",
+        "drawdown_20d": -0.04562573917412627,
+        "historical_after_reentry": {
+          "10": {
+            "median": 0.01145765319196157,
+            "median_excess_vs_spy": 3.027831626667421e-05,
+            "n": 131,
+            "positive_rate": 0.6259541984732825
+          },
+          "30": {
+            "median": 0.019210507124301057,
+            "median_excess_vs_spy": -0.009984821340614625,
+            "n": 130,
+            "positive_rate": 0.5923076923076923
+          },
+          "60": {
+            "median": 0.029597904778910777,
+            "median_excess_vs_spy": -0.013270038078240232,
+            "n": 128,
+            "positive_rate": 0.640625
+          }
+        },
+        "label": "Banks",
+        "parent_sector": "XLF",
+        "return_5d": 0.008700840414797906,
+        "symbol": "KBE"
+      },
+      {
+        "current_state": "REPAIRING",
+        "drawdown_20d": -0.030123523539927644,
+        "historical_after_reentry": {
+          "10": {
+            "median": 0.009640867000902387,
+            "median_excess_vs_spy": -0.001786507874792509,
+            "n": 124,
+            "positive_rate": 0.5967741935483871
+          },
+          "30": {
+            "median": 0.01870514972337134,
+            "median_excess_vs_spy": -0.010490178741544343,
+            "n": 123,
+            "positive_rate": 0.5772357723577236
+          },
+          "60": {
+            "median": 0.007644510407400441,
+            "median_excess_vs_spy": -0.03522343244975057,
             "n": 121,
             "positive_rate": 0.5702479338842975
           }
         },
         "label": "Digital Infrastructure REITs",
         "parent_sector": "XLRE",
-        "return_5d": 0.0003658232827083996,
+        "return_5d": 0.013438495472463341,
         "symbol": "SRVR"
       },
       {
         "current_state": "REPAIRING",
-        "drawdown_20d": -0.03251014218756154,
+        "drawdown_20d": -0.024796772778518772,
         "historical_after_reentry": {
           "10": {
-            "median": 0.011457331814718752,
-            "median_excess_vs_spy": 0.0002244529714423571,
+            "median": 0.012390744841641266,
+            "median_excess_vs_spy": 0.0009633699659463701,
+            "n": 131,
+            "positive_rate": 0.5954198473282443
+          },
+          "30": {
+            "median": 0.015901149110979396,
+            "median_excess_vs_spy": -0.013294179353936286,
+            "n": 130,
+            "positive_rate": 0.5692307692307692
+          },
+          "60": {
+            "median": 0.04404443314005679,
+            "median_excess_vs_spy": 0.0011764902829057844,
+            "n": 128,
+            "positive_rate": 0.6171875
+          }
+        },
+        "label": "Metals & Mining",
+        "parent_sector": "XLB",
+        "return_5d": 0.015406753044443722,
+        "symbol": "XME"
+      },
+      {
+        "current_state": "REPAIRING",
+        "drawdown_20d": -0.04645197911466714,
+        "historical_after_reentry": {
+          "10": {
+            "median": 0.011388954013953456,
+            "median_excess_vs_spy": -3.842086174143944e-05,
             "n": 131,
             "positive_rate": 0.6183206106870229
           },
           "30": {
-            "median": 0.018217897264537375,
-            "median_excess_vs_spy": -0.0101810117894936,
-            "n": 129,
-            "positive_rate": 0.6046511627906976
+            "median": 0.015253714280793584,
+            "median_excess_vs_spy": -0.013941614184122098,
+            "n": 130,
+            "positive_rate": 0.5846153846153846
           },
           "60": {
-            "median": 0.02959797307869827,
-            "median_excess_vs_spy": -0.013269976863275246,
+            "median": 0.024448341191089296,
+            "median_excess_vs_spy": -0.018419601666061713,
             "n": 128,
-            "positive_rate": 0.6484375
-          }
-        },
-        "label": "Banks",
-        "parent_sector": "XLF",
-        "return_5d": 0.012854181495564276,
-        "symbol": "KBE"
-      },
-      {
-        "current_state": "REPAIRING",
-        "drawdown_20d": -0.020729277729891415,
-        "historical_after_reentry": {
-          "10": {
-            "median": 0.012570037461844152,
-            "median_excess_vs_spy": 0.0013371586185677575,
-            "n": 131,
-            "positive_rate": 0.5801526717557252
-          },
-          "30": {
-            "median": 0.016480277564440704,
-            "median_excess_vs_spy": -0.01191863148959027,
-            "n": 129,
-            "positive_rate": 0.5736434108527132
-          },
-          "60": {
-            "median": 0.0163556677677148,
-            "median_excess_vs_spy": -0.026512282174258717,
-            "n": 128,
-            "positive_rate": 0.546875
-          }
-        },
-        "label": "Oil Services",
-        "parent_sector": "XLE",
-        "return_5d": 0.02204107306665959,
-        "symbol": "OIH"
-      },
-      {
-        "current_state": "REPAIRING",
-        "drawdown_20d": -0.034133243316986195,
-        "historical_after_reentry": {
-          "10": {
-            "median": 0.011388570373323748,
-            "median_excess_vs_spy": 0.0001556915300473527,
-            "n": 131,
-            "positive_rate": 0.6183206106870229
-          },
-          "30": {
-            "median": 0.01632470779380457,
-            "median_excess_vs_spy": -0.012074201260226403,
-            "n": 129,
-            "positive_rate": 0.5968992248062015
-          },
-          "60": {
-            "median": 0.024862777577510098,
-            "median_excess_vs_spy": -0.018005172364463418,
-            "n": 128,
-            "positive_rate": 0.625
+            "positive_rate": 0.6171875
           }
         },
         "label": "Regional Banks",
         "parent_sector": "XLF",
-        "return_5d": 0.013055094905351394,
+        "return_5d": 0.010195758902827423,
         "symbol": "KRE"
       }
     ]
   },
   "outperformance_intelligence": {
-    "as_of": "2026-09-04",
+    "as_of": "2026-09-08",
     "candidate_count": 3,
     "candidates": [
       {
-        "label": "Residential & Specialized REITs",
-        "neighbor_positive_excess_rate": 0.8,
+        "label": "Oil Services",
+        "neighbor_positive_excess_rate": 0.6666666666666666,
         "neighbors": 15,
-        "parent_sector": "XLRE",
-        "predicted_median_excess_vs_spy": 0.024917379485098978,
+        "parent_sector": "XLE",
+        "predicted_median_excess_vs_spy": 0.036814637263980377,
         "rank": 1,
-        "symbol": "REZ"
+        "symbol": "OIH"
       },
       {
         "label": "Aerospace & Defense",
         "neighbor_positive_excess_rate": 0.8,
         "neighbors": 15,
         "parent_sector": "XLI",
-        "predicted_median_excess_vs_spy": 0.01966597030939954,
+        "predicted_median_excess_vs_spy": 0.024785799300845013,
         "rank": 2,
         "symbol": "ITA"
       },
       {
-        "label": "Transportation",
+        "label": "Copper Miners",
         "neighbor_positive_excess_rate": 0.6,
         "neighbors": 15,
-        "parent_sector": "XLI",
-        "predicted_median_excess_vs_spy": 0.01341815556345416,
+        "parent_sector": "XLB",
+        "predicted_median_excess_vs_spy": 0.018734631376916222,
         "rank": 3,
-        "symbol": "XTN"
+        "symbol": "COPX"
       }
     ],
     "gate": {
@@ -1440,13 +1502,13 @@
   "question": "Does it make sense to put cash back into the market right now?",
   "research_only": true,
   "rsp_breadth": {
-    "as_of": "2026-09-04",
+    "as_of": "2026-09-08",
     "decision_role": "canonical breadth/participation input; diagnostic/context only, not an independent gate, veto, or trigger",
     "interpretation": "equal-weight participation is lagging cap-weighted SPY over both 5D and 20D",
-    "rsp_close": 219.0,
-    "rsp_spy_relative_20d": -0.0009861998147275841,
-    "rsp_spy_relative_5d": -0.008740114372044916,
-    "spy_close": 770.19,
+    "rsp_close": 216.74001,
+    "rsp_spy_relative_20d": -0.00671793513867025,
+    "rsp_spy_relative_5d": -0.010673079974949484,
+    "spy_close": 765.96002,
     "state": "NARROWING",
     "validation_note": "direct inclusion in analog-distance decision math was rejected because incremental walk-forward results weakened and many signals shifted materially earlier"
   },
@@ -1457,197 +1519,196 @@
   "signal_interpretation": "meaningful weakness is present and historical analogs do not support continuing to wait",
   "signal_snapshot": {
     "breadth": {
-      "breadth_1d_change": -0.03193612774451099,
-      "breadth_3d_change": 0.013972055888223534,
+      "breadth_1d_change": -0.0538922155688622,
+      "breadth_3d_change": -0.05788423153692607,
       "equal_weight_participation_state": "NARROWING",
-      "pct_sp500_above_200dma": 0.6646706586826348,
-      "pct_sp500_above_50dma": 0.4790419161676646,
-      "rsp_spy_relative_20d": -0.0009861998147275841,
-      "rsp_spy_relative_5d": -0.008740114372044916
+      "pct_sp500_above_200dma": 0.6047904191616766,
+      "pct_sp500_above_50dma": 0.4251497005988024,
+      "rsp_spy_relative_20d": -0.00671793513867025,
+      "rsp_spy_relative_5d": -0.010673079974949484
     },
     "factor_aggregates": {
-      "damage_count_2pct": 4,
-      "damage_count_3pct": 1,
-      "damage_share_2pct": 0.5,
-      "damage_share_3pct": 0.125,
-      "dispersion_20d": 0.018528464719014506,
-      "median_1d_return": -0.002050047337432137,
-      "median_drawdown_20d": -0.019076840148746166,
-      "median_drawdown_60d": -0.019076840148746166,
-      "relative_strength_dispersion": 0.018528464719014506,
-      "repair_count": 1,
-      "repair_share": 0.375
+      "damage_count_2pct": 6,
+      "damage_count_3pct": 2,
+      "damage_share_2pct": 0.75,
+      "damage_share_3pct": 0.25,
+      "dispersion_20d": 0.016054618936393924,
+      "median_1d_return": -0.008096669390485312,
+      "median_drawdown_20d": -0.02456830078742711,
+      "median_drawdown_60d": -0.02456830078742711,
+      "relative_strength_dispersion": 0.016054618936393924,
+      "repair_count": 2,
+      "repair_share": 0.625
     },
     "factors": {
       "IWD": {
-        "drawdown_20d": -0.006746857764886927,
-        "drawdown_60d": -0.006746857764886927,
-        "relative_strength_20d_vs_spy": 0.004242023264829253,
-        "relative_strength_60d_vs_spy": 0.034195800964666345
+        "drawdown_20d": -0.014843110613923627,
+        "drawdown_60d": -0.014843110613923627,
+        "relative_strength_20d_vs_spy": -0.0016164198940158414,
+        "relative_strength_60d_vs_spy": 0.028146639405476126
       },
       "IWF": {
-        "drawdown_20d": -0.017905458653734274,
-        "drawdown_60d": -0.017905458653734274,
-        "relative_strength_20d_vs_spy": -0.0055803067847595145,
-        "relative_strength_60d_vs_spy": -0.03244818547580741
+        "drawdown_20d": -0.021009127344463252,
+        "drawdown_60d": -0.021009127344463252,
+        "relative_strength_20d_vs_spy": -0.00011567088100217227,
+        "relative_strength_60d_vs_spy": -0.028080132816225012
       },
       "IWM": {
-        "drawdown_20d": -0.029761666004313847,
-        "drawdown_60d": -0.029761666004313847,
-        "relative_strength_20d_vs_spy": -0.014434043828791876,
-        "relative_strength_60d_vs_spy": -0.012445859370719736
+        "drawdown_20d": -0.034153800633358045,
+        "drawdown_60d": -0.034153800633358045,
+        "relative_strength_20d_vs_spy": -0.00855533341196113,
+        "relative_strength_60d_vs_spy": -0.023816558460146853
       },
       "MTUM": {
-        "drawdown_20d": -0.053435655544700866,
-        "drawdown_60d": -0.11691100088762818,
-        "relative_strength_20d_vs_spy": -0.010448582146175833,
-        "relative_strength_60d_vs_spy": -0.06352877857087469
+        "drawdown_20d": -0.04154377799402853,
+        "drawdown_60d": -0.10581657682094392,
+        "relative_strength_20d_vs_spy": 0.013603715937062333,
+        "relative_strength_60d_vs_spy": -0.07217958004618275
       },
       "QUAL": {
-        "drawdown_20d": -0.020248221643758058,
-        "drawdown_60d": -0.020248221643758058,
-        "relative_strength_20d_vs_spy": -0.009809752729486032,
-        "relative_strength_60d_vs_spy": -0.014293838467265951
+        "drawdown_20d": -0.02812747423039097,
+        "drawdown_60d": -0.02812747423039097,
+        "relative_strength_20d_vs_spy": -0.01278209729589852,
+        "relative_strength_60d_vs_spy": -0.016426072400345992
       },
       "SPYD": {
-        "drawdown_20d": -0.020915575511209372,
-        "drawdown_60d": -0.020915575511209372,
-        "relative_strength_20d_vs_spy": -0.0016410607643486674,
-        "relative_strength_60d_vs_spy": -0.026087526450778498
+        "drawdown_20d": -0.029597474170630744,
+        "drawdown_60d": -0.029597474170630744,
+        "relative_strength_20d_vs_spy": -0.0019138693818107066,
+        "relative_strength_60d_vs_spy": -0.01747314710140624
       },
       "USMV": {
-        "drawdown_20d": -0.011570898865787771,
-        "drawdown_60d": -0.011570898865787771,
-        "relative_strength_20d_vs_spy": 0.0057591252425812645,
-        "relative_strength_60d_vs_spy": -0.0025186053856396384
+        "drawdown_20d": -0.020200089431044566,
+        "drawdown_60d": -0.020200089431044566,
+        "relative_strength_20d_vs_spy": 0.0001207099855520255,
+        "relative_strength_60d_vs_spy": 0.007126003323715269
       },
       "VLUE": {
-        "drawdown_20d": 0.0,
-        "drawdown_60d": 0.0,
-        "relative_strength_20d_vs_spy": 0.04384264900023793,
-        "relative_strength_60d_vs_spy": 0.0175349331304413
+        "drawdown_20d": -0.010997005339128507,
+        "drawdown_60d": -0.010997005339128507,
+        "relative_strength_20d_vs_spy": 0.038311842976947785,
+        "relative_strength_60d_vs_spy": -0.008574301808411677
       }
     },
     "headline_market": {
-      "spy_drawdown_20d": -0.009885843574844344,
-      "spy_return_5d": 0.0010918567905857657
+      "spy_drawdown_20d": -0.015323674602766513,
+      "spy_return_5d": -0.0014209869200858538
     },
     "rotation_leadership": {
-      "growth_minus_value_20d": -0.009822330049588768,
-      "momentum_relative_20d": -0.010448582146175833,
-      "quality_minus_momentum_20d": 0.0006388294166898012,
+      "growth_minus_value_20d": 0.0015007490130136691,
+      "momentum_relative_20d": 0.013603715937062333,
+      "quality_minus_momentum_20d": -0.026385813232960853,
       "rotation_count": 0,
-      "small_vs_large_relative_20d": -0.014434043828791876
+      "small_vs_large_relative_20d": -0.00855533341196113
     },
     "sector_aggregates": {
       "damage_count_2pct": 7,
-      "damage_count_3pct": 4,
+      "damage_count_3pct": 6,
       "damage_count_5pct": 1,
       "damage_share_2pct": 0.6363636363636364,
-      "damage_share_3pct": 0.36363636363636365,
-      "dispersion_20d": 0.04439353806175956,
-      "dispersion_percentile": 0.6468253968253969,
-      "median_1d_return": -0.007855240580300404,
-      "median_drawdown_20d": -0.024077845536717213,
-      "median_drawdown_60d": -0.02534475811542869,
-      "relative_strength_dispersion": 0.044393538061759566,
+      "damage_share_3pct": 0.5454545454545454,
+      "dispersion_20d": 0.034137433597139055,
+      "dispersion_percentile": 0.3531746031746032,
+      "median_1d_return": -0.004849695229049433,
+      "median_drawdown_20d": -0.0321869282369337,
+      "median_drawdown_60d": -0.03922241766578727,
+      "relative_strength_dispersion": 0.034137433597139055,
       "repair_count": 0,
       "repair_share": 0.36363636363636365
     },
     "sectors": {
       "XLB": {
-        "drawdown_20d": -0.02291782344326654,
-        "drawdown_60d": -0.02291782344326654,
-        "relative_strength_20d_vs_spy": -0.003975340400364624,
-        "relative_strength_60d_vs_spy": -0.0032252732668560657
+        "drawdown_20d": -0.032234015302004315,
+        "drawdown_60d": -0.032234015302004315,
+        "relative_strength_20d_vs_spy": -0.014171230028198867,
+        "relative_strength_60d_vs_spy": -0.023049903487917467
       },
       "XLC": {
-        "drawdown_20d": -0.011906848710744655,
-        "drawdown_60d": -0.011906848710744655,
-        "relative_strength_20d_vs_spy": 0.010981438475249794,
-        "relative_strength_60d_vs_spy": -0.05262276375279362
+        "drawdown_20d": -0.01640501548253026,
+        "drawdown_60d": -0.01640501548253026,
+        "relative_strength_20d_vs_spy": 0.006373726792392342,
+        "relative_strength_60d_vs_spy": -0.043662405826103146
       },
       "XLE": {
-        "drawdown_20d": -0.015975436864883674,
-        "drawdown_60d": -0.015975436864883674,
-        "relative_strength_20d_vs_spy": 0.11805712755530595,
-        "relative_strength_60d_vs_spy": 0.043236965507703395
+        "drawdown_20d": -0.00506915266957908,
+        "drawdown_60d": -0.00506915266957908,
+        "relative_strength_20d_vs_spy": 0.08541696308117275,
+        "relative_strength_60d_vs_spy": 0.101207605730115
       },
       "XLF": {
-        "drawdown_20d": -0.007855240580300404,
-        "drawdown_60d": -0.007855240580300404,
-        "relative_strength_20d_vs_spy": 0.012650769278317764,
-        "relative_strength_60d_vs_spy": 0.051847659878036634
+        "drawdown_20d": -0.021516429417386407,
+        "drawdown_60d": -0.021516429417386407,
+        "relative_strength_20d_vs_spy": 0.00032379802317805684,
+        "relative_strength_60d_vs_spy": 0.05185554182710139
       },
       "XLI": {
-        "drawdown_20d": -0.06026481456983279,
-        "drawdown_60d": -0.06026481456983279,
-        "relative_strength_20d_vs_spy": -0.04954522443396314,
-        "relative_strength_60d_vs_spy": -0.02882870956413308
+        "drawdown_20d": -0.06482224381518331,
+        "drawdown_60d": -0.06482224381518331,
+        "relative_strength_20d_vs_spy": -0.046000465467824325,
+        "relative_strength_60d_vs_spy": -0.04261627480743069
       },
       "XLK": {
-        "drawdown_20d": -0.01829430945642574,
-        "drawdown_60d": -0.02534475811542869,
-        "relative_strength_20d_vs_spy": 0.00029940199668798684,
-        "relative_strength_60d_vs_spy": -0.002876777971144273
+        "drawdown_20d": -0.015201599257352871,
+        "drawdown_60d": -0.022274259251876982,
+        "relative_strength_20d_vs_spy": 0.017464793075439466,
+        "relative_strength_60d_vs_spy": -0.014240562325268602
       },
       "XLP": {
-        "drawdown_20d": -0.032818698883272934,
-        "drawdown_60d": -0.032818698883272934,
-        "relative_strength_20d_vs_spy": -0.002373782020622661,
-        "relative_strength_60d_vs_spy": -0.06821633017052253
+        "drawdown_20d": -0.03922241766578727,
+        "drawdown_60d": -0.03922241766578727,
+        "relative_strength_20d_vs_spy": -0.0018017823506826236,
+        "relative_strength_60d_vs_spy": -0.04872095558552292
       },
       "XLRE": {
-        "drawdown_20d": -0.03152557949590151,
-        "drawdown_60d": -0.045207522109036,
-        "relative_strength_20d_vs_spy": -0.019373478097821972,
-        "relative_strength_60d_vs_spy": -0.0794409765182853
+        "drawdown_20d": -0.0321869282369337,
+        "drawdown_60d": -0.0458595277684849,
+        "relative_strength_20d_vs_spy": -0.0021154229943816105,
+        "relative_strength_60d_vs_spy": -0.05504158620180599
       },
       "XLU": {
-        "drawdown_20d": -0.027758959695671326,
-        "drawdown_60d": -0.0693454098290136,
-        "relative_strength_20d_vs_spy": -0.00818293422283689,
-        "relative_strength_60d_vs_spy": -0.07909361973554141
+        "drawdown_20d": -0.019408724524886845,
+        "drawdown_60d": -0.06135234600168804,
+        "relative_strength_20d_vs_spy": 0.016565260251753422,
+        "relative_strength_60d_vs_spy": -0.048220883432751105
       },
       "XLV": {
-        "drawdown_20d": -0.024077845536717213,
-        "drawdown_60d": -0.024077845536717213,
-        "relative_strength_20d_vs_spy": 0.038796411751712334,
-        "relative_strength_60d_vs_spy": 0.06219821677501747
+        "drawdown_20d": -0.04866796533141837,
+        "drawdown_60d": -0.04866796533141837,
+        "relative_strength_20d_vs_spy": 0.0013686024274435216,
+        "relative_strength_60d_vs_spy": 0.04851085935583077
       },
       "XLY": {
-        "drawdown_20d": -0.03977600551239224,
-        "drawdown_60d": -0.04129815554009508,
-        "relative_strength_20d_vs_spy": -0.037327942047289175,
-        "relative_strength_60d_vs_spy": -0.04990675282882151
+        "drawdown_20d": -0.04402885016819669,
+        "drawdown_60d": -0.04897382543543116,
+        "relative_strength_20d_vs_spy": -0.038318024341947976,
+        "relative_strength_60d_vs_spy": -0.058807918268263926
       }
     },
     "volatility": {
-      "vix_5d_change": 0.006930006930006893,
-      "vix_vix3m_ratio": 0.825099375354912
+      "vix_5d_change": 0.05361932084643484,
+      "vix_vix3m_ratio": 0.8548124409333833
     }
   },
   "strategy": "RE-ENTRY",
   "subsector_decision_evidence": {
-    "aggregate_damage_share_3pct": 0.6,
-    "aggregate_repair_share": 0.16666666666666666,
+    "aggregate_damage_share_3pct": 0.6333333333333333,
+    "aggregate_repair_share": 0.2,
     "deep_damage_sectors": [
       "XLY",
+      "XLP",
       "XLF",
       "XLV",
       "XLI",
-      "XLB",
       "XLRE",
       "XLK"
     ],
     "hidden_damage_sectors": [
       "XLF",
-      "XLV",
-      "XLB",
       "XLK"
     ],
     "repairing_sectors": [
       "XLF",
+      "XLI",
       "XLRE",
       "XLK"
     ],
@@ -1659,57 +1720,57 @@
   "subsector_intelligence": {
     "aggregate": {
       "coverage": 0.967741935483871,
-      "damage_share_2pct": 0.7,
-      "damage_share_3pct": 0.6,
-      "median_drawdown_20d": -0.03399379768281863,
-      "repair_share": 0.16666666666666666
+      "damage_share_2pct": 0.8,
+      "damage_share_3pct": 0.6333333333333333,
+      "median_drawdown_20d": -0.03567703590837279,
+      "repair_share": 0.2
     },
     "by_sector": {
       "XLB": {
         "coverage": 1.0,
         "damage_share_2pct": 0.6666666666666666,
-        "damage_share_3pct": 0.6666666666666666,
-        "median_drawdown_20d": -0.03560973376762577,
+        "damage_share_3pct": 0.0,
+        "median_drawdown_20d": -0.02146189487113248,
         "members": {
           "COPX": {
-            "drawdown_20d": -0.060031036488678025,
-            "drawdown_60d": -0.060031036488678025,
+            "drawdown_20d": -0.02146189487113248,
+            "drawdown_60d": -0.02146189487113248,
             "label": "Copper Miners",
             "parent_sector": "XLB",
-            "relative_strength_20d_vs_parent": 0.03782178835054317,
-            "relative_strength_20d_vs_spy": 0.03384644795017855,
-            "relative_strength_60d_vs_parent": 0.11332838812096435,
+            "relative_strength_20d_vs_parent": 0.0777243408492021,
+            "relative_strength_20d_vs_spy": 0.06355311082100323,
+            "relative_strength_60d_vs_parent": 0.12092864070422427,
             "repairing": false,
-            "return_1d": -0.006465713291952002,
-            "return_5d": -0.03982201418928433
+            "return_1d": 0.041032356508312606,
+            "return_5d": 0.016368690858020063
           },
           "SLX": {
             "drawdown_20d": 0.0,
-            "drawdown_60d": -0.0008102625657321338,
+            "drawdown_60d": 0.0,
             "label": "Steel",
             "parent_sector": "XLB",
-            "relative_strength_20d_vs_parent": 0.01676214406132015,
-            "relative_strength_20d_vs_spy": 0.012786803660955526,
-            "relative_strength_60d_vs_parent": 0.0038496564208057027,
+            "relative_strength_20d_vs_parent": 0.03349243585289563,
+            "relative_strength_20d_vs_spy": 0.019321205824696763,
+            "relative_strength_60d_vs_parent": 0.001868925242254571,
             "repairing": false,
-            "return_1d": 0.001262962486022312,
-            "return_5d": 0.021161057785449744
+            "return_1d": 0.0018020054192828816,
+            "return_5d": 0.02944172060255057
           },
           "XME": {
-            "drawdown_20d": -0.03560973376762577,
-            "drawdown_60d": -0.03560973376762577,
+            "drawdown_20d": -0.024796772778518772,
+            "drawdown_60d": -0.024796772778518772,
             "label": "Metals & Mining",
             "parent_sector": "XLB",
-            "relative_strength_20d_vs_parent": 0.032828955793716474,
-            "relative_strength_20d_vs_spy": 0.02885361539335185,
-            "relative_strength_60d_vs_parent": -0.00543295134793631,
-            "repairing": false,
-            "return_1d": 0.002027415937933208,
-            "return_5d": -0.0010105703162061053
+            "relative_strength_20d_vs_parent": 0.043820692324803234,
+            "relative_strength_20d_vs_spy": 0.029649462296604367,
+            "relative_strength_60d_vs_parent": -0.0036360492036773273,
+            "repairing": true,
+            "return_1d": 0.011212225348717464,
+            "return_5d": 0.015406753044443722
           }
         },
-        "relative_strength_dispersion_vs_parent": 0.008985045809401435,
-        "repair_share": 0.0
+        "relative_strength_dispersion_vs_parent": 0.01889324301500923,
+        "repair_share": 0.3333333333333333
       },
       "XLC": {
         "coverage": 0.6666666666666666,
@@ -1718,28 +1779,28 @@
         "median_drawdown_20d": NaN,
         "members": {
           "FDN": {
-            "drawdown_20d": -0.01483490222798478,
-            "drawdown_60d": -0.01483490222798478,
+            "drawdown_20d": -0.025876425566257355,
+            "drawdown_60d": -0.025876425566257355,
             "label": "Internet",
             "parent_sector": "XLC",
-            "relative_strength_20d_vs_parent": -0.0018623197048370788,
-            "relative_strength_20d_vs_spy": 0.009119118770412715,
-            "relative_strength_60d_vs_parent": 0.09482904477143905,
+            "relative_strength_20d_vs_parent": -0.01602568455052633,
+            "relative_strength_20d_vs_spy": -0.009651957758133989,
+            "relative_strength_60d_vs_parent": 0.08779793558403226,
             "repairing": false,
-            "return_1d": -0.008690676142903642,
-            "return_5d": -0.012024076970511888
+            "return_1d": -0.011207789804209889,
+            "return_5d": -0.01668434833924437
           },
           "IYZ": {
-            "drawdown_20d": -0.046885515648434684,
-            "drawdown_60d": -0.046885515648434684,
+            "drawdown_20d": -0.03616884825783573,
+            "drawdown_60d": -0.03616884825783573,
             "label": "Telecom",
             "parent_sector": "XLC",
-            "relative_strength_20d_vs_parent": -0.027882781846195637,
-            "relative_strength_20d_vs_spy": -0.016901343370945843,
-            "relative_strength_60d_vs_parent": 0.0040924169982785585,
+            "relative_strength_20d_vs_parent": -0.0034433692601150145,
+            "relative_strength_20d_vs_spy": 0.002930357532277328,
+            "relative_strength_60d_vs_parent": 0.005366520313018763,
             "repairing": false,
-            "return_1d": 0.00046872412987886136,
-            "return_5d": -0.008362383663915285
+            "return_1d": 0.01124384065770423,
+            "return_5d": 0.0011595370663048943
           }
         },
         "relative_strength_dispersion_vs_parent": NaN,
@@ -1747,217 +1808,217 @@
       },
       "XLE": {
         "coverage": 1.0,
-        "damage_share_2pct": 0.3333333333333333,
+        "damage_share_2pct": 0.0,
         "damage_share_3pct": 0.0,
-        "median_drawdown_20d": -0.0126837694232389,
+        "median_drawdown_20d": 0.0,
         "members": {
           "CRAK": {
             "drawdown_20d": 0.0,
             "drawdown_60d": 0.0,
             "label": "Refiners",
             "parent_sector": "XLE",
-            "relative_strength_20d_vs_parent": 0.046738233246933714,
-            "relative_strength_20d_vs_spy": 0.16479536080223967,
-            "relative_strength_60d_vs_parent": 0.21794664286362275,
+            "relative_strength_20d_vs_parent": 0.08069317686168342,
+            "relative_strength_20d_vs_spy": 0.16611013994285617,
+            "relative_strength_60d_vs_parent": 0.1944591681192802,
             "repairing": false,
-            "return_1d": 0.013063560440404576,
-            "return_5d": 0.0564878153090731
+            "return_1d": 0.01887090360213839,
+            "return_5d": 0.05503991331238667
           },
           "OIH": {
-            "drawdown_20d": -0.020729277729891415,
-            "drawdown_60d": -0.020729277729891415,
+            "drawdown_20d": -0.01834710590133981,
+            "drawdown_60d": -0.01834710590133981,
             "label": "Oil Services",
             "parent_sector": "XLE",
-            "relative_strength_20d_vs_parent": -0.013000069199522235,
-            "relative_strength_20d_vs_spy": 0.10505705835578372,
-            "relative_strength_60d_vs_parent": -0.09677313414886068,
-            "repairing": true,
-            "return_1d": -0.0053046666951623855,
-            "return_5d": 0.02204107306665959
+            "relative_strength_20d_vs_parent": -0.0343836084518403,
+            "relative_strength_20d_vs_spy": 0.05103335462933245,
+            "relative_strength_60d_vs_parent": -0.13578979375396738,
+            "repairing": false,
+            "return_1d": 0.0024325978244599256,
+            "return_5d": -0.0014212809589735365
           },
           "XOP": {
-            "drawdown_20d": -0.0126837694232389,
-            "drawdown_60d": -0.0126837694232389,
+            "drawdown_20d": 0.0,
+            "drawdown_60d": 0.0,
             "label": "Oil & Gas Exploration/Production",
             "parent_sector": "XLE",
-            "relative_strength_20d_vs_parent": 0.032006918323730815,
-            "relative_strength_20d_vs_spy": 0.15006404587903677,
-            "relative_strength_60d_vs_parent": 0.03313680869883617,
+            "relative_strength_20d_vs_parent": 0.02592868003294657,
+            "relative_strength_20d_vs_spy": 0.11134564311411932,
+            "relative_strength_60d_vs_parent": 0.05035704063010127,
             "repairing": false,
-            "return_1d": -0.008422997461470016,
-            "return_5d": 0.025653459233249576
+            "return_1d": 0.016779386689673492,
+            "return_5d": 0.026196003240716026
           }
         },
-        "relative_strength_dispersion_vs_parent": 0.025410639382547968,
-        "repair_share": 0.3333333333333333
+        "relative_strength_dispersion_vs_parent": 0.046998095438091615,
+        "repair_share": 0.0
       },
       "XLF": {
         "coverage": 1.0,
-        "damage_share_2pct": 0.5,
-        "damage_share_3pct": 0.5,
-        "median_drawdown_20d": -0.023199526984932883,
+        "damage_share_2pct": 1.0,
+        "damage_share_3pct": 0.75,
+        "median_drawdown_20d": -0.04040548136651806,
         "members": {
           "IAI": {
-            "drawdown_20d": -0.008078313967732065,
-            "drawdown_60d": -0.008078313967732065,
+            "drawdown_20d": -0.024083632895379514,
+            "drawdown_60d": -0.024083632895379514,
             "label": "Broker-Dealers",
             "parent_sector": "XLF",
-            "relative_strength_20d_vs_parent": 0.03493169767460591,
-            "relative_strength_20d_vs_spy": 0.047582466952923674,
-            "relative_strength_60d_vs_parent": -0.014865732486796679,
+            "relative_strength_20d_vs_parent": 0.0357040335529446,
+            "relative_strength_20d_vs_spy": 0.03602783157612266,
+            "relative_strength_60d_vs_parent": -0.021803669134726533,
             "repairing": false,
-            "return_1d": -0.008078313967732065,
-            "return_5d": 0.006764411849684349
+            "return_1d": -0.016135667919177643,
+            "return_5d": -0.006067814712620523
           },
           "KBE": {
-            "drawdown_20d": -0.03251014218756154,
-            "drawdown_60d": -0.03251014218756154,
+            "drawdown_20d": -0.04562573917412627,
+            "drawdown_60d": -0.04562573917412627,
             "label": "Banks",
             "parent_sector": "XLF",
-            "relative_strength_20d_vs_parent": -0.017684484209427476,
-            "relative_strength_20d_vs_spy": -0.005033714931109712,
-            "relative_strength_60d_vs_parent": -0.048222647857371514,
+            "relative_strength_20d_vs_parent": -0.013196845784864353,
+            "relative_strength_20d_vs_spy": -0.012873047761686296,
+            "relative_strength_60d_vs_parent": -0.05066689669826774,
             "repairing": true,
-            "return_1d": 0.003327965931237742,
-            "return_5d": 0.012854181495564276
+            "return_1d": -0.013556314705169159,
+            "return_5d": 0.008700840414797906
           },
           "KIE": {
-            "drawdown_20d": -0.013888911782304225,
-            "drawdown_60d": -0.038374650706898716,
+            "drawdown_20d": -0.03518522355890985,
+            "drawdown_60d": -0.05914216209128775,
             "label": "Insurance",
             "parent_sector": "XLF",
-            "relative_strength_20d_vs_parent": -0.018903543048109595,
-            "relative_strength_20d_vs_spy": -0.006252773769791831,
-            "relative_strength_60d_vs_parent": -0.011999628024705,
+            "relative_strength_20d_vs_parent": -0.012314620495548767,
+            "relative_strength_20d_vs_spy": -0.01199082247237071,
+            "relative_strength_60d_vs_parent": -0.012131838961948693,
             "repairing": false,
-            "return_1d": -0.013888911782304225,
-            "return_5d": -0.00015644377338563942
+            "return_1d": -0.02159626033117301,
+            "return_5d": -0.009976263703763477
           },
           "KRE": {
-            "drawdown_20d": -0.034133243316986195,
-            "drawdown_60d": -0.034133243316986195,
+            "drawdown_20d": -0.04645197911466714,
+            "drawdown_60d": -0.04645197911466714,
             "label": "Regional Banks",
             "parent_sector": "XLF",
-            "relative_strength_20d_vs_parent": -0.021014927294483177,
-            "relative_strength_20d_vs_spy": -0.008364158016165413,
-            "relative_strength_60d_vs_parent": -0.059469614208726984,
+            "relative_strength_20d_vs_parent": -0.013800625516435017,
+            "relative_strength_20d_vs_spy": -0.01347682749325696,
+            "relative_strength_60d_vs_parent": -0.0596568496602885,
             "repairing": true,
-            "return_1d": 0.005342512111803588,
-            "return_5d": 0.013055094905351394
+            "return_1d": -0.012754073698515112,
+            "return_5d": 0.010195758902827423
           }
         },
-        "relative_strength_dispersion_vs_parent": 0.023470402217725617,
+        "relative_strength_dispersion_vs_parent": 0.021141117355409005,
         "repair_share": 0.5
       },
       "XLI": {
         "coverage": 1.0,
         "damage_share_2pct": 1.0,
         "damage_share_3pct": 1.0,
-        "median_drawdown_20d": -0.06078664605227546,
+        "median_drawdown_20d": -0.0760395432389882,
         "members": {
           "ITA": {
-            "drawdown_20d": -0.10903562308368786,
-            "drawdown_60d": -0.10903562308368786,
+            "drawdown_20d": -0.11724983136513312,
+            "drawdown_60d": -0.11724983136513312,
             "label": "Aerospace & Defense",
             "parent_sector": "XLI",
-            "relative_strength_20d_vs_parent": -0.04674378197212803,
-            "relative_strength_20d_vs_spy": -0.09628900640609117,
-            "relative_strength_60d_vs_parent": -0.03161271768297058,
+            "relative_strength_20d_vs_parent": -0.05475695618672671,
+            "relative_strength_20d_vs_spy": -0.10075742165455104,
+            "relative_strength_60d_vs_parent": -0.05061697064137971,
             "repairing": false,
-            "return_1d": -0.0016372914602299504,
-            "return_5d": -0.03096815774868833
+            "return_1d": -0.009219457583562685,
+            "return_5d": -0.021107979835278567
           },
           "PAVE": {
-            "drawdown_20d": -0.06078664605227546,
-            "drawdown_60d": -0.07890102806066057,
+            "drawdown_20d": -0.06674609568362422,
+            "drawdown_60d": -0.0847455392206512,
             "label": "U.S. Infrastructure Theme",
             "parent_sector": "XLI",
-            "relative_strength_20d_vs_parent": -0.006631075310503776,
-            "relative_strength_20d_vs_spy": -0.05617629974446692,
-            "relative_strength_60d_vs_parent": -0.03639028220840845,
-            "repairing": false,
-            "return_1d": 0.008593915386817974,
-            "return_5d": -0.0027120145028841636
+            "relative_strength_20d_vs_parent": -0.004716439524369176,
+            "relative_strength_20d_vs_spy": -0.0507169049921935,
+            "relative_strength_60d_vs_parent": -0.03804940015399283,
+            "repairing": true,
+            "return_1d": -0.006345150019747781,
+            "return_5d": 0.002010980051504685
           },
           "XTN": {
-            "drawdown_20d": -0.06045767129488988,
-            "drawdown_60d": -0.10355961716267026,
+            "drawdown_20d": -0.0760395432389882,
+            "drawdown_60d": -0.11842666340862373,
             "label": "Transportation",
             "parent_sector": "XLI",
-            "relative_strength_20d_vs_parent": -0.007861555831134681,
-            "relative_strength_20d_vs_spy": -0.05740678026509782,
-            "relative_strength_60d_vs_parent": -0.09209170517610021,
+            "relative_strength_20d_vs_parent": -0.004482168986159274,
+            "relative_strength_20d_vs_spy": -0.0504826344539836,
+            "relative_strength_60d_vs_parent": -0.10457244209474503,
             "repairing": false,
-            "return_1d": 0.01189104217764636,
-            "return_5d": -0.009852707654730453
+            "return_1d": -0.016584534265287942,
+            "return_5d": -0.017608640146881904
           }
         },
-        "relative_strength_dispersion_vs_parent": 0.01862605948578649,
-        "repair_share": 0.0
+        "relative_strength_dispersion_vs_parent": 0.023644737301665848,
+        "repair_share": 0.3333333333333333
       },
       "XLK": {
         "coverage": 1.0,
         "damage_share_2pct": 1.0,
         "damage_share_3pct": 1.0,
-        "median_drawdown_20d": -0.05212110239218726,
+        "median_drawdown_20d": -0.06943433696432666,
         "members": {
           "CIBR": {
-            "drawdown_20d": -0.07446184772594022,
-            "drawdown_60d": -0.07446184772594022,
+            "drawdown_20d": -0.08013693793121568,
+            "drawdown_60d": -0.08013693793121568,
             "label": "Cybersecurity",
             "parent_sector": "XLK",
-            "relative_strength_20d_vs_parent": -0.02964551131499238,
-            "relative_strength_20d_vs_spy": -0.029346109318304392,
-            "relative_strength_60d_vs_parent": 0.075633447642387,
+            "relative_strength_20d_vs_parent": -0.0738258780369857,
+            "relative_strength_20d_vs_spy": -0.05636108496154624,
+            "relative_strength_60d_vs_parent": 0.07420596950978031,
             "repairing": false,
-            "return_1d": -0.007658449006197721,
-            "return_5d": -0.04028004585068057
+            "return_1d": -0.006131665335817549,
+            "return_5d": -0.06130803091462611
           },
           "IGV": {
-            "drawdown_20d": -0.05212110239218726,
-            "drawdown_60d": -0.05212110239218726,
+            "drawdown_20d": -0.06943433696432666,
+            "drawdown_60d": -0.06943433696432666,
             "label": "Software",
             "parent_sector": "XLK",
-            "relative_strength_20d_vs_parent": 0.021978311824503605,
-            "relative_strength_20d_vs_spy": 0.02227771382119159,
-            "relative_strength_60d_vs_parent": 0.08049748063371953,
+            "relative_strength_20d_vs_parent": -0.030697761274181334,
+            "relative_strength_20d_vs_spy": -0.013232968198741868,
+            "relative_strength_60d_vs_parent": 0.10267831139797923,
             "repairing": false,
-            "return_1d": -0.022253364388310826,
-            "return_5d": -0.04502283383722172
+            "return_1d": -0.018265238962311914,
+            "return_5d": -0.06655755111288364
           },
           "SMH": {
-            "drawdown_20d": -0.04555018301710956,
-            "drawdown_60d": -0.1523373360691226,
+            "drawdown_20d": -0.03423843419916672,
+            "drawdown_60d": -0.14229118490839976,
             "label": "Semiconductors",
             "parent_sector": "XLK",
-            "relative_strength_20d_vs_parent": -0.023255569339157622,
-            "relative_strength_20d_vs_spy": -0.022956167342469636,
-            "relative_strength_60d_vs_parent": -0.06839089787338704,
+            "relative_strength_20d_vs_parent": -0.0007321416026135896,
+            "relative_strength_20d_vs_spy": 0.016732651472825877,
+            "relative_strength_60d_vs_parent": -0.08526823783278581,
             "repairing": true,
-            "return_1d": 0.02607679119856665,
-            "return_5d": 0.02513066981646972
+            "return_1d": 0.011851590954986335,
+            "return_5d": 0.03072054225595977
           }
         },
-        "relative_strength_dispersion_vs_parent": 0.022978140528000186,
+        "relative_strength_dispersion_vs_parent": 0.03000123538890541,
         "repair_share": 0.3333333333333333
       },
       "XLP": {
         "coverage": 1.0,
         "damage_share_2pct": 1.0,
-        "damage_share_3pct": 0.0,
-        "median_drawdown_20d": -0.02286186381320987,
+        "damage_share_3pct": 1.0,
+        "median_drawdown_20d": -0.03284758692568812,
         "members": {
           "PBJ": {
-            "drawdown_20d": -0.02286186381320987,
-            "drawdown_60d": -0.02306124628806605,
+            "drawdown_20d": -0.03284758692568812,
+            "drawdown_60d": -0.03304493183992352,
             "label": "Food & Beverage",
             "parent_sector": "XLP",
-            "relative_strength_20d_vs_parent": 0.015833678776093763,
-            "relative_strength_20d_vs_spy": 0.013459896755471101,
-            "relative_strength_60d_vs_parent": 0.001750976224983658,
+            "relative_strength_20d_vs_parent": 0.018406679759620737,
+            "relative_strength_20d_vs_spy": 0.016604897408938113,
+            "relative_strength_60d_vs_parent": -0.007475091115877075,
             "repairing": false,
-            "return_1d": -0.005195345086226655,
-            "return_5d": -0.006640375678426791
+            "return_1d": -0.010219356652526934,
+            "return_5d": -0.006691874590989633
           }
         },
         "relative_strength_dispersion_vs_parent": 0.0,
@@ -1965,67 +2026,67 @@
       },
       "XLRE": {
         "coverage": 1.0,
-        "damage_share_2pct": 0.6666666666666666,
+        "damage_share_2pct": 1.0,
         "damage_share_3pct": 0.6666666666666666,
-        "median_drawdown_20d": -0.036275341657068805,
+        "median_drawdown_20d": -0.030123523539927644,
         "members": {
           "NETL": {
-            "drawdown_20d": -0.01818436011941882,
-            "drawdown_60d": -0.06505026623547716,
+            "drawdown_20d": -0.02132093047989747,
+            "drawdown_60d": -0.06803705237411095,
             "label": "Net Lease REITs",
             "parent_sector": "XLRE",
-            "relative_strength_20d_vs_parent": 0.004097735082147169,
-            "relative_strength_20d_vs_spy": -0.015275743015674803,
-            "relative_strength_60d_vs_parent": 0.0019850413620734475,
+            "relative_strength_20d_vs_parent": 0.0089702219899086,
+            "relative_strength_20d_vs_spy": 0.0068547989955269895,
+            "relative_strength_60d_vs_parent": 0.00013662014871618222,
             "repairing": false,
-            "return_1d": -0.0011056208209256901,
-            "return_5d": -0.005428373640490092
+            "return_1d": -0.0031946632678006015,
+            "return_5d": -0.0004477830831872698
           },
           "REZ": {
-            "drawdown_20d": -0.036275341657068805,
-            "drawdown_60d": -0.061115583099831006,
+            "drawdown_20d": -0.036378712223518184,
+            "drawdown_60d": -0.061216289264361845,
             "label": "Residential & Specialized REITs",
             "parent_sector": "XLRE",
-            "relative_strength_20d_vs_parent": -0.011335382188224719,
-            "relative_strength_20d_vs_spy": -0.03070886028604669,
-            "relative_strength_60d_vs_parent": 0.02886960683702222,
+            "relative_strength_20d_vs_parent": -0.007987732887494658,
+            "relative_strength_20d_vs_spy": -0.010103155881876269,
+            "relative_strength_60d_vs_parent": 0.033410228619280447,
             "repairing": false,
-            "return_1d": -0.010819949924559924,
-            "return_5d": -0.014687229486610387
+            "return_1d": -0.0001072615145358835,
+            "return_5d": -0.005652114730411051
           },
           "SRVR": {
-            "drawdown_20d": -0.04109853593534407,
-            "drawdown_60d": -0.07953375951957886,
+            "drawdown_20d": -0.030123523539927644,
+            "drawdown_60d": -0.06899865369544811,
             "label": "Digital Infrastructure REITs",
             "parent_sector": "XLRE",
-            "relative_strength_20d_vs_parent": 0.005772783212754207,
-            "relative_strength_20d_vs_spy": -0.013600694885067766,
-            "relative_strength_60d_vs_parent": -0.04116300504436221,
+            "relative_strength_20d_vs_parent": 0.015517399068256221,
+            "relative_strength_20d_vs_spy": 0.01340197607387461,
+            "relative_strength_60d_vs_parent": -0.04346796712200507,
             "repairing": true,
-            "return_1d": 0.003149215120762605,
-            "return_5d": 0.0003658232827083996
+            "return_1d": 0.01144540164627017,
+            "return_5d": 0.013438495472463341
           }
         },
-        "relative_strength_dispersion_vs_parent": 0.007700477750749939,
+        "relative_strength_dispersion_vs_parent": 0.009904707015558853,
         "repair_share": 0.3333333333333333
       },
       "XLU": {
         "coverage": 1.0,
         "damage_share_2pct": 0.0,
         "damage_share_3pct": 0.0,
-        "median_drawdown_20d": -0.014293946511243716,
+        "median_drawdown_20d": -0.005022940192138559,
         "members": {
           "RNRG": {
-            "drawdown_20d": -0.014293946511243716,
-            "drawdown_60d": -0.08398002990670639,
+            "drawdown_20d": -0.005022940192138559,
+            "drawdown_60d": -0.07536445237108735,
             "label": "Renewable Power Producers",
             "parent_sector": "XLU",
-            "relative_strength_20d_vs_parent": 0.005414125189455943,
-            "relative_strength_20d_vs_spy": -0.002768809033380948,
-            "relative_strength_60d_vs_parent": -0.0532589371258716,
+            "relative_strength_20d_vs_parent": 0.005525490020050761,
+            "relative_strength_20d_vs_spy": 0.022090750271804183,
+            "relative_strength_60d_vs_parent": -0.0652140948162897,
             "repairing": false,
-            "return_1d": 0.005651726354745978,
-            "return_5d": 0.0017209143389462778
+            "return_1d": 0.0094054472794316,
+            "return_5d": 0.013863268029801645
           }
         },
         "relative_strength_dispersion_vs_parent": 0.0,
@@ -2034,105 +2095,105 @@
       "XLV": {
         "coverage": 1.0,
         "damage_share_2pct": 0.75,
-        "damage_share_3pct": 0.5,
-        "median_drawdown_20d": -0.02854223960507285,
+        "damage_share_3pct": 0.75,
+        "median_drawdown_20d": -0.04466431915322827,
         "members": {
           "IBB": {
-            "drawdown_20d": -0.02323012716149464,
-            "drawdown_60d": -0.02323012716149464,
+            "drawdown_20d": -0.04438608307895575,
+            "drawdown_60d": -0.04438608307895575,
             "label": "Large-Cap Biotech",
             "parent_sector": "XLV",
-            "relative_strength_20d_vs_parent": 0.037046701303751206,
-            "relative_strength_20d_vs_spy": 0.07584311305546354,
-            "relative_strength_60d_vs_parent": 0.1507099596551993,
+            "relative_strength_20d_vs_parent": 0.04432356783144131,
+            "relative_strength_20d_vs_spy": 0.045692170258884834,
+            "relative_strength_60d_vs_parent": 0.12684465004941337,
             "repairing": false,
-            "return_1d": -0.008839621211494064,
-            "return_5d": 0.014213932826420805
+            "return_1d": -0.021659099554311112,
+            "return_5d": -0.008227702442449969
           },
           "IHF": {
-            "drawdown_20d": -0.010000031569908363,
-            "drawdown_60d": -0.011874073897072623,
+            "drawdown_20d": -0.018103435121733513,
+            "drawdown_60d": -0.019962137931994306,
             "label": "Healthcare Providers",
             "parent_sector": "XLV",
-            "relative_strength_20d_vs_parent": -0.028693405618418044,
-            "relative_strength_20d_vs_spy": 0.01010300613329429,
-            "relative_strength_60d_vs_parent": -0.038961423578405485,
+            "relative_strength_20d_vs_parent": 0.001669059557463437,
+            "relative_strength_20d_vs_spy": 0.0030376619849069586,
+            "relative_strength_60d_vs_parent": -0.014098519533023435,
             "repairing": false,
-            "return_1d": -0.010000031569908363,
-            "return_5d": 0.010026380125299328
+            "return_1d": -0.008185256373972716,
+            "return_5d": 0.004232087503815762
           },
           "IHI": {
-            "drawdown_20d": -0.053142626305947904,
-            "drawdown_60d": -0.053142626305947904,
+            "drawdown_20d": -0.08651125995734332,
+            "drawdown_60d": -0.08651125995734332,
             "label": "Medical Devices",
             "parent_sector": "XLV",
-            "relative_strength_20d_vs_parent": -0.048618033221553225,
-            "relative_strength_20d_vs_spy": -0.009821621469840891,
-            "relative_strength_60d_vs_parent": -0.04636316901861992,
+            "relative_strength_20d_vs_parent": -0.0591298706508504,
+            "relative_strength_20d_vs_spy": -0.05776126822340688,
+            "relative_strength_60d_vs_parent": -0.04615897021613358,
             "repairing": false,
-            "return_1d": -0.005193818959179919,
-            "return_5d": -0.02826594668257154
+            "return_1d": -0.035241457244201024,
+            "return_5d": -0.058759313634867194
           },
           "XBI": {
-            "drawdown_20d": -0.03385435204865106,
-            "drawdown_60d": -0.03385435204865106,
+            "drawdown_20d": -0.04494255522750079,
+            "drawdown_60d": -0.04494255522750079,
             "label": "Biotech",
             "parent_sector": "XLV",
-            "relative_strength_20d_vs_parent": 0.006096484852385675,
-            "relative_strength_20d_vs_spy": 0.04489289660409801,
-            "relative_strength_60d_vs_parent": 0.14593636723619374,
+            "relative_strength_20d_vs_parent": 0.03245605546514274,
+            "relative_strength_20d_vs_spy": 0.03382465789258626,
+            "relative_strength_60d_vs_parent": 0.1316915630323776,
             "repairing": false,
-            "return_1d": -0.003467619584420323,
-            "return_5d": 0.00880645789371215
+            "return_1d": -0.01147674080234351,
+            "return_5d": -0.003507737379807696
           }
         },
-        "relative_strength_dispersion_vs_parent": 0.03280542071248766,
+        "relative_strength_dispersion_vs_parent": 0.04007429799267188,
         "repair_share": 0.0
       },
       "XLY": {
         "coverage": 1.0,
         "damage_share_2pct": 1.0,
         "damage_share_3pct": 1.0,
-        "median_drawdown_20d": -0.06142254003691461,
+        "median_drawdown_20d": -0.07619873119729437,
         "members": {
           "ITB": {
-            "drawdown_20d": -0.06557210286458337,
-            "drawdown_60d": -0.10476642234421985,
+            "drawdown_20d": -0.09402982038051932,
+            "drawdown_60d": -0.13203048877653534,
             "label": "Homebuilders",
             "parent_sector": "XLY",
-            "relative_strength_20d_vs_parent": -0.030186872847981494,
-            "relative_strength_20d_vs_spy": -0.06751481489527067,
-            "relative_strength_60d_vs_parent": -0.009462223544678627,
+            "relative_strength_20d_vs_parent": -0.02713717836588092,
+            "relative_strength_20d_vs_spy": -0.0654552027078289,
+            "relative_strength_60d_vs_parent": -0.049007200386824046,
             "repairing": false,
-            "return_1d": 0.0030976384001220048,
-            "return_5d": -0.025930919044063305
+            "return_1d": -0.030454695972986223,
+            "return_5d": -0.03844122183755194
           },
           "PEJ": {
-            "drawdown_20d": -0.06142254003691461,
-            "drawdown_60d": -0.06142254003691461,
+            "drawdown_20d": -0.07619873119729437,
+            "drawdown_60d": -0.07619873119729437,
             "label": "Leisure & Entertainment",
             "parent_sector": "XLY",
-            "relative_strength_20d_vs_parent": 0.0014344580358498504,
-            "relative_strength_20d_vs_spy": -0.035893484011439325,
-            "relative_strength_60d_vs_parent": 0.006691677839804067,
+            "relative_strength_20d_vs_parent": -0.002021844460983746,
+            "relative_strength_20d_vs_spy": -0.04033986880293172,
+            "relative_strength_60d_vs_parent": -0.00013138038695170717,
             "repairing": false,
-            "return_1d": -0.0018487558128437165,
-            "return_5d": -0.031539619764214044
+            "return_1d": -0.015743177085203897,
+            "return_5d": -0.024476093339341642
           },
           "XRT": {
-            "drawdown_20d": -0.0331162393340908,
-            "drawdown_60d": -0.05154306675559228,
+            "drawdown_20d": -0.043846931000836475,
+            "drawdown_60d": -0.0720086804088298,
             "label": "Retail",
             "parent_sector": "XLY",
-            "relative_strength_20d_vs_parent": 0.005733264901610857,
-            "relative_strength_20d_vs_spy": -0.03159467714567832,
-            "relative_strength_60d_vs_parent": 0.01828568051156143,
+            "relative_strength_20d_vs_parent": -0.006515601155236084,
+            "relative_strength_20d_vs_spy": -0.04483362549718406,
+            "relative_strength_60d_vs_parent": -0.0024520299664928524,
             "repairing": false,
-            "return_1d": 0.009915749425464249,
-            "return_5d": 0.008056127899174426
+            "return_1d": -0.021577799619462268,
+            "return_5d": -0.004645778547825774
           }
         },
-        "relative_strength_dispersion_vs_parent": 0.016016118975316882,
+        "relative_strength_dispersion_vs_parent": 0.01093528078710882,
         "repair_share": 0.0
       }
     },
@@ -2140,368 +2201,368 @@
       "available_proxies": 30,
       "coverage_rate": 0.967741935483871,
       "expected_proxies": 31,
-      "same_day_target": "2026-09-04"
+      "same_day_target": "2026-09-08"
     },
     "proxies": {
       "CIBR": {
-        "drawdown_20d": -0.07446184772594022,
-        "drawdown_60d": -0.07446184772594022,
+        "drawdown_20d": -0.08013693793121568,
+        "drawdown_60d": -0.08013693793121568,
         "label": "Cybersecurity",
         "parent_sector": "XLK",
-        "relative_strength_20d_vs_parent": -0.02964551131499238,
-        "relative_strength_20d_vs_spy": -0.029346109318304392,
-        "relative_strength_60d_vs_parent": 0.075633447642387,
+        "relative_strength_20d_vs_parent": -0.0738258780369857,
+        "relative_strength_20d_vs_spy": -0.05636108496154624,
+        "relative_strength_60d_vs_parent": 0.07420596950978031,
         "repairing": false,
-        "return_1d": -0.007658449006197721,
-        "return_5d": -0.04028004585068057
+        "return_1d": -0.006131665335817549,
+        "return_5d": -0.06130803091462611
       },
       "COPX": {
-        "drawdown_20d": -0.060031036488678025,
-        "drawdown_60d": -0.060031036488678025,
+        "drawdown_20d": -0.02146189487113248,
+        "drawdown_60d": -0.02146189487113248,
         "label": "Copper Miners",
         "parent_sector": "XLB",
-        "relative_strength_20d_vs_parent": 0.03782178835054317,
-        "relative_strength_20d_vs_spy": 0.03384644795017855,
-        "relative_strength_60d_vs_parent": 0.11332838812096435,
+        "relative_strength_20d_vs_parent": 0.0777243408492021,
+        "relative_strength_20d_vs_spy": 0.06355311082100323,
+        "relative_strength_60d_vs_parent": 0.12092864070422427,
         "repairing": false,
-        "return_1d": -0.006465713291952002,
-        "return_5d": -0.03982201418928433
+        "return_1d": 0.041032356508312606,
+        "return_5d": 0.016368690858020063
       },
       "CRAK": {
         "drawdown_20d": 0.0,
         "drawdown_60d": 0.0,
         "label": "Refiners",
         "parent_sector": "XLE",
-        "relative_strength_20d_vs_parent": 0.046738233246933714,
-        "relative_strength_20d_vs_spy": 0.16479536080223967,
-        "relative_strength_60d_vs_parent": 0.21794664286362275,
+        "relative_strength_20d_vs_parent": 0.08069317686168342,
+        "relative_strength_20d_vs_spy": 0.16611013994285617,
+        "relative_strength_60d_vs_parent": 0.1944591681192802,
         "repairing": false,
-        "return_1d": 0.013063560440404576,
-        "return_5d": 0.0564878153090731
+        "return_1d": 0.01887090360213839,
+        "return_5d": 0.05503991331238667
       },
       "FDN": {
-        "drawdown_20d": -0.01483490222798478,
-        "drawdown_60d": -0.01483490222798478,
+        "drawdown_20d": -0.025876425566257355,
+        "drawdown_60d": -0.025876425566257355,
         "label": "Internet",
         "parent_sector": "XLC",
-        "relative_strength_20d_vs_parent": -0.0018623197048370788,
-        "relative_strength_20d_vs_spy": 0.009119118770412715,
-        "relative_strength_60d_vs_parent": 0.09482904477143905,
+        "relative_strength_20d_vs_parent": -0.01602568455052633,
+        "relative_strength_20d_vs_spy": -0.009651957758133989,
+        "relative_strength_60d_vs_parent": 0.08779793558403226,
         "repairing": false,
-        "return_1d": -0.008690676142903642,
-        "return_5d": -0.012024076970511888
+        "return_1d": -0.011207789804209889,
+        "return_5d": -0.01668434833924437
       },
       "IAI": {
-        "drawdown_20d": -0.008078313967732065,
-        "drawdown_60d": -0.008078313967732065,
+        "drawdown_20d": -0.024083632895379514,
+        "drawdown_60d": -0.024083632895379514,
         "label": "Broker-Dealers",
         "parent_sector": "XLF",
-        "relative_strength_20d_vs_parent": 0.03493169767460591,
-        "relative_strength_20d_vs_spy": 0.047582466952923674,
-        "relative_strength_60d_vs_parent": -0.014865732486796679,
+        "relative_strength_20d_vs_parent": 0.0357040335529446,
+        "relative_strength_20d_vs_spy": 0.03602783157612266,
+        "relative_strength_60d_vs_parent": -0.021803669134726533,
         "repairing": false,
-        "return_1d": -0.008078313967732065,
-        "return_5d": 0.006764411849684349
+        "return_1d": -0.016135667919177643,
+        "return_5d": -0.006067814712620523
       },
       "IBB": {
-        "drawdown_20d": -0.02323012716149464,
-        "drawdown_60d": -0.02323012716149464,
+        "drawdown_20d": -0.04438608307895575,
+        "drawdown_60d": -0.04438608307895575,
         "label": "Large-Cap Biotech",
         "parent_sector": "XLV",
-        "relative_strength_20d_vs_parent": 0.037046701303751206,
-        "relative_strength_20d_vs_spy": 0.07584311305546354,
-        "relative_strength_60d_vs_parent": 0.1507099596551993,
+        "relative_strength_20d_vs_parent": 0.04432356783144131,
+        "relative_strength_20d_vs_spy": 0.045692170258884834,
+        "relative_strength_60d_vs_parent": 0.12684465004941337,
         "repairing": false,
-        "return_1d": -0.008839621211494064,
-        "return_5d": 0.014213932826420805
+        "return_1d": -0.021659099554311112,
+        "return_5d": -0.008227702442449969
       },
       "IGV": {
-        "drawdown_20d": -0.05212110239218726,
-        "drawdown_60d": -0.05212110239218726,
+        "drawdown_20d": -0.06943433696432666,
+        "drawdown_60d": -0.06943433696432666,
         "label": "Software",
         "parent_sector": "XLK",
-        "relative_strength_20d_vs_parent": 0.021978311824503605,
-        "relative_strength_20d_vs_spy": 0.02227771382119159,
-        "relative_strength_60d_vs_parent": 0.08049748063371953,
+        "relative_strength_20d_vs_parent": -0.030697761274181334,
+        "relative_strength_20d_vs_spy": -0.013232968198741868,
+        "relative_strength_60d_vs_parent": 0.10267831139797923,
         "repairing": false,
-        "return_1d": -0.022253364388310826,
-        "return_5d": -0.04502283383722172
+        "return_1d": -0.018265238962311914,
+        "return_5d": -0.06655755111288364
       },
       "IHF": {
-        "drawdown_20d": -0.010000031569908363,
-        "drawdown_60d": -0.011874073897072623,
+        "drawdown_20d": -0.018103435121733513,
+        "drawdown_60d": -0.019962137931994306,
         "label": "Healthcare Providers",
         "parent_sector": "XLV",
-        "relative_strength_20d_vs_parent": -0.028693405618418044,
-        "relative_strength_20d_vs_spy": 0.01010300613329429,
-        "relative_strength_60d_vs_parent": -0.038961423578405485,
+        "relative_strength_20d_vs_parent": 0.001669059557463437,
+        "relative_strength_20d_vs_spy": 0.0030376619849069586,
+        "relative_strength_60d_vs_parent": -0.014098519533023435,
         "repairing": false,
-        "return_1d": -0.010000031569908363,
-        "return_5d": 0.010026380125299328
+        "return_1d": -0.008185256373972716,
+        "return_5d": 0.004232087503815762
       },
       "IHI": {
-        "drawdown_20d": -0.053142626305947904,
-        "drawdown_60d": -0.053142626305947904,
+        "drawdown_20d": -0.08651125995734332,
+        "drawdown_60d": -0.08651125995734332,
         "label": "Medical Devices",
         "parent_sector": "XLV",
-        "relative_strength_20d_vs_parent": -0.048618033221553225,
-        "relative_strength_20d_vs_spy": -0.009821621469840891,
-        "relative_strength_60d_vs_parent": -0.04636316901861992,
+        "relative_strength_20d_vs_parent": -0.0591298706508504,
+        "relative_strength_20d_vs_spy": -0.05776126822340688,
+        "relative_strength_60d_vs_parent": -0.04615897021613358,
         "repairing": false,
-        "return_1d": -0.005193818959179919,
-        "return_5d": -0.02826594668257154
+        "return_1d": -0.035241457244201024,
+        "return_5d": -0.058759313634867194
       },
       "ITA": {
-        "drawdown_20d": -0.10903562308368786,
-        "drawdown_60d": -0.10903562308368786,
+        "drawdown_20d": -0.11724983136513312,
+        "drawdown_60d": -0.11724983136513312,
         "label": "Aerospace & Defense",
         "parent_sector": "XLI",
-        "relative_strength_20d_vs_parent": -0.04674378197212803,
-        "relative_strength_20d_vs_spy": -0.09628900640609117,
-        "relative_strength_60d_vs_parent": -0.03161271768297058,
+        "relative_strength_20d_vs_parent": -0.05475695618672671,
+        "relative_strength_20d_vs_spy": -0.10075742165455104,
+        "relative_strength_60d_vs_parent": -0.05061697064137971,
         "repairing": false,
-        "return_1d": -0.0016372914602299504,
-        "return_5d": -0.03096815774868833
+        "return_1d": -0.009219457583562685,
+        "return_5d": -0.021107979835278567
       },
       "ITB": {
-        "drawdown_20d": -0.06557210286458337,
-        "drawdown_60d": -0.10476642234421985,
+        "drawdown_20d": -0.09402982038051932,
+        "drawdown_60d": -0.13203048877653534,
         "label": "Homebuilders",
         "parent_sector": "XLY",
-        "relative_strength_20d_vs_parent": -0.030186872847981494,
-        "relative_strength_20d_vs_spy": -0.06751481489527067,
-        "relative_strength_60d_vs_parent": -0.009462223544678627,
+        "relative_strength_20d_vs_parent": -0.02713717836588092,
+        "relative_strength_20d_vs_spy": -0.0654552027078289,
+        "relative_strength_60d_vs_parent": -0.049007200386824046,
         "repairing": false,
-        "return_1d": 0.0030976384001220048,
-        "return_5d": -0.025930919044063305
+        "return_1d": -0.030454695972986223,
+        "return_5d": -0.03844122183755194
       },
       "IYZ": {
-        "drawdown_20d": -0.046885515648434684,
-        "drawdown_60d": -0.046885515648434684,
+        "drawdown_20d": -0.03616884825783573,
+        "drawdown_60d": -0.03616884825783573,
         "label": "Telecom",
         "parent_sector": "XLC",
-        "relative_strength_20d_vs_parent": -0.027882781846195637,
-        "relative_strength_20d_vs_spy": -0.016901343370945843,
-        "relative_strength_60d_vs_parent": 0.0040924169982785585,
+        "relative_strength_20d_vs_parent": -0.0034433692601150145,
+        "relative_strength_20d_vs_spy": 0.002930357532277328,
+        "relative_strength_60d_vs_parent": 0.005366520313018763,
         "repairing": false,
-        "return_1d": 0.00046872412987886136,
-        "return_5d": -0.008362383663915285
+        "return_1d": 0.01124384065770423,
+        "return_5d": 0.0011595370663048943
       },
       "KBE": {
-        "drawdown_20d": -0.03251014218756154,
-        "drawdown_60d": -0.03251014218756154,
+        "drawdown_20d": -0.04562573917412627,
+        "drawdown_60d": -0.04562573917412627,
         "label": "Banks",
         "parent_sector": "XLF",
-        "relative_strength_20d_vs_parent": -0.017684484209427476,
-        "relative_strength_20d_vs_spy": -0.005033714931109712,
-        "relative_strength_60d_vs_parent": -0.048222647857371514,
+        "relative_strength_20d_vs_parent": -0.013196845784864353,
+        "relative_strength_20d_vs_spy": -0.012873047761686296,
+        "relative_strength_60d_vs_parent": -0.05066689669826774,
         "repairing": true,
-        "return_1d": 0.003327965931237742,
-        "return_5d": 0.012854181495564276
+        "return_1d": -0.013556314705169159,
+        "return_5d": 0.008700840414797906
       },
       "KIE": {
-        "drawdown_20d": -0.013888911782304225,
-        "drawdown_60d": -0.038374650706898716,
+        "drawdown_20d": -0.03518522355890985,
+        "drawdown_60d": -0.05914216209128775,
         "label": "Insurance",
         "parent_sector": "XLF",
-        "relative_strength_20d_vs_parent": -0.018903543048109595,
-        "relative_strength_20d_vs_spy": -0.006252773769791831,
-        "relative_strength_60d_vs_parent": -0.011999628024705,
+        "relative_strength_20d_vs_parent": -0.012314620495548767,
+        "relative_strength_20d_vs_spy": -0.01199082247237071,
+        "relative_strength_60d_vs_parent": -0.012131838961948693,
         "repairing": false,
-        "return_1d": -0.013888911782304225,
-        "return_5d": -0.00015644377338563942
+        "return_1d": -0.02159626033117301,
+        "return_5d": -0.009976263703763477
       },
       "KRE": {
-        "drawdown_20d": -0.034133243316986195,
-        "drawdown_60d": -0.034133243316986195,
+        "drawdown_20d": -0.04645197911466714,
+        "drawdown_60d": -0.04645197911466714,
         "label": "Regional Banks",
         "parent_sector": "XLF",
-        "relative_strength_20d_vs_parent": -0.021014927294483177,
-        "relative_strength_20d_vs_spy": -0.008364158016165413,
-        "relative_strength_60d_vs_parent": -0.059469614208726984,
+        "relative_strength_20d_vs_parent": -0.013800625516435017,
+        "relative_strength_20d_vs_spy": -0.01347682749325696,
+        "relative_strength_60d_vs_parent": -0.0596568496602885,
         "repairing": true,
-        "return_1d": 0.005342512111803588,
-        "return_5d": 0.013055094905351394
+        "return_1d": -0.012754073698515112,
+        "return_5d": 0.010195758902827423
       },
       "NETL": {
-        "drawdown_20d": -0.01818436011941882,
-        "drawdown_60d": -0.06505026623547716,
+        "drawdown_20d": -0.02132093047989747,
+        "drawdown_60d": -0.06803705237411095,
         "label": "Net Lease REITs",
         "parent_sector": "XLRE",
-        "relative_strength_20d_vs_parent": 0.004097735082147169,
-        "relative_strength_20d_vs_spy": -0.015275743015674803,
-        "relative_strength_60d_vs_parent": 0.0019850413620734475,
+        "relative_strength_20d_vs_parent": 0.0089702219899086,
+        "relative_strength_20d_vs_spy": 0.0068547989955269895,
+        "relative_strength_60d_vs_parent": 0.00013662014871618222,
         "repairing": false,
-        "return_1d": -0.0011056208209256901,
-        "return_5d": -0.005428373640490092
+        "return_1d": -0.0031946632678006015,
+        "return_5d": -0.0004477830831872698
       },
       "OIH": {
-        "drawdown_20d": -0.020729277729891415,
-        "drawdown_60d": -0.020729277729891415,
+        "drawdown_20d": -0.01834710590133981,
+        "drawdown_60d": -0.01834710590133981,
         "label": "Oil Services",
         "parent_sector": "XLE",
-        "relative_strength_20d_vs_parent": -0.013000069199522235,
-        "relative_strength_20d_vs_spy": 0.10505705835578372,
-        "relative_strength_60d_vs_parent": -0.09677313414886068,
-        "repairing": true,
-        "return_1d": -0.0053046666951623855,
-        "return_5d": 0.02204107306665959
+        "relative_strength_20d_vs_parent": -0.0343836084518403,
+        "relative_strength_20d_vs_spy": 0.05103335462933245,
+        "relative_strength_60d_vs_parent": -0.13578979375396738,
+        "repairing": false,
+        "return_1d": 0.0024325978244599256,
+        "return_5d": -0.0014212809589735365
       },
       "PAVE": {
-        "drawdown_20d": -0.06078664605227546,
-        "drawdown_60d": -0.07890102806066057,
+        "drawdown_20d": -0.06674609568362422,
+        "drawdown_60d": -0.0847455392206512,
         "label": "U.S. Infrastructure Theme",
         "parent_sector": "XLI",
-        "relative_strength_20d_vs_parent": -0.006631075310503776,
-        "relative_strength_20d_vs_spy": -0.05617629974446692,
-        "relative_strength_60d_vs_parent": -0.03639028220840845,
-        "repairing": false,
-        "return_1d": 0.008593915386817974,
-        "return_5d": -0.0027120145028841636
+        "relative_strength_20d_vs_parent": -0.004716439524369176,
+        "relative_strength_20d_vs_spy": -0.0507169049921935,
+        "relative_strength_60d_vs_parent": -0.03804940015399283,
+        "repairing": true,
+        "return_1d": -0.006345150019747781,
+        "return_5d": 0.002010980051504685
       },
       "PBJ": {
-        "drawdown_20d": -0.02286186381320987,
-        "drawdown_60d": -0.02306124628806605,
+        "drawdown_20d": -0.03284758692568812,
+        "drawdown_60d": -0.03304493183992352,
         "label": "Food & Beverage",
         "parent_sector": "XLP",
-        "relative_strength_20d_vs_parent": 0.015833678776093763,
-        "relative_strength_20d_vs_spy": 0.013459896755471101,
-        "relative_strength_60d_vs_parent": 0.001750976224983658,
+        "relative_strength_20d_vs_parent": 0.018406679759620737,
+        "relative_strength_20d_vs_spy": 0.016604897408938113,
+        "relative_strength_60d_vs_parent": -0.007475091115877075,
         "repairing": false,
-        "return_1d": -0.005195345086226655,
-        "return_5d": -0.006640375678426791
+        "return_1d": -0.010219356652526934,
+        "return_5d": -0.006691874590989633
       },
       "PEJ": {
-        "drawdown_20d": -0.06142254003691461,
-        "drawdown_60d": -0.06142254003691461,
+        "drawdown_20d": -0.07619873119729437,
+        "drawdown_60d": -0.07619873119729437,
         "label": "Leisure & Entertainment",
         "parent_sector": "XLY",
-        "relative_strength_20d_vs_parent": 0.0014344580358498504,
-        "relative_strength_20d_vs_spy": -0.035893484011439325,
-        "relative_strength_60d_vs_parent": 0.006691677839804067,
+        "relative_strength_20d_vs_parent": -0.002021844460983746,
+        "relative_strength_20d_vs_spy": -0.04033986880293172,
+        "relative_strength_60d_vs_parent": -0.00013138038695170717,
         "repairing": false,
-        "return_1d": -0.0018487558128437165,
-        "return_5d": -0.031539619764214044
+        "return_1d": -0.015743177085203897,
+        "return_5d": -0.024476093339341642
       },
       "REZ": {
-        "drawdown_20d": -0.036275341657068805,
-        "drawdown_60d": -0.061115583099831006,
+        "drawdown_20d": -0.036378712223518184,
+        "drawdown_60d": -0.061216289264361845,
         "label": "Residential & Specialized REITs",
         "parent_sector": "XLRE",
-        "relative_strength_20d_vs_parent": -0.011335382188224719,
-        "relative_strength_20d_vs_spy": -0.03070886028604669,
-        "relative_strength_60d_vs_parent": 0.02886960683702222,
+        "relative_strength_20d_vs_parent": -0.007987732887494658,
+        "relative_strength_20d_vs_spy": -0.010103155881876269,
+        "relative_strength_60d_vs_parent": 0.033410228619280447,
         "repairing": false,
-        "return_1d": -0.010819949924559924,
-        "return_5d": -0.014687229486610387
+        "return_1d": -0.0001072615145358835,
+        "return_5d": -0.005652114730411051
       },
       "RNRG": {
-        "drawdown_20d": -0.014293946511243716,
-        "drawdown_60d": -0.08398002990670639,
+        "drawdown_20d": -0.005022940192138559,
+        "drawdown_60d": -0.07536445237108735,
         "label": "Renewable Power Producers",
         "parent_sector": "XLU",
-        "relative_strength_20d_vs_parent": 0.005414125189455943,
-        "relative_strength_20d_vs_spy": -0.002768809033380948,
-        "relative_strength_60d_vs_parent": -0.0532589371258716,
+        "relative_strength_20d_vs_parent": 0.005525490020050761,
+        "relative_strength_20d_vs_spy": 0.022090750271804183,
+        "relative_strength_60d_vs_parent": -0.0652140948162897,
         "repairing": false,
-        "return_1d": 0.005651726354745978,
-        "return_5d": 0.0017209143389462778
+        "return_1d": 0.0094054472794316,
+        "return_5d": 0.013863268029801645
       },
       "SLX": {
         "drawdown_20d": 0.0,
-        "drawdown_60d": -0.0008102625657321338,
+        "drawdown_60d": 0.0,
         "label": "Steel",
         "parent_sector": "XLB",
-        "relative_strength_20d_vs_parent": 0.01676214406132015,
-        "relative_strength_20d_vs_spy": 0.012786803660955526,
-        "relative_strength_60d_vs_parent": 0.0038496564208057027,
+        "relative_strength_20d_vs_parent": 0.03349243585289563,
+        "relative_strength_20d_vs_spy": 0.019321205824696763,
+        "relative_strength_60d_vs_parent": 0.001868925242254571,
         "repairing": false,
-        "return_1d": 0.001262962486022312,
-        "return_5d": 0.021161057785449744
+        "return_1d": 0.0018020054192828816,
+        "return_5d": 0.02944172060255057
       },
       "SMH": {
-        "drawdown_20d": -0.04555018301710956,
-        "drawdown_60d": -0.1523373360691226,
+        "drawdown_20d": -0.03423843419916672,
+        "drawdown_60d": -0.14229118490839976,
         "label": "Semiconductors",
         "parent_sector": "XLK",
-        "relative_strength_20d_vs_parent": -0.023255569339157622,
-        "relative_strength_20d_vs_spy": -0.022956167342469636,
-        "relative_strength_60d_vs_parent": -0.06839089787338704,
+        "relative_strength_20d_vs_parent": -0.0007321416026135896,
+        "relative_strength_20d_vs_spy": 0.016732651472825877,
+        "relative_strength_60d_vs_parent": -0.08526823783278581,
         "repairing": true,
-        "return_1d": 0.02607679119856665,
-        "return_5d": 0.02513066981646972
+        "return_1d": 0.011851590954986335,
+        "return_5d": 0.03072054225595977
       },
       "SRVR": {
-        "drawdown_20d": -0.04109853593534407,
-        "drawdown_60d": -0.07953375951957886,
+        "drawdown_20d": -0.030123523539927644,
+        "drawdown_60d": -0.06899865369544811,
         "label": "Digital Infrastructure REITs",
         "parent_sector": "XLRE",
-        "relative_strength_20d_vs_parent": 0.005772783212754207,
-        "relative_strength_20d_vs_spy": -0.013600694885067766,
-        "relative_strength_60d_vs_parent": -0.04116300504436221,
+        "relative_strength_20d_vs_parent": 0.015517399068256221,
+        "relative_strength_20d_vs_spy": 0.01340197607387461,
+        "relative_strength_60d_vs_parent": -0.04346796712200507,
         "repairing": true,
-        "return_1d": 0.003149215120762605,
-        "return_5d": 0.0003658232827083996
+        "return_1d": 0.01144540164627017,
+        "return_5d": 0.013438495472463341
       },
       "XBI": {
-        "drawdown_20d": -0.03385435204865106,
-        "drawdown_60d": -0.03385435204865106,
+        "drawdown_20d": -0.04494255522750079,
+        "drawdown_60d": -0.04494255522750079,
         "label": "Biotech",
         "parent_sector": "XLV",
-        "relative_strength_20d_vs_parent": 0.006096484852385675,
-        "relative_strength_20d_vs_spy": 0.04489289660409801,
-        "relative_strength_60d_vs_parent": 0.14593636723619374,
+        "relative_strength_20d_vs_parent": 0.03245605546514274,
+        "relative_strength_20d_vs_spy": 0.03382465789258626,
+        "relative_strength_60d_vs_parent": 0.1316915630323776,
         "repairing": false,
-        "return_1d": -0.003467619584420323,
-        "return_5d": 0.00880645789371215
+        "return_1d": -0.01147674080234351,
+        "return_5d": -0.003507737379807696
       },
       "XME": {
-        "drawdown_20d": -0.03560973376762577,
-        "drawdown_60d": -0.03560973376762577,
+        "drawdown_20d": -0.024796772778518772,
+        "drawdown_60d": -0.024796772778518772,
         "label": "Metals & Mining",
         "parent_sector": "XLB",
-        "relative_strength_20d_vs_parent": 0.032828955793716474,
-        "relative_strength_20d_vs_spy": 0.02885361539335185,
-        "relative_strength_60d_vs_parent": -0.00543295134793631,
-        "repairing": false,
-        "return_1d": 0.002027415937933208,
-        "return_5d": -0.0010105703162061053
+        "relative_strength_20d_vs_parent": 0.043820692324803234,
+        "relative_strength_20d_vs_spy": 0.029649462296604367,
+        "relative_strength_60d_vs_parent": -0.0036360492036773273,
+        "repairing": true,
+        "return_1d": 0.011212225348717464,
+        "return_5d": 0.015406753044443722
       },
       "XOP": {
-        "drawdown_20d": -0.0126837694232389,
-        "drawdown_60d": -0.0126837694232389,
+        "drawdown_20d": 0.0,
+        "drawdown_60d": 0.0,
         "label": "Oil & Gas Exploration/Production",
         "parent_sector": "XLE",
-        "relative_strength_20d_vs_parent": 0.032006918323730815,
-        "relative_strength_20d_vs_spy": 0.15006404587903677,
-        "relative_strength_60d_vs_parent": 0.03313680869883617,
+        "relative_strength_20d_vs_parent": 0.02592868003294657,
+        "relative_strength_20d_vs_spy": 0.11134564311411932,
+        "relative_strength_60d_vs_parent": 0.05035704063010127,
         "repairing": false,
-        "return_1d": -0.008422997461470016,
-        "return_5d": 0.025653459233249576
+        "return_1d": 0.016779386689673492,
+        "return_5d": 0.026196003240716026
       },
       "XRT": {
-        "drawdown_20d": -0.0331162393340908,
-        "drawdown_60d": -0.05154306675559228,
+        "drawdown_20d": -0.043846931000836475,
+        "drawdown_60d": -0.0720086804088298,
         "label": "Retail",
         "parent_sector": "XLY",
-        "relative_strength_20d_vs_parent": 0.005733264901610857,
-        "relative_strength_20d_vs_spy": -0.03159467714567832,
-        "relative_strength_60d_vs_parent": 0.01828568051156143,
+        "relative_strength_20d_vs_parent": -0.006515601155236084,
+        "relative_strength_20d_vs_spy": -0.04483362549718406,
+        "relative_strength_60d_vs_parent": -0.0024520299664928524,
         "repairing": false,
-        "return_1d": 0.009915749425464249,
-        "return_5d": 0.008056127899174426
+        "return_1d": -0.021577799619462268,
+        "return_5d": -0.004645778547825774
       },
       "XTN": {
-        "drawdown_20d": -0.06045767129488988,
-        "drawdown_60d": -0.10355961716267026,
+        "drawdown_20d": -0.0760395432389882,
+        "drawdown_60d": -0.11842666340862373,
         "label": "Transportation",
         "parent_sector": "XLI",
-        "relative_strength_20d_vs_parent": -0.007861555831134681,
-        "relative_strength_20d_vs_spy": -0.05740678026509782,
-        "relative_strength_60d_vs_parent": -0.09209170517610021,
+        "relative_strength_20d_vs_parent": -0.004482168986159274,
+        "relative_strength_20d_vs_spy": -0.0504826344539836,
+        "relative_strength_60d_vs_parent": -0.10457244209474503,
         "repairing": false,
-        "return_1d": 0.01189104217764636,
-        "return_5d": -0.009852707654730453
+        "return_1d": -0.016584534265287942,
+        "return_5d": -0.017608640146881904
       }
     },
     "proxy_audit_notes": {
@@ -2518,10 +2579,11 @@
   },
   "weakness_present": true,
   "weakness_reasons": [
+    "SPY is at least 1% below its 20-day high",
     "50% or fewer S&P 500 stocks are above their 50DMA"
   ],
   "retail_metadata": {
-    "published_at_utc": "2026-09-07T22:14:49.125621+00:00",
+    "published_at_utc": "2026-09-08T21:41:08.591974+00:00",
     "engine_commit": "47f38bf3362a97bcf9c9dd2d6545c4fae212e046",
     "engine_validation": "CANONICAL_WORKFLOW_PASS",
     "feed_mode": "COMPLETED_CLOSE_ONLY",
