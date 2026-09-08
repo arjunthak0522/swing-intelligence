@@ -1,4 +1,5 @@
 import { ChevronRight, CircleAlert, CircleCheck, Clock3, Radio } from "lucide-react";
+import MarketMovementTables from "./MarketMovementTables";
 import {
   getIntradaySnapshot,
   getLatestEpisode,
@@ -261,8 +262,7 @@ export default async function Home() {
       <VehicleCard s={s} />
       <Historical s={s} />
       <OutperformanceCard />
-      <SectorMap s={s} />
-      <MarketInternals s={s} />
+      <MarketMovementTables snapshot={s} live={intraday} />
     </>}
     <footer>Official RE-ENTRY decisions use completed-close data. Intraday data is provisional market context only and never overwrites the validated close signal. Historical ETF opportunity estimates remain suppressed until their input history is reproducible.</footer>
   </main>;
