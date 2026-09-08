@@ -1,0 +1,63 @@
+{
+  "provenance": {
+    "source": "Original canonical GitHub Actions artifact reentry-unified-results",
+    "workflow_run_id": 34156095215,
+    "artifact_id": 10031254523,
+    "engine_commit": "47f38bf3362a97bcf9c9dd2d6545c4fae212e046",
+    "sample_start": "2005-02-25",
+    "sample_end": "2026-09-04",
+    "status": "KEEP_ORIGINAL",
+    "note": "Archived results copied from the original canonical validation artifact; not recomputed."
+  },
+  "retail_validation_summary": {
+    "QQQ_10D_median_after_signal": 0.01228,
+    "QQQ_30D_median_after_signal": 0.02608,
+    "QQQ_5D_median_after_signal": 0.0042,
+    "QQQ_60D_median_after_signal": 0.05318,
+    "SPY_10D_median_after_signal": 0.0092,
+    "SPY_30D_median_after_signal": 0.02466,
+    "SPY_5D_median_after_signal": 0.00297,
+    "SPY_60D_median_after_signal": 0.03846,
+    "final_independent_reentry_episodes": 189,
+    "important_limit": "the broad and aggregate-internal policy is the validated timing foundation; subsector repair improves diagnosis and context but exact incremental testing did not support a separate WAIT-to-RE-ENTER promotion",
+    "incremental_early_internal_episodes": 94,
+    "incremental_subsector_candidate_episodes": 40,
+    "result": "CANONICAL_REENTRY_POLICY_VALIDATED",
+    "subsector_direct_promotion": "REJECTED"
+  },
+  "final_policy_validation": {
+    "count": 193,
+    "SPY": {
+      "5": {"false_start_rate_return_lt_minus_2pct": 0.16062176165803108,"mean_return": 0.0012084963826565673,"median_mae": -0.005907919583965581,"median_mfe": 0.010965950707339613,"median_return": 0.0029710195530723447,"n": 193,"p10_mae": -0.03080804963613593,"p25_return": -0.010712059671896827,"p75_return": 0.015446719792706043,"positive_rate": 0.5595854922279793},
+      "7": {"false_start_rate_return_lt_minus_2pct": 0.18652849740932642,"mean_return": 0.003145927659762511,"median_mae": -0.006915635430146062,"median_mfe": 0.013512243055473744,"median_return": 0.003965735668366397,"n": 193,"p10_mae": -0.03481814741936071,"p25_return": -0.010862515968734047,"p75_return": 0.019082720368231195,"positive_rate": 0.6062176165803109},
+      "10": {"false_start_rate_return_lt_minus_2pct": 0.1683937823834197,"mean_return": 0.005308893472413977,"median_mae": -0.008424379411698777,"median_mfe": 0.017897898547900024,"median_return": 0.009199074223212746,"n": 193,"p10_mae": -0.05475300144648557,"p25_return": -0.009260881579940575,"p75_return": 0.026627520882091787,"positive_rate": 0.6476683937823834},
+      "15": {"false_start_rate_return_lt_minus_2pct": 0.18541666666666667,"mean_return": 0.008315517395617414,"median_mae": -0.010915096543601786,"median_mfe": 0.022942699482483958,"median_return": 0.014448205877938328,"n": 192,"p10_mae": -0.06080270126392831,"p25_return": -0.010474529318910797,"p75_return": 0.030619554142203992,"positive_rate": 0.6979166666666666},
+      "30": {"false_start_rate_return_lt_minus_2pct": 0.18421052631578946,"mean_return": 0.018360876302230936,"median_mae": -0.016977437708962294,"median_mfe": 0.039918424138530404,"median_return": 0.024663439380489982,"n": 190,"p10_mae": -0.0807425265570736,"p25_return": -0.0033360746899107814,"p75_return": 0.04880766772490128,"positive_rate": 0.7421052631578947},
+      "60": {"false_start_rate_return_lt_minus_2pct": 0.18548387096774194,"mean_return": 0.038269371008674684,"median_mae": -0.024099866149683127,"median_mfe": 0.06330120779618724,"median_return": 0.0384553340257785,"n": 186,"p10_mae": -0.10951315704365809,"p25_return": 0.0010536360196907055,"p75_return": 0.07941449560778772,"positive_rate": 0.7634408602150538}
+    },
+    "QQQ": {
+      "5": {"false_start_rate_return_lt_minus_2pct": 0.18134715025906736,"mean_return": 0.0014235168474402754,"median_mae": -0.007901941351280734,"median_mfe": 0.01353672681185537,"median_return": 0.004197342761012635,"n": 193,"p10_mae": -0.040891944016714204,"p25_return": -0.012949359832321427,"p75_return": 0.019817624436940463,"positive_rate": 0.5699481865284974},
+      "7": {"false_start_rate_return_lt_minus_2pct": 0.20207253886010363,"mean_return": 0.003320208993724032,"median_mae": -0.009800107472974372,"median_mfe": 0.016590966713019098,"median_return": 0.0060559720088792715,"n": 193,"p10_mae": -0.048090046876673654,"p25_return": -0.014638365425652964,"p75_return": 0.02350923453769406,"positive_rate": 0.5803108808290155},
+      "10": {"false_start_rate_return_lt_minus_2pct": 0.21243523316062177,"mean_return": 0.007114094964619502,"median_mae": -0.012018473742217222,"median_mfe": 0.02365957588407519,"median_return": 0.01228269704907215,"n": 193,"p10_mae": -0.06957266883474246,"p25_return": -0.01634800989858252,"p75_return": 0.03652536878003149,"positive_rate": 0.6217616580310881},
+      "15": {"false_start_rate_return_lt_minus_2pct": 0.20416666666666666,"mean_return": 0.011146944739179455,"median_mae": -0.015477463966950904,"median_mfe": 0.03115479631462421,"median_return": 0.017187707716263212,"n": 192,"p10_mae": -0.07591491169832624,"p25_return": -0.013609550460131104,"p75_return": 0.038963242338941365,"positive_rate": 0.6666666666666666},
+      "30": {"false_start_rate_return_lt_minus_2pct": 0.20526315789473684,"mean_return": 0.024259769430321354,"median_mae": -0.02452435704518125,"median_mfe": 0.052696610199335426,"median_return": 0.026077927279898993,"n": 190,"p10_mae": -0.10410297132075546,"p25_return": -0.007485508871119133,"p75_return": 0.06172124824767119,"positive_rate": 0.6842105263157895},
+      "60": {"false_start_rate_return_lt_minus_2pct": 0.1881720430107527,"mean_return": 0.05109548028270202,"median_mae": -0.03495044324096282,"median_mfe": 0.08754680920238197,"median_return": 0.053179304425371,"n": 186,"p10_mae": -0.13831257738542287,"p25_return": 0.006970075596099632,"p75_return": 0.10856769686307602,"positive_rate": 0.7741935483870968}
+    }
+  },
+  "era_split_final_policy": {},
+  "latest_policy_rows": [
+    {"date":"2026-08-27","final_policy_signal":"NO RE-ENTRY SETUP"},
+    {"date":"2026-08-28","final_policy_signal":"RE-ENTER","SPY":769.3499755859375,"QQQ":716.4299926757812},
+    {"date":"2026-08-31","final_policy_signal":"RE-ENTER"},
+    {"date":"2026-09-01","final_policy_signal":"RE-ENTER"},
+    {"date":"2026-09-02","final_policy_signal":"RE-ENTER"},
+    {"date":"2026-09-03","final_policy_signal":"RE-ENTER"},
+    {"date":"2026-09-04","final_policy_signal":"RE-ENTER"}
+  ],
+  "current_analog_set": {
+    "as_of": "2026-09-04",
+    "count": 40,
+    "decision": "CAUTIOUS YES",
+    "analogs": []
+  }
+}

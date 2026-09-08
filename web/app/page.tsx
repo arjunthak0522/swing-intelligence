@@ -1,5 +1,7 @@
 import { ChevronRight, CircleAlert, CircleCheck, Clock3, Radio } from "lucide-react";
 import MarketMovementTables from "./MarketMovementTables";
+import HistoricalEvidence from "./HistoricalEvidence";
+import { getHistoricalEpisodeEvidence } from "../lib/historicalEvidence";
 import {
   getIntradaySnapshot,
   getLatestEpisode,
@@ -55,6 +57,23 @@ function StatusPill({ children }: { children: React.ReactNode }) {
   return <span className="pill">{children}</span>;
 }
 
+function formatDate(value?: string | null) {
+  if (!value) return "—";
+  const date = new Date(`${value}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+}
+
+function ProductPurpose() {
+  return (
+    <section className="card purpose-card">
+      <span className="kicker">WHAT RE-ENTRY DOES</span>
+      <h1>After a market pullback, should you keep waiting—or put cash back into SPY/QQQ?</h1>
+      <p>This is not a stock picker or trading dashboard. It tells you when waiting after a market pullback may no longer be helping.</p>
+    </section>
+  );
+}
+
 function Hero({ s }: { s: ReentrySnapshot }) {
   const closer = s.signal === "WAIT" && ["DEVELOPING", "MEANINGFUL", "BROAD"].includes(s.internal_reset);
   const displaySignal = s.signal === "WAIT" ? "WAIT FOR NEW ENTRY" : s.signal;
@@ -62,7 +81,7 @@ function Hero({ s }: { s: ReentrySnapshot }) {
     <section className="hero card">
       <div className="eyebrow-row">
         <span className="eyebrow">OFFICIAL RE-ENTRY DECISION</span>
-        <span className="freshness"><Clock3 size={14} /> {s.as_of} completed close</span>
+        <span className="freshness"><Clock3 size={14} /> {formatDate(s.as_of)} completed close</span>
       </div>
       <div className="hero-grid">
         <div>
@@ -88,18 +107,18 @@ function EpisodeSummary({ episode, official }: { episode: ReentryEpisode | null;
   return (
     <section className="card section-card action-card">
       <div className="section-heading">
-        <div><span className="kicker">CURRENT RE-ENTRY EPISODE</span><h2>{episode.episode_start}</h2></div>
+        <div><span className="kicker">CURRENT RE-ENTRY EPISODE</span><h2>{formatDate(episode.episode_start)}</h2></div>
         <StatusPill>{episode.active ? "ACTIVE" : "COMPLETED"}</StatusPill>
       </div>
       <p className="section-intro">
-        This is one continuous re-entry opportunity, not a new entry every day. The signal first fired on {episode.episode_start} and remained favorable through {episode.favorable_through}.
+        This is one continuous re-entry opportunity, not a new entry every day. The signal first fired on {formatDate(episode.episode_start)} and remained favorable through {formatDate(episode.favorable_through)}.
         {official.signal === "WAIT" ? " Today’s WAIT applies only to a new/additional deployment." : ""}
       </p>
       <div className="vehicle-strip">
-        <div className="vehicle-primary"><div><span>S&P 500</span><b>SPY</b></div><small>Close when episode first fired</small><strong>${episode.entry_closes.SPY.toFixed(2)}</strong><em>{episode.episode_start}</em></div>
-        <div className="vehicle-primary"><div><span>Nasdaq 100</span><b>QQQ</b></div><small>Close when episode first fired</small><strong>${episode.entry_closes.QQQ.toFixed(2)}</strong><em>{episode.episode_start}</em></div>
+        <div className="vehicle-primary"><div><span>S&P 500</span><b>SPY</b></div><small>Close when episode first fired</small><strong>${episode.entry_closes.SPY.toFixed(2)}</strong><em>{formatDate(episode.episode_start)}</em></div>
+        <div className="vehicle-primary"><div><span>Nasdaq 100</span><b>QQQ</b></div><small>Close when episode first fired</small><strong>${episode.entry_closes.QQQ.toFixed(2)}</strong><em>{formatDate(episode.episode_start)}</em></div>
       </div>
-      <div className="notice"><CircleCheck size={16} /> Last favorable close: <b>{episode.favorable_through}</b>{episode.ended_on ? <> · Episode ended when the official signal changed on <b>{episode.ended_on}</b>.</> : null}</div>
+      <div className="notice"><CircleCheck size={16} /> Last favorable close: <b>{formatDate(episode.favorable_through)}</b>{episode.ended_on ? <> · Episode ended when the official signal changed on <b>{formatDate(episode.ended_on)}</b>.</> : null}</div>
     </section>
   );
 }
@@ -129,7 +148,7 @@ function IntradayMonitor({ live, official }: { live: IntradaySnapshot | null; of
         {regularSession
           ? "This layer updates from 5-minute market bars so you can see what is happening now while the official completed-close decision remains in force."
           : "The market is closed, so this panel shows the latest completed intraday session rather than implying prices are moving now."}
-        {` It does not replace the official ${official.as_of} close signal.`}
+        {` It does not replace the official ${formatDate(official.as_of)} close signal.`}
       </p>
       {live ? <>
         <div className="live-grid">
@@ -147,14 +166,13 @@ function IntradayMonitor({ live, official }: { live: IntradaySnapshot | null; of
 }
 
 function VehicleCard({ s }: { s: ReentrySnapshot }) {
-  const h = s.historical_validation;
   return (
     <section className="card section-card action-card">
-      <div className="section-heading"><div><span className="kicker">WHERE IT APPLIES</span><h2>Broad-market re-entry</h2></div><StatusPill>SPY + QQQ</StatusPill></div>
-      <p className="section-intro">The engine answers whether cash should go back into broad equities. SPY and QQQ are the validated destination set. Sector and subsector ETFs explain the setup but are not standalone buy calls.</p>
+      <div className="section-heading"><div><span className="kicker">WHAT THIS MEANS</span><h2>Broad-market re-entry</h2></div><StatusPill>SPY + QQQ</StatusPill></div>
+      <p className="section-intro">The model currently answers whether continuing to wait after a pullback is still helping. When the answer is RE-ENTER, SPY and QQQ are the validated broad-market destination set. Sector and subsector ETFs explain the setup; they are not separate buy calls and this tool does not decide position size.</p>
       <div className="vehicle-strip">
-        <div className="vehicle-primary"><div><span>S&P 500</span><b>SPY</b></div><small>Broad market</small><strong>{pct(h.SPY_10D_median_after_signal, 2)}</strong><em>10D historical median after RE-ENTRY signals</em></div>
-        <div className="vehicle-primary"><div><span>Nasdaq 100</span><b>QQQ</b></div><small>Growth heavy</small><strong>{pct(h.QQQ_10D_median_after_signal, 2)}</strong><em>10D historical median after RE-ENTRY signals</em></div>
+        <div className="vehicle-primary"><div><span>S&P 500</span><b>SPY</b></div><small>Validated broad-market destination</small><strong>Broad U.S. equities</strong><em>Historical performance is shown in the Historical Evidence section below.</em></div>
+        <div className="vehicle-primary"><div><span>Nasdaq 100</span><b>QQQ</b></div><small>Validated broad-market destination</small><strong>Growth-heavy equities</strong><em>Historical performance is shown in the Historical Evidence section below.</em></div>
       </div>
       <div className="notice"><CircleAlert size={16} /> The app will not claim SPY or QQQ is preferred until a separate vehicle-selection rule is historically validated.</div>
     </section>
@@ -245,7 +263,7 @@ function Historical({ s }: { s: ReentrySnapshot }) {
 }
 
 export default async function Home() {
-  const [snapshot, intraday, episode] = await Promise.all([getLatestSnapshot(), getIntradaySnapshot(), getLatestEpisode()]);
+  const [snapshot, intraday, episode, historicalEvidence] = await Promise.all([getLatestSnapshot(), getIntradaySnapshot(), getLatestEpisode(), getHistoricalEpisodeEvidence()]);
   if (!snapshot) {
     return <main className="shell"><section className="card data-blocked"><CircleAlert /> <div><b>OFFICIAL FEED UNAVAILABLE</b><p>No fallback decision is shown when the canonical close snapshot cannot be loaded.</p></div></section></main>;
   }
@@ -255,14 +273,16 @@ export default async function Home() {
   return <main className="shell">
     <header className="topbar"><div><span className="brand">RE-ENTRY</span><span className="tagline">Know when waiting stops helping.</span></div><div className="top-status">{fresh ? <><span className="live-dot" /> Official close feed</> : "DATA INCOMPLETE"}</div></header>
     {!fresh ? <section className="card data-blocked"><CircleAlert /> <div><b>DATA INCOMPLETE</b><p>The current decision is suppressed until every required input resolves to the same completed market session.</p></div></section> : <>
+      <ProductPurpose />
       <Hero s={s} />
-      <IntradayMonitor live={intraday} official={s} />
-      <WhyNow s={s} />
-      <EpisodeSummary episode={episode} official={s} />
       <VehicleCard s={s} />
-      <Historical s={s} />
-      <OutperformanceCard />
+      <EpisodeSummary episode={episode} official={s} />
+      <WhyNow s={s} />
+      <div className="context-divider"><span className="kicker">WHAT IS HAPPENING TODAY · CONTEXT ONLY</span><p>Live movement helps explain what is happening underneath the official decision. It never replaces the completed-close RE-ENTRY signal.</p></div>
+      <IntradayMonitor live={intraday} official={s} />
       <MarketMovementTables snapshot={s} live={intraday} />
+      <HistoricalEvidence evidence={historicalEvidence} />
+      <OutperformanceCard />
     </>}
     <footer>Official RE-ENTRY decisions use completed-close data. Intraday data is provisional market context only and never overwrites the validated close signal. Historical ETF opportunity estimates remain suppressed until their input history is reproducible.</footer>
   </main>;
