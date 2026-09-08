@@ -166,14 +166,13 @@ function IntradayMonitor({ live, official }: { live: IntradaySnapshot | null; of
 }
 
 function VehicleCard({ s }: { s: ReentrySnapshot }) {
-  const h = s.historical_validation;
   return (
     <section className="card section-card action-card">
       <div className="section-heading"><div><span className="kicker">WHAT THIS MEANS</span><h2>Broad-market re-entry</h2></div><StatusPill>SPY + QQQ</StatusPill></div>
       <p className="section-intro">The model currently answers whether continuing to wait after a pullback is still helping. When the answer is RE-ENTER, SPY and QQQ are the validated broad-market destination set. Sector and subsector ETFs explain the setup; they are not separate buy calls and this tool does not decide position size.</p>
       <div className="vehicle-strip">
-        <div className="vehicle-primary"><div><span>S&P 500</span><b>SPY</b></div><small>Broad market</small><strong>{pct(h.SPY_10D_median_after_signal, 2)}</strong><em>10D historical median after RE-ENTRY signals</em></div>
-        <div className="vehicle-primary"><div><span>Nasdaq 100</span><b>QQQ</b></div><small>Growth heavy</small><strong>{pct(h.QQQ_10D_median_after_signal, 2)}</strong><em>10D historical median after RE-ENTRY signals</em></div>
+        <div className="vehicle-primary"><div><span>S&P 500</span><b>SPY</b></div><small>Validated broad-market destination</small><strong>Broad U.S. equities</strong><em>Historical performance is shown in the Historical Evidence section below.</em></div>
+        <div className="vehicle-primary"><div><span>Nasdaq 100</span><b>QQQ</b></div><small>Validated broad-market destination</small><strong>Growth-heavy equities</strong><em>Historical performance is shown in the Historical Evidence section below.</em></div>
       </div>
       <div className="notice"><CircleAlert size={16} /> The app will not claim SPY or QQQ is preferred until a separate vehicle-selection rule is historically validated.</div>
     </section>
