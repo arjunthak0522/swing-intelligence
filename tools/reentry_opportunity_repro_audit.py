@@ -31,7 +31,6 @@ def reconstruct(px: pd.DataFrame, sf: pd.DataFrame, dates: list[pd.Timestamp], a
     current = frow(sf, as_of, sym)
     if current is None:
         raise RuntimeError(f"Current feature row unavailable for {sym}")
-
     history = []
     for d in dates:
         vector = frow(sf, d, sym)
@@ -48,10 +47,8 @@ def reconstruct(px: pd.DataFrame, sf: pd.DataFrame, dates: list[pd.Timestamp], a
             horizon_excess.append(float(asset_return - spy_return))
         if valid:
             history.append((d, vector, float(np.mean(horizon_excess)), horizon_excess))
-
     if len(history) < 20:
         raise RuntimeError(f"Insufficient prior history for {sym}: {len(history)}")
-
     X = np.vstack([row[1] for row in history])
     mu = X.mean(0)
     sd = X.std(0)
@@ -60,7 +57,6 @@ def reconstruct(px: pd.DataFrame, sf: pd.DataFrame, dates: list[pd.Timestamp], a
     normalized_current = (current - mu) / sd
     distances = np.sqrt(((normalized_hist - normalized_current) ** 2).mean(axis=1))
     selected = np.argsort(distances)[: min(K, len(history))]
-
     neighbors = []
     targets = []
     for idx in selected:
@@ -73,7 +69,6 @@ def reconstruct(px: pd.DataFrame, sf: pd.DataFrame, dates: list[pd.Timestamp], a
             "excess_30d_vs_spy": float(horizon_excess[1]),
             "average_10d_30d_excess_vs_spy": float(target),
         })
-
     return {
         "reconstructed_score": float(np.median(np.asarray(targets))),
         "reconstructed_positive_rate": float(np.mean(np.asarray(targets) > 0)),
@@ -92,7 +87,6 @@ def main() -> None:
     signals = build_canonical_signal_history(base)["signal"]
     prices = load_subsector_prices(start="2016-09-01").sort_index()
     subsector_frame = build_subsector_frame(prices)
-
     prior_dates = independent(
         [d for d in episode_starts(signals) if d in subsector_frame.index and d < as_of],
         prices.index,
@@ -101,34 +95,40 @@ def main() -> None:
     current_i = len(live_dates) - 1
 
     results = []
+    all_passed = True
     for candidate in published:
         sym = candidate["symbol"]
         engine_prediction = predict_for_symbol(prices, subsector_frame, live_dates, current_i, sym)
         if engine_prediction is None:
-            raise RuntimeError(f"Frozen engine returned no prediction for {sym}")
+            results.append({"symbol": sym, "pass": False, "error": "Frozen engine returned no prediction"})
+            all_passed = False
+            continue
         detail = reconstruct(prices, subsector_frame, prior_dates, as_of, sym)
         published_score = float(candidate["predicted_median_excess_vs_spy"])
         published_rate = float(candidate["neighbor_positive_excess_rate"])
-        score_diff = abs(detail["reconstructed_score"] - published_score)
-        rate_diff = abs(detail["reconstructed_positive_rate"] - published_rate)
-        engine_diff = abs(float(engine_prediction["score"]) - published_score)
-        passed = score_diff <= TOLERANCE and rate_diff <= TOLERANCE and engine_diff <= TOLERANCE
+        passed = (
+            abs(detail["reconstructed_score"] - published_score) <= TOLERANCE
+            and abs(detail["reconstructed_positive_rate"] - published_rate) <= TOLERANCE
+            and abs(float(engine_prediction["score"]) - published_score) <= TOLERANCE
+        )
+        all_passed = all_passed and passed
         results.append({
             "symbol": sym,
             "published_score": published_score,
             "engine_score": float(engine_prediction["score"]),
             "reconstructed_score": detail["reconstructed_score"],
             "published_positive_rate": published_rate,
+            "engine_positive_rate": float(engine_prediction["positive_excess_rate"]),
             "reconstructed_positive_rate": detail["reconstructed_positive_rate"],
             "neighbors": detail["neighbors"],
             "pass": passed,
         })
-        if not passed:
-            raise AssertionError(f"Opportunity reproducibility failed for {sym}: {results[-1]}")
 
     output = {
-        "status": "PASS",
+        "status": "PASS" if all_passed else "FAIL",
         "as_of": str(as_of.date()),
+        "prior_independent_episode_count": len(prior_dates),
+        "prior_independent_episode_dates": [str(d.date()) for d in prior_dates],
         "target_definition": "For each prior neighbor, average 10D and 30D forward excess return vs SPY; candidate score is the median of those averages across the 15 nearest prior RE-ENTRY states.",
         "results": results,
     }
@@ -136,6 +136,8 @@ def main() -> None:
     out.mkdir(parents=True, exist_ok=True)
     (out / "results.json").write_text(json.dumps(output, indent=2), encoding="utf-8")
     print(json.dumps(output, indent=2))
+    if not all_passed:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":
