@@ -6,7 +6,9 @@ on:
       - spy-qqq-autonomous-lab
     paths:
       - 'src/swing_intelligence/autonomous_lab.py'
+      - 'src/swing_intelligence/autonomous_robustness.py'
       - 'tests/test_autonomous_lab.py'
+      - 'tests/test_autonomous_robustness.py'
       - 'tools/run_autonomous_lab.py'
       - '.github/workflows/autonomous-lab.yml'
   workflow_dispatch:
@@ -25,7 +27,7 @@ jobs:
       - name: Install package and test dependencies
         run: pip install -e '.[dev]'
       - name: Run autonomous lab tests
-        run: pytest -q tests/test_autonomous_lab.py
+        run: pytest -q tests/test_autonomous_lab.py tests/test_autonomous_robustness.py
 
   research:
     needs: test
