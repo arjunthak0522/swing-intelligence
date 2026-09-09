@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import FreshnessStatus from "./FreshnessStatus";
 import "./globals.css";
 import "./retail-overrides.css";
+import "./premium-fintech.css";
 
 export const metadata: Metadata = {
   title: "RE-ENTRY",
