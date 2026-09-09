@@ -134,6 +134,34 @@ def learn_market_state_hypotheses(train: pd.DataFrame, target: str) -> list[Stat
             _term(train, "trend_repair_5d", ">=", 0.80),
             _term(train, "vol_expansion_ratio", ">=", 0.70),
         ),
+        _make(
+            "credit_stress_cooling",
+            "credit_normalization",
+            "High-yield credit spreads remain elevated but have started narrowing.",
+            _term(train, "hy_spread_percentile_252", ">=", 0.70),
+            _term(train, "hy_spread_cooling_5d", ">=", 0.60),
+        ),
+        _make(
+            "rates_easing_with_rebound",
+            "rates_relief",
+            "Equities are rebounding while the 10-year Treasury yield has eased over the prior month.",
+            _term(train, "rebound_3d", ">=", 0.70),
+            _term(train, "yield_10y_change_20d", "<=", 0.35),
+        ),
+        _make(
+            "curve_resteepening_with_rebound",
+            "curve_repair",
+            "Equities are rebounding while the 10Y-2Y curve is re-steepening.",
+            _term(train, "rebound_3d", ">=", 0.70),
+            _term(train, "yield_curve_change_20d", ">=", 0.65),
+        ),
+        _make(
+            "credit_and_volatility_cooling",
+            "risk_normalization",
+            "Both credit stress and equity volatility are cooling after elevated risk conditions.",
+            _term(train, "hy_spread_cooling_5d", ">=", 0.60),
+            _term(train, "vix_cooling_5d", ">=", 0.60),
+        ),
     ]
 
     if target == "SPY":
@@ -152,6 +180,14 @@ def learn_market_state_hypotheses(train: pd.DataFrame, target: str) -> list[Stat
                 _term(train, "rebound_3d", ">=", 0.70),
                 _term(train, "rsp_spy_ret_5d", ">=", 0.70),
             ),
+            _make(
+                "spy_breadth_credit_recovery",
+                "breadth_credit_confirmation",
+                "SPY rebound is confirmed by equal-weight leadership and cooling credit stress.",
+                _term(train, "rebound_3d", ">=", 0.70),
+                _term(train, "rsp_spy_ret_5d", ">=", 0.65),
+                _term(train, "hy_spread_cooling_5d", ">=", 0.60),
+            ),
         ])
 
     if target == "QQQ":
@@ -169,6 +205,22 @@ def learn_market_state_hypotheses(train: pd.DataFrame, target: str) -> list[Stat
                 "QQQ is rebounding with semiconductor relative strength confirming the move.",
                 _term(train, "rebound_3d", ">=", 0.70),
                 _term(train, "smh_qqq_ret_5d", ">=", 0.70),
+            ),
+            _make(
+                "qqq_rates_credit_relief",
+                "growth_macro_relief",
+                "QQQ is rebounding while long yields ease and high-yield credit stress cools.",
+                _term(train, "rebound_3d", ">=", 0.65),
+                _term(train, "yield_10y_change_20d", "<=", 0.35),
+                _term(train, "hy_spread_cooling_5d", ">=", 0.60),
+            ),
+            _make(
+                "qqq_semis_rates_relief",
+                "growth_leadership_macro",
+                "QQQ rebound is confirmed by semiconductor leadership while long yields ease.",
+                _term(train, "rebound_3d", ">=", 0.65),
+                _term(train, "smh_qqq_ret_5d", ">=", 0.65),
+                _term(train, "yield_10y_change_20d", "<=", 0.35),
             ),
         ])
 
