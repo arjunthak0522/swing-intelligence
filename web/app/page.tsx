@@ -39,6 +39,10 @@ function formatDate(value?: string | null) {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 }
 
+function ratePct(value?: number | null, digits = 0) {
+  return typeof value === "number" && Number.isFinite(value) ? `${(value * 100).toFixed(digits)}%` : "-";
+}
+
 function DecisionHero({ s }: { s: ReentrySnapshot }) {
   const closer = s.signal === "WAIT" && ["DEVELOPING", "MEANINGFUL", "BROAD"].includes(s.internal_reset);
   const displaySignal = s.signal === "WAIT" ? "WAIT FOR NEW ENTRY" : s.signal;
@@ -146,14 +150,31 @@ function MarketInternalsSummary({ snapshot, live }: { snapshot: ReentrySnapshot;
 
 function HistoricalSummary({ snapshot, evidence, ledger }: { snapshot: ReentrySnapshot; evidence: Awaited<ReturnType<typeof getHistoricalEpisodeEvidence>>; ledger: Awaited<ReturnType<typeof getHistoricalEpisodeLedger>> }) {
   const h = snapshot.historical_validation;
+  const cards = (["SPY", "QQQ"] as const).flatMap((asset) => (["30", "60"] as const).map((horizon) => {
+    const archived = evidence?.final_policy_validation?.[asset]?.[horizon];
+    const fallbackMedian = asset === "SPY"
+      ? (horizon === "30" ? h.SPY_30D_median_after_signal : h.SPY_60D_median_after_signal)
+      : (horizon === "30" ? h.QQQ_30D_median_after_signal : h.QQQ_60D_median_after_signal);
+    return {
+      key: `${asset}-${horizon}`,
+      asset,
+      horizon,
+      average: archived?.mean_return ?? null,
+      median: archived?.median_return ?? fallbackMedian,
+      positive: archived?.positive_rate ?? null,
+    };
+  }));
+
   return (
     <section className="simple-section">
       <div className="simple-heading"><span className="kicker">HISTORICAL EVIDENCE</span><h2>{h.final_independent_reentry_episodes} validated independent RE-ENTRY episodes</h2></div>
-      <div className="history-summary-grid">
-        <div><small>SPY 30D MEDIAN</small><strong>{pct(h.SPY_30D_median_after_signal, 2)}</strong></div>
-        <div><small>SPY 60D MEDIAN</small><strong>{pct(h.SPY_60D_median_after_signal, 2)}</strong></div>
-        <div><small>QQQ 30D MEDIAN</small><strong>{pct(h.QQQ_30D_median_after_signal, 2)}</strong></div>
-        <div><small>QQQ 60D MEDIAN</small><strong>{pct(h.QQQ_60D_median_after_signal, 2)}</strong></div>
+      <div className="history-summary-grid history-summary-complete">
+        {cards.map((card) => <div className="history-summary-card" key={card.key}>
+          <div className="history-summary-title"><b>{card.asset}</b><span>{card.horizon}D after RE-ENTRY</span></div>
+          <div className="history-summary-stat"><small>AVERAGE RETURN</small><strong>{pct(card.average, 2)}</strong></div>
+          <div className="history-summary-stat"><small>MEDIAN RETURN</small><strong>{pct(card.median, 2)}</strong></div>
+          <div className="history-summary-stat"><small>POSITIVE OUTCOMES</small><strong className="rate-value">{ratePct(card.positive, 0)}</strong></div>
+        </div>)}
       </div>
       <details className="deep-disclosure"><summary>View historical RE-ENTRY periods <ChevronDown size={16} /></summary><div className="nested-detail"><HistoricalEvidence evidence={evidence} ledger={ledger} /></div></details>
     </section>
@@ -194,9 +215,10 @@ function PageStyles() {
     .evidence-list{margin-top:16px;border-top:1px solid var(--line)}.evidence-row{border-bottom:1px solid var(--line)}.evidence-row>summary{display:grid;grid-template-columns:1fr auto 22px;gap:16px;align-items:center;padding:15px 0;cursor:pointer;list-style:none}.evidence-row>summary::-webkit-details-marker{display:none}.evidence-row>summary span{font-size:12px;font-weight:700}.evidence-row>summary b{font-size:12px}.evidence-row>summary b.good{color:var(--green)}.evidence-row>summary b.warn{color:var(--amber)}.evidence-row>summary b.bad{color:var(--red)}.evidence-row[open]>summary svg{transform:rotate(180deg)}.evidence-row p{margin:0 0 15px;max-width:760px;font-size:11px;color:var(--muted);line-height:1.5}
     .internals-summary-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:16px}.internals-summary-grid-two{grid-template-columns:1fr 1fr}.internals-summary-grid>div{padding:14px 0}.internals-summary-grid small{display:block;color:var(--muted);font-size:9px;margin-bottom:7px}.internals-summary-grid span{display:flex;justify-content:space-between;gap:10px;font-size:11px;padding:3px 0}.internals-summary-grid strong{display:block;font-size:28px;letter-spacing:-.04em}.nested-detail{margin-top:16px}.nested-detail>.card,.nested-detail>section.card,.nested-detail>details.card{box-shadow:none!important}
     .history-summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}.history-summary-grid>div{padding:12px 0}.history-summary-grid small,.history-summary-grid strong{display:block}.history-summary-grid small{font-size:9px;color:var(--muted)}.history-summary-grid strong{font-size:24px;margin-top:4px;letter-spacing:-.03em}
+    .history-summary-complete{gap:12px!important}.history-summary-card{padding:0!important;border:1px solid var(--line)!important;border-radius:14px!important;background:#fff!important;overflow:hidden}.history-summary-title{display:flex;align-items:baseline;gap:8px;padding:13px 14px;border-bottom:1px solid var(--line)}.history-summary-title b{font-size:16px}.history-summary-title span{font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em}.history-summary-stat{padding:10px 14px;border-top:1px solid #eef1ef}.history-summary-title+.history-summary-stat{border-top:0}.history-summary-stat small{font-size:8px!important;letter-spacing:.08em}.history-summary-stat strong{font-size:19px!important;margin-top:3px!important}.history-summary-stat .rate-value{color:var(--ink)}
     .research-section{margin:30px 0 12px;border:1px solid var(--line);border-radius:16px;overflow:hidden}.research-section>summary{display:flex;justify-content:space-between;gap:20px;align-items:center;padding:20px 22px;cursor:pointer;list-style:none}.research-section>summary::-webkit-details-marker{display:none}.research-section>summary h2{margin:4px 0 3px;font-size:20px}.research-section>summary p{margin:0;color:var(--muted);font-size:10px}.research-status{display:flex;align-items:center;gap:8px}.research-section[open] .research-status svg{transform:rotate(180deg)}.research-body{padding:0 16px 16px;border-top:1px solid var(--line)}.research-note{padding:18px 8px;border-top:1px solid var(--line)}.research-note h3{margin:3px 0 0;font-size:16px}.research-note p{margin:8px 0 0;font-size:11px;color:var(--muted);max-width:760px}
     .good-text{color:var(--green)}.bad-text{color:var(--red)}
-    @media(max-width:760px){.decision-word{font-size:48px}.decision-label-row,.today-topline,.simple-heading{display:block}.freshness{display:inline-flex;margin-top:8px}.episode-strip{grid-template-columns:1fr 1fr}.episode-meta{grid-column:1/-1}.today-drivers,.live-detail-grid,.internals-summary-grid,.history-summary-grid{grid-template-columns:1fr 1fr}.today-drivers>div+div{border-left:0;padding-left:0}.today-drivers>div:nth-child(3){grid-column:1/-1}.research-section>summary{align-items:flex-start}.research-status .pill{display:none}}
+    @media(max-width:760px){.decision-word{font-size:48px}.decision-label-row,.today-topline,.simple-heading{display:block}.freshness{display:inline-flex;margin-top:8px}.episode-strip{grid-template-columns:1fr 1fr}.episode-meta{grid-column:1/-1}.today-drivers,.live-detail-grid,.internals-summary-grid,.history-summary-grid{grid-template-columns:1fr 1fr}.today-drivers>div+div{border-left:0;padding-left:0}.today-drivers>div:nth-child(3){grid-column:1/-1}.research-section>summary{align-items:flex-start}.research-status .pill{display:none}.history-summary-title{display:block}.history-summary-title span{display:block;margin-top:2px}}
   `}</style>;
 }
 
