@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import FreshnessStatus from "./FreshnessStatus";
 import HistoryTablePolish from "./HistoryTablePolish";
+import DashboardPolish from "./DashboardPolish";
 import "./globals.css";
 import "./retail-overrides.css";
 import "./premium-fintech.css";
 import "./history-table-fix.css";
+import "./historical-cleanup.css";
 
 export const metadata: Metadata = {
   title: "RE-ENTRY",
@@ -17,6 +19,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         <FreshnessStatus />
         <HistoryTablePolish />
+        <DashboardPolish />
         {children}
       </body>
     </html>
