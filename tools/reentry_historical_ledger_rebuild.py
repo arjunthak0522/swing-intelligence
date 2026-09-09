@@ -80,6 +80,7 @@ def main() -> None:
         if signals.iloc[i]["signal"] != "RE-ENTER":
             i += 1
             continue
+
         start_i = i
         while i + 1 < len(idx) and signals.iloc[i + 1]["signal"] == "RE-ENTER":
             i += 1
@@ -88,28 +89,43 @@ def main() -> None:
 
         start_date = idx[start_i]
         last_date = idx[last_i]
+        next_date = idx[next_i] if next_i is not None else None
         start_pos = price_pos[start_date]
         last_pos = price_pos[last_date]
+        transition_pos = price_pos[next_date] if next_date is not None else last_pos
+
         rec = {
             "start": str(pd.Timestamp(start_date).date()),
             "favorable_through": str(pd.Timestamp(last_date).date()),
-            "next_state_date": str(pd.Timestamp(idx[next_i]).date()) if next_i is not None else None,
+            "next_state_date": str(pd.Timestamp(next_date).date()) if next_date is not None else None,
             "next_state": str(signals.iloc[next_i]["signal"]) if next_i is not None else None,
             "reenter_sessions": int(last_i - start_i + 1),
             "signal_source": str(signals.iloc[start_i]["source"]),
             "analog_at_start": str(signals.iloc[start_i]["analog"]),
         }
+
         for sym in ("SPY", "QQQ"):
             start_px = float(frame.at[start_date, sym])
             last_px = float(frame.at[last_date, sym])
-            path = frame[sym].iloc[start_pos:last_pos + 1].astype(float)
+            transition_px = float(frame.at[next_date, sym]) if next_date is not None else last_px
+            favorable_path = frame[sym].iloc[start_pos:last_pos + 1].astype(float)
+            active_path = frame[sym].iloc[start_pos:transition_pos + 1].astype(float)
+
             rec[f"{sym}_start_close"] = start_px
             rec[f"{sym}_favorable_through_close"] = last_px
+            rec[f"{sym}_transition_close"] = transition_px if next_date is not None else None
+            # Preserve the old strict close-to-last-RE-ENTER diagnostic.
             rec[f"{sym}_episode_return"] = last_px / start_px - 1.0
-            rec[f"{sym}_max_gain_during_episode"] = float(path.max() / start_px - 1.0)
-            rec[f"{sym}_max_adverse_during_episode"] = float(path.min() / start_px - 1.0)
+            # Primary continuous-state performance: signal is known only after each close,
+            # so the RE-ENTER state governs the market until the close that changes it.
+            rec[f"{sym}_return_until_state_change"] = transition_px / start_px - 1.0
+            rec[f"{sym}_max_gain_during_episode"] = float(favorable_path.max() / start_px - 1.0)
+            rec[f"{sym}_max_adverse_during_episode"] = float(favorable_path.min() / start_px - 1.0)
+            rec[f"{sym}_max_gain_until_state_change"] = float(active_path.max() / start_px - 1.0)
+            rec[f"{sym}_max_adverse_until_state_change"] = float(active_path.min() / start_px - 1.0)
             for h in HORIZONS:
                 rec[f"{sym}_{h}d_from_start"] = forward_from_start(frame, sym, start_pos, h)
+
         episodes.append(rec)
         i += 1
 
@@ -121,14 +137,14 @@ def main() -> None:
             "rebuild_date": "2026-09-09",
             "data_note": "Rebuilt with the frozen validated engine and currently returned historical vendor series. Historical vendor adjustments can revise some reconstructed boundaries or prices; archived aggregate canonical validation remains authoritative for validated performance statistics.",
         },
-        "definition": "A continuous episode begins on the first RE-ENTER completed close and ends on the last consecutive RE-ENTER completed close. The following WAIT/NO-SETUP date is shown separately and is not included in episode return.",
+        "definition": "A continuous episode begins on the first RE-ENTER completed close and remains active through each consecutive RE-ENTER state. For completed episodes, primary episode performance is measured through the completed close that changes the state to WAIT or NO RE-ENTRY SETUP, because that new state is not known until that close.",
         "forward_return_definition": "Reconstructed row-level fixed-horizon returns are close-to-close from the first RE-ENTER close. They are transparency diagnostics and are not substituted for the archived canonical aggregate validator.",
         "episode_count": len(episodes),
         "completed_episode_count": len(completed),
         "active_episode_count": len(episodes) - len(completed),
         "summary": {
-            "SPY_episode_return": summarize([e["SPY_episode_return"] for e in completed]),
-            "QQQ_episode_return": summarize([e["QQQ_episode_return"] for e in completed]),
+            "SPY_episode_return": summarize([e["SPY_return_until_state_change"] for e in completed]),
+            "QQQ_episode_return": summarize([e["QQQ_return_until_state_change"] for e in completed]),
             "duration_sessions": summarize([float(e["reenter_sessions"]) for e in completed]),
         },
         "episodes": episodes,
