@@ -1105,7 +1105,7 @@
   "data_source": "Yahoo Finance chart endpoint, 5-minute bars, recent 60-day availability",
   "download_errors": [],
   "engine_impact": "NONE",
-  "generated_at": "2026-09-09T16:03:20.032271+00:00",
+  "generated_at": "2026-09-09T16:05:02.006478+00:00",
   "limitations": [
     "Recent 5-minute vendor history is a small sample and is not point-in-time archived by this project.",
     "Episode dates come from the reconstructed ledger, not the archived independent-event validator.",

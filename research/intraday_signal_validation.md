@@ -1,6 +1,6 @@
 # RE-ENTRY intraday signal validation - research only
 
-Generated: 2026-09-09T16:03:20.032271+00:00
+Generated: 2026-09-09T16:05:02.006478+00:00
 
 **No frozen RE-ENTRY signal logic is changed by this research.**
 
