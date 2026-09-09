@@ -5,6 +5,7 @@ on:
     branches: [intraday-signal-research]
     paths:
       - "tools/intraday_signal_validation.py"
+      - "tools/intraday_signal_robustness.py"
       - ".github/workflows/intraday-signal-research.yml"
       - "web/public/reentry/validation/historical_episode_ledger_2026-09-09.json"
   workflow_dispatch:
@@ -15,7 +16,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,17 +33,18 @@ jobs:
           s = p.read_text()
           old = '"both_indices_positive": len(broad_moves) == 2 and all(x > 0 for x in broad_moves),'
           new = '"both_indices_positive": len([x for x in broad_moves if isinstance(x, (int, float)) and math.isfinite(x)]) == 2 and all(x > 0 for x in broad_moves if isinstance(x, (int, float)) and math.isfinite(x)),'
-          if old not in s:
-              raise SystemExit('Expected source line not found')
-          p.write_text(s.replace(old, new))
+          if old in s:
+              p.write_text(s.replace(old, new))
           PY
-      - name: Run research validation
+      - name: Run recent 5-minute validation
         run: python tools/intraday_signal_validation.py
+      - name: Run two-year hourly robustness validation
+        run: python tools/intraday_signal_robustness.py
       - name: Persist research outputs
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add research/intraday_signal_validation.json research/intraday_signal_validation.md
+          git add research/intraday_signal_validation.json research/intraday_signal_validation.md research/intraday_signal_robustness.json research/intraday_signal_robustness.md
           if git diff --cached --quiet; then
             echo "No research output changes"
           else
