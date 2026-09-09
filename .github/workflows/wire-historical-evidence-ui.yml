@@ -1,0 +1,65 @@
+name: Wire Historical Evidence UI
+
+on:
+  push:
+    branches: [historical-evidence-transparency-20260908]
+    paths:
+      - '.github/workflows/wire-historical-evidence-ui.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  wire-and-build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: historical-evidence-transparency-20260908
+      - name: Wire ledger into server page
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('web/app/page.tsx')
+          s=p.read_text()
+          old='import { getHistoricalEpisodeEvidence } from "../lib/historicalEvidence";'
+          new='import { getHistoricalEpisodeEvidence, getHistoricalEpisodeLedger } from "../lib/historicalEvidence";'
+          assert old in s or new in s
+          s=s.replace(old,new)
+          old_call='const [snapshot, intraday, episode, historicalEvidence] = await Promise.all([getLatestSnapshot(), getIntradaySnapshot(), getLatestEpisode(), getHistoricalEpisodeEvidence()]);'
+          new_call='const [snapshot, intraday, episode, historicalEvidence, historicalLedger] = await Promise.all([getLatestSnapshot(), getIntradaySnapshot(), getLatestEpisode(), getHistoricalEpisodeEvidence(), getHistoricalEpisodeLedger()]);'
+          assert old_call in s or new_call in s
+          s=s.replace(old_call,new_call)
+          old_render='<HistoricalEvidence evidence={historicalEvidence} />'
+          new_render='<HistoricalEvidence evidence={historicalEvidence} ledger={historicalLedger} />'
+          assert old_render in s or new_render in s
+          s=s.replace(old_render,new_render)
+          p.write_text(s)
+          PY
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install web dependencies
+        working-directory: web
+        run: npm ci
+      - name: Typecheck
+        working-directory: web
+        run: npx tsc --noEmit
+      - name: Production build
+        working-directory: web
+        run: npm run build
+      - name: Commit wiring after successful build
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add web/app/page.tsx
+          if git diff --cached --quiet; then
+            echo 'Wiring already committed'
+          else
+            git commit -m 'Wire full historical episode ledger into UI'
+            git push origin HEAD:historical-evidence-transparency-20260908
+          fi
