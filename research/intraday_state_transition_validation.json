@@ -1,0 +1,278 @@
+{
+  "analysis": {
+    "10:30": {
+      "base_change_rate": 0.25903614457831325,
+      "change_features": {
+        "breadth_positive_share": {
+          "mean": 0.49943904331434386,
+          "median": 0.5106060606060606,
+          "n": 86
+        },
+        "broad_move": {
+          "mean": 0.0001464521334836967,
+          "median": 0.00032844486006877727,
+          "n": 86
+        },
+        "vix_change": {
+          "mean": 0.016590162634384745,
+          "median": 0.010188594986847876,
+          "n": 86
+        }
+      },
+      "change_n": 86,
+      "hold_features": {
+        "breadth_positive_share": {
+          "mean": 0.5513977787001341,
+          "median": 0.5893939393939394,
+          "n": 246
+        },
+        "broad_move": {
+          "mean": 0.0010671554859099357,
+          "median": 0.0009924746844213739,
+          "n": 246
+        },
+        "vix_change": {
+          "mean": 0.003357929240093083,
+          "median": 0.0005852805902873959,
+          "n": 246
+        }
+      },
+      "hold_n": 246,
+      "n": 332,
+      "risk_0to1": {
+        "n": 183,
+        "state_change_rate": 0.2185792349726776
+      },
+      "risk_2plus": {
+        "n": 149,
+        "state_change_rate": 0.3087248322147651
+      },
+      "risk_score": {
+        "0": {
+          "n": 103,
+          "state_change_rate": 0.1941747572815534
+        },
+        "1": {
+          "n": 80,
+          "state_change_rate": 0.25
+        },
+        "2": {
+          "n": 59,
+          "state_change_rate": 0.288135593220339
+        },
+        "3": {
+          "n": 90,
+          "state_change_rate": 0.32222222222222224
+        }
+      }
+    },
+    "11:30": {
+      "base_change_rate": 0.25903614457831325,
+      "change_features": {
+        "breadth_positive_share": {
+          "mean": 0.49828497484872786,
+          "median": 0.5166666666666666,
+          "n": 86
+        },
+        "broad_move": {
+          "mean": 0.00014755174255794113,
+          "median": 0.0002378304852174995,
+          "n": 86
+        },
+        "vix_change": {
+          "mean": 0.01646148420404038,
+          "median": 0.007928863414675691,
+          "n": 86
+        }
+      },
+      "change_n": 86,
+      "hold_features": {
+        "breadth_positive_share": {
+          "mean": 0.559545745815721,
+          "median": 0.600914315569488,
+          "n": 246
+        },
+        "broad_move": {
+          "mean": 0.0011074060975357755,
+          "median": 0.0014530572794161367,
+          "n": 246
+        },
+        "vix_change": {
+          "mean": 0.0010775602428635125,
+          "median": -0.005529656275758077,
+          "n": 246
+        }
+      },
+      "hold_n": 246,
+      "n": 332,
+      "risk_0to1": {
+        "n": 181,
+        "state_change_rate": 0.20441988950276244
+      },
+      "risk_2plus": {
+        "n": 151,
+        "state_change_rate": 0.32450331125827814
+      },
+      "risk_score": {
+        "0": {
+          "n": 117,
+          "state_change_rate": 0.21367521367521367
+        },
+        "1": {
+          "n": 64,
+          "state_change_rate": 0.1875
+        },
+        "2": {
+          "n": 70,
+          "state_change_rate": 0.3142857142857143
+        },
+        "3": {
+          "n": 81,
+          "state_change_rate": 0.3333333333333333
+        }
+      }
+    },
+    "13:30": {
+      "base_change_rate": 0.25825825825825827,
+      "change_features": {
+        "breadth_positive_share": {
+          "mean": 0.5081996792301522,
+          "median": 0.5192789968652037,
+          "n": 86
+        },
+        "broad_move": {
+          "mean": 0.0007628955387091463,
+          "median": 0.000874932132529288,
+          "n": 86
+        },
+        "vix_change": {
+          "mean": 0.009160916718658181,
+          "median": 0.004713638938458886,
+          "n": 86
+        }
+      },
+      "change_n": 86,
+      "hold_features": {
+        "breadth_positive_share": {
+          "mean": 0.5494439015310163,
+          "median": 0.5681818181818181,
+          "n": 247
+        },
+        "broad_move": {
+          "mean": 0.0011635225265293973,
+          "median": 0.0016147639625276322,
+          "n": 247
+        },
+        "vix_change": {
+          "mean": 0.0014296281129017882,
+          "median": -0.006586110669982936,
+          "n": 247
+        }
+      },
+      "hold_n": 247,
+      "n": 333,
+      "risk_0to1": {
+        "n": 187,
+        "state_change_rate": 0.22459893048128343
+      },
+      "risk_2plus": {
+        "n": 146,
+        "state_change_rate": 0.3013698630136986
+      },
+      "risk_score": {
+        "0": {
+          "n": 125,
+          "state_change_rate": 0.216
+        },
+        "1": {
+          "n": 62,
+          "state_change_rate": 0.24193548387096775
+        },
+        "2": {
+          "n": 55,
+          "state_change_rate": 0.36363636363636365
+        },
+        "3": {
+          "n": 91,
+          "state_change_rate": 0.26373626373626374
+        }
+      }
+    },
+    "14:30": {
+      "base_change_rate": 0.25825825825825827,
+      "change_features": {
+        "breadth_positive_share": {
+          "mean": 0.5250571067531774,
+          "median": 0.5143939393939394,
+          "n": 86
+        },
+        "broad_move": {
+          "mean": 0.0012340867690827791,
+          "median": 0.0010066423375161837,
+          "n": 86
+        },
+        "vix_change": {
+          "mean": 0.009073964763478213,
+          "median": 0.0014343600738516704,
+          "n": 86
+        }
+      },
+      "change_n": 86,
+      "hold_features": {
+        "breadth_positive_share": {
+          "mean": 0.5447296502650405,
+          "median": 0.5848484848484848,
+          "n": 247
+        },
+        "broad_move": {
+          "mean": 0.0012927040457017904,
+          "median": 0.0019602843052324292,
+          "n": 247
+        },
+        "vix_change": {
+          "mean": 0.0018956093093706239,
+          "median": -0.011940344056086794,
+          "n": 247
+        }
+      },
+      "hold_n": 247,
+      "n": 333,
+      "risk_0to1": {
+        "n": 190,
+        "state_change_rate": 0.24736842105263157
+      },
+      "risk_2plus": {
+        "n": 143,
+        "state_change_rate": 0.2727272727272727
+      },
+      "risk_score": {
+        "0": {
+          "n": 132,
+          "state_change_rate": 0.22727272727272727
+        },
+        "1": {
+          "n": 58,
+          "state_change_rate": 0.29310344827586204
+        },
+        "2": {
+          "n": 55,
+          "state_change_rate": 0.2727272727272727
+        },
+        "3": {
+          "n": 88,
+          "state_change_rate": 0.2727272727272727
+        }
+      }
+    }
+  },
+  "classification": "RESEARCH_ONLY_NON_CANONICAL",
+  "engine_impact": "NONE",
+  "errors": [],
+  "generated_at": "2026-09-09T16:08:10.233539+00:00",
+  "target": "same-day completed-close RE-ENTRY state hold vs state change",
+  "window": {
+    "end": "2026-09-09",
+    "labeled_days": 334,
+    "start": "2024-09-09"
+  }
+}

@@ -370,7 +370,7 @@
   "classification": "RESEARCH_ONLY_NON_CANONICAL",
   "engine_impact": "NONE",
   "errors": [],
-  "generated_at": "2026-09-09T16:05:15.743734+00:00",
+  "generated_at": "2026-09-09T16:07:55.067207+00:00",
   "method": "60-minute Yahoo history; snapshot uses hourly bar OPEN to avoid look-ahead",
   "robust_survivors": [],
   "window": {
