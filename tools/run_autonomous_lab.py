@@ -98,7 +98,7 @@ def main():
         min_positive_edge_fold_fraction=0.60,
     )
     qqq_family_config = QQQFamilyConfig(
-        first_test_year=2010,
+        first_test_year=2008,
         fold_years=2,
         horizons=(20, 30, 40, 60),
         min_gaps=(20, 30, 40),
@@ -108,6 +108,9 @@ def main():
         min_folds=3,
         min_positive_fold_fraction=0.60,
         min_excess_hit_rate=0.50,
+        random_iterations=100,
+        min_random_percentile=0.90,
+        min_leave_crisis_trades=15,
     )
 
     result = run_autonomous_lab(frames, targets=TARGETS, config=config)
@@ -177,7 +180,10 @@ def main():
         f"valid variants={qqq_family['valid_variant_count']} / "
         f"passing={qqq_family['passing_variant_count']} / "
         f"fraction={qqq_family['passing_variant_fraction']:.3f} / "
-        f"family_robust={qqq_family['family_robust']}"
+        f"full-stress passing={qqq_family['full_stress_passing_variant_count']} / "
+        f"full-stress fraction={qqq_family['full_stress_passing_variant_fraction']:.3f} / "
+        f"family_robust={qqq_family['family_robust']} / "
+        f"family_full_stress_robust={qqq_family['family_full_stress_robust']}"
     )
 
 
