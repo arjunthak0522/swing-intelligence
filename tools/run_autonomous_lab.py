@@ -12,6 +12,8 @@ from swing_intelligence.semantic_lab import build_semantic_features, run_semanti
 
 
 OUT_DIR = Path("artifacts/autonomous_lab")
+TARGETS = ("SPY", "QQQ")
+CONTEXT_SYMBOLS = ("RSP", "IWM", "SMH")
 
 
 def _load_frames():
@@ -20,7 +22,9 @@ def _load_frames():
         raise RuntimeError("TWELVE_DATA_API_KEY is required")
 
     frames = {}
-    for symbol in ("SPY", "QQQ"):
+    # SPY and QQQ are the only research targets. RSP/IWM/SMH are context-only
+    # series used for breadth and leadership confirmation, never trade targets.
+    for symbol in TARGETS + CONTEXT_SYMBOLS:
         frames[symbol] = fetch_twelve_data_daily(
             DataRequest(symbol=symbol, start="2000-01-01"),
             api_key=key,
@@ -57,7 +61,7 @@ def _compact_target(target: dict) -> dict:
 
 def _run_robustness(frames, result, robust_config, semantic=False):
     robustness = {"config": robust_config.__dict__, "targets": {}}
-    for symbol in ("SPY", "QQQ"):
+    for symbol in TARGETS:
         features = build_semantic_features(frames, symbol) if semantic else add_research_features(frames, symbol)
         holdout = split_periods(features)["holdout"]
         robustness["targets"][symbol] = robustness_report(
@@ -80,12 +84,10 @@ def main():
         fdr_alpha=0.10,
     )
 
-    # Lane 1: original percentile discovery. Kept unchanged as a benchmark/control.
-    result = run_autonomous_lab(frames, targets=("SPY", "QQQ"), config=config)
+    result = run_autonomous_lab(frames, targets=TARGETS, config=config)
     robustness = _run_robustness(frames, result, robust_config, semantic=False)
 
-    # Lane 2: semantic market-state discovery. Uses the same skeptic and robustness gates.
-    semantic = run_semantic_lab(frames, targets=("SPY", "QQQ"), config=config)
+    semantic = run_semantic_lab(frames, targets=TARGETS, config=config)
     semantic_robustness = _run_robustness(frames, semantic, robust_config, semantic=True)
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -96,6 +98,8 @@ def main():
 
     summary = {
         "config": result["config"],
+        "research_targets": list(TARGETS),
+        "context_only_symbols": list(CONTEXT_SYMBOLS) + ["VIX"],
         "targets": {symbol: _compact_target(payload) for symbol, payload in result["targets"].items()},
         "robustness": {
             symbol: {
@@ -119,7 +123,7 @@ def main():
     }
     (OUT_DIR / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True))
 
-    for symbol in ("SPY", "QQQ"):
+    for symbol in TARGETS:
         base = summary["targets"][symbol]
         base_robust = summary["robustness"][symbol]
         sem = summary["semantic"]["targets"][symbol]
