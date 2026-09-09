@@ -6,7 +6,7 @@ from typing import Iterable
 import numpy as np
 import pandas as pd
 
-from .outcomes import forward_path_stats, summarize_forward_paths
+from .outcomes import summarize_forward_paths
 from .research import ResearchSplit, add_research_features, split_periods
 
 
@@ -124,16 +124,55 @@ def learn_hypotheses(full_features: pd.DataFrame, split: ResearchSplit = Researc
     return rules + pair_rules
 
 
-def _baseline_cache(frame: pd.DataFrame, horizons: Iterable[int]) -> dict[int, dict]:
-    return {h: summarize_forward_paths(forward_path_stats(frame, frame.index, h)) for h in horizons}
+def _forward_path_table(frame: pd.DataFrame, horizon: int) -> pd.DataFrame:
+    """Precompute the exact close-to-close return, MAE and MFE for every valid entry date."""
+    n = len(frame)
+    if horizon <= 0 or n <= horizon:
+        return pd.DataFrame(columns=["forward_return", "mae", "mfe"])
+
+    close = frame["close"].to_numpy(dtype=float)
+    high = frame["high"].to_numpy(dtype=float)
+    low = frame["low"].to_numpy(dtype=float)
+    valid_n = n - horizon
+    entry = close[:valid_n]
+    end_close = close[horizon:horizon + valid_n]
+
+    high_windows = np.lib.stride_tricks.sliding_window_view(high[1:], horizon)
+    low_windows = np.lib.stride_tricks.sliding_window_view(low[1:], horizon)
+    future_high = high_windows[:valid_n].max(axis=1)
+    future_low = low_windows[:valid_n].min(axis=1)
+
+    return pd.DataFrame(
+        {
+            "forward_return": end_close / entry - 1.0,
+            "mae": future_low / entry - 1.0,
+            "mfe": future_high / entry - 1.0,
+        },
+        index=frame.index[:valid_n],
+    )
 
 
-def _evaluate_rule_on_frame(frame: pd.DataFrame, rule: HypothesisRule, baseline: dict[int, dict], config: LabConfig) -> dict:
-    entries = rule.mask(frame).reindex(frame.index).fillna(False)
-    dates = list(frame.index[entries])
-    result = {"name": rule.name, "rationale": rule.rationale, "entry_count": len(dates), "horizons": {}}
+def _path_cache(frame: pd.DataFrame, horizons: Iterable[int]) -> dict[int, pd.DataFrame]:
+    return {h: _forward_path_table(frame, h) for h in horizons}
+
+
+def _baseline_cache(path_cache: dict[int, pd.DataFrame]) -> dict[int, dict]:
+    return {h: summarize_forward_paths(paths) for h, paths in path_cache.items()}
+
+
+def _evaluate_rule_on_frame(
+    frame: pd.DataFrame,
+    rule: HypothesisRule,
+    paths: dict[int, pd.DataFrame],
+    baseline: dict[int, dict],
+    config: LabConfig,
+) -> dict:
+    mask = rule.mask(frame).reindex(frame.index).fillna(False)
+    dates = frame.index[mask]
+    result = {"name": rule.name, "rationale": rule.rationale, "entry_count": int(mask.sum()), "horizons": {}}
     for h in config.horizons:
-        cs = summarize_forward_paths(forward_path_stats(frame, dates, h))
+        conditional = paths[h].loc[paths[h].index.intersection(dates)]
+        cs = summarize_forward_paths(conditional)
         bs = baseline[h]
         if cs.get("n", 0) == 0 or bs.get("n", 0) == 0:
             continue
@@ -153,14 +192,17 @@ def evaluate_hypothesis(
     rule: HypothesisRule,
     split: ResearchSplit = ResearchSplit(),
     config: LabConfig = LabConfig(),
+    path_caches: dict[str, dict[int, pd.DataFrame]] | None = None,
     baselines: dict[str, dict[int, dict]] | None = None,
 ) -> dict:
     periods = split_periods(full_features, split)
+    if path_caches is None:
+        path_caches = {period: _path_cache(frame, config.horizons) for period, frame in periods.items()}
     if baselines is None:
-        baselines = {period: _baseline_cache(frame, config.horizons) for period, frame in periods.items()}
+        baselines = {period: _baseline_cache(path_caches[period]) for period in periods}
     out = {"name": rule.name, "rationale": rule.rationale, "terms": [asdict(t) for t in rule.terms], "periods": {}}
     for period, frame in periods.items():
-        out["periods"][period] = _evaluate_rule_on_frame(frame, rule, baselines[period], config)
+        out["periods"][period] = _evaluate_rule_on_frame(frame, rule, path_caches[period], baselines[period], config)
     return out
 
 
@@ -174,7 +216,6 @@ def skeptic_verdict(result: dict, config: LabConfig = LabConfig()) -> dict:
 
     val = metric("validation")
     hold = metric("holdout")
-
     for name, block in (("validation", val), ("holdout", hold)):
         if not block:
             reasons.append(f"{name}: missing {h}d result")
@@ -213,31 +254,32 @@ def research_target(
     periods = split_periods(features, split)
     rules = learn_hypotheses(features, split=split, config=config)
 
-    # Stage 1: screen every candidate only on the exact horizon used by the skeptic gate.
-    # This cannot change the survivor set because the gate depends only on primary_horizon.
     screen_config = replace(config, horizons=(config.primary_horizon,))
-    screen_baselines = {
-        period: _baseline_cache(frame, screen_config.horizons)
-        for period, frame in periods.items()
-    }
+    screen_paths = {period: _path_cache(frame, screen_config.horizons) for period, frame in periods.items()}
+    screen_baselines = {period: _baseline_cache(screen_paths[period]) for period in periods}
+
     passed_rules: list[tuple[HypothesisRule, dict]] = []
     for rule in rules:
-        screened = evaluate_hypothesis(features, rule, split=split, config=screen_config, baselines=screen_baselines)
+        screened = evaluate_hypothesis(
+            features, rule, split=split, config=screen_config,
+            path_caches=screen_paths, baselines=screen_baselines,
+        )
         verdict = skeptic_verdict(screened, config=config)
         if verdict["passed"]:
             passed_rules.append((rule, verdict))
 
-    # Stage 2: calculate the complete horizon set only for survivors.
-    full_baselines = {
-        period: _baseline_cache(frame, config.horizons)
-        for period, frame in periods.items()
-    } if passed_rules else {}
     survivors = []
-    for rule, verdict in passed_rules:
-        result = evaluate_hypothesis(features, rule, split=split, config=config, baselines=full_baselines)
-        result["skeptic"] = verdict
-        result["live_active"] = bool(rule.mask(features).iloc[-1])
-        survivors.append(result)
+    if passed_rules:
+        full_paths = {period: _path_cache(frame, config.horizons) for period, frame in periods.items()}
+        full_baselines = {period: _baseline_cache(full_paths[period]) for period in periods}
+        for rule, verdict in passed_rules:
+            result = evaluate_hypothesis(
+                features, rule, split=split, config=config,
+                path_caches=full_paths, baselines=full_baselines,
+            )
+            result["skeptic"] = verdict
+            result["live_active"] = bool(rule.mask(features).iloc[-1])
+            survivors.append(result)
 
     survivors.sort(key=lambda r: r["skeptic"]["score"] if r["skeptic"]["score"] is not None else -np.inf, reverse=True)
     live = [r for r in survivors if r.get("live_active")]
