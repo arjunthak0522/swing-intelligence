@@ -8,6 +8,9 @@ on:
       - 'tools/reentry_historical_ledger_rebuild.py'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   rebuild-ledger:
     runs-on: ubuntu-24.04
@@ -52,9 +55,29 @@ jobs:
                   assert e['next_state_date'] > e['favorable_through']
           print('ledger contract OK:', d['episode_count'], 'episodes')
           PY
+      - name: Preserve generated ledger
+        run: cp artifacts/reentry_historical_ledger/historical_episode_ledger.json /tmp/historical_episode_ledger.json
+      - name: Checkout transparency branch for persistence
+        uses: actions/checkout@v4
+        with:
+          ref: historical-evidence-transparency-20260908
+          clean: true
+      - name: Commit ledger snapshot to web data
+        run: |
+          mkdir -p web/public/reentry/validation
+          cp /tmp/historical_episode_ledger.json web/public/reentry/validation/historical_episode_ledger_2026-09-09.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add web/public/reentry/validation/historical_episode_ledger_2026-09-09.json
+          if git diff --cached --quiet; then
+            echo 'Ledger snapshot unchanged'
+          else
+            git commit -m 'Persist reconstructed historical episode ledger'
+            git push origin HEAD:historical-evidence-transparency-20260908
+          fi
       - name: Upload ledger
         uses: actions/upload-artifact@v4
         with:
           name: reentry-historical-episode-ledger-corrected
-          path: artifacts/reentry_historical_ledger/**
+          path: /tmp/historical_episode_ledger.json
           retention-days: 30
