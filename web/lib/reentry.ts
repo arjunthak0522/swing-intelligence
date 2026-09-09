@@ -142,22 +142,53 @@ export interface IntradayQuote {
   price: number | null;
   previous_close: number | null;
   change_pct: number | null;
+  from_open_pct?: number | null;
+  from_session_high_pct?: number | null;
+  from_session_low_pct?: number | null;
+  last_30m_pct?: number | null;
+  change_at_1030_pct?: number | null;
   timestamp: string | null;
   market_state: string | null;
+}
+
+export interface IntradayGroupSummary {
+  positive_share: number | null;
+  positive_share_1030: number | null;
+  breadth_change_since_1030: number | null;
+  mean_change_pct: number | null;
+  median_change_pct: number | null;
+  strong_up_share: number | null;
+  strong_down_share: number | null;
+  count: number;
+}
+
+export interface IntradayStateQuality {
+  label: "STABLE" | "WATCH" | "CAUTION" | "DETERIORATING";
+  risk_score: number;
+  risks: {
+    broad_negative: boolean;
+    breadth_below_half: boolean;
+    vix_up: boolean;
+  };
+  broad_move: number | null;
+  breadth_positive_share: number | null;
+  vix_change: number | null;
+  research_status: string;
+  evidence_note: string;
 }
 
 export interface IntradaySnapshot {
   generated_at: string;
   status: "LIVE" | "PARTIAL" | "DEGRADED";
   official_signal_authoritative: false;
-  interpretation: string;
-  summary: {
-    sectors_positive_share: number | null;
-    subsectors_positive_share: number | null;
-    factors_positive_share: number | null;
-    tracked_quotes: number;
-    expected_quotes: number;
+  research_layer?: boolean;
+  research_version?: string;
+  group_summary?: {
+    sectors: IntradayGroupSummary;
+    subsectors: IntradayGroupSummary;
+    factors: IntradayGroupSummary;
   };
+  state_quality?: IntradayStateQuality;
   quotes: Record<string, IntradayQuote>;
   errors: string[];
 }
@@ -233,7 +264,7 @@ export async function getLatestEpisode(): Promise<ReentryEpisode | null> {
   return readPublicReentryFile<ReentryEpisode>("episode.json");
 }
 
-const INTRADAY_URL = "https://gexrdfzxmlnaawzmtlrk.supabase.co/functions/v1/reentry-intraday";
+const INTRADAY_URL = "https://gexrdfzxmlnaawzmtlrk.supabase.co/functions/v1/reentry-intraday-research";
 
 export async function getIntradaySnapshot(): Promise<IntradaySnapshot | null> {
   try {
