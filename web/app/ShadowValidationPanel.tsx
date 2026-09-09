@@ -72,7 +72,7 @@ export default function ShadowValidationPanel() {
   }, []);
 
   return (
-    <details className="card section-card shadow-validation" open>
+    <details className="card section-card shadow-validation">
       <summary className="shadow-summary">
         <div className="section-heading">
           <div>
