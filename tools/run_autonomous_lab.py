@@ -6,6 +6,7 @@ from pathlib import Path
 
 from swing_intelligence.autonomous_lab import LabConfig, run_autonomous_lab
 from swing_intelligence.autonomous_robustness import RobustnessConfig, robustness_report
+from swing_intelligence.conditional_search import ConditionalSearchConfig, run_conditional_walk_forward
 from swing_intelligence.data import DataRequest, fetch_fred_vix, fetch_twelve_data_daily
 from swing_intelligence.phase2b_validation import Phase2BConfig, phase2b_report
 from swing_intelligence.research import add_research_features, split_periods
@@ -86,6 +87,15 @@ def main():
     wf_config = WalkForwardConfig(first_test_year=2010, fold_years=2, horizon=30, min_gap=30,
                                   transaction_cost_bps_round_trip=2.0, min_trades_total=20,
                                   min_folds_with_trades=3, min_positive_fold_fraction=0.60)
+    conditional_config = ConditionalSearchConfig(
+        walk_forward=wf_config,
+        inner_validation_years=2,
+        min_inner_trades=3,
+        max_selected_per_fold=4,
+        min_outer_trades_total=20,
+        min_outer_folds=3,
+        min_positive_edge_fold_fraction=0.60,
+    )
 
     result = run_autonomous_lab(frames, targets=TARGETS, config=config)
     robustness = _run_robustness(frames, result, robust_config, semantic=False)
@@ -96,15 +106,18 @@ def main():
     semantic_phase2b = _run_phase2b(frames, semantic, semantic_robustness, phase2b_config, semantic=True)
 
     walk_forward = {"config": wf_config.__dict__, "targets": {}}
+    conditional = {"targets": {}}
     for symbol in TARGETS:
         features = build_semantic_features(frames, symbol)
         walk_forward["targets"][symbol] = run_semantic_walk_forward(features, symbol, config=wf_config)
+        conditional["targets"][symbol] = run_conditional_walk_forward(features, symbol, config=conditional_config)
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     payloads = {
         "latest.json": result, "robustness.json": robustness, "phase2b.json": phase2b,
         "semantic_latest.json": semantic, "semantic_robustness.json": semantic_robustness,
         "semantic_phase2b.json": semantic_phase2b, "walk_forward.json": walk_forward,
+        "conditional_walk_forward.json": conditional,
     }
     for name, payload in payloads.items():
         (OUT_DIR / name).write_text(json.dumps(payload, indent=2, sort_keys=True))
@@ -121,6 +134,7 @@ def main():
             "phase2b": {symbol: semantic_phase2b["targets"][symbol] for symbol in TARGETS},
         },
         "walk_forward": {symbol: walk_forward["targets"][symbol] for symbol in TARGETS},
+        "conditional_walk_forward": {symbol: conditional["targets"][symbol] for symbol in TARGETS},
     }
     (OUT_DIR / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True))
 
@@ -132,11 +146,12 @@ def main():
         sem_robust = summary["semantic"]["robustness"][symbol]
         sem_grades = summary["semantic"]["phase2b"][symbol]["grade_counts"]
         wf = summary["walk_forward"][symbol]
+        cond = summary["conditional_walk_forward"][symbol]
         print(
             f"{symbol}: baseline {base['candidate_count']} candidates / {base['survivor_count']} first-pass / "
             f"{base_robust['robust_count']} robust / grades={base_grades}; semantic {sem['candidate_count']} candidates / "
             f"{sem['survivor_count']} first-pass / {sem_robust['robust_count']} robust / grades={sem_grades}; "
-            f"walk-forward profitable={wf['profitable_count']}"
+            f"walk-forward profitable={wf['profitable_count']}; conditional candidate strategies={cond['candidate_strategy_count']}"
         )
 
 
