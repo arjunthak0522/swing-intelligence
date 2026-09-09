@@ -6,9 +6,11 @@ from swing_intelligence.autonomous_lab import (
     ResearchSplit,
     RuleTerm,
     HypothesisRule,
+    _forward_path_table,
     learn_hypotheses,
     skeptic_verdict,
 )
+from swing_intelligence.outcomes import forward_path_stats
 
 
 def test_rule_mask_applies_all_terms():
@@ -38,6 +40,24 @@ def test_hypothesis_thresholds_are_train_only():
     thresholds_after = [(r.name, r.terms[0].threshold) for r in rules_after]
 
     assert thresholds_before == thresholds_after
+
+
+def test_precomputed_forward_paths_match_reference_implementation():
+    idx = pd.bdate_range("2024-01-02", periods=12)
+    close = np.array([100, 102, 101, 104, 103, 105, 107, 106, 109, 108, 111, 112], dtype=float)
+    df = pd.DataFrame({
+        "open": close,
+        "high": close + np.array([1.0, 2.0, 1.5, 1.0, 2.5, 1.5, 2.0, 1.0, 2.0, 1.5, 1.0, 2.0]),
+        "low": close - np.array([1.0, 1.0, 2.0, 1.5, 1.0, 2.0, 1.0, 2.5, 1.0, 2.0, 1.5, 1.0]),
+        "close": close,
+        "volume": 1000,
+    }, index=idx)
+
+    for horizon in (1, 3, 5):
+        reference = forward_path_stats(df, df.index, horizon)
+        fast = _forward_path_table(df, horizon)
+        pd.testing.assert_index_equal(fast.index, reference.index)
+        pd.testing.assert_frame_equal(fast, reference, check_exact=False, rtol=1e-12, atol=1e-12)
 
 
 def test_skeptic_requires_validation_and_holdout_edges():
