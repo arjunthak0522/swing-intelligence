@@ -6,6 +6,7 @@ on:
     paths:
       - "tools/intraday_signal_validation.py"
       - "tools/intraday_signal_robustness.py"
+      - "tools/intraday_state_transition_validation.py"
       - ".github/workflows/intraday-signal-research.yml"
       - "web/public/reentry/validation/historical_episode_ledger_2026-09-09.json"
   workflow_dispatch:
@@ -16,7 +17,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
         with:
@@ -40,11 +41,13 @@ jobs:
         run: python tools/intraday_signal_validation.py
       - name: Run two-year hourly robustness validation
         run: python tools/intraday_signal_robustness.py
+      - name: Run same-day state transition validation
+        run: python tools/intraday_state_transition_validation.py
       - name: Persist research outputs
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add research/intraday_signal_validation.json research/intraday_signal_validation.md research/intraday_signal_robustness.json research/intraday_signal_robustness.md
+          git add research/intraday_signal_validation.json research/intraday_signal_validation.md research/intraday_signal_robustness.json research/intraday_signal_robustness.md research/intraday_state_transition_validation.json research/intraday_state_transition_validation.md
           if git diff --cached --quiet; then
             echo "No research output changes"
           else
