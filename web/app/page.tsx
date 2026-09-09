@@ -3,7 +3,7 @@ import MarketMovementTables from "./MarketMovementTables";
 import HistoricalEvidence from "./HistoricalEvidence";
 import ShadowValidationPanel from "./ShadowValidationPanel";
 import VolumeBreadthPanel from "./VolumeBreadthPanel";
-import { getHistoricalEpisodeEvidence, getHistoricalEpisodeLedger } from "../lib/historicalEvidence";
+import { getHistoricalEpisodeEvidence } from "../lib/historicalEvidence";
 import {
   getIntradaySnapshot,
   getLatestEpisode,
@@ -184,12 +184,11 @@ function PageStyles() {
 }
 
 export default async function Home() {
-  const [snapshot, intraday, episode, historicalEvidence, historicalLedger] = await Promise.all([
+  const [snapshot, intraday, episode, historicalEvidence] = await Promise.all([
     getLatestSnapshot(),
     getIntradaySnapshot(),
     getLatestEpisode(),
     getHistoricalEpisodeEvidence(),
-    getHistoricalEpisodeLedger(),
   ]);
 
   if (!snapshot) {
@@ -207,7 +206,7 @@ export default async function Home() {
       <LiveToday live={intraday} official={snapshot} />
       <WhyDecision s={snapshot} />
       <MarketInternalsSummary snapshot={snapshot} live={intraday} />
-      <HistoricalEvidence evidence={historicalEvidence} ledger={historicalLedger} />
+      <HistoricalEvidence evidence={historicalEvidence} />
       <ResearchSection />
     </>}
     <footer>Official RE-ENTRY decisions use completed-close data. Live context and research layers never overwrite the validated close signal.</footer>
