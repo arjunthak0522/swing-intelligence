@@ -13,7 +13,7 @@ from .robustness import block_bootstrap_edge, benjamini_hochberg
 class RobustnessConfig:
     horizon: int = 30
     min_event_gap: int = 30
-    min_independent_events: int = 8
+    min_independent_events: int = 20
     bootstrap_iterations: int = 1000
     bootstrap_block: int = 3
     fdr_alpha: float = 0.10
