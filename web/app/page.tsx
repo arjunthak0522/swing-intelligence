@@ -1,7 +1,7 @@
 import { ChevronRight, CircleAlert, CircleCheck, Clock3, Radio } from "lucide-react";
 import MarketMovementTables from "./MarketMovementTables";
 import HistoricalEvidence from "./HistoricalEvidence";
-import { getHistoricalEpisodeEvidence } from "../lib/historicalEvidence";
+import { getHistoricalEpisodeEvidence, getHistoricalEpisodeLedger } from "../lib/historicalEvidence";
 import {
   getIntradaySnapshot,
   getLatestEpisode,
@@ -263,7 +263,7 @@ function Historical({ s }: { s: ReentrySnapshot }) {
 }
 
 export default async function Home() {
-  const [snapshot, intraday, episode, historicalEvidence] = await Promise.all([getLatestSnapshot(), getIntradaySnapshot(), getLatestEpisode(), getHistoricalEpisodeEvidence()]);
+  const [snapshot, intraday, episode, historicalEvidence, historicalLedger] = await Promise.all([getLatestSnapshot(), getIntradaySnapshot(), getLatestEpisode(), getHistoricalEpisodeEvidence(), getHistoricalEpisodeLedger()]);
   if (!snapshot) {
     return <main className="shell"><section className="card data-blocked"><CircleAlert /> <div><b>OFFICIAL FEED UNAVAILABLE</b><p>No fallback decision is shown when the canonical close snapshot cannot be loaded.</p></div></section></main>;
   }
@@ -281,7 +281,7 @@ export default async function Home() {
       <div className="context-divider"><span className="kicker">WHAT IS HAPPENING TODAY · CONTEXT ONLY</span><p>Live movement helps explain what is happening underneath the official decision. It never replaces the completed-close RE-ENTRY signal.</p></div>
       <IntradayMonitor live={intraday} official={s} />
       <MarketMovementTables snapshot={s} live={intraday} />
-      <HistoricalEvidence evidence={historicalEvidence} />
+      <HistoricalEvidence evidence={historicalEvidence} ledger={historicalLedger} />
       <OutperformanceCard />
     </>}
     <footer>Official RE-ENTRY decisions use completed-close data. Intraday data is provisional market context only and never overwrites the validated close signal. Historical ETF opportunity estimates remain suppressed until their input history is reproducible.</footer>
