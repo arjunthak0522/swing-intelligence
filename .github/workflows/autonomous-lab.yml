@@ -7,8 +7,12 @@ on:
     paths:
       - 'src/swing_intelligence/autonomous_lab.py'
       - 'tests/test_autonomous_lab.py'
+      - 'tools/run_autonomous_lab.py'
       - '.github/workflows/autonomous-lab.yml'
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   test:
@@ -22,3 +26,25 @@ jobs:
         run: pip install -e '.[dev]'
       - name: Run autonomous lab tests
         run: pytest -q tests/test_autonomous_lab.py
+
+  research:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install package
+        run: pip install -e .
+      - name: Run real-data SPY QQQ lab
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/run_autonomous_lab.py
+      - name: Upload research evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: spy-qqq-autonomous-lab-evidence
+          path: artifacts/autonomous_lab/
+          retention-days: 14
