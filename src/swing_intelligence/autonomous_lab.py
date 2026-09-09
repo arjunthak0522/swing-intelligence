@@ -6,8 +6,8 @@ from typing import Iterable
 import numpy as np
 import pandas as pd
 
+from .outcomes import forward_path_stats, summarize_forward_paths
 from .research import ResearchSplit, add_research_features, split_periods
-from .tournament import SignalSpec, evaluate_signal
 
 
 DEFAULT_HORIZONS = (1, 5, 10, 20, 30, 60, 120)
@@ -140,9 +140,6 @@ def learn_hypotheses(full_features: pd.DataFrame, split: ResearchSplit = Researc
             ))
             single_terms.append(term)
 
-    # Autonomous interaction search is constrained to price-state x context pairs.
-    # This captures combinations such as a pullback plus improving breadth/volatility
-    # without creating an unbounded combinatorial search.
     pair_rules: list[HypothesisRule] = []
     price_terms = [t for t in single_terms if t.feature in PRICE_STATE_FEATURES]
     context_terms = [t for t in single_terms if t.feature in CONTEXT_FEATURES]
@@ -162,17 +159,53 @@ def learn_hypotheses(full_features: pd.DataFrame, split: ResearchSplit = Researc
     return rules + pair_rules
 
 
+def _baseline_cache(frame: pd.DataFrame, horizons: Iterable[int]) -> dict[int, dict]:
+    """Compute the unconditional forward-path baseline once per period/horizon."""
+    cache: dict[int, dict] = {}
+    for h in horizons:
+        cache[h] = summarize_forward_paths(forward_path_stats(frame, frame.index, h))
+    return cache
+
+
+def _evaluate_rule_on_frame(
+    frame: pd.DataFrame,
+    rule: HypothesisRule,
+    baseline: dict[int, dict],
+    config: LabConfig,
+) -> dict:
+    entries = rule.mask(frame).reindex(frame.index).fillna(False)
+    dates = list(frame.index[entries])
+    result = {"name": rule.name, "rationale": rule.rationale, "entry_count": len(dates), "horizons": {}}
+    for h in config.horizons:
+        conditional = forward_path_stats(frame, dates, h)
+        cs = summarize_forward_paths(conditional)
+        bs = baseline[h]
+        if cs.get("n", 0) == 0 or bs.get("n", 0) == 0:
+            continue
+        result["horizons"][h] = {
+            **cs,
+            "normal_median_return": bs["median_return"],
+            "median_excess_edge": float(cs["median_return"] - bs["median_return"]),
+            "normal_win_probability": bs["win_probability"],
+            "win_probability_edge": float(cs["win_probability"] - bs["win_probability"]),
+            "sample_ok": bool(cs["n"] >= config.min_n),
+        }
+    return result
+
+
 def evaluate_hypothesis(
     full_features: pd.DataFrame,
     rule: HypothesisRule,
     split: ResearchSplit = ResearchSplit(),
     config: LabConfig = LabConfig(),
+    baselines: dict[str, dict[int, dict]] | None = None,
 ) -> dict:
     periods = split_periods(full_features, split)
+    if baselines is None:
+        baselines = {period: _baseline_cache(frame, config.horizons) for period, frame in periods.items()}
     out = {"name": rule.name, "rationale": rule.rationale, "terms": [asdict(t) for t in rule.terms], "periods": {}}
     for period, frame in periods.items():
-        spec = SignalSpec(rule.name, rule.mask(frame), rule.rationale)
-        out["periods"][period] = evaluate_signal(frame, spec, horizons=config.horizons, min_n=config.min_n)
+        out["periods"][period] = _evaluate_rule_on_frame(frame, rule, baselines[period], config)
     return out
 
 
@@ -222,11 +255,13 @@ def research_target(
     config: LabConfig = LabConfig(),
 ) -> dict:
     features = add_research_features(frames, target)
+    periods = split_periods(features, split)
+    baselines = {period: _baseline_cache(frame, config.horizons) for period, frame in periods.items()}
     rules = learn_hypotheses(features, split=split, config=config)
     survivors = []
 
     for rule in rules:
-        result = evaluate_hypothesis(features, rule, split=split, config=config)
+        result = evaluate_hypothesis(features, rule, split=split, config=config, baselines=baselines)
         verdict = skeptic_verdict(result, config=config)
         result["skeptic"] = verdict
         if verdict["passed"]:
