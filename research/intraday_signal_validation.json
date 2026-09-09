@@ -1,0 +1,2737 @@
+{
+  "analysis": {
+    "10:30": {
+      "features": {
+        "breadth_not_fading": {
+          "10d": {
+            "absent": {
+              "mean": 0.003994380429953248,
+              "median": -0.004913155920094586,
+              "n": 10,
+              "positive_rate": 0.4
+            },
+            "present": {
+              "mean": null,
+              "median": null,
+              "n": 0,
+              "positive_rate": null
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": 0.0026440959786943443,
+              "median": 0.0016611595710012694,
+              "n": 10,
+              "positive_rate": 0.5
+            },
+            "present": {
+              "mean": null,
+              "median": null,
+              "n": 0,
+              "positive_rate": null
+            }
+          }
+        },
+        "factors_broad": {
+          "10d": {
+            "absent": {
+              "mean": 0.018169410935076458,
+              "median": 0.009942923654752439,
+              "n": 6,
+              "positive_rate": 0.6666666666666666
+            },
+            "present": {
+              "mean": -0.017268165327731566,
+              "median": -0.012087478876010666,
+              "n": 4,
+              "positive_rate": 0.0
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": 0.00673531822053286,
+              "median": 0.009484102167441,
+              "n": 6,
+              "positive_rate": 0.6666666666666666
+            },
+            "present": {
+              "mean": -0.0034927373840634296,
+              "median": -0.005856938799563088,
+              "n": 4,
+              "positive_rate": 0.25
+            }
+          }
+        },
+        "indices_confirm": {
+          "10d": {
+            "absent": {
+              "mean": 0.019127722148556892,
+              "median": 0.00650799244183059,
+              "n": 5,
+              "positive_rate": 0.6
+            },
+            "present": {
+              "mean": -0.011138961288650395,
+              "median": -0.011507319168908403,
+              "n": 5,
+              "positive_rate": 0.2
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": 0.01048934675815918,
+              "median": 0.010739660124433392,
+              "n": 5,
+              "positive_rate": 0.8
+            },
+            "present": {
+              "mean": -0.005201154800770491,
+              "median": -0.0074846976975525,
+              "n": 5,
+              "positive_rate": 0.2
+            }
+          }
+        },
+        "sectors_broad": {
+          "10d": {
+            "absent": {
+              "mean": -0.0009484987197166157,
+              "median": -0.006894476205567435,
+              "n": 7,
+              "positive_rate": 0.2857142857142857
+            },
+            "present": {
+              "mean": 0.015527765112516264,
+              "median": 0.00650799244183059,
+              "n": 3,
+              "positive_rate": 0.6666666666666666
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": -0.002038346872545568,
+              "median": -0.0074846976975525,
+              "n": 7,
+              "positive_rate": 0.2857142857142857
+            },
+            "present": {
+              "mean": 0.013569795964920806,
+              "median": 0.008228544210448607,
+              "n": 3,
+              "positive_rate": 1.0
+            }
+          }
+        },
+        "short_term_momentum": {
+          "10d": {
+            "absent": {
+              "mean": 0.01161803490219846,
+              "median": 0.00650799244183059,
+              "n": 5,
+              "positive_rate": 0.6
+            },
+            "present": {
+              "mean": -0.0036292740422919634,
+              "median": -0.011507319168908403,
+              "n": 5,
+              "positive_rate": 0.2
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": -0.0005219562517539522,
+              "median": 0.008228544210448607,
+              "n": 5,
+              "positive_rate": 0.6
+            },
+            "present": {
+              "mean": 0.00581014820914264,
+              "median": -0.004229179901573676,
+              "n": 5,
+              "positive_rate": 0.4
+            }
+          }
+        },
+        "subsectors_broad": {
+          "10d": {
+            "absent": {
+              "mean": 0.012731462776000388,
+              "median": 0.005223009616526275,
+              "n": 4,
+              "positive_rate": 0.5
+            },
+            "present": {
+              "mean": -0.0018303411340781783,
+              "median": -0.009200897687237919,
+              "n": 6,
+              "positive_rate": 0.3333333333333333
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": 0.0018135051180027395,
+              "median": -0.0006475821715826724,
+              "n": 4,
+              "positive_rate": 0.5
+            },
+            "present": {
+              "mean": 0.0031978232191554137,
+              "median": 0.0016611595710012694,
+              "n": 6,
+              "positive_rate": 0.5
+            }
+          }
+        },
+        "vol_curve_normal": {
+          "10d": {
+            "absent": {
+              "mean": -0.010446459228517446,
+              "median": -0.010446459228517446,
+              "n": 1,
+              "positive_rate": 0.0
+            },
+            "present": {
+              "mean": 0.005598918169783325,
+              "median": -0.002931835634621738,
+              "n": 9,
+              "positive_rate": 0.4444444444444444
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": -0.03447250576679062,
+              "median": -0.03447250576679062,
+              "n": 1,
+              "positive_rate": 0.0
+            },
+            "present": {
+              "mean": 0.006768162839303784,
+              "median": 0.007551499043576215,
+              "n": 9,
+              "positive_rate": 0.5555555555555556
+            }
+          }
+        },
+        "vol_easing": {
+          "10d": {
+            "absent": {
+              "mean": 0.007432302494518084,
+              "median": -0.002931835634621738,
+              "n": 5,
+              "positive_rate": 0.4
+            },
+            "present": {
+              "mean": 0.0005564583653884126,
+              "median": -0.011507319168908403,
+              "n": 5,
+              "positive_rate": 0.4
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": 0.007997801935754723,
+              "median": 0.010739660124433392,
+              "n": 5,
+              "positive_rate": 0.6
+            },
+            "present": {
+              "mean": -0.0027096099783660344,
+              "median": -0.0074846976975525,
+              "n": 5,
+              "positive_rate": 0.4
+            }
+          }
+        }
+      },
+      "n_observations": 10,
+      "score_6plus": {
+        "10d": {
+          "absent": {
+            "mean": 0.014588855629270188,
+            "median": 0.00650799244183059,
+            "n": 7,
+            "positive_rate": 0.5714285714285714
+          },
+          "present": {
+            "mean": -0.020726061701786275,
+            "median": -0.012667638583112928,
+            "n": 3,
+            "positive_rate": 0.0
+          }
+        },
+        "5d": {
+          "absent": {
+            "mean": 0.0051689613459462115,
+            "median": 0.008228544210448607,
+            "n": 7,
+            "positive_rate": 0.5714285714285714
+          },
+          "present": {
+            "mean": -0.0032472565448933475,
+            "median": -0.0074846976975525,
+            "n": 3,
+            "positive_rate": 0.3333333333333333
+          }
+        }
+      }
+    },
+    "12:00": {
+      "features": {
+        "breadth_not_fading": {
+          "10d": {
+            "absent": {
+              "mean": -0.017127174072158895,
+              "median": -0.010446459228517446,
+              "n": 3,
+              "positive_rate": 0.0
+            },
+            "present": {
+              "mean": 0.013046475216572737,
+              "median": 0.00650799244183059,
+              "n": 7,
+              "positive_rate": 0.5714285714285714
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": -0.011180472207686995,
+              "median": -0.009808570980703757,
+              "n": 3,
+              "positive_rate": 0.3333333333333333
+            },
+            "present": {
+              "mean": 0.008568910915714918,
+              "median": 0.007551499043576215,
+              "n": 7,
+              "positive_rate": 0.5714285714285714
+            }
+          }
+        },
+        "factors_broad": {
+          "10d": {
+            "absent": {
+              "mean": 0.011486768709166428,
+              "median": 0.00650799244183059,
+              "n": 5,
+              "positive_rate": 0.6
+            },
+            "present": {
+              "mean": -0.003498007849259932,
+              "median": -0.011507319168908403,
+              "n": 5,
+              "positive_rate": 0.2
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": 0.006436673022549711,
+              "median": 0.010739660124433392,
+              "n": 5,
+              "positive_rate": 0.6
+            },
+            "present": {
+              "mean": -0.0011484810651610222,
+              "median": -0.004229179901573676,
+              "n": 5,
+              "positive_rate": 0.4
+            }
+          }
+        },
+        "indices_confirm": {
+          "10d": {
+            "absent": {
+              "mean": 0.011178079910829503,
+              "median": 0.0017880784036044262,
+              "n": 4,
+              "positive_rate": 0.5
+            },
+            "present": {
+              "mean": -0.0007947525572975881,
+              "median": -0.009200897687237919,
+              "n": 6,
+              "positive_rate": 0.3333333333333333
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": 0.002356260802207244,
+              "median": 0.009484102167441,
+              "n": 4,
+              "positive_rate": 0.75
+            },
+            "present": {
+              "mean": 0.002835986096352411,
+              "median": -0.005856938799563088,
+              "n": 6,
+              "positive_rate": 0.3333333333333333
+            }
+          }
+        },
+        "sectors_broad": {
+          "10d": {
+            "absent": {
+              "mean": -0.0009484987197166157,
+              "median": -0.006894476205567435,
+              "n": 7,
+              "positive_rate": 0.2857142857142857
+            },
+            "present": {
+              "mean": 0.015527765112516264,
+              "median": 0.00650799244183059,
+              "n": 3,
+              "positive_rate": 0.6666666666666666
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": -0.002038346872545568,
+              "median": -0.0074846976975525,
+              "n": 7,
+              "positive_rate": 0.2857142857142857
+            },
+            "present": {
+              "mean": 0.013569795964920806,
+              "median": 0.008228544210448607,
+              "n": 3,
+              "positive_rate": 1.0
+            }
+          }
+        },
+        "short_term_momentum": {
+          "10d": {
+            "absent": {
+              "mean": -0.02475527326112295,
+              "median": -0.02475527326112295,
+              "n": 2,
+              "positive_rate": 0.0
+            },
+            "present": {
+              "mean": 0.011181793852722298,
+              "median": 0.0017880784036044262,
+              "n": 8,
+              "positive_rate": 0.5
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": -0.0011285359685637708,
+              "median": -0.0011285359685637708,
+              "n": 2,
+              "positive_rate": 0.5
+            },
+            "present": {
+              "mean": 0.003587253965508873,
+              "median": 0.0019996821544374654,
+              "n": 8,
+              "positive_rate": 0.5
+            }
+          }
+        },
+        "subsectors_broad": {
+          "10d": {
+            "absent": {
+              "mean": 0.012515998745442422,
+              "median": -0.002931835634621738,
+              "n": 3,
+              "positive_rate": 0.3333333333333333
+            },
+            "present": {
+              "mean": 0.0003422582947436026,
+              "median": -0.006894476205567435,
+              "n": 7,
+              "positive_rate": 0.42857142857142855
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": 0.006429614979869898,
+              "median": 0.010739660124433392,
+              "n": 3,
+              "positive_rate": 0.6666666666666666
+            },
+            "present": {
+              "mean": 0.0010217306924762495,
+              "median": -0.004229179901573676,
+              "n": 7,
+              "positive_rate": 0.42857142857142855
+            }
+          }
+        },
+        "vol_curve_normal": {
+          "10d": {
+            "absent": {
+              "mean": -0.010446459228517446,
+              "median": -0.010446459228517446,
+              "n": 1,
+              "positive_rate": 0.0
+            },
+            "present": {
+              "mean": 0.005598918169783325,
+              "median": -0.002931835634621738,
+              "n": 9,
+              "positive_rate": 0.4444444444444444
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": -0.03447250576679062,
+              "median": -0.03447250576679062,
+              "n": 1,
+              "positive_rate": 0.0
+            },
+            "present": {
+              "mean": 0.006768162839303784,
+              "median": 0.007551499043576215,
+              "n": 9,
+              "positive_rate": 0.5555555555555556
+            }
+          }
+        },
+        "vol_easing": {
+          "10d": {
+            "absent": {
+              "mean": -0.003441194656719007,
+              "median": -0.004913155920094586,
+              "n": 4,
+              "positive_rate": 0.25
+            },
+            "present": {
+              "mean": 0.008951430487734752,
+              "median": 0.0009352678493829425,
+              "n": 6,
+              "positive_rate": 0.5
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": -0.0007581702257983269,
+              "median": 0.003255240111429858,
+              "n": 4,
+              "positive_rate": 0.5
+            },
+            "present": {
+              "mean": 0.004912273448356125,
+              "median": 3.340067301185745e-05,
+              "n": 6,
+              "positive_rate": 0.5
+            }
+          }
+        }
+      },
+      "n_observations": 10,
+      "score_6plus": {
+        "10d": {
+          "absent": {
+            "mean": 0.001210552264964071,
+            "median": -0.002931835634621738,
+            "n": 5,
+            "positive_rate": 0.4
+          },
+          "present": {
+            "mean": 0.006778208594942425,
+            "median": -0.006894476205567435,
+            "n": 5,
+            "positive_rate": 0.4
+          }
+        },
+        "5d": {
+          "absent": {
+            "mean": 0.006881923719928707,
+            "median": 0.010739660124433392,
+            "n": 5,
+            "positive_rate": 0.6
+          },
+          "present": {
+            "mean": -0.0015937317625400182,
+            "median": -0.004229179901573676,
+            "n": 5,
+            "positive_rate": 0.4
+          }
+        }
+      }
+    },
+    "13:30": {
+      "features": {
+        "breadth_not_fading": {
+          "10d": {
+            "absent": {
+              "mean": -0.011690610571393553,
+              "median": -0.010446459228517446,
+              "n": 3,
+              "positive_rate": 0.3333333333333333
+            },
+            "present": {
+              "mean": 0.010716519430530449,
+              "median": -0.002931835634621738,
+              "n": 7,
+              "positive_rate": 0.42857142857142855
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": -0.018771967071697704,
+              "median": -0.012034824467598737,
+              "n": 3,
+              "positive_rate": 0.0
+            },
+            "present": {
+              "mean": 0.01182240871457665,
+              "median": 0.008228544210448607,
+              "n": 7,
+              "positive_rate": 0.7142857142857143
+            }
+          }
+        },
+        "factors_broad": {
+          "10d": {
+            "absent": {
+              "mean": 0.0016268881115914235,
+              "median": 0.0017880784036044262,
+              "n": 4,
+              "positive_rate": 0.5
+            },
+            "present": {
+              "mean": 0.005572708642194464,
+              "median": -0.009200897687237919,
+              "n": 6,
+              "positive_rate": 0.3333333333333333
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": -0.002709581367304592,
+              "median": -0.0006475821715826724,
+              "n": 4,
+              "positive_rate": 0.5
+            },
+            "present": {
+              "mean": 0.0062132142093603016,
+              "median": 0.0016611595710012694,
+              "n": 6,
+              "positive_rate": 0.5
+            }
+          }
+        },
+        "indices_confirm": {
+          "10d": {
+            "absent": {
+              "mean": 0.011178079910829503,
+              "median": 0.0017880784036044262,
+              "n": 4,
+              "positive_rate": 0.5
+            },
+            "present": {
+              "mean": -0.0007947525572975881,
+              "median": -0.009200897687237919,
+              "n": 6,
+              "positive_rate": 0.3333333333333333
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": 0.002356260802207244,
+              "median": 0.009484102167441,
+              "n": 4,
+              "positive_rate": 0.75
+            },
+            "present": {
+              "mean": 0.002835986096352411,
+              "median": -0.005856938799563088,
+              "n": 6,
+              "positive_rate": 0.3333333333333333
+            }
+          }
+        },
+        "sectors_broad": {
+          "10d": {
+            "absent": {
+              "mean": 4.2497527925187496e-05,
+              "median": -0.006689147431569592,
+              "n": 6,
+              "positive_rate": 0.3333333333333333
+            },
+            "present": {
+              "mean": 0.00992220478299534,
+              "median": -0.00019324188186842228,
+              "n": 4,
+              "positive_rate": 0.5
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": -0.0016732080343742166,
+              "median": -0.008646634339128129,
+              "n": 6,
+              "positive_rate": 0.3333333333333333
+            },
+            "present": {
+              "mean": 0.009120051998297185,
+              "median": 0.007890021627012411,
+              "n": 4,
+              "positive_rate": 0.75
+            }
+          }
+        },
+        "short_term_momentum": {
+          "10d": {
+            "absent": {
+              "mean": -0.0035990342947823475,
+              "median": -0.011507319168908403,
+              "n": 3,
+              "positive_rate": 0.3333333333333333
+            },
+            "present": {
+              "mean": 0.007248701026268504,
+              "median": -0.002931835634621738,
+              "n": 7,
+              "positive_rate": 0.42857142857142855
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": -0.003989341040525007,
+              "median": -0.0074846976975525,
+              "n": 3,
+              "positive_rate": 0.3333333333333333
+            },
+            "present": {
+              "mean": 0.005486997558359781,
+              "median": 0.008228544210448607,
+              "n": 7,
+              "positive_rate": 0.5714285714285714
+            }
+          }
+        },
+        "subsectors_broad": {
+          "10d": {
+            "absent": {
+              "mean": 0.0025845247501328104,
+              "median": -0.002931835634621738,
+              "n": 5,
+              "positive_rate": 0.4
+            },
+            "present": {
+              "mean": 0.0054042361097736856,
+              "median": -0.006894476205567435,
+              "n": 5,
+              "positive_rate": 0.4
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": -0.0005109101017385598,
+              "median": -0.009808570980703757,
+              "n": 5,
+              "positive_rate": 0.4
+            },
+            "present": {
+              "mean": 0.005799102059127248,
+              "median": 0.007551499043576215,
+              "n": 5,
+              "positive_rate": 0.6
+            }
+          }
+        },
+        "vol_curve_normal": {
+          "10d": {
+            "absent": {
+              "mean": -0.010446459228517446,
+              "median": -0.010446459228517446,
+              "n": 1,
+              "positive_rate": 0.0
+            },
+            "present": {
+              "mean": 0.005598918169783325,
+              "median": -0.002931835634621738,
+              "n": 9,
+              "positive_rate": 0.4444444444444444
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": -0.03447250576679062,
+              "median": -0.03447250576679062,
+              "n": 1,
+              "positive_rate": 0.0
+            },
+            "present": {
+              "mean": 0.006768162839303784,
+              "median": 0.007551499043576215,
+              "n": 9,
+              "positive_rate": 0.5555555555555556
+            }
+          }
+        },
+        "vol_easing": {
+          "10d": {
+            "absent": {
+              "mean": -0.003441194656719007,
+              "median": -0.004913155920094586,
+              "n": 4,
+              "positive_rate": 0.25
+            },
+            "present": {
+              "mean": 0.008951430487734752,
+              "median": 0.0009352678493829425,
+              "n": 6,
+              "positive_rate": 0.5
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": -0.0007581702257983269,
+              "median": 0.003255240111429858,
+              "n": 4,
+              "positive_rate": 0.5
+            },
+            "present": {
+              "mean": 0.004912273448356125,
+              "median": 3.340067301185745e-05,
+              "n": 6,
+              "positive_rate": 0.5
+            }
+          }
+        }
+      },
+      "n_observations": 10,
+      "score_6plus": {
+        "10d": {
+          "absent": {
+            "mean": -0.006299134981394361,
+            "median": -0.002931835634621738,
+            "n": 5,
+            "positive_rate": 0.4
+          },
+          "present": {
+            "mean": 0.014287895841300857,
+            "median": -0.006894476205567435,
+            "n": 5,
+            "positive_rate": 0.4
+          }
+        },
+        "5d": {
+          "absent": {
+            "mean": -0.004129379289984425,
+            "median": -0.009808570980703757,
+            "n": 5,
+            "positive_rate": 0.4
+          },
+          "present": {
+            "mean": 0.009417571247373113,
+            "median": 0.007551499043576215,
+            "n": 5,
+            "positive_rate": 0.6
+          }
+        }
+      }
+    },
+    "15:00": {
+      "features": {
+        "breadth_not_fading": {
+          "10d": {
+            "absent": {
+              "mean": -0.011690610571393553,
+              "median": -0.010446459228517446,
+              "n": 3,
+              "positive_rate": 0.3333333333333333
+            },
+            "present": {
+              "mean": 0.010716519430530449,
+              "median": -0.002931835634621738,
+              "n": 7,
+              "positive_rate": 0.42857142857142855
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": -0.018771967071697704,
+              "median": -0.012034824467598737,
+              "n": 3,
+              "positive_rate": 0.0
+            },
+            "present": {
+              "mean": 0.01182240871457665,
+              "median": 0.008228544210448607,
+              "n": 7,
+              "positive_rate": 0.7142857142857143
+            }
+          }
+        },
+        "factors_broad": {
+          "10d": {
+            "absent": {
+              "mean": 0.01161803490219846,
+              "median": 0.00650799244183059,
+              "n": 5,
+              "positive_rate": 0.6
+            },
+            "present": {
+              "mean": -0.0036292740422919634,
+              "median": -0.011507319168908403,
+              "n": 5,
+              "positive_rate": 0.2
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": -0.0005219562517539522,
+              "median": 0.008228544210448607,
+              "n": 5,
+              "positive_rate": 0.6
+            },
+            "present": {
+              "mean": 0.00581014820914264,
+              "median": -0.004229179901573676,
+              "n": 5,
+              "positive_rate": 0.4
+            }
+          }
+        },
+        "indices_confirm": {
+          "10d": {
+            "absent": {
+              "mean": 0.01161803490219846,
+              "median": 0.00650799244183059,
+              "n": 5,
+              "positive_rate": 0.6
+            },
+            "present": {
+              "mean": -0.0036292740422919634,
+              "median": -0.011507319168908403,
+              "n": 5,
+              "positive_rate": 0.2
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": -0.0005219562517539522,
+              "median": 0.008228544210448607,
+              "n": 5,
+              "positive_rate": 0.6
+            },
+            "present": {
+              "mean": 0.00581014820914264,
+              "median": -0.004229179901573676,
+              "n": 5,
+              "positive_rate": 0.4
+            }
+          }
+        },
+        "sectors_broad": {
+          "10d": {
+            "absent": {
+              "mean": 0.0025845247501328104,
+              "median": -0.002931835634621738,
+              "n": 5,
+              "positive_rate": 0.4
+            },
+            "present": {
+              "mean": 0.0054042361097736856,
+              "median": -0.006894476205567435,
+              "n": 5,
+              "positive_rate": 0.4
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": -0.0005109101017385598,
+              "median": -0.009808570980703757,
+              "n": 5,
+              "positive_rate": 0.4
+            },
+            "present": {
+              "mean": 0.005799102059127248,
+              "median": 0.007551499043576215,
+              "n": 5,
+              "positive_rate": 0.6
+            }
+          }
+        },
+        "short_term_momentum": {
+          "10d": {
+            "absent": {
+              "mean": 0.008753919329804294,
+              "median": 0.00650799244183059,
+              "n": 7,
+              "positive_rate": 0.5714285714285714
+            },
+            "present": {
+              "mean": -0.0071112103363658585,
+              "median": -0.006894476205567435,
+              "n": 3,
+              "positive_rate": 0.0
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": 0.00176842578864393,
+              "median": -0.0074846976975525,
+              "n": 7,
+              "positive_rate": 0.42857142857142855
+            },
+            "present": {
+              "mean": 0.00468732642214531,
+              "median": 0.007551499043576215,
+              "n": 3,
+              "positive_rate": 0.6666666666666666
+            }
+          }
+        },
+        "subsectors_broad": {
+          "10d": {
+            "absent": {
+              "mean": 0.0025845247501328104,
+              "median": -0.002931835634621738,
+              "n": 5,
+              "positive_rate": 0.4
+            },
+            "present": {
+              "mean": 0.0054042361097736856,
+              "median": -0.006894476205567435,
+              "n": 5,
+              "positive_rate": 0.4
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": -0.0005109101017385598,
+              "median": -0.009808570980703757,
+              "n": 5,
+              "positive_rate": 0.4
+            },
+            "present": {
+              "mean": 0.005799102059127248,
+              "median": 0.007551499043576215,
+              "n": 5,
+              "positive_rate": 0.6
+            }
+          }
+        },
+        "vol_curve_normal": {
+          "10d": {
+            "absent": {
+              "mean": -0.010446459228517446,
+              "median": -0.010446459228517446,
+              "n": 1,
+              "positive_rate": 0.0
+            },
+            "present": {
+              "mean": 0.005598918169783325,
+              "median": -0.002931835634621738,
+              "n": 9,
+              "positive_rate": 0.4444444444444444
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": -0.03447250576679062,
+              "median": -0.03447250576679062,
+              "n": 1,
+              "positive_rate": 0.0
+            },
+            "present": {
+              "mean": 0.006768162839303784,
+              "median": 0.007551499043576215,
+              "n": 9,
+              "positive_rate": 0.5555555555555556
+            }
+          }
+        },
+        "vol_easing": {
+          "10d": {
+            "absent": {
+              "mean": -0.003441194656719007,
+              "median": -0.004913155920094586,
+              "n": 4,
+              "positive_rate": 0.25
+            },
+            "present": {
+              "mean": 0.008951430487734752,
+              "median": 0.0009352678493829425,
+              "n": 6,
+              "positive_rate": 0.5
+            }
+          },
+          "5d": {
+            "absent": {
+              "mean": -0.0007581702257983269,
+              "median": 0.003255240111429858,
+              "n": 4,
+              "positive_rate": 0.5
+            },
+            "present": {
+              "mean": 0.004912273448356125,
+              "median": 3.340067301185745e-05,
+              "n": 6,
+              "positive_rate": 0.5
+            }
+          }
+        }
+      },
+      "n_observations": 10,
+      "score_6plus": {
+        "10d": {
+          "absent": {
+            "mean": 0.010144748322445893,
+            "median": 0.00650799244183059,
+            "n": 7,
+            "positive_rate": 0.5714285714285714
+          },
+          "present": {
+            "mean": -0.010356477985862922,
+            "median": -0.011507319168908403,
+            "n": 3,
+            "positive_rate": 0.0
+          }
+        },
+        "5d": {
+          "absent": {
+            "mean": 0.004371905477499057,
+            "median": 0.008228544210448607,
+            "n": 7,
+            "positive_rate": 0.5714285714285714
+          },
+          "present": {
+            "mean": -0.0013874595185166538,
+            "median": -0.004229179901573676,
+            "n": 3,
+            "positive_rate": 0.3333333333333333
+          }
+        }
+      }
+    }
+  },
+  "classification": "RESEARCH_ONLY_NON_CANONICAL",
+  "data_source": "Yahoo Finance chart endpoint, 5-minute bars, recent 60-day availability",
+  "download_errors": [],
+  "engine_impact": "NONE",
+  "generated_at": "2026-09-09T16:03:20.032271+00:00",
+  "limitations": [
+    "Recent 5-minute vendor history is a small sample and is not point-in-time archived by this project.",
+    "Episode dates come from the reconstructed ledger, not the archived independent-event validator.",
+    "Candidate thresholds are predeclared research heuristics, not validated trading rules.",
+    "Results are descriptive only; no intraday feature is promoted into the official completed-close RE-ENTRY engine by this script."
+  ],
+  "observations": [
+    {
+      "BROAD_10d": -0.010446459228517446,
+      "BROAD_1d": -0.012483501573592959,
+      "BROAD_5d": -0.03447250576679062,
+      "QQQ_10d": -0.010215020948840747,
+      "QQQ_1d": -0.019005396032846122,
+      "QQQ_5d": -0.040792977938088004,
+      "SPY_10d": -0.010677897508194145,
+      "SPY_1d": -0.005961607114339795,
+      "SPY_5d": -0.02815203359549323,
+      "breadth_delta_since_1030": null,
+      "checks": {
+        "factors_broad": false,
+        "indices_confirm": false,
+        "sectors_broad": false,
+        "short_term_momentum": false,
+        "subsectors_broad": false,
+        "vol_curve_normal": false,
+        "vol_easing": false
+      },
+      "date": "2026-06-15",
+      "features": {
+        "both_indices_positive": false,
+        "broad_last_30m": -0.0004837071880265942,
+        "broad_mean": null,
+        "factor_median_move": null,
+        "factor_positive_share": null,
+        "quotes_available": 52,
+        "sector_median_move": null,
+        "sector_positive_share": null,
+        "subsector_median_move": null,
+        "subsector_positive_share": null,
+        "vix_change": null,
+        "vix_term_ratio": null
+      },
+      "score": 0,
+      "snapshot": "10:30"
+    },
+    {
+      "BROAD_10d": -0.010446459228517446,
+      "BROAD_1d": -0.012483501573592959,
+      "BROAD_5d": -0.03447250576679062,
+      "QQQ_10d": -0.010215020948840747,
+      "QQQ_1d": -0.019005396032846122,
+      "QQQ_5d": -0.040792977938088004,
+      "SPY_10d": -0.010677897508194145,
+      "SPY_1d": -0.005961607114339795,
+      "SPY_5d": -0.02815203359549323,
+      "breadth_delta_since_1030": null,
+      "checks": {
+        "factors_broad": false,
+        "indices_confirm": false,
+        "sectors_broad": false,
+        "short_term_momentum": true,
+        "subsectors_broad": false,
+        "vol_curve_normal": false,
+        "vol_easing": false
+      },
+      "date": "2026-06-15",
+      "features": {
+        "both_indices_positive": false,
+        "broad_last_30m": 0.0022942472517967216,
+        "broad_mean": null,
+        "factor_median_move": null,
+        "factor_positive_share": null,
+        "quotes_available": 52,
+        "sector_median_move": null,
+        "sector_positive_share": null,
+        "subsector_median_move": null,
+        "subsector_positive_share": null,
+        "vix_change": null,
+        "vix_term_ratio": null
+      },
+      "score": 1,
+      "snapshot": "12:00"
+    },
+    {
+      "BROAD_10d": -0.010446459228517446,
+      "BROAD_1d": -0.012483501573592959,
+      "BROAD_5d": -0.03447250576679062,
+      "QQQ_10d": -0.010215020948840747,
+      "QQQ_1d": -0.019005396032846122,
+      "QQQ_5d": -0.040792977938088004,
+      "SPY_10d": -0.010677897508194145,
+      "SPY_1d": -0.005961607114339795,
+      "SPY_5d": -0.02815203359549323,
+      "breadth_delta_since_1030": null,
+      "checks": {
+        "factors_broad": false,
+        "indices_confirm": false,
+        "sectors_broad": false,
+        "short_term_momentum": true,
+        "subsectors_broad": false,
+        "vol_curve_normal": false,
+        "vol_easing": false
+      },
+      "date": "2026-06-15",
+      "features": {
+        "both_indices_positive": false,
+        "broad_last_30m": 8.638882889877575e-05,
+        "broad_mean": null,
+        "factor_median_move": null,
+        "factor_positive_share": null,
+        "quotes_available": 52,
+        "sector_median_move": null,
+        "sector_positive_share": null,
+        "subsector_median_move": null,
+        "subsector_positive_share": null,
+        "vix_change": null,
+        "vix_term_ratio": null
+      },
+      "score": 1,
+      "snapshot": "13:30"
+    },
+    {
+      "BROAD_10d": -0.010446459228517446,
+      "BROAD_1d": -0.012483501573592959,
+      "BROAD_5d": -0.03447250576679062,
+      "QQQ_10d": -0.010215020948840747,
+      "QQQ_1d": -0.019005396032846122,
+      "QQQ_5d": -0.040792977938088004,
+      "SPY_10d": -0.010677897508194145,
+      "SPY_1d": -0.005961607114339795,
+      "SPY_5d": -0.02815203359549323,
+      "breadth_delta_since_1030": null,
+      "checks": {
+        "factors_broad": false,
+        "indices_confirm": false,
+        "sectors_broad": false,
+        "short_term_momentum": false,
+        "subsectors_broad": false,
+        "vol_curve_normal": false,
+        "vol_easing": false
+      },
+      "date": "2026-06-15",
+      "features": {
+        "both_indices_positive": false,
+        "broad_last_30m": -8.064197963436603e-05,
+        "broad_mean": null,
+        "factor_median_move": null,
+        "factor_positive_share": null,
+        "quotes_available": 52,
+        "sector_median_move": null,
+        "sector_positive_share": null,
+        "subsector_median_move": null,
+        "subsector_positive_share": null,
+        "vix_change": null,
+        "vix_term_ratio": null
+      },
+      "score": 0,
+      "snapshot": "15:00"
+    },
+    {
+      "BROAD_10d": 0.00650799244183059,
+      "BROAD_1d": -0.0023546683568179128,
+      "BROAD_5d": 0.024929344640737594,
+      "QQQ_10d": -0.0030967867961201323,
+      "QQQ_1d": -0.00424581964999271,
+      "QQQ_5d": 0.031878370660294975,
+      "SPY_10d": 0.016112771679781313,
+      "SPY_1d": -0.0004635170636431152,
+      "SPY_5d": 0.017980318621180214,
+      "breadth_delta_since_1030": null,
+      "checks": {
+        "factors_broad": false,
+        "indices_confirm": false,
+        "sectors_broad": true,
+        "short_term_momentum": false,
+        "subsectors_broad": true,
+        "vol_curve_normal": true,
+        "vol_easing": false
+      },
+      "date": "2026-06-23",
+      "features": {
+        "both_indices_positive": false,
+        "broad_last_30m": -0.000673817393854026,
+        "broad_mean": -0.01574225722411049,
+        "factor_median_move": -0.007527011040498632,
+        "factor_positive_share": 0.25,
+        "quotes_available": 52,
+        "sector_median_move": 0.004304689143227458,
+        "sector_positive_share": 0.6363636363636364,
+        "subsector_median_move": 0.0040093362281778955,
+        "subsector_positive_share": 0.5862068965517241,
+        "vix_change": 0.10535404923945979,
+        "vix_term_ratio": 0.9195403033835434
+      },
+      "score": 3,
+      "snapshot": "10:30"
+    },
+    {
+      "BROAD_10d": 0.00650799244183059,
+      "BROAD_1d": -0.0023546683568179128,
+      "BROAD_5d": 0.024929344640737594,
+      "QQQ_10d": -0.0030967867961201323,
+      "QQQ_1d": -0.00424581964999271,
+      "QQQ_5d": 0.031878370660294975,
+      "SPY_10d": 0.016112771679781313,
+      "SPY_1d": -0.0004635170636431152,
+      "SPY_5d": 0.017980318621180214,
+      "breadth_delta_since_1030": 0.02681992337164746,
+      "checks": {
+        "breadth_not_fading": true,
+        "factors_broad": false,
+        "indices_confirm": false,
+        "sectors_broad": true,
+        "short_term_momentum": true,
+        "subsectors_broad": true,
+        "vol_curve_normal": true,
+        "vol_easing": false
+      },
+      "date": "2026-06-23",
+      "features": {
+        "both_indices_positive": false,
+        "broad_last_30m": 0.0027892270339983094,
+        "broad_mean": -0.0181318701161835,
+        "factor_median_move": -0.009159921171040086,
+        "factor_positive_share": 0.25,
+        "quotes_available": 53,
+        "sector_median_move": 0.004716128528841956,
+        "sector_positive_share": 0.6363636363636364,
+        "subsector_median_move": 0.00515760981510327,
+        "subsector_positive_share": 0.6666666666666666,
+        "vix_change": 0.104202612463562,
+        "vix_term_ratio": 0.9150763904080743
+      },
+      "score": 5,
+      "snapshot": "12:00"
+    },
+    {
+      "BROAD_10d": 0.00650799244183059,
+      "BROAD_1d": -0.0023546683568179128,
+      "BROAD_5d": 0.024929344640737594,
+      "QQQ_10d": -0.0030967867961201323,
+      "QQQ_1d": -0.00424581964999271,
+      "QQQ_5d": 0.031878370660294975,
+      "SPY_10d": 0.016112771679781313,
+      "SPY_1d": -0.0004635170636431152,
+      "SPY_5d": 0.017980318621180214,
+      "breadth_delta_since_1030": 0.03793103448275864,
+      "checks": {
+        "breadth_not_fading": true,
+        "factors_broad": false,
+        "indices_confirm": false,
+        "sectors_broad": true,
+        "short_term_momentum": true,
+        "subsectors_broad": true,
+        "vol_curve_normal": true,
+        "vol_easing": false
+      },
+      "date": "2026-06-23",
+      "features": {
+        "both_indices_positive": false,
+        "broad_last_30m": 0.0016675819283736848,
+        "broad_mean": -0.017182849037747527,
+        "factor_median_move": -0.007824910092925186,
+        "factor_positive_share": 0.25,
+        "quotes_available": 53,
+        "sector_median_move": 0.0063744096007170015,
+        "sector_positive_share": 0.6363636363636364,
+        "subsector_median_move": 0.006596091112381242,
+        "subsector_positive_share": 0.7,
+        "vix_change": 0.07656878868433914,
+        "vix_term_ratio": 0.9055690609388201
+      },
+      "score": 5,
+      "snapshot": "13:30"
+    },
+    {
+      "BROAD_10d": 0.00650799244183059,
+      "BROAD_1d": -0.0023546683568179128,
+      "BROAD_5d": 0.024929344640737594,
+      "QQQ_10d": -0.0030967867961201323,
+      "QQQ_1d": -0.00424581964999271,
+      "QQQ_5d": 0.031878370660294975,
+      "SPY_10d": 0.016112771679781313,
+      "SPY_1d": -0.0004635170636431152,
+      "SPY_5d": 0.017980318621180214,
+      "breadth_delta_since_1030": 0.0045977011494252595,
+      "checks": {
+        "breadth_not_fading": true,
+        "factors_broad": false,
+        "indices_confirm": false,
+        "sectors_broad": true,
+        "short_term_momentum": false,
+        "subsectors_broad": true,
+        "vol_curve_normal": true,
+        "vol_easing": false
+      },
+      "date": "2026-06-23",
+      "features": {
+        "both_indices_positive": false,
+        "broad_last_30m": -0.00014737385607804798,
+        "broad_mean": -0.021678803750944386,
+        "factor_median_move": -0.011083698368500039,
+        "factor_positive_share": 0.25,
+        "quotes_available": 53,
+        "sector_median_move": 0.005989138929374471,
+        "sector_positive_share": 0.6363636363636364,
+        "subsector_median_move": 0.003692776151872579,
+        "subsector_positive_share": 0.6,
+        "vix_change": 0.11571665080137739,
+        "vix_term_ratio": 0.9237368724318296
+      },
+      "score": 4,
+      "snapshot": "15:00"
+    },
+    {
+      "BROAD_10d": -0.002931835634621738,
+      "BROAD_1d": 0.012553795314202865,
+      "BROAD_5d": 0.010739660124433392,
+      "QQQ_10d": -0.008560141170822488,
+      "QQQ_1d": 0.01664234062582648,
+      "QQQ_5d": 0.008855262244672035,
+      "SPY_10d": 0.002696469901579013,
+      "SPY_1d": 0.00846525000257925,
+      "SPY_5d": 0.01262405800419475,
+      "breadth_delta_since_1030": null,
+      "checks": {
+        "factors_broad": false,
+        "indices_confirm": false,
+        "sectors_broad": false,
+        "short_term_momentum": false,
+        "subsectors_broad": false,
+        "vol_curve_normal": true,
+        "vol_easing": false
+      },
+      "date": "2026-07-08",
+      "features": {
+        "both_indices_positive": false,
+        "broad_last_30m": -0.0004490454244757136,
+        "broad_mean": -0.004218494628857816,
+        "factor_median_move": -0.005746953860968573,
+        "factor_positive_share": 0.125,
+        "quotes_available": 53,
+        "sector_median_move": -0.00901816917622622,
+        "sector_positive_share": 0.18181818181818182,
+        "subsector_median_move": -0.010648346339395987,
+        "subsector_positive_share": 0.23333333333333334,
+        "vix_change": 0.0888340910171288,
+        "vix_term_ratio": 0.894123597932063
+      },
+      "score": 1,
+      "snapshot": "10:30"
+    },
+    {
+      "BROAD_10d": -0.002931835634621738,
+      "BROAD_1d": 0.012553795314202865,
+      "BROAD_5d": 0.010739660124433392,
+      "QQQ_10d": -0.008560141170822488,
+      "QQQ_1d": 0.01664234062582648,
+      "QQQ_5d": 0.008855262244672035,
+      "SPY_10d": 0.002696469901579013,
+      "SPY_1d": 0.00846525000257925,
+      "SPY_5d": 0.01262405800419475,
+      "breadth_delta_since_1030": -0.03358585858585861,
+      "checks": {
+        "breadth_not_fading": false,
+        "factors_broad": false,
+        "indices_confirm": false,
+        "sectors_broad": false,
+        "short_term_momentum": true,
+        "subsectors_broad": false,
+        "vol_curve_normal": true,
+        "vol_easing": false
+      },
+      "date": "2026-07-08",
+      "features": {
+        "both_indices_positive": false,
+        "broad_last_30m": 0.0008921943246690267,
+        "broad_mean": -0.00851410222886162,
+        "factor_median_move": -0.008467642075211945,
+        "factor_positive_share": 0.0,
+        "quotes_available": 53,
+        "sector_median_move": -0.010988032370676803,
+        "sector_positive_share": 0.2727272727272727,
+        "subsector_median_move": -0.015597462169583853,
+        "subsector_positive_share": 0.16666666666666666,
+        "vix_change": 0.11597786392943488,
+        "vix_term_ratio": 0.9008964253645834
+      },
+      "score": 2,
+      "snapshot": "12:00"
+    },
+    {
+      "BROAD_10d": -0.002931835634621738,
+      "BROAD_1d": 0.012553795314202865,
+      "BROAD_5d": 0.010739660124433392,
+      "QQQ_10d": -0.008560141170822488,
+      "QQQ_1d": 0.01664234062582648,
+      "QQQ_5d": 0.008855262244672035,
+      "SPY_10d": 0.002696469901579013,
+      "SPY_1d": 0.00846525000257925,
+      "SPY_5d": 0.01262405800419475,
+      "breadth_delta_since_1030": 0.01944444444444446,
+      "checks": {
+        "breadth_not_fading": true,
+        "factors_broad": false,
+        "indices_confirm": false,
+        "sectors_broad": false,
+        "short_term_momentum": true,
+        "subsectors_broad": false,
+        "vol_curve_normal": true,
+        "vol_easing": false
+      },
+      "date": "2026-07-08",
+      "features": {
+        "both_indices_positive": false,
+        "broad_last_30m": 0.0023107278216645266,
+        "broad_mean": -0.0005637629517186715,
+        "factor_median_move": -0.0038683972482833617,
+        "factor_positive_share": 0.25,
+        "quotes_available": 53,
+        "sector_median_move": -0.010357574876361575,
+        "sector_positive_share": 0.18181818181818182,
+        "subsector_median_move": -0.011326347877393061,
+        "subsector_positive_share": 0.16666666666666666,
+        "vix_change": 0.027760690213147754,
+        "vix_term_ratio": 0.8641078451284409
+      },
+      "score": 3,
+      "snapshot": "13:30"
+    },
+    {
+      "BROAD_10d": -0.002931835634621738,
+      "BROAD_1d": 0.012553795314202865,
+      "BROAD_5d": 0.010739660124433392,
+      "QQQ_10d": -0.008560141170822488,
+      "QQQ_1d": 0.01664234062582648,
+      "QQQ_5d": 0.008855262244672035,
+      "SPY_10d": 0.002696469901579013,
+      "SPY_1d": 0.00846525000257925,
+      "SPY_5d": 0.01262405800419475,
+      "breadth_delta_since_1030": 0.01944444444444446,
+      "checks": {
+        "breadth_not_fading": true,
+        "factors_broad": false,
+        "indices_confirm": false,
+        "sectors_broad": false,
+        "short_term_momentum": true,
+        "subsectors_broad": false,
+        "vol_curve_normal": true,
+        "vol_easing": false
+      },
+      "date": "2026-07-08",
+      "features": {
+        "both_indices_positive": false,
+        "broad_last_30m": 0.0012714973676866137,
+        "broad_mean": -0.0013485569752597626,
+        "factor_median_move": -0.004569623969741643,
+        "factor_positive_share": 0.25,
+        "quotes_available": 53,
+        "sector_median_move": -0.010772415429202709,
+        "sector_positive_share": 0.18181818181818182,
+        "subsector_median_move": -0.010700917230952123,
+        "subsector_positive_share": 0.16666666666666666,
+        "vix_change": 0.036397297095040804,
+        "vix_term_ratio": 0.8686659309468793
+      },
+      "score": 3,
+      "snapshot": "15:00"
+    },
+    {
+      "BROAD_10d": -0.0380032273533375,
+      "BROAD_1d": 0.0006270595268907386,
+      "BROAD_5d": -0.009808570980703757,
+      "QQQ_10d": -0.06141534835427953,
+      "QQQ_1d": -0.002709516875899598,
+      "QQQ_5d": -0.014895346193382841,
+      "SPY_10d": -0.014591106352395466,
+      "SPY_1d": 0.003963635929681075,
+      "SPY_5d": -0.0047217957680246725,
+      "breadth_delta_since_1030": null,
+      "checks": {
+        "factors_broad": true,
+        "indices_confirm": true,
+        "sectors_broad": false,
+        "short_term_momentum": true,
+        "subsectors_broad": true,
+        "vol_curve_normal": true,
+        "vol_easing": true
+      },
+      "date": "2026-07-14",
+      "features": {
+        "both_indices_positive": true,
+        "broad_last_30m": 0.0024112004666937414,
+        "broad_mean": 0.007266456799705612,
+        "factor_median_move": 0.004143245211301938,
+        "factor_positive_share": 0.625,
+        "quotes_available": 52,
+        "sector_median_move": -0.00013441518183243684,
+        "sector_positive_share": 0.45454545454545453,
+        "subsector_median_move": 0.0028587871033414203,
+        "subsector_positive_share": 0.6551724137931034,
+        "vix_change": -0.04105565319142512,
+        "vix_term_ratio": 0.8484691226295478
+      },
+      "score": 6,
+      "snapshot": "10:30"
+    },
+    {
+      "BROAD_10d": -0.0380032273533375,
+      "BROAD_1d": 0.0006270595268907386,
+      "BROAD_5d": -0.009808570980703757,
+      "QQQ_10d": -0.06141534835427953,
+      "QQQ_1d": -0.002709516875899598,
+      "QQQ_5d": -0.014895346193382841,
+      "SPY_10d": -0.014591106352395466,
+      "SPY_1d": 0.003963635929681075,
+      "SPY_5d": -0.0047217957680246725,
+      "breadth_delta_since_1030": -0.05980494601184261,
+      "checks": {
+        "breadth_not_fading": false,
+        "factors_broad": true,
+        "indices_confirm": true,
+        "sectors_broad": false,
+        "short_term_momentum": false,
+        "subsectors_broad": true,
+        "vol_curve_normal": true,
+        "vol_easing": true
+      },
+      "date": "2026-07-14",
+      "features": {
+        "both_indices_positive": true,
+        "broad_last_30m": -0.002906669349307889,
+        "broad_mean": 0.005535311887961636,
+        "factor_median_move": 0.0022634140541647474,
+        "factor_positive_share": 0.625,
+        "quotes_available": 53,
+        "sector_median_move": -8.812454828610594e-05,
+        "sector_positive_share": 0.36363636363636365,
+        "subsector_median_move": 0.0013314371053885221,
+        "subsector_positive_share": 0.5666666666666667,
+        "vix_change": -0.01818178767237455,
+        "vix_term_ratio": 0.8593429242553459
+      },
+      "score": 5,
+      "snapshot": "12:00"
+    },
+    {
+      "BROAD_10d": -0.0380032273533375,
+      "BROAD_1d": 0.0006270595268907386,
+      "BROAD_5d": -0.009808570980703757,
+      "QQQ_10d": -0.06141534835427953,
+      "QQQ_1d": -0.002709516875899598,
+      "QQQ_5d": -0.014895346193382841,
+      "SPY_10d": -0.014591106352395466,
+      "SPY_1d": 0.003963635929681075,
+      "SPY_5d": -0.0047217957680246725,
+      "breadth_delta_since_1030": -0.0820271682340647,
+      "checks": {
+        "breadth_not_fading": false,
+        "factors_broad": true,
+        "indices_confirm": true,
+        "sectors_broad": false,
+        "short_term_momentum": true,
+        "subsectors_broad": false,
+        "vol_curve_normal": true,
+        "vol_easing": true
+      },
+      "date": "2026-07-14",
+      "features": {
+        "both_indices_positive": true,
+        "broad_last_30m": 0.00039054454522002846,
+        "broad_mean": 0.008286161399452152,
+        "factor_median_move": 0.003510813416722214,
+        "factor_positive_share": 0.625,
+        "quotes_available": 53,
+        "sector_median_move": -0.0023269554934666203,
+        "sector_positive_share": 0.36363636363636365,
+        "subsector_median_move": 4.7915005241205844e-05,
+        "subsector_positive_share": 0.5,
+        "vix_change": -0.035777051630419554,
+        "vix_term_ratio": 0.8544698923924249
+      },
+      "score": 5,
+      "snapshot": "13:30"
+    },
+    {
+      "BROAD_10d": -0.0380032273533375,
+      "BROAD_1d": 0.0006270595268907386,
+      "BROAD_5d": -0.009808570980703757,
+      "QQQ_10d": -0.06141534835427953,
+      "QQQ_1d": -0.002709516875899598,
+      "QQQ_5d": -0.014895346193382841,
+      "SPY_10d": -0.014591106352395466,
+      "SPY_1d": 0.003963635929681075,
+      "SPY_5d": -0.0047217957680246725,
+      "breadth_delta_since_1030": -0.0406130268199234,
+      "checks": {
+        "breadth_not_fading": false,
+        "factors_broad": true,
+        "indices_confirm": true,
+        "sectors_broad": false,
+        "short_term_momentum": false,
+        "subsectors_broad": false,
+        "vol_curve_normal": true,
+        "vol_easing": true
+      },
+      "date": "2026-07-14",
+      "features": {
+        "both_indices_positive": true,
+        "broad_last_30m": -0.0013582823032907698,
+        "broad_mean": 0.007718436930955419,
+        "factor_median_move": 0.0024938881827656356,
+        "factor_positive_share": 0.625,
+        "quotes_available": 53,
+        "sector_median_move": -0.0005376607273297473,
+        "sector_positive_share": 0.45454545454545453,
+        "subsector_median_move": 0.0007240626203893763,
+        "subsector_positive_share": 0.5333333333333333,
+        "vix_change": -0.035777051630419554,
+        "vix_term_ratio": 0.8535825721021844
+      },
+      "score": 4,
+      "snapshot": "15:00"
+    },
+    {
+      "BROAD_10d": 0.013377854867674288,
+      "BROAD_1d": 0.013444261227620102,
+      "BROAD_5d": -0.012034824467598737,
+      "QQQ_10d": 0.005761011665215587,
+      "QQQ_1d": 0.018547213156642428,
+      "QQQ_5d": -0.02002701274358576,
+      "SPY_10d": 0.02099469807013299,
+      "SPY_1d": 0.008341309298597777,
+      "SPY_5d": -0.004042636191611715,
+      "breadth_delta_since_1030": null,
+      "checks": {
+        "factors_broad": false,
+        "indices_confirm": true,
+        "sectors_broad": false,
+        "short_term_momentum": false,
+        "subsectors_broad": false,
+        "vol_curve_normal": true,
+        "vol_easing": true
+      },
+      "date": "2026-07-20",
+      "features": {
+        "both_indices_positive": true,
+        "broad_last_30m": -0.000739628501856826,
+        "broad_mean": 0.005687785157554748,
+        "factor_median_move": -0.00020970360217037465,
+        "factor_positive_share": 0.5,
+        "quotes_available": 53,
+        "sector_median_move": -0.0021733039636714357,
+        "sector_positive_share": 0.36363636363636365,
+        "subsector_median_move": -0.001047850461429245,
+        "subsector_positive_share": 0.4,
+        "vix_change": -0.01619876549643484,
+        "vix_term_ratio": 0.905566528497655
+      },
+      "score": 3,
+      "snapshot": "10:30"
+    },
+    {
+      "BROAD_10d": 0.013377854867674288,
+      "BROAD_1d": 0.013444261227620102,
+      "BROAD_5d": -0.012034824467598737,
+      "QQQ_10d": 0.005761011665215587,
+      "QQQ_1d": 0.018547213156642428,
+      "QQQ_5d": -0.02002701274358576,
+      "SPY_10d": 0.02099469807013299,
+      "SPY_1d": 0.008341309298597777,
+      "SPY_5d": -0.004042636191611715,
+      "breadth_delta_since_1030": 0.02525252525252525,
+      "checks": {
+        "breadth_not_fading": true,
+        "factors_broad": false,
+        "indices_confirm": true,
+        "sectors_broad": false,
+        "short_term_momentum": true,
+        "subsectors_broad": true,
+        "vol_curve_normal": true,
+        "vol_easing": true
+      },
+      "date": "2026-07-20",
+      "features": {
+        "both_indices_positive": true,
+        "broad_last_30m": 0.0009607881437162513,
+        "broad_mean": 0.007364715974399583,
+        "factor_median_move": 0.0007808333640448306,
+        "factor_positive_share": 0.5,
+        "quotes_available": 53,
+        "sector_median_move": -0.003622144929162907,
+        "sector_positive_share": 0.2727272727272727,
+        "subsector_median_move": 0.000955969989515415,
+        "subsector_positive_share": 0.5666666666666667,
+        "vix_change": -0.046976286054501104,
+        "vix_term_ratio": 0.8914141564962274
+      },
+      "score": 6,
+      "snapshot": "12:00"
+    },
+    {
+      "BROAD_10d": 0.013377854867674288,
+      "BROAD_1d": 0.013444261227620102,
+      "BROAD_5d": -0.012034824467598737,
+      "QQQ_10d": 0.005761011665215587,
+      "QQQ_1d": 0.018547213156642428,
+      "QQQ_5d": -0.02002701274358576,
+      "SPY_10d": 0.02099469807013299,
+      "SPY_1d": 0.008341309298597777,
+      "SPY_5d": -0.004042636191611715,
+      "breadth_delta_since_1030": -0.030303030303030276,
+      "checks": {
+        "breadth_not_fading": false,
+        "factors_broad": false,
+        "indices_confirm": true,
+        "sectors_broad": false,
+        "short_term_momentum": false,
+        "subsectors_broad": false,
+        "vol_curve_normal": true,
+        "vol_easing": true
+      },
+      "date": "2026-07-20",
+      "features": {
+        "both_indices_positive": true,
+        "broad_last_30m": -0.00023844177640369724,
+        "broad_mean": 0.004260506059359015,
+        "factor_median_move": 0.00023529866983218461,
+        "factor_positive_share": 0.5,
+        "quotes_available": 53,
+        "sector_median_move": -0.005684058455320717,
+        "sector_positive_share": 0.2727272727272727,
+        "subsector_median_move": -0.0007583076470324412,
+        "subsector_positive_share": 0.4,
+        "vix_change": -0.030777520558066263,
+        "vix_term_ratio": 0.8997493772674263
+      },
+      "score": 3,
+      "snapshot": "13:30"
+    },
+    {
+      "BROAD_10d": 0.013377854867674288,
+      "BROAD_1d": 0.013444261227620102,
+      "BROAD_5d": -0.012034824467598737,
+      "QQQ_10d": 0.005761011665215587,
+      "QQQ_1d": 0.018547213156642428,
+      "QQQ_5d": -0.02002701274358576,
+      "SPY_10d": 0.02099469807013299,
+      "SPY_1d": 0.008341309298597777,
+      "SPY_5d": -0.004042636191611715,
+      "breadth_delta_since_1030": -0.08308080808080809,
+      "checks": {
+        "breadth_not_fading": false,
+        "factors_broad": false,
+        "indices_confirm": false,
+        "sectors_broad": false,
+        "short_term_momentum": false,
+        "subsectors_broad": false,
+        "vol_curve_normal": true,
+        "vol_easing": true
+      },
+      "date": "2026-07-20",
+      "features": {
+        "both_indices_positive": false,
+        "broad_last_30m": -0.0017778906576335074,
+        "broad_mean": 0.0011767723699831478,
+        "factor_median_move": -0.0018992523753951218,
+        "factor_positive_share": 0.375,
+        "quotes_available": 53,
+        "sector_median_move": -0.005672504337402295,
+        "sector_positive_share": 0.2727272727272727,
+        "subsector_median_move": -0.002529490024473391,
+        "subsector_positive_share": 0.36666666666666664,
+        "vix_change": -0.004859619350071953,
+        "vix_term_ratio": 0.9101234718605324
+      },
+      "score": 2,
+      "snapshot": "15:00"
+    },
+    {
+      "BROAD_10d": 0.051582622064626604,
+      "BROAD_1d": -0.0014335807505163611,
+      "BROAD_5d": 0.008228544210448607,
+      "QQQ_10d": 0.05670615134628276,
+      "QQQ_1d": -0.003083737064717651,
+      "QQQ_5d": 0.005495242642026721,
+      "SPY_10d": 0.046459092782970446,
+      "SPY_1d": 0.0002165755636849287,
+      "SPY_5d": 0.010961845778870494,
+      "breadth_delta_since_1030": null,
+      "checks": {
+        "factors_broad": false,
+        "indices_confirm": false,
+        "sectors_broad": true,
+        "short_term_momentum": false,
+        "subsectors_broad": true,
+        "vol_curve_normal": true,
+        "vol_easing": true
+      },
+      "date": "2026-07-24",
+      "features": {
+        "both_indices_positive": false,
+        "broad_last_30m": -0.00016639904842774556,
+        "broad_mean": -0.0050588098813751925,
+        "factor_median_move": 4.710628157372776e-05,
+        "factor_positive_share": 0.5,
+        "quotes_available": 51,
+        "sector_median_move": 0.0060632043622028675,
+        "sector_positive_share": 0.9090909090909091,
+        "subsector_median_move": 0.003208179459859628,
+        "subsector_positive_share": 0.6428571428571429,
+        "vix_change": -0.0190880487116194,
+        "vix_term_ratio": 0.9024390243902439
+      },
+      "score": 4,
+      "snapshot": "10:30"
+    },
+    {
+      "BROAD_10d": 0.051582622064626604,
+      "BROAD_1d": -0.0014335807505163611,
+      "BROAD_5d": 0.008228544210448607,
+      "QQQ_10d": 0.05670615134628276,
+      "QQQ_1d": -0.003083737064717651,
+      "QQQ_5d": 0.005495242642026721,
+      "SPY_10d": 0.046459092782970446,
+      "SPY_1d": 0.0002165755636849287,
+      "SPY_5d": 0.010961845778870494,
+      "breadth_delta_since_1030": 0.18546176046176044,
+      "checks": {
+        "breadth_not_fading": true,
+        "factors_broad": true,
+        "indices_confirm": false,
+        "sectors_broad": true,
+        "short_term_momentum": true,
+        "subsectors_broad": true,
+        "vol_curve_normal": true,
+        "vol_easing": true
+      },
+      "date": "2026-07-24",
+      "features": {
+        "both_indices_positive": false,
+        "broad_last_30m": 0.002578810237325979,
+        "broad_mean": 0.0032296009059066266,
+        "factor_median_move": 0.006870750860847874,
+        "factor_positive_share": 0.875,
+        "quotes_available": 53,
+        "sector_median_move": 0.00871130654747354,
+        "sector_positive_share": 1.0,
+        "subsector_median_move": 0.009487888951386303,
+        "subsector_positive_share": 0.7333333333333333,
+        "vix_change": -0.07211031634882914,
+        "vix_term_ratio": 0.8776328751902446
+      },
+      "score": 7,
+      "snapshot": "12:00"
+    },
+    {
+      "BROAD_10d": 0.051582622064626604,
+      "BROAD_1d": -0.0014335807505163611,
+      "BROAD_5d": 0.008228544210448607,
+      "QQQ_10d": 0.05670615134628276,
+      "QQQ_1d": -0.003083737064717651,
+      "QQQ_5d": 0.005495242642026721,
+      "SPY_10d": 0.046459092782970446,
+      "SPY_1d": 0.0002165755636849287,
+      "SPY_5d": 0.010961845778870494,
+      "breadth_delta_since_1030": 0.10238095238095224,
+      "checks": {
+        "breadth_not_fading": true,
+        "factors_broad": true,
+        "indices_confirm": false,
+        "sectors_broad": true,
+        "short_term_momentum": true,
+        "subsectors_broad": true,
+        "vol_curve_normal": true,
+        "vol_easing": true
+      },
+      "date": "2026-07-24",
+      "features": {
+        "both_indices_positive": false,
+        "broad_last_30m": 0.0017279301082488985,
+        "broad_mean": 0.0015860635533722078,
+        "factor_median_move": 0.005719244499792442,
+        "factor_positive_share": 0.75,
+        "quotes_available": 53,
+        "sector_median_move": 0.007096787855286113,
+        "sector_positive_share": 0.9090909090909091,
+        "subsector_median_move": 0.00964142336798579,
+        "subsector_positive_share": 0.7,
+        "vix_change": -0.051431664332541316,
+        "vix_term_ratio": 0.8887233052903486
+      },
+      "score": 7,
+      "snapshot": "13:30"
+    },
+    {
+      "BROAD_10d": 0.051582622064626604,
+      "BROAD_1d": -0.0014335807505163611,
+      "BROAD_5d": 0.008228544210448607,
+      "QQQ_10d": 0.05670615134628276,
+      "QQQ_1d": -0.003083737064717651,
+      "QQQ_5d": 0.005495242642026721,
+      "SPY_10d": 0.046459092782970446,
+      "SPY_1d": 0.0002165755636849287,
+      "SPY_5d": 0.010961845778870494,
+      "breadth_delta_since_1030": 0.007936507936507908,
+      "checks": {
+        "breadth_not_fading": true,
+        "factors_broad": false,
+        "indices_confirm": false,
+        "sectors_broad": true,
+        "short_term_momentum": false,
+        "subsectors_broad": true,
+        "vol_curve_normal": true,
+        "vol_easing": true
+      },
+      "date": "2026-07-24",
+      "features": {
+        "both_indices_positive": false,
+        "broad_last_30m": -0.00016910462384123193,
+        "broad_mean": -0.005475229380968283,
+        "factor_median_move": 0.0007369901970332715,
+        "factor_positive_share": 0.5,
+        "quotes_available": 53,
+        "sector_median_move": 0.00622946256474699,
+        "sector_positive_share": 0.9090909090909091,
+        "subsector_median_move": 0.00841909361978077,
+        "subsector_positive_share": 0.6666666666666666,
+        "vix_change": -0.008483554731397613,
+        "vix_term_ratio": 0.9090909596680601
+      },
+      "score": 5,
+      "snapshot": "15:00"
+    },
+    {
+      "BROAD_10d": 0.05092629109946645,
+      "BROAD_1d": 0.015900713200469596,
+      "BROAD_5d": 0.04302169058196692,
+      "QQQ_10d": 0.06261721493239736,
+      "QQQ_1d": 0.017558419833591632,
+      "QQQ_5d": 0.050931030334559146,
+      "SPY_10d": 0.03923536726653554,
+      "SPY_1d": 0.01424300656734756,
+      "SPY_5d": 0.035112350829374694,
+      "breadth_delta_since_1030": null,
+      "checks": {
+        "factors_broad": false,
+        "indices_confirm": false,
+        "sectors_broad": false,
+        "short_term_momentum": true,
+        "subsectors_broad": false,
+        "vol_curve_normal": true,
+        "vol_easing": false
+      },
+      "date": "2026-07-31",
+      "features": {
+        "both_indices_positive": false,
+        "broad_last_30m": 8.022949350339204e-05,
+        "broad_mean": -0.0005981560670277886,
+        "factor_median_move": -0.005321782959045285,
+        "factor_positive_share": 0.125,
+        "quotes_available": 52,
+        "sector_median_move": -0.003858926723082634,
+        "sector_positive_share": 0.2727272727272727,
+        "subsector_median_move": -0.0062571523471801616,
+        "subsector_positive_share": 0.20689655172413793,
+        "vix_change": 0.024798171937248092,
+        "vix_term_ratio": 0.891173519650234
+      },
+      "score": 2,
+      "snapshot": "10:30"
+    },
+    {
+      "BROAD_10d": 0.05092629109946645,
+      "BROAD_1d": 0.015900713200469596,
+      "BROAD_5d": 0.04302169058196692,
+      "QQQ_10d": 0.06261721493239736,
+      "QQQ_1d": 0.017558419833591632,
+      "QQQ_5d": 0.050931030334559146,
+      "SPY_10d": 0.03923536726653554,
+      "SPY_1d": 0.01424300656734756,
+      "SPY_5d": 0.035112350829374694,
+      "breadth_delta_since_1030": 0.22426854754440964,
+      "checks": {
+        "breadth_not_fading": true,
+        "factors_broad": false,
+        "indices_confirm": true,
+        "sectors_broad": false,
+        "short_term_momentum": true,
+        "subsectors_broad": false,
+        "vol_curve_normal": true,
+        "vol_easing": true
+      },
+      "date": "2026-07-31",
+      "features": {
+        "both_indices_positive": true,
+        "broad_last_30m": 0.0037350100120295826,
+        "broad_mean": 0.0021400810676177606,
+        "factor_median_move": -0.0007596336424448569,
+        "factor_positive_share": 0.5,
+        "quotes_available": 52,
+        "sector_median_move": -0.001345633805306501,
+        "sector_positive_share": 0.36363636363636365,
+        "subsector_median_move": -0.0011457202909483932,
+        "subsector_positive_share": 0.41379310344827586,
+        "vix_change": -0.009803925882236775,
+        "vix_term_ratio": 0.8787103005020798
+      },
+      "score": 5,
+      "snapshot": "12:00"
+    },
+    {
+      "BROAD_10d": 0.05092629109946645,
+      "BROAD_1d": 0.015900713200469596,
+      "BROAD_5d": 0.04302169058196692,
+      "QQQ_10d": 0.06261721493239736,
+      "QQQ_1d": 0.017558419833591632,
+      "QQQ_5d": 0.050931030334559146,
+      "SPY_10d": 0.03923536726653554,
+      "SPY_1d": 0.01424300656734756,
+      "SPY_5d": 0.035112350829374694,
+      "breadth_delta_since_1030": 0.3380355276907001,
+      "checks": {
+        "breadth_not_fading": true,
+        "factors_broad": true,
+        "indices_confirm": true,
+        "sectors_broad": false,
+        "short_term_momentum": true,
+        "subsectors_broad": false,
+        "vol_curve_normal": true,
+        "vol_easing": true
+      },
+      "date": "2026-07-31",
+      "features": {
+        "both_indices_positive": true,
+        "broad_last_30m": 0.0024163058336656995,
+        "broad_mean": 0.007695845898394671,
+        "factor_median_move": 0.0017730852901278737,
+        "factor_positive_share": 0.625,
+        "quotes_available": 52,
+        "sector_median_move": 0.0007893700222330047,
+        "sector_positive_share": 0.5454545454545454,
+        "subsector_median_move": -0.000969424598291857,
+        "subsector_positive_share": 0.4482758620689655,
+        "vix_change": -0.04786620048455892,
+        "vix_term_ratio": 0.8616910417727273
+      },
+      "score": 6,
+      "snapshot": "13:30"
+    },
+    {
+      "BROAD_10d": 0.05092629109946645,
+      "BROAD_1d": 0.015900713200469596,
+      "BROAD_5d": 0.04302169058196692,
+      "QQQ_10d": 0.06261721493239736,
+      "QQQ_1d": 0.017558419833591632,
+      "QQQ_5d": 0.050931030334559146,
+      "SPY_10d": 0.03923536726653554,
+      "SPY_1d": 0.01424300656734756,
+      "SPY_5d": 0.035112350829374694,
+      "breadth_delta_since_1030": 0.26593521421107635,
+      "checks": {
+        "breadth_not_fading": true,
+        "factors_broad": true,
+        "indices_confirm": true,
+        "sectors_broad": false,
+        "short_term_momentum": false,
+        "subsectors_broad": false,
+        "vol_curve_normal": true,
+        "vol_easing": true
+      },
+      "date": "2026-07-31",
+      "features": {
+        "both_indices_positive": true,
+        "broad_last_30m": -0.0004020883866447944,
+        "broad_mean": 0.0062864272488845074,
+        "factor_median_move": 0.0012918920840644388,
+        "factor_positive_share": 0.625,
+        "quotes_available": 52,
+        "sector_median_move": -0.002276530305555302,
+        "sector_positive_share": 0.36363636363636365,
+        "subsector_median_move": -0.0014714211428243917,
+        "subsector_positive_share": 0.41379310344827586,
+        "vix_change": -0.04901962941118365,
+        "vix_term_ratio": 0.8584071086420273
+      },
+      "score": 5,
+      "snapshot": "15:00"
+    },
+    {
+      "BROAD_10d": -0.006894476205567435,
+      "BROAD_1d": -0.005522710767997874,
+      "BROAD_5d": -0.004229179901573676,
+      "QQQ_10d": -0.008758673805549955,
+      "QQQ_1d": -0.009048819525989127,
+      "QQQ_5d": -0.0074600587981440425,
+      "SPY_10d": -0.005030278605584915,
+      "SPY_1d": -0.0019966020100066206,
+      "SPY_5d": -0.0009983010050033103,
+      "breadth_delta_since_1030": null,
+      "checks": {
+        "factors_broad": true,
+        "indices_confirm": true,
+        "sectors_broad": false,
+        "short_term_momentum": true,
+        "subsectors_broad": true,
+        "vol_curve_normal": true,
+        "vol_easing": false
+      },
+      "date": "2026-08-04",
+      "features": {
+        "both_indices_positive": true,
+        "broad_last_30m": 0.0016771758423295147,
+        "broad_mean": 0.01591447601933227,
+        "factor_median_move": 0.007686988186744403,
+        "factor_positive_share": 0.875,
+        "quotes_available": 52,
+        "sector_median_move": -0.0035524468105769813,
+        "sector_positive_share": 0.36363636363636365,
+        "subsector_median_move": 0.0064128705458934565,
+        "subsector_positive_share": 0.7241379310344828,
+        "vix_change": 0.0012690040481537768,
+        "vix_term_ratio": 0.8384697124788438
+      },
+      "score": 5,
+      "snapshot": "10:30"
+    },
+    {
+      "BROAD_10d": -0.006894476205567435,
+      "BROAD_1d": -0.005522710767997874,
+      "BROAD_5d": -0.004229179901573676,
+      "QQQ_10d": -0.008758673805549955,
+      "QQQ_1d": -0.009048819525989127,
+      "QQQ_5d": -0.0074600587981440425,
+      "SPY_10d": -0.005030278605584915,
+      "SPY_1d": -0.0019966020100066206,
+      "SPY_5d": -0.0009983010050033103,
+      "breadth_delta_since_1030": 0.09725705329153611,
+      "checks": {
+        "breadth_not_fading": true,
+        "factors_broad": true,
+        "indices_confirm": true,
+        "sectors_broad": false,
+        "short_term_momentum": true,
+        "subsectors_broad": true,
+        "vol_curve_normal": true,
+        "vol_easing": false
+      },
+      "date": "2026-08-04",
+      "features": {
+        "both_indices_positive": true,
+        "broad_last_30m": 0.0019752569170392587,
+        "broad_mean": 0.020954540690541368,
+        "factor_median_move": 0.013345408760006894,
+        "factor_positive_share": 1.0,
+        "quotes_available": 53,
+        "sector_median_move": -0.0007187945090844083,
+        "sector_positive_share": 0.45454545454545453,
+        "subsector_median_move": 0.013234141879673755,
+        "subsector_positive_share": 0.8,
+        "vix_change": 0.03299495242460204,
+        "vix_term_ratio": 0.8550420117558386
+      },
+      "score": 6,
+      "snapshot": "12:00"
+    },
+    {
+      "BROAD_10d": -0.006894476205567435,
+      "BROAD_1d": -0.005522710767997874,
+      "BROAD_5d": -0.004229179901573676,
+      "QQQ_10d": -0.008758673805549955,
+      "QQQ_1d": -0.009048819525989127,
+      "QQQ_5d": -0.0074600587981440425,
+      "SPY_10d": -0.005030278605584915,
+      "SPY_1d": -0.0019966020100066206,
+      "SPY_5d": -0.0009983010050033103,
+      "breadth_delta_since_1030": 0.15786311389759666,
+      "checks": {
+        "breadth_not_fading": true,
+        "factors_broad": true,
+        "indices_confirm": true,
+        "sectors_broad": true,
+        "short_term_momentum": true,
+        "subsectors_broad": true,
+        "vol_curve_normal": true,
+        "vol_easing": false
+      },
+      "date": "2026-08-04",
+      "features": {
+        "both_indices_positive": true,
+        "broad_last_30m": 0.0008573876894268917,
+        "broad_mean": 0.024952784273569617,
+        "factor_median_move": 0.01618893440440272,
+        "factor_positive_share": 1.0,
+        "quotes_available": 53,
+        "sector_median_move": 0.002180379390869458,
+        "sector_positive_share": 0.6363636363636364,
+        "subsector_median_move": 0.016999843250364077,
+        "subsector_positive_share": 0.8,
+        "vix_change": 0.04885789635666171,
+        "vix_term_ratio": 0.8622848524182782
+      },
+      "score": 7,
+      "snapshot": "13:30"
+    },
+    {
+      "BROAD_10d": -0.006894476205567435,
+      "BROAD_1d": -0.005522710767997874,
+      "BROAD_5d": -0.004229179901573676,
+      "QQQ_10d": -0.008758673805549955,
+      "QQQ_1d": -0.009048819525989127,
+      "QQQ_5d": -0.0074600587981440425,
+      "SPY_10d": -0.005030278605584915,
+      "SPY_1d": -0.0019966020100066206,
+      "SPY_5d": -0.0009983010050033103,
+      "breadth_delta_since_1030": 0.18816614420062694,
+      "checks": {
+        "breadth_not_fading": true,
+        "factors_broad": true,
+        "indices_confirm": true,
+        "sectors_broad": true,
+        "short_term_momentum": true,
+        "subsectors_broad": true,
+        "vol_curve_normal": true,
+        "vol_easing": false
+      },
+      "date": "2026-08-04",
+      "features": {
+        "both_indices_positive": true,
+        "broad_last_30m": 0.001058321734584311,
+        "broad_mean": 0.02750509168597104,
+        "factor_median_move": 0.017366803430532318,
+        "factor_positive_share": 1.0,
+        "quotes_available": 53,
+        "sector_median_move": 0.0047731147505016835,
+        "sector_positive_share": 0.7272727272727273,
+        "subsector_median_move": 0.018817120193114767,
+        "subsector_positive_share": 0.8,
+        "vix_change": 0.037436557361633316,
+        "vix_term_ratio": 0.8533403189811652
+      },
+      "score": 7,
+      "snapshot": "15:00"
+    },
+    {
+      "BROAD_10d": -0.011507319168908403,
+      "BROAD_1d": -0.001642445898042466,
+      "BROAD_5d": 0.007551499043576215,
+      "QQQ_10d": -0.013263663287671146,
+      "QQQ_1d": -0.0029874750593527066,
+      "QQQ_5d": 0.01111983970453112,
+      "SPY_10d": -0.00975097505014566,
+      "SPY_1d": -0.00029741673673222557,
+      "SPY_5d": 0.00398315838262131,
+      "breadth_delta_since_1030": null,
+      "checks": {
+        "factors_broad": true,
+        "indices_confirm": true,
+        "sectors_broad": true,
+        "short_term_momentum": true,
+        "subsectors_broad": true,
+        "vol_curve_normal": true,
+        "vol_easing": true
+      },
+      "date": "2026-08-07",
+      "features": {
+        "both_indices_positive": true,
+        "broad_last_30m": 0.003281815739833327,
+        "broad_mean": 0.006761463982512539,
+        "factor_median_move": 0.0053577406863695165,
+        "factor_positive_share": 0.75,
+        "quotes_available": 52,
+        "sector_median_move": 0.003111365248432696,
+        "sector_positive_share": 0.6363636363636364,
+        "subsector_median_move": 0.0063561592434362435,
+        "subsector_positive_share": 0.7586206896551724,
+        "vix_change": -0.020928691669233834,
+        "vix_term_ratio": 0.7988260645605968
+      },
+      "score": 7,
+      "snapshot": "10:30"
+    },
+    {
+      "BROAD_10d": -0.011507319168908403,
+      "BROAD_1d": -0.001642445898042466,
+      "BROAD_5d": 0.007551499043576215,
+      "QQQ_10d": -0.013263663287671146,
+      "QQQ_1d": -0.0029874750593527066,
+      "QQQ_5d": 0.01111983970453112,
+      "SPY_10d": -0.00975097505014566,
+      "SPY_1d": -0.00029741673673222557,
+      "SPY_5d": 0.00398315838262131,
+      "breadth_delta_since_1030": 0.12742946708463943,
+      "checks": {
+        "breadth_not_fading": true,
+        "factors_broad": true,
+        "indices_confirm": true,
+        "sectors_broad": true,
+        "short_term_momentum": false,
+        "subsectors_broad": true,
+        "vol_curve_normal": true,
+        "vol_easing": true
+      },
+      "date": "2026-08-07",
+      "features": {
+        "both_indices_positive": true,
+        "broad_last_30m": -0.0006172485707633957,
+        "broad_mean": 0.008497944500386767,
+        "factor_median_move": 0.005017439027841686,
+        "factor_positive_share": 1.0,
+        "quotes_available": 53,
+        "sector_median_move": 0.002381094525637728,
+        "sector_positive_share": 0.7272727272727273,
+        "subsector_median_move": 0.008132836669305088,
+        "subsector_positive_share": 0.8,
+        "vix_change": -0.023544778127888022,
+        "vix_term_ratio": 0.797969055891944
+      },
+      "score": 7,
+      "snapshot": "12:00"
+    },
+    {
+      "BROAD_10d": -0.011507319168908403,
+      "BROAD_1d": -0.001642445898042466,
+      "BROAD_5d": 0.007551499043576215,
+      "QQQ_10d": -0.013263663287671146,
+      "QQQ_1d": -0.0029874750593527066,
+      "QQQ_5d": 0.01111983970453112,
+      "SPY_10d": -0.00975097505014566,
+      "SPY_1d": -0.00029741673673222557,
+      "SPY_5d": 0.00398315838262131,
+      "breadth_delta_since_1030": 0.16076280041797286,
+      "checks": {
+        "breadth_not_fading": true,
+        "factors_broad": true,
+        "indices_confirm": true,
+        "sectors_broad": true,
+        "short_term_momentum": false,
+        "subsectors_broad": true,
+        "vol_curve_normal": true,
+        "vol_easing": true
+      },
+      "date": "2026-08-07",
+      "features": {
+        "both_indices_positive": true,
+        "broad_last_30m": -0.00021594127306451272,
+        "broad_mean": 0.00639700167392343,
+        "factor_median_move": 0.005760856810661297,
+        "factor_positive_share": 1.0,
+        "quotes_available": 53,
+        "sector_median_move": 0.004166915419866024,
+        "sector_positive_share": 0.7272727272727273,
+        "subsector_median_move": 0.008569887732351567,
+        "subsector_positive_share": 0.9,
+        "vix_change": -0.02223676608477143,
+        "vix_term_ratio": 0.7994651978246843
+      },
+      "score": 7,
+      "snapshot": "13:30"
+    },
+    {
+      "BROAD_10d": -0.011507319168908403,
+      "BROAD_1d": -0.001642445898042466,
+      "BROAD_5d": 0.007551499043576215,
+      "QQQ_10d": -0.013263663287671146,
+      "QQQ_1d": -0.0029874750593527066,
+      "QQQ_5d": 0.01111983970453112,
+      "SPY_10d": -0.00975097505014566,
+      "SPY_1d": -0.00029741673673222557,
+      "SPY_5d": 0.00398315838262131,
+      "breadth_delta_since_1030": 0.11934865900383129,
+      "checks": {
+        "breadth_not_fading": true,
+        "factors_broad": true,
+        "indices_confirm": true,
+        "sectors_broad": true,
+        "short_term_momentum": true,
+        "subsectors_broad": true,
+        "vol_curve_normal": true,
+        "vol_easing": true
+      },
+      "date": "2026-08-07",
+      "features": {
+        "both_indices_positive": true,
+        "broad_last_30m": 0.001105017507958328,
+        "broad_mean": 0.006642044696478777,
+        "factor_median_move": 0.005730222296148613,
+        "factor_positive_share": 1.0,
+        "quotes_available": 53,
+        "sector_median_move": 0.0032366174159155214,
+        "sector_positive_share": 0.6363636363636364,
+        "subsector_median_move": 0.009143992821592728,
+        "subsector_positive_share": 0.8666666666666667,
+        "vix_change": -0.029430988252965307,
+        "vix_term_ratio": 0.7952840446912436
+      },
+      "score": 8,
+      "snapshot": "15:00"
+    },
+    {
+      "BROAD_10d": -0.012667638583112928,
+      "BROAD_1d": 0.00927150727602899,
+      "BROAD_5d": -0.0074846976975525,
+      "QQQ_10d": -0.017037469782875236,
+      "QQQ_1d": 0.011565558900105577,
+      "QQQ_5d": -0.010529217892299325,
+      "SPY_10d": -0.00829780738335062,
+      "SPY_1d": 0.006977455651952402,
+      "SPY_5d": -0.004440177502805676,
+      "breadth_delta_since_1030": null,
+      "checks": {
+        "factors_broad": true,
+        "indices_confirm": true,
+        "sectors_broad": false,
+        "short_term_momentum": true,
+        "subsectors_broad": true,
+        "vol_curve_normal": true,
+        "vol_easing": true
+      },
+      "date": "2026-08-12",
+      "features": {
+        "both_indices_positive": true,
+        "broad_last_30m": 0.0004365108727870659,
+        "broad_mean": 0.005201169673350381,
+        "factor_median_move": 0.00048735882403982966,
+        "factor_positive_share": 0.625,
+        "quotes_available": 52,
+        "sector_median_move": -0.0023616078860677625,
+        "sector_positive_share": 0.2727272727272727,
+        "subsector_median_move": 0.0027988019804645603,
+        "subsector_positive_share": 0.5862068965517241,
+        "vix_change": -0.029354195140553485,
+        "vix_term_ratio": 0.7940234949935151
+      },
+      "score": 6,
+      "snapshot": "10:30"
+    },
+    {
+      "BROAD_10d": -0.012667638583112928,
+      "BROAD_1d": 0.00927150727602899,
+      "BROAD_5d": -0.0074846976975525,
+      "QQQ_10d": -0.017037469782875236,
+      "QQQ_1d": 0.011565558900105577,
+      "QQQ_5d": -0.010529217892299325,
+      "SPY_10d": -0.00829780738335062,
+      "SPY_1d": 0.006977455651952402,
+      "SPY_5d": -0.004440177502805676,
+      "breadth_delta_since_1030": 0.14407001044932077,
+      "checks": {
+        "breadth_not_fading": true,
+        "factors_broad": true,
+        "indices_confirm": true,
+        "sectors_broad": false,
+        "short_term_momentum": true,
+        "subsectors_broad": true,
+        "vol_curve_normal": true,
+        "vol_easing": true
+      },
+      "date": "2026-08-12",
+      "features": {
+        "both_indices_positive": true,
+        "broad_last_30m": 0.0005460441524093307,
+        "broad_mean": 0.004866940722986879,
+        "factor_median_move": 0.0030644650932809547,
+        "factor_positive_share": 0.75,
+        "quotes_available": 52,
+        "sector_median_move": 0.002342222462495158,
+        "sector_positive_share": 0.5454545454545454,
+        "subsector_median_move": 0.004573157073868739,
+        "subsector_positive_share": 0.6206896551724138,
+        "vix_change": -0.0345727159562218,
+        "vix_term_ratio": 0.7931404239956317
+      },
+      "score": 7,
+      "snapshot": "12:00"
+    },
+    {
+      "BROAD_10d": -0.012667638583112928,
+      "BROAD_1d": 0.00927150727602899,
+      "BROAD_5d": -0.0074846976975525,
+      "QQQ_10d": -0.017037469782875236,
+      "QQQ_1d": 0.011565558900105577,
+      "QQQ_5d": -0.010529217892299325,
+      "SPY_10d": -0.00829780738335062,
+      "SPY_1d": 0.006977455651952402,
+      "SPY_5d": -0.004440177502805676,
+      "breadth_delta_since_1030": 0.1137669801462905,
+      "checks": {
+        "breadth_not_fading": true,
+        "factors_broad": true,
+        "indices_confirm": true,
+        "sectors_broad": false,
+        "short_term_momentum": false,
+        "subsectors_broad": true,
+        "vol_curve_normal": true,
+        "vol_easing": true
+      },
+      "date": "2026-08-12",
+      "features": {
+        "both_indices_positive": true,
+        "broad_last_30m": -0.00025548978806927414,
+        "broad_mean": 0.006268852721696638,
+        "factor_median_move": 0.0033308645538960846,
+        "factor_positive_share": 0.75,
+        "quotes_available": 52,
+        "sector_median_move": -5.949111211867031e-05,
+        "sector_positive_share": 0.45454545454545453,
+        "subsector_median_move": 0.0031773253291216275,
+        "subsector_positive_share": 0.6206896551724138,
+        "vix_change": -0.04500975758755854,
+        "vix_term_ratio": 0.7892183798085495
+      },
+      "score": 6,
+      "snapshot": "13:30"
+    },
+    {
+      "BROAD_10d": -0.012667638583112928,
+      "BROAD_1d": 0.00927150727602899,
+      "BROAD_5d": -0.0074846976975525,
+      "QQQ_10d": -0.017037469782875236,
+      "QQQ_1d": 0.011565558900105577,
+      "QQQ_5d": -0.010529217892299325,
+      "SPY_10d": -0.00829780738335062,
+      "SPY_1d": 0.006977455651952402,
+      "SPY_5d": -0.004440177502805676,
+      "breadth_delta_since_1030": 0.292319749216301,
+      "checks": {
+        "breadth_not_fading": true,
+        "factors_broad": true,
+        "indices_confirm": true,
+        "sectors_broad": true,
+        "short_term_momentum": false,
+        "subsectors_broad": true,
+        "vol_curve_normal": true,
+        "vol_easing": true
+      },
+      "date": "2026-08-12",
+      "features": {
+        "both_indices_positive": true,
+        "broad_last_30m": -0.00025775606446931665,
+        "broad_mean": 0.006189860235529587,
+        "factor_median_move": 0.004587526188147395,
+        "factor_positive_share": 0.875,
+        "quotes_available": 52,
+        "sector_median_move": 0.003094959640904227,
+        "sector_positive_share": 0.7272727272727273,
+        "subsector_median_move": 0.003441484403634787,
+        "subsector_positive_share": 0.7586206896551724,
+        "vix_change": -0.05348986946543843,
+        "vix_term_ratio": 0.78559830905844
+      },
+      "score": 7,
+      "snapshot": "15:00"
+    }
+  ],
+  "sample_window": {
+    "first_intraday_date": "2026-06-15",
+    "last_intraday_date": "2026-09-09",
+    "reentry_episode_starts": 10
+  },
+  "survivor_candidates": [
+    {
+      "details": [
+        {
+          "directionally_better_5d_and_10d": false,
+          "snapshot": "10:30"
+        },
+        {
+          "directionally_better_5d_and_10d": false,
+          "snapshot": "12:00"
+        },
+        {
+          "directionally_better_5d_and_10d": true,
+          "snapshot": "13:30"
+        },
+        {
+          "directionally_better_5d_and_10d": true,
+          "snapshot": "15:00"
+        }
+      ],
+      "feature": "sectors_broad",
+      "supporting_snapshots": 2
+    },
+    {
+      "details": [
+        {
+          "directionally_better_5d_and_10d": false,
+          "snapshot": "10:30"
+        },
+        {
+          "directionally_better_5d_and_10d": false,
+          "snapshot": "12:00"
+        },
+        {
+          "directionally_better_5d_and_10d": true,
+          "snapshot": "13:30"
+        },
+        {
+          "directionally_better_5d_and_10d": true,
+          "snapshot": "15:00"
+        }
+      ],
+      "feature": "subsectors_broad",
+      "supporting_snapshots": 2
+    },
+    {
+      "details": [
+        {
+          "directionally_better_5d_and_10d": false,
+          "snapshot": "10:30"
+        },
+        {
+          "directionally_better_5d_and_10d": true,
+          "snapshot": "12:00"
+        },
+        {
+          "directionally_better_5d_and_10d": true,
+          "snapshot": "13:30"
+        },
+        {
+          "directionally_better_5d_and_10d": true,
+          "snapshot": "15:00"
+        }
+      ],
+      "feature": "vol_easing",
+      "supporting_snapshots": 3
+    }
+  ]
+}
