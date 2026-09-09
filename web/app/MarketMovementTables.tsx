@@ -2,6 +2,7 @@
 
 import { useMemo, useState, type ReactNode } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import ShadowValidationPanel from "./ShadowValidationPanel";
 
 type SubsectorProxy = {
   label: string;
@@ -94,6 +95,8 @@ export default function MarketMovementTables({ snapshot, live }: { snapshot: Sna
   }), [snapshot, live, subsectorSort, subsectorDirection]);
 
   return <>
+    <ShadowValidationPanel />
+
     <section className="card section-card">
       <div className="section-heading"><div><span className="kicker">ALL 11 SECTORS</span><h2>Sector Daily Moves &amp; Repair</h2></div><span className="pill">{sectors.length}/11 loaded</span></div>
       <p className="section-intro">Today&apos;s movement first, with pullback and repair context beside it. The default view ranks the strongest sectors today from top to bottom.</p>
