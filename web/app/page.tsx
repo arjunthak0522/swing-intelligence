@@ -39,10 +39,6 @@ function formatDate(value?: string | null) {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 }
 
-function ratePct(value?: number | null, digits = 0) {
-  return typeof value === "number" && Number.isFinite(value) ? `${(value * 100).toFixed(digits)}%` : "-";
-}
-
 function DecisionHero({ s }: { s: ReentrySnapshot }) {
   const closer = s.signal === "WAIT" && ["DEVELOPING", "MEANINGFUL", "BROAD"].includes(s.internal_reset);
   const displaySignal = s.signal === "WAIT" ? "WAIT FOR NEW ENTRY" : s.signal;
@@ -148,52 +144,6 @@ function MarketInternalsSummary({ snapshot, live }: { snapshot: ReentrySnapshot;
   );
 }
 
-function HistoricalSummary({ snapshot, evidence, ledger }: { snapshot: ReentrySnapshot; evidence: Awaited<ReturnType<typeof getHistoricalEpisodeEvidence>>; ledger: Awaited<ReturnType<typeof getHistoricalEpisodeLedger>> }) {
-  const h = snapshot.historical_validation;
-
-  const assets = (["SPY", "QQQ"] as const).map((asset) => {
-    const name = asset === "SPY" ? "S&P 500" : "Nasdaq 100";
-    const horizons = (["30", "60"] as const).map((horizon) => {
-      const archived = evidence?.final_policy_validation?.[asset]?.[horizon];
-      const fallbackMedian = asset === "SPY"
-        ? (horizon === "30" ? h.SPY_30D_median_after_signal : h.SPY_60D_median_after_signal)
-        : (horizon === "30" ? h.QQQ_30D_median_after_signal : h.QQQ_60D_median_after_signal);
-      return {
-        horizon,
-        average: archived?.mean_return ?? null,
-        median: archived?.median_return ?? fallbackMedian,
-        positive: archived?.positive_rate ?? null,
-      };
-    });
-    return { asset, name, horizons };
-  });
-
-  return (
-    <section className="simple-section">
-      <div className="simple-heading"><span className="kicker">HISTORICAL EVIDENCE</span><h2>{h.final_independent_reentry_episodes} validated independent RE-ENTRY episodes</h2></div>
-      <div className="history-ticker-grid">
-        {assets.map(({ asset, name, horizons }) => <section className="history-ticker-block" key={asset}>
-          <div className="history-ticker-head">
-            <div><strong>{asset}</strong><span>{name}</span></div>
-            <span className="history-ticker-context">AFTER RE-ENTRY</span>
-          </div>
-          <div className="history-horizon-grid">
-            {horizons.map((item) => <div className="history-horizon-card" key={`${asset}-${item.horizon}`}>
-              <div className="history-horizon-label">{item.horizon} DAYS</div>
-              <div className="history-primary-stat"><strong>{pct(item.average, 2)}</strong><span>avg return</span></div>
-              <div className="history-secondary-stats">
-                <div><span>Median</span><b>{pct(item.median, 2)}</b></div>
-                <div><span>Positive</span><b>{ratePct(item.positive, 0)}</b></div>
-              </div>
-            </div>)}
-          </div>
-        </section>)}
-      </div>
-      <details className="deep-disclosure"><summary>View historical RE-ENTRY periods <ChevronDown size={16} /></summary><div className="nested-detail"><HistoricalEvidence evidence={evidence} ledger={ledger} /></div></details>
-    </section>
-  );
-}
-
 function ResearchSection() {
   return (
     <details className="research-section">
@@ -227,29 +177,9 @@ function PageStyles() {
     .simple-section{padding:30px 0;border-bottom:1px solid var(--line)}.simple-heading h2{font-size:26px;letter-spacing:-.025em;margin:4px 0 0}
     .evidence-list{margin-top:16px;border-top:1px solid var(--line)}.evidence-row{border-bottom:1px solid var(--line)}.evidence-row>summary{display:grid;grid-template-columns:1fr auto 22px;gap:16px;align-items:center;padding:15px 0;cursor:pointer;list-style:none}.evidence-row>summary::-webkit-details-marker{display:none}.evidence-row>summary span{font-size:12px;font-weight:700}.evidence-row>summary b{font-size:12px}.evidence-row>summary b.good{color:var(--green)}.evidence-row>summary b.warn{color:var(--amber)}.evidence-row>summary b.bad{color:var(--red)}.evidence-row[open]>summary svg{transform:rotate(180deg)}.evidence-row p{margin:0 0 15px;max-width:760px;font-size:11px;color:var(--muted);line-height:1.5}
     .internals-summary-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:16px}.internals-summary-grid-two{grid-template-columns:1fr 1fr}.internals-summary-grid>div{padding:14px 0}.internals-summary-grid small{display:block;color:var(--muted);font-size:9px;margin-bottom:7px}.internals-summary-grid span{display:flex;justify-content:space-between;gap:10px;font-size:11px;padding:3px 0}.internals-summary-grid strong{display:block;font-size:28px;letter-spacing:-.04em}.nested-detail{margin-top:16px}.nested-detail>.card,.nested-detail>section.card,.nested-detail>details.card{box-shadow:none!important}
-
-    .history-ticker-grid{display:grid;gap:14px;margin-top:20px}
-    .history-ticker-block{border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,#fff,#fbfcfb);overflow:hidden}
-    .history-ticker-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px;border-bottom:1px solid var(--line)}
-    .history-ticker-head>div{display:flex;align-items:baseline;gap:9px}
-    .history-ticker-head strong{font-size:28px;letter-spacing:-.05em}
-    .history-ticker-head span{font-size:10px;color:var(--muted);font-weight:700}
-    .history-ticker-context{letter-spacing:.12em;text-transform:uppercase}
-    .history-horizon-grid{display:grid;grid-template-columns:1fr 1fr}
-    .history-horizon-card{padding:20px}
-    .history-horizon-card+.history-horizon-card{border-left:1px solid var(--line)}
-    .history-horizon-label{font-size:10px;font-weight:850;letter-spacing:.13em;color:var(--muted)}
-    .history-primary-stat{margin-top:12px}
-    .history-primary-stat strong{display:block;font-size:34px;line-height:1;letter-spacing:-.055em}
-    .history-primary-stat span{display:block;margin-top:5px;font-size:10px;color:var(--muted);font-weight:700}
-    .history-secondary-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px;padding-top:14px;border-top:1px solid #edf1ee}
-    .history-secondary-stats>div{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
-    .history-secondary-stats span{font-size:9px;color:var(--muted);font-weight:700}
-    .history-secondary-stats b{font-size:14px;font-variant-numeric:tabular-nums}
-
     .research-section{margin:30px 0 12px;border:1px solid var(--line);border-radius:16px;overflow:hidden}.research-section>summary{display:flex;justify-content:space-between;gap:20px;align-items:center;padding:20px 22px;cursor:pointer;list-style:none}.research-section>summary::-webkit-details-marker{display:none}.research-section>summary h2{margin:4px 0 3px;font-size:20px}.research-section>summary p{margin:0;color:var(--muted);font-size:10px}.research-status{display:flex;align-items:center;gap:8px}.research-section[open] .research-status svg{transform:rotate(180deg)}.research-body{padding:0 16px 16px;border-top:1px solid var(--line)}.research-note{padding:18px 8px;border-top:1px solid var(--line)}.research-note h3{margin:3px 0 0;font-size:16px}.research-note p{margin:8px 0 0;font-size:11px;color:var(--muted);max-width:760px}
     .good-text{color:var(--green)}.bad-text{color:var(--red)}
-    @media(max-width:760px){.decision-word{font-size:48px}.decision-label-row,.today-topline,.simple-heading{display:block}.freshness{display:inline-flex;margin-top:8px}.episode-strip{grid-template-columns:1fr 1fr}.episode-meta{grid-column:1/-1}.today-drivers,.live-detail-grid,.internals-summary-grid{grid-template-columns:1fr 1fr}.today-drivers>div+div{border-left:0;padding-left:0}.today-drivers>div:nth-child(3){grid-column:1/-1}.research-section>summary{align-items:flex-start}.research-status .pill{display:none}.history-horizon-card{padding:16px}.history-ticker-head{padding:16px}.history-ticker-head strong{font-size:24px}.history-primary-stat strong{font-size:28px}.history-secondary-stats{grid-template-columns:1fr;gap:7px}}
+    @media(max-width:760px){.decision-word{font-size:48px}.decision-label-row,.today-topline,.simple-heading{display:block}.freshness{display:inline-flex;margin-top:8px}.episode-strip{grid-template-columns:1fr 1fr}.episode-meta{grid-column:1/-1}.today-drivers,.live-detail-grid,.internals-summary-grid{grid-template-columns:1fr 1fr}.today-drivers>div+div{border-left:0;padding-left:0}.today-drivers>div:nth-child(3){grid-column:1/-1}.research-section>summary{align-items:flex-start}.research-status .pill{display:none}}
   `}</style>;
 }
 
@@ -277,7 +207,7 @@ export default async function Home() {
       <LiveToday live={intraday} official={snapshot} />
       <WhyDecision s={snapshot} />
       <MarketInternalsSummary snapshot={snapshot} live={intraday} />
-      <HistoricalSummary snapshot={snapshot} evidence={historicalEvidence} ledger={historicalLedger} />
+      <HistoricalEvidence evidence={historicalEvidence} ledger={historicalLedger} />
       <ResearchSection />
     </>}
     <footer>Official RE-ENTRY decisions use completed-close data. Live context and research layers never overwrite the validated close signal.</footer>
