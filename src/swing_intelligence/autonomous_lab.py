@@ -36,11 +36,15 @@ DISCOVERY_FEATURES = (
     "rsp_spy_ret_20d",
     "qqq_spy_ret_5d",
     "qqq_spy_ret_20d",
+    "iwm_spy_ret_5d",
+    "iwm_spy_ret_20d",
     "smh_qqq_ret_5d",
     "smh_qqq_ret_20d",
-    "vix_ret_5d",
-    "vix_ret_20d",
-    "vix_z_20",
+    "vix_level",
+    "vix_change_1d",
+    "vix_change_5d",
+    "vix_z_60",
+    "vix_percentile_252",
 )
 
 PRICE_STATE_FEATURES = {
