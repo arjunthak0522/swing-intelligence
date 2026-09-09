@@ -7,7 +7,7 @@ from pathlib import Path
 from swing_intelligence.autonomous_lab import LabConfig, run_autonomous_lab
 from swing_intelligence.autonomous_robustness import RobustnessConfig, robustness_report
 from swing_intelligence.conditional_search import ConditionalSearchConfig, run_conditional_walk_forward
-from swing_intelligence.data import DataRequest, fetch_fred_vix, fetch_twelve_data_daily
+from swing_intelligence.data import DataRequest, fetch_fred_series, fetch_fred_vix, fetch_twelve_data_daily
 from swing_intelligence.phase2b_validation import Phase2BConfig, phase2b_report
 from swing_intelligence.qqq_family_robustness import QQQFamilyConfig, run_qqq_family_robustness
 from swing_intelligence.research import add_research_features, split_periods
@@ -18,6 +18,11 @@ from swing_intelligence.walk_forward import WalkForwardConfig, run_semantic_walk
 OUT_DIR = Path("artifacts/autonomous_lab")
 TARGETS = ("SPY", "QQQ")
 CONTEXT_SYMBOLS = ("RSP", "IWM", "SMH")
+MACRO_CONTEXT = {
+    "DGS2": "DGS2",
+    "DGS10": "DGS10",
+    "HY_SPREAD": "BAMLH0A0HYM2",
+}
 
 
 def _load_frames():
@@ -31,6 +36,8 @@ def _load_frames():
             years_per_chunk=14, min_interval_seconds=8.0,
         )
     frames["VIX"] = fetch_fred_vix(start="2000-01-01")
+    for name, fred_id in MACRO_CONTEXT.items():
+        frames[name] = fetch_fred_series(fred_id, start="2000-01-01")
     return frames
 
 
@@ -85,9 +92,13 @@ def main():
                                    min_events_per_slice=8, min_positive_horizons=3,
                                    min_positive_eras=2, era_years=2, min_regime_events=8,
                                    transaction_cost_bps_round_trip=2.0)
-    wf_config = WalkForwardConfig(first_test_year=2010, fold_years=2, horizon=30, min_gap=30,
-                                  transaction_cost_bps_round_trip=2.0, min_trades_total=20,
-                                  min_folds_with_trades=3, min_positive_fold_fraction=0.60)
+    wf_config = WalkForwardConfig(
+        first_test_year=2010, fold_years=2, horizon=30, min_gap=30,
+        transaction_cost_bps_round_trip=2.0, min_trades_total=20,
+        min_folds_with_trades=3, min_positive_fold_fraction=0.60,
+        matched_random_iterations=200, min_matched_random_percentile=0.80,
+        min_random_superiority_fold_fraction=0.60,
+    )
     conditional_config = ConditionalSearchConfig(
         walk_forward=wf_config,
         inner_validation_years=2,
@@ -144,7 +155,8 @@ def main():
 
     summary = {
         "config": result["config"], "research_targets": list(TARGETS),
-        "context_only_symbols": list(CONTEXT_SYMBOLS) + ["VIX"],
+        "context_only_symbols": list(CONTEXT_SYMBOLS) + ["VIX"] + list(MACRO_CONTEXT),
+        "macro_fred_series": MACRO_CONTEXT,
         "targets": {symbol: _compact_target(payload) for symbol, payload in result["targets"].items()},
         "robustness": {symbol: robustness["targets"][symbol] for symbol in TARGETS},
         "phase2b": {symbol: phase2b["targets"][symbol] for symbol in TARGETS},
@@ -172,7 +184,7 @@ def main():
             f"{symbol}: baseline {base['candidate_count']} candidates / {base['survivor_count']} first-pass / "
             f"{base_robust['robust_count']} robust / grades={base_grades}; semantic {sem['candidate_count']} candidates / "
             f"{sem['survivor_count']} first-pass / {sem_robust['robust_count']} robust / grades={sem_grades}; "
-            f"walk-forward profitable={wf['profitable_count']}; conditional candidate strategies={cond['candidate_strategy_count']}"
+            f"walk-forward matched-random-qualified={wf['profitable_count']}; conditional candidate strategies={cond['candidate_strategy_count']}"
         )
 
     print(
