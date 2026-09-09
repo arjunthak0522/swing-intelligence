@@ -24,6 +24,18 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Patch null-safe broad confirmation
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('tools/intraday_signal_validation.py')
+          s = p.read_text()
+          old = '"both_indices_positive": len(broad_moves) == 2 and all(x > 0 for x in broad_moves),'
+          new = '"both_indices_positive": len([x for x in broad_moves if isinstance(x, (int, float)) and math.isfinite(x)]) == 2 and all(x > 0 for x in broad_moves if isinstance(x, (int, float)) and math.isfinite(x)),'
+          if old not in s:
+              raise SystemExit('Expected source line not found')
+          p.write_text(s.replace(old, new))
+          PY
       - name: Run research validation
         run: python tools/intraday_signal_validation.py
       - name: Persist research outputs
