@@ -9,18 +9,17 @@ def _align_close(frames: dict[str, pd.DataFrame], symbol: str) -> pd.Series:
 
 
 def compute_cross_asset_features(frames: dict[str, pd.DataFrame]) -> pd.DataFrame:
-    """Compute cross-asset confirmation features without using future information.
+    """Compute causal cross-asset and macro confirmation features.
 
-    Expected symbols when available: SPY, QQQ, RSP, IWM, SMH, VIX.
-    Missing optional symbols are skipped rather than fabricated.
+    Expected symbols when available: SPY, QQQ, RSP, IWM, SMH, VIX plus
+    macro context DGS2, DGS10, and HY_SPREAD. Missing optional series are
+    skipped rather than fabricated.
     """
-    closes = []
-    for symbol in ("SPY", "QQQ", "RSP", "IWM", "SMH", "VIX"):
-        if symbol in frames:
-            closes.append(_align_close(frames, symbol))
+    symbols = ("SPY", "QQQ", "RSP", "IWM", "SMH", "VIX", "DGS2", "DGS10", "HY_SPREAD")
+    closes = [_align_close(frames, symbol) for symbol in symbols if symbol in frames]
     if not closes:
         return pd.DataFrame()
-    px = pd.concat(closes, axis=1).sort_index()
+    px = pd.concat(closes, axis=1).sort_index().ffill()
     out = pd.DataFrame(index=px.index)
 
     pairs = [
@@ -49,5 +48,33 @@ def compute_cross_asset_features(frames: dict[str, pd.DataFrame]) -> pd.DataFram
         out["vix_z_60"] = (vix - mean) / std.replace(0, np.nan)
         out["vix_percentile_252"] = vix.rolling(252).rank(pct=True)
         out["vix_shock"] = ((out["vix_change_5d"] >= 0.25) | (out["vix_z_60"] >= 1.5)).astype(int)
+
+    if "DGS2" in px.columns:
+        y2 = px["DGS2"].astype(float)
+        out["yield_2y"] = y2
+        out["yield_2y_change_5d"] = y2.diff(5)
+        out["yield_2y_change_20d"] = y2.diff(20)
+        out["yield_2y_percentile_252"] = y2.rolling(252).rank(pct=True)
+
+    if "DGS10" in px.columns:
+        y10 = px["DGS10"].astype(float)
+        out["yield_10y"] = y10
+        out["yield_10y_change_5d"] = y10.diff(5)
+        out["yield_10y_change_20d"] = y10.diff(20)
+        out["yield_10y_percentile_252"] = y10.rolling(252).rank(pct=True)
+
+    if "DGS2" in px.columns and "DGS10" in px.columns:
+        curve = px["DGS10"].astype(float) - px["DGS2"].astype(float)
+        out["yield_curve_10y2y"] = curve
+        out["yield_curve_change_20d"] = curve.diff(20)
+        out["yield_curve_percentile_252"] = curve.rolling(252).rank(pct=True)
+
+    if "HY_SPREAD" in px.columns:
+        spread = px["HY_SPREAD"].astype(float)
+        out["hy_spread"] = spread
+        out["hy_spread_change_5d"] = spread.diff(5)
+        out["hy_spread_change_20d"] = spread.diff(20)
+        out["hy_spread_percentile_252"] = spread.rolling(252).rank(pct=True)
+        out["hy_spread_cooling_5d"] = -spread.diff(5)
 
     return out
