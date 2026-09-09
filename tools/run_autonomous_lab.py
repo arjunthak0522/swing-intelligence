@@ -7,6 +7,7 @@ from pathlib import Path
 from swing_intelligence.autonomous_lab import LabConfig, run_autonomous_lab
 from swing_intelligence.autonomous_robustness import RobustnessConfig, robustness_report
 from swing_intelligence.data import DataRequest, fetch_fred_vix, fetch_twelve_data_daily
+from swing_intelligence.phase2b_validation import Phase2BConfig, phase2b_report
 from swing_intelligence.research import add_research_features, split_periods
 from swing_intelligence.semantic_lab import build_semantic_features, run_semantic_lab
 
@@ -72,6 +73,20 @@ def _run_robustness(frames, result, robust_config, semantic=False):
     return robustness
 
 
+def _run_phase2b(frames, result, robustness, phase2b_config, semantic=False):
+    report = {"config": phase2b_config.__dict__, "targets": {}}
+    for symbol in TARGETS:
+        features = build_semantic_features(frames, symbol) if semantic else add_research_features(frames, symbol)
+        holdout = split_periods(features)["holdout"]
+        report["targets"][symbol] = phase2b_report(
+            holdout,
+            result["targets"][symbol]["survivors"],
+            robustness["targets"][symbol]["rows"],
+            config=phase2b_config,
+        )
+    return report
+
+
 def main():
     frames = _load_frames()
     config = LabConfig(max_pair_rules=80, min_n=25, primary_horizon=30)
@@ -83,18 +98,32 @@ def main():
         bootstrap_block=3,
         fdr_alpha=0.10,
     )
+    phase2b_config = Phase2BConfig(
+        horizons=(10, 20, 30, 60),
+        primary_horizon=30,
+        min_events_per_slice=8,
+        min_positive_horizons=3,
+        min_positive_eras=2,
+        era_years=2,
+        min_regime_events=8,
+        transaction_cost_bps_round_trip=2.0,
+    )
 
     result = run_autonomous_lab(frames, targets=TARGETS, config=config)
     robustness = _run_robustness(frames, result, robust_config, semantic=False)
+    phase2b = _run_phase2b(frames, result, robustness, phase2b_config, semantic=False)
 
     semantic = run_semantic_lab(frames, targets=TARGETS, config=config)
     semantic_robustness = _run_robustness(frames, semantic, robust_config, semantic=True)
+    semantic_phase2b = _run_phase2b(frames, semantic, semantic_robustness, phase2b_config, semantic=True)
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     (OUT_DIR / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True))
     (OUT_DIR / "robustness.json").write_text(json.dumps(robustness, indent=2, sort_keys=True))
+    (OUT_DIR / "phase2b.json").write_text(json.dumps(phase2b, indent=2, sort_keys=True))
     (OUT_DIR / "semantic_latest.json").write_text(json.dumps(semantic, indent=2, sort_keys=True))
     (OUT_DIR / "semantic_robustness.json").write_text(json.dumps(semantic_robustness, indent=2, sort_keys=True))
+    (OUT_DIR / "semantic_phase2b.json").write_text(json.dumps(semantic_phase2b, indent=2, sort_keys=True))
 
     summary = {
         "config": result["config"],
@@ -109,6 +138,10 @@ def main():
             }
             for symbol, payload in robustness["targets"].items()
         },
+        "phase2b": {
+            symbol: phase2b["targets"][symbol]
+            for symbol in TARGETS
+        },
         "semantic": {
             "targets": {symbol: _compact_target(payload) for symbol, payload in semantic["targets"].items()},
             "robustness": {
@@ -119,6 +152,10 @@ def main():
                 }
                 for symbol, payload in semantic_robustness["targets"].items()
             },
+            "phase2b": {
+                symbol: semantic_phase2b["targets"][symbol]
+                for symbol in TARGETS
+            },
         },
     }
     (OUT_DIR / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True))
@@ -126,14 +163,16 @@ def main():
     for symbol in TARGETS:
         base = summary["targets"][symbol]
         base_robust = summary["robustness"][symbol]
+        base_grades = summary["phase2b"][symbol]["grade_counts"]
         sem = summary["semantic"]["targets"][symbol]
         sem_robust = summary["semantic"]["robustness"][symbol]
+        sem_grades = summary["semantic"]["phase2b"][symbol]["grade_counts"]
         print(
             f"{symbol}: baseline {base['candidate_count']} candidates / "
             f"{base['survivor_count']} first-pass / {base_robust['robust_count']} robust / "
-            f"{base['live_survivor_count']} live; semantic {sem['candidate_count']} candidates / "
+            f"grades={base_grades}; semantic {sem['candidate_count']} candidates / "
             f"{sem['survivor_count']} first-pass / {sem_robust['robust_count']} robust / "
-            f"{sem['live_survivor_count']} live"
+            f"grades={sem_grades}"
         )
 
 
