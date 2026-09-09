@@ -1,7 +1,8 @@
-import { CircleAlert, CircleCheck, Clock3, Radio, ChevronDown } from "lucide-react";
+import { CircleAlert, Clock3, Radio, ChevronDown } from "lucide-react";
 import MarketMovementTables from "./MarketMovementTables";
 import HistoricalEvidence from "./HistoricalEvidence";
 import ShadowValidationPanel from "./ShadowValidationPanel";
+import VolumeBreadthPanel from "./VolumeBreadthPanel";
 import { getHistoricalEpisodeEvidence, getHistoricalEpisodeLedger } from "../lib/historicalEvidence";
 import {
   getIntradaySnapshot,
@@ -89,7 +90,7 @@ function LiveToday({ live, official }: { live: IntradaySnapshot | null; official
       </div>
       <div className="today-drivers">
         <div><small>PRICE</small><b className={quality.risks.broad_negative ? "bad-text" : "good-text"}>{quality.risks.broad_negative ? "WEAK" : "HOLDING UP"}</b></div>
-        <div><small>BREADTH</small><b className={quality.risks.breadth_below_half ? "bad-text" : "good-text"}>{quality.risks.breadth_below_half ? "WEAK" : "BROAD"}</b></div>
+        <VolumeBreadthPanel compact />
         <div><small>VOLATILITY</small><b className={quality.risks.vix_up ? "bad-text" : "good-text"}>{quality.risks.vix_up ? "VIX RISING" : "NOT RISING"}</b></div>
       </div>
       <p className="today-copy">{quality.label === "DETERIORATING" ? "Today's market action is putting meaningful pressure on the active RE-ENTRY state." : quality.label === "CAUTION" ? "Multiple deterioration conditions are present, but the official close decision has not changed." : quality.label === "WATCH" ? "One deterioration condition is present. The official close decision remains unchanged." : "Today's market action is broadly supporting the existing RE-ENTRY state."}</p>
@@ -99,10 +100,8 @@ function LiveToday({ live, official }: { live: IntradaySnapshot | null; official
           <div><small>SPY today</small><b>{pct(spy?.change_pct, 2)}</b></div>
           <div><small>QQQ today</small><b>{pct(qqq?.change_pct, 2)}</b></div>
           <div><small>VIX today</small><b>{pct(vix?.change_pct, 2)}</b></div>
-          <div><small>Sectors positive</small><b>{pct(live.group_summary?.sectors?.positive_share, 0)}</b></div>
-          <div><small>Subsectors positive</small><b>{pct(live.group_summary?.subsectors?.positive_share, 0)}</b></div>
-          <div><small>Risk conditions</small><b>{quality.risk_score}/3</b></div>
         </div>
+        <VolumeBreadthPanel />
         <div className="context-note"><CircleAlert size={15} /> Official decision remains <b>{official.signal}</b> until the completed-close engine recalculates.</div>
       </details>
     </section>
@@ -136,10 +135,9 @@ function MarketInternalsSummary({ snapshot, live }: { snapshot: ReentrySnapshot;
   return (
     <section className="simple-section">
       <div className="simple-heading"><span className="kicker">MARKET INTERNALS</span><h2>What is leading and lagging today?</h2></div>
-      <div className="internals-summary-grid">
+      <div className="internals-summary-grid internals-summary-grid-two">
         <div><small>STRONGEST SECTORS</small>{strongest.map((x) => <span key={x.symbol}><b>{x.symbol}</b>{pct(x.move, 1)}</span>)}</div>
         <div><small>WEAKEST SECTORS</small>{weakest.map((x) => <span key={x.symbol}><b>{x.symbol}</b>{pct(x.move, 1)}</span>)}</div>
-        <div><small>SUBSECTOR BREADTH</small><strong>{pct(live?.group_summary?.subsectors?.positive_share, 0)}</strong><span>positive now</span></div>
       </div>
       <details className="deep-disclosure"><summary>Explore all sectors & subsectors <ChevronDown size={16} /></summary><div className="nested-detail"><MarketMovementTables snapshot={snapshot} live={live} /></div></details>
     </section>
@@ -194,7 +192,7 @@ function PageStyles() {
     .live-detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.live-detail-grid>div{padding:12px;background:#f4f1eb;border-radius:10px}.live-detail-grid small,.live-detail-grid b{display:block}.live-detail-grid small{font-size:9px;color:var(--muted)}.live-detail-grid b{margin-top:3px}.context-note{display:flex;gap:8px;align-items:flex-start;margin-top:10px;font-size:10px;color:var(--muted)}
     .simple-section{padding:30px 0;border-bottom:1px solid var(--line)}.simple-heading h2{font-size:26px;letter-spacing:-.025em;margin:4px 0 0}
     .evidence-list{margin-top:16px;border-top:1px solid var(--line)}.evidence-row{border-bottom:1px solid var(--line)}.evidence-row>summary{display:grid;grid-template-columns:1fr auto 22px;gap:16px;align-items:center;padding:15px 0;cursor:pointer;list-style:none}.evidence-row>summary::-webkit-details-marker{display:none}.evidence-row>summary span{font-size:12px;font-weight:700}.evidence-row>summary b{font-size:12px}.evidence-row>summary b.good{color:var(--green)}.evidence-row>summary b.warn{color:var(--amber)}.evidence-row>summary b.bad{color:var(--red)}.evidence-row[open]>summary svg{transform:rotate(180deg)}.evidence-row p{margin:0 0 15px;max-width:760px;font-size:11px;color:var(--muted);line-height:1.5}
-    .internals-summary-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:16px}.internals-summary-grid>div{padding:14px 0}.internals-summary-grid small{display:block;color:var(--muted);font-size:9px;margin-bottom:7px}.internals-summary-grid span{display:flex;justify-content:space-between;gap:10px;font-size:11px;padding:3px 0}.internals-summary-grid strong{display:block;font-size:28px;letter-spacing:-.04em}.nested-detail{margin-top:16px}.nested-detail>.card,.nested-detail>section.card,.nested-detail>details.card{box-shadow:none!important}
+    .internals-summary-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:16px}.internals-summary-grid-two{grid-template-columns:1fr 1fr}.internals-summary-grid>div{padding:14px 0}.internals-summary-grid small{display:block;color:var(--muted);font-size:9px;margin-bottom:7px}.internals-summary-grid span{display:flex;justify-content:space-between;gap:10px;font-size:11px;padding:3px 0}.internals-summary-grid strong{display:block;font-size:28px;letter-spacing:-.04em}.nested-detail{margin-top:16px}.nested-detail>.card,.nested-detail>section.card,.nested-detail>details.card{box-shadow:none!important}
     .history-summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}.history-summary-grid>div{padding:12px 0}.history-summary-grid small,.history-summary-grid strong{display:block}.history-summary-grid small{font-size:9px;color:var(--muted)}.history-summary-grid strong{font-size:24px;margin-top:4px;letter-spacing:-.03em}
     .research-section{margin:30px 0 12px;border:1px solid var(--line);border-radius:16px;overflow:hidden}.research-section>summary{display:flex;justify-content:space-between;gap:20px;align-items:center;padding:20px 22px;cursor:pointer;list-style:none}.research-section>summary::-webkit-details-marker{display:none}.research-section>summary h2{margin:4px 0 3px;font-size:20px}.research-section>summary p{margin:0;color:var(--muted);font-size:10px}.research-status{display:flex;align-items:center;gap:8px}.research-section[open] .research-status svg{transform:rotate(180deg)}.research-body{padding:0 16px 16px;border-top:1px solid var(--line)}.research-note{padding:18px 8px;border-top:1px solid var(--line)}.research-note h3{margin:3px 0 0;font-size:16px}.research-note p{margin:8px 0 0;font-size:11px;color:var(--muted);max-width:760px}
     .good-text{color:var(--green)}.bad-text{color:var(--red)}
