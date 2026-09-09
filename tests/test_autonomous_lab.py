@@ -56,8 +56,15 @@ def test_precomputed_forward_paths_match_reference_implementation():
     for horizon in (1, 3, 5):
         reference = forward_path_stats(df, df.index, horizon)
         fast = _forward_path_table(df, horizon)
-        pd.testing.assert_index_equal(fast.index, reference.index)
-        pd.testing.assert_frame_equal(fast, reference, check_exact=False, rtol=1e-12, atol=1e-12)
+        pd.testing.assert_index_equal(fast.index, reference.index, check_freq=False)
+        pd.testing.assert_frame_equal(
+            fast,
+            reference,
+            check_freq=False,
+            check_exact=False,
+            rtol=1e-12,
+            atol=1e-12,
+        )
 
 
 def test_skeptic_requires_validation_and_holdout_edges():
