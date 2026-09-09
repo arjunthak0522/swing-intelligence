@@ -1,0 +1,75 @@
+/* Historical performance cleanup */
+
+/* The aggregate SPY/QQQ period-return block duplicates the archived performance summary above. */
+.episode-performance-block{
+  display:none!important;
+}
+
+/* Keep the archived SPY and QQQ identities unmistakable after the visual redesign. */
+.performance-grid .asset-performance-card{
+  position:relative;
+  overflow:hidden;
+}
+.performance-grid .asset-performance-title{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  min-height:54px;
+  padding:14px 16px!important;
+  background:#f8faf9!important;
+  border-bottom:1px solid var(--line)!important;
+}
+.performance-grid .asset-performance-title>div{
+  display:flex!important;
+  align-items:baseline!important;
+  gap:9px!important;
+}
+.performance-grid .asset-performance-title span{
+  display:inline-block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  color:var(--ink)!important;
+  font-size:22px!important;
+  line-height:1!important;
+  font-weight:900!important;
+  letter-spacing:-.04em!important;
+}
+.performance-grid .asset-performance-title small{
+  display:inline-block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  color:var(--muted)!important;
+  font-size:9px!important;
+  line-height:1!important;
+  font-weight:800!important;
+  letter-spacing:.08em!important;
+  text-transform:uppercase!important;
+}
+.performance-grid .asset-performance-title>b{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  color:var(--muted)!important;
+  font-size:9px!important;
+  font-weight:800!important;
+  letter-spacing:.08em!important;
+  text-transform:uppercase!important;
+}
+
+/* Numeric alignment in the archived performance tables. */
+.asset-performance-head>span:not(:first-child),
+.asset-performance-row>span,
+.asset-performance-row>small{
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+}
+
+@media(max-width:760px){
+  .performance-grid .asset-performance-title{
+    min-height:50px;
+    padding:12px 13px!important;
+  }
+  .performance-grid .asset-performance-title span{
+    font-size:20px!important;
+  }
+}
