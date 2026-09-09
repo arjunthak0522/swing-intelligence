@@ -1,0 +1,156 @@
+/* Historical RE-ENTRY ledger: one shared grid for header and body rows. */
+.historical-evidence-card .definition-box {
+  display: none !important;
+}
+
+.historical-evidence-card .episode-table-scroll {
+  overflow-x: auto;
+  border-radius: 12px;
+}
+
+.historical-evidence-card .episode-ledger-head,
+.historical-evidence-card .episode-summary-grid {
+  display: grid !important;
+  grid-template-columns: minmax(280px, 1.8fr) 120px 120px 120px 32px !important;
+  column-gap: 20px !important;
+  align-items: center !important;
+  min-width: 790px !important;
+  width: 100% !important;
+}
+
+.historical-evidence-card .episode-ledger-head {
+  padding: 13px 22px !important;
+  background: #efede7 !important;
+  border: 1px solid var(--line) !important;
+  border-bottom: 0 !important;
+  border-radius: 12px 12px 0 0 !important;
+  text-transform: uppercase;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  letter-spacing: .055em;
+  color: var(--muted) !important;
+}
+
+.historical-evidence-card .episode-ledger {
+  min-width: 790px !important;
+  border: 1px solid var(--line) !important;
+  border-top: 0 !important;
+  border-radius: 0 0 12px 12px !important;
+  overflow: hidden;
+}
+
+.historical-evidence-card .episode-row > summary {
+  display: block !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+.historical-evidence-card .episode-summary-grid {
+  padding: 18px 22px !important;
+  min-height: 72px;
+  font-size: 12px !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.historical-evidence-card .episode-ledger-head > span:nth-child(2),
+.historical-evidence-card .episode-ledger-head > span:nth-child(3),
+.historical-evidence-card .episode-ledger-head > span:nth-child(4),
+.historical-evidence-card .episode-summary-grid > span:nth-child(2),
+.historical-evidence-card .episode-summary-grid > strong:nth-child(3),
+.historical-evidence-card .episode-summary-grid > strong:nth-child(4) {
+  text-align: right !important;
+  justify-self: stretch !important;
+}
+
+.historical-evidence-card .episode-ledger-head > span:nth-child(5),
+.historical-evidence-card .episode-summary-grid > svg {
+  justify-self: end !important;
+}
+
+.historical-evidence-card .period-cell {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 7px !important;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.historical-evidence-card .period-cell b,
+.historical-evidence-card .period-cell small {
+  display: inline !important;
+  margin: 0 !important;
+  white-space: nowrap;
+}
+
+.historical-evidence-card .period-cell b {
+  font-size: 12px !important;
+  font-weight: 800;
+}
+
+.historical-evidence-card .period-cell small {
+  font-size: 10px !important;
+  color: var(--muted) !important;
+}
+
+.historical-evidence-card .episode-summary-grid > strong {
+  font-size: 14px !important;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.historical-evidence-card .episode-summary-grid > span:nth-child(2) {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.historical-evidence-card .episode-row + .episode-row {
+  border-top: 1px solid var(--line) !important;
+}
+
+@media (max-width: 760px) {
+  .historical-evidence-card .episode-table-scroll {
+    overflow-x: visible;
+  }
+
+  .historical-evidence-card .episode-ledger-head {
+    display: none !important;
+  }
+
+  .historical-evidence-card .episode-ledger {
+    min-width: 0 !important;
+    border-top: 1px solid var(--line) !important;
+    border-radius: 12px !important;
+  }
+
+  .historical-evidence-card .episode-summary-grid {
+    min-width: 0 !important;
+    grid-template-columns: 1fr auto auto !important;
+    gap: 10px 14px !important;
+    padding: 16px !important;
+  }
+
+  .historical-evidence-card .period-cell {
+    grid-column: 1 / -1;
+    white-space: normal;
+    flex-wrap: wrap;
+  }
+
+  .historical-evidence-card .episode-summary-grid > span:nth-child(2) {
+    grid-column: 1;
+    text-align: left !important;
+  }
+
+  .historical-evidence-card .episode-summary-grid > strong:nth-child(3) {
+    grid-column: 2;
+  }
+
+  .historical-evidence-card .episode-summary-grid > strong:nth-child(4) {
+    grid-column: 3;
+  }
+
+  .historical-evidence-card .episode-summary-grid > svg {
+    display: none;
+  }
+}
