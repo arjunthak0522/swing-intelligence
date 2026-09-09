@@ -8,6 +8,7 @@ from swing_intelligence.autonomous_lab import LabConfig, run_autonomous_lab
 from swing_intelligence.autonomous_robustness import RobustnessConfig, robustness_report
 from swing_intelligence.data import DataRequest, fetch_fred_vix, fetch_twelve_data_daily
 from swing_intelligence.research import add_research_features, split_periods
+from swing_intelligence.semantic_lab import build_semantic_features, run_semantic_lab
 
 
 OUT_DIR = Path("artifacts/autonomous_lab")
@@ -54,11 +55,22 @@ def _compact_target(target: dict) -> dict:
     }
 
 
+def _run_robustness(frames, result, robust_config, semantic=False):
+    robustness = {"config": robust_config.__dict__, "targets": {}}
+    for symbol in ("SPY", "QQQ"):
+        features = build_semantic_features(frames, symbol) if semantic else add_research_features(frames, symbol)
+        holdout = split_periods(features)["holdout"]
+        robustness["targets"][symbol] = robustness_report(
+            holdout,
+            result["targets"][symbol]["survivors"],
+            config=robust_config,
+        )
+    return robustness
+
+
 def main():
     frames = _load_frames()
     config = LabConfig(max_pair_rules=80, min_n=25, primary_horizon=30)
-    result = run_autonomous_lab(frames, targets=("SPY", "QQQ"), config=config)
-
     robust_config = RobustnessConfig(
         horizon=30,
         min_event_gap=30,
@@ -67,19 +79,20 @@ def main():
         bootstrap_block=3,
         fdr_alpha=0.10,
     )
-    robustness = {"config": robust_config.__dict__, "targets": {}}
-    for symbol in ("SPY", "QQQ"):
-        features = add_research_features(frames, symbol)
-        holdout = split_periods(features)["holdout"]
-        robustness["targets"][symbol] = robustness_report(
-            holdout,
-            result["targets"][symbol]["survivors"],
-            config=robust_config,
-        )
+
+    # Lane 1: original percentile discovery. Kept unchanged as a benchmark/control.
+    result = run_autonomous_lab(frames, targets=("SPY", "QQQ"), config=config)
+    robustness = _run_robustness(frames, result, robust_config, semantic=False)
+
+    # Lane 2: semantic market-state discovery. Uses the same skeptic and robustness gates.
+    semantic = run_semantic_lab(frames, targets=("SPY", "QQQ"), config=config)
+    semantic_robustness = _run_robustness(frames, semantic, robust_config, semantic=True)
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     (OUT_DIR / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True))
     (OUT_DIR / "robustness.json").write_text(json.dumps(robustness, indent=2, sort_keys=True))
+    (OUT_DIR / "semantic_latest.json").write_text(json.dumps(semantic, indent=2, sort_keys=True))
+    (OUT_DIR / "semantic_robustness.json").write_text(json.dumps(semantic_robustness, indent=2, sort_keys=True))
 
     summary = {
         "config": result["config"],
@@ -92,16 +105,31 @@ def main():
             }
             for symbol, payload in robustness["targets"].items()
         },
+        "semantic": {
+            "targets": {symbol: _compact_target(payload) for symbol, payload in semantic["targets"].items()},
+            "robustness": {
+                symbol: {
+                    "tested": payload["tested"],
+                    "robust_count": payload["robust_count"],
+                    "rows": payload["rows"],
+                }
+                for symbol, payload in semantic_robustness["targets"].items()
+            },
+        },
     }
     (OUT_DIR / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True))
 
-    for symbol, payload in summary["targets"].items():
-        robust = summary["robustness"][symbol]
+    for symbol in ("SPY", "QQQ"):
+        base = summary["targets"][symbol]
+        base_robust = summary["robustness"][symbol]
+        sem = summary["semantic"]["targets"][symbol]
+        sem_robust = summary["semantic"]["robustness"][symbol]
         print(
-            f"{symbol}: {payload['candidate_count']} candidates, "
-            f"{payload['survivor_count']} first-pass survivors, "
-            f"{robust['robust_count']} robust, "
-            f"{payload['live_survivor_count']} live"
+            f"{symbol}: baseline {base['candidate_count']} candidates / "
+            f"{base['survivor_count']} first-pass / {base_robust['robust_count']} robust / "
+            f"{base['live_survivor_count']} live; semantic {sem['candidate_count']} candidates / "
+            f"{sem['survivor_count']} first-pass / {sem_robust['robust_count']} robust / "
+            f"{sem['live_survivor_count']} live"
         )
 
 
