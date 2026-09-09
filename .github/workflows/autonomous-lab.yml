@@ -7,6 +7,8 @@ on:
     paths:
       - 'src/swing_intelligence/autonomous_lab.py'
       - 'src/swing_intelligence/autonomous_robustness.py'
+      - 'src/swing_intelligence/data.py'
+      - 'src/swing_intelligence/market_state.py'
       - 'src/swing_intelligence/market_state_hypotheses.py'
       - 'src/swing_intelligence/semantic_lab.py'
       - 'src/swing_intelligence/phase2b_validation.py'
@@ -20,6 +22,7 @@ on:
       - 'tests/test_walk_forward.py'
       - 'tests/test_conditional_search.py'
       - 'tests/test_qqq_family_robustness.py'
+      - 'tests/test_macro_context.py'
       - 'tools/run_autonomous_lab.py'
       - '.github/workflows/autonomous-lab.yml'
   workflow_dispatch:
@@ -38,7 +41,7 @@ jobs:
       - name: Install package and test dependencies
         run: pip install -e '.[dev]'
       - name: Run autonomous lab tests
-        run: pytest -q tests/test_autonomous_lab.py tests/test_autonomous_robustness.py tests/test_semantic_lab.py tests/test_phase2b_validation.py tests/test_walk_forward.py tests/test_conditional_search.py tests/test_qqq_family_robustness.py
+        run: pytest -q tests/test_autonomous_lab.py tests/test_autonomous_robustness.py tests/test_semantic_lab.py tests/test_phase2b_validation.py tests/test_walk_forward.py tests/test_conditional_search.py tests/test_qqq_family_robustness.py tests/test_macro_context.py
 
   research:
     needs: test
