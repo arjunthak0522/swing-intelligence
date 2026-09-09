@@ -19,6 +19,9 @@ class WalkForwardConfig:
     min_trades_total: int = 20
     min_folds_with_trades: int = 3
     min_positive_fold_fraction: float = 0.60
+    matched_random_iterations: int = 200
+    min_matched_random_percentile: float = 0.80
+    min_random_superiority_fold_fraction: float = 0.60
 
 
 def _to_rule(state_rule) -> HypothesisRule:
@@ -61,6 +64,38 @@ def _baseline_returns(test: pd.DataFrame, config: WalkForwardConfig) -> pd.Serie
     return paths["forward_return"].astype(float) - config.transaction_cost_bps_round_trip / 10000.0
 
 
+def _random_spaced_positions(length: int, n: int, gap: int, rng: np.random.Generator) -> list[int]:
+    available = list(range(length))
+    chosen: list[int] = []
+    while available and len(chosen) < n:
+        pick = int(rng.choice(available))
+        chosen.append(pick)
+        available = [x for x in available if abs(x - pick) >= gap]
+    return sorted(chosen) if len(chosen) == n else []
+
+
+def _matched_random_percentile(
+    baseline: pd.Series,
+    n: int,
+    observed_median: float | None,
+    gap: int,
+    iterations: int,
+    seed: int,
+) -> float | None:
+    if observed_median is None or n <= 0 or len(baseline) < n:
+        return None
+    rng = np.random.default_rng(seed)
+    medians = []
+    values = baseline.to_numpy(dtype=float)
+    for _ in range(iterations):
+        pos = _random_spaced_positions(len(values), n, gap, rng)
+        if pos:
+            medians.append(float(np.median(values[pos])))
+    if not medians:
+        return None
+    return float(np.mean(np.asarray(medians) < observed_median))
+
+
 def _folds(index: pd.DatetimeIndex, config: WalkForwardConfig):
     max_year = int(index.max().year)
     year = config.first_test_year
@@ -77,12 +112,11 @@ def run_semantic_walk_forward(
     target: str,
     config: WalkForwardConfig = WalkForwardConfig(),
 ) -> dict:
-    """Expanding-window out-of-sample test of semantic strategy templates.
+    """Expanding-window out-of-sample test with a mandatory matched-random gate.
 
-    Each fold relearns template thresholds from data strictly before the test
-    window. Signals become non-overlapping fixed-horizon trades. A rule must beat
-    the fold's unconditional forward-return distribution, not merely make money in
-    an upward-drifting equity market.
+    Thresholds are relearned from data strictly before each test fold. Signals
+    become non-overlapping fixed-horizon trades. Promotion requires positive
+    excess edge and superiority to randomly timed, similarly spaced entries.
     """
     features = features.sort_index()
     by_rule: dict[str, dict] = {}
@@ -102,34 +136,26 @@ def run_semantic_walk_forward(
             returns = _trade_returns(test, rule, config)
             median_return = float(returns.median()) if len(returns) else None
             win_rate = float((returns > 0).mean()) if len(returns) else None
-            median_excess = (
-                float(median_return - baseline_median)
-                if median_return is not None and baseline_median is not None else None
-            )
-            win_edge = (
-                float(win_rate - baseline_win)
-                if win_rate is not None and baseline_win is not None else None
+            median_excess = float(median_return - baseline_median) if median_return is not None and baseline_median is not None else None
+            win_edge = float(win_rate - baseline_win) if win_rate is not None and baseline_win is not None else None
+            seed = start_year * 1009 + sum((i + 1) * ord(c) for i, c in enumerate(rule.name))
+            random_pct = _matched_random_percentile(
+                baseline, len(returns), median_return, config.min_gap,
+                config.matched_random_iterations, seed,
             )
             row = by_rule.setdefault(rule.name, {
-                "name": rule.name,
-                "rationale": rule.rationale,
-                "folds": [],
-                "all_returns": [],
-                "all_excess": [],
+                "name": rule.name, "rationale": rule.rationale, "folds": [],
+                "all_returns": [], "all_excess": [],
             })
             fold = {
-                "start_year": start_year,
-                "end_year": end_year,
-                "test_start": str(test_start.date()),
-                "test_end": str(test_end.date()),
+                "start_year": start_year, "end_year": end_year,
+                "test_start": str(test_start.date()), "test_end": str(test_end.date()),
                 "n": int(len(returns)),
                 "mean_return": float(returns.mean()) if len(returns) else None,
-                "median_return": median_return,
-                "win_rate": win_rate,
-                "baseline_median_return": baseline_median,
-                "baseline_win_rate": baseline_win,
-                "median_excess_edge": median_excess,
-                "win_probability_edge": win_edge,
+                "median_return": median_return, "win_rate": win_rate,
+                "baseline_median_return": baseline_median, "baseline_win_rate": baseline_win,
+                "median_excess_edge": median_excess, "win_probability_edge": win_edge,
+                "matched_random_percentile": random_pct,
                 "compounded_return": float((1.0 + returns).prod() - 1.0) if len(returns) else None,
             }
             row["folds"].append(fold)
@@ -142,24 +168,27 @@ def run_semantic_walk_forward(
         returns = np.asarray(row.pop("all_returns"), dtype=float)
         excess = np.asarray(row.pop("all_excess"), dtype=float)
         trade_folds = [f for f in row["folds"] if f["n"] > 0]
-        edge_positive_folds = [
-            f for f in trade_folds
-            if f["median_excess_edge"] is not None and f["median_excess_edge"] > 0
-            and f["win_probability_edge"] is not None and f["win_probability_edge"] >= 0
-        ]
+        edge_positive_folds = [f for f in trade_folds if f["median_excess_edge"] is not None and f["median_excess_edge"] > 0 and f["win_probability_edge"] is not None and f["win_probability_edge"] >= 0]
+        random_tested_folds = [f for f in trade_folds if f["matched_random_percentile"] is not None]
+        random_superior_folds = [f for f in random_tested_folds if f["matched_random_percentile"] >= config.min_matched_random_percentile]
         n = int(len(returns))
         fold_fraction = float(len(edge_positive_folds) / len(trade_folds)) if trade_folds else 0.0
+        random_fraction = float(len(random_superior_folds) / len(random_tested_folds)) if random_tested_folds else 0.0
         mean_return = float(np.mean(returns)) if n else None
         median_return = float(np.median(returns)) if n else None
         win_rate = float((returns > 0).mean()) if n else None
         mean_excess = float(np.mean(excess)) if len(excess) else None
         median_excess = float(np.median(excess)) if len(excess) else None
         excess_hit_rate = float((excess > 0).mean()) if len(excess) else None
+        median_random_pct = float(np.median([f["matched_random_percentile"] for f in random_tested_folds])) if random_tested_folds else None
 
         profitable = bool(
             n >= config.min_trades_total
             and len(trade_folds) >= config.min_folds_with_trades
             and fold_fraction >= config.min_positive_fold_fraction
+            and len(random_tested_folds) >= config.min_folds_with_trades
+            and random_fraction >= config.min_random_superiority_fold_fraction
+            and median_random_pct is not None and median_random_pct >= config.min_matched_random_percentile
             and mean_return is not None and mean_return > 0
             and median_return is not None and median_return > 0
             and win_rate is not None and win_rate > 0.50
@@ -168,32 +197,29 @@ def run_semantic_walk_forward(
             and excess_hit_rate is not None and excess_hit_rate > 0.50
         )
         row.update({
-            "trades": n,
-            "folds_with_trades": len(trade_folds),
+            "trades": n, "folds_with_trades": len(trade_folds),
             "positive_edge_folds": len(edge_positive_folds),
             "positive_edge_fold_fraction": fold_fraction,
-            "mean_trade_return": mean_return,
-            "median_trade_return": median_return,
-            "win_rate": win_rate,
-            "mean_excess_edge": mean_excess,
-            "median_excess_edge": median_excess,
-            "excess_hit_rate": excess_hit_rate,
+            "matched_random_tested_folds": len(random_tested_folds),
+            "matched_random_superior_folds": len(random_superior_folds),
+            "matched_random_superiority_fold_fraction": random_fraction,
+            "median_matched_random_percentile": median_random_pct,
+            "mean_trade_return": mean_return, "median_trade_return": median_return,
+            "win_rate": win_rate, "mean_excess_edge": mean_excess,
+            "median_excess_edge": median_excess, "excess_hit_rate": excess_hit_rate,
             "compounded_trade_return": float(np.prod(1.0 + returns) - 1.0) if n else None,
             "profitable_walk_forward": profitable,
         })
         rows.append(row)
 
-    rows.sort(
-        key=lambda r: (
-            r["profitable_walk_forward"],
-            r["positive_edge_fold_fraction"],
-            r["median_excess_edge"] if r["median_excess_edge"] is not None else -999.0,
-        ),
-        reverse=True,
-    )
+    rows.sort(key=lambda r: (
+        r["profitable_walk_forward"],
+        r["matched_random_superiority_fold_fraction"],
+        r["positive_edge_fold_fraction"],
+        r["median_excess_edge"] if r["median_excess_edge"] is not None else -999.0,
+    ), reverse=True)
     return {
-        "target": target.upper(),
-        "config": asdict(config),
+        "target": target.upper(), "config": asdict(config),
         "profitable_count": sum(1 for r in rows if r["profitable_walk_forward"]),
         "rows": rows,
     }
