@@ -9,6 +9,7 @@ from swing_intelligence.autonomous_robustness import RobustnessConfig, robustnes
 from swing_intelligence.conditional_search import ConditionalSearchConfig, run_conditional_walk_forward
 from swing_intelligence.data import DataRequest, fetch_fred_vix, fetch_twelve_data_daily
 from swing_intelligence.phase2b_validation import Phase2BConfig, phase2b_report
+from swing_intelligence.qqq_family_robustness import QQQFamilyConfig, run_qqq_family_robustness
 from swing_intelligence.research import add_research_features, split_periods
 from swing_intelligence.semantic_lab import build_semantic_features, run_semantic_lab
 from swing_intelligence.walk_forward import WalkForwardConfig, run_semantic_walk_forward
@@ -96,6 +97,18 @@ def main():
         min_outer_folds=3,
         min_positive_edge_fold_fraction=0.60,
     )
+    qqq_family_config = QQQFamilyConfig(
+        first_test_year=2010,
+        fold_years=2,
+        horizons=(20, 30, 40, 60),
+        min_gaps=(20, 30, 40),
+        cost_bps=(2.0, 5.0, 10.0),
+        vix_cooling_quantiles=(0.50, 0.60, 0.70),
+        min_total_trades=20,
+        min_folds=3,
+        min_positive_fold_fraction=0.60,
+        min_excess_hit_rate=0.50,
+    )
 
     result = run_autonomous_lab(frames, targets=TARGETS, config=config)
     robustness = _run_robustness(frames, result, robust_config, semantic=False)
@@ -107,17 +120,21 @@ def main():
 
     walk_forward = {"config": wf_config.__dict__, "targets": {}}
     conditional = {"targets": {}}
+    semantic_features = {}
     for symbol in TARGETS:
         features = build_semantic_features(frames, symbol)
+        semantic_features[symbol] = features
         walk_forward["targets"][symbol] = run_semantic_walk_forward(features, symbol, config=wf_config)
         conditional["targets"][symbol] = run_conditional_walk_forward(features, symbol, config=conditional_config)
+
+    qqq_family = run_qqq_family_robustness(semantic_features["QQQ"], qqq_family_config)
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     payloads = {
         "latest.json": result, "robustness.json": robustness, "phase2b.json": phase2b,
         "semantic_latest.json": semantic, "semantic_robustness.json": semantic_robustness,
         "semantic_phase2b.json": semantic_phase2b, "walk_forward.json": walk_forward,
-        "conditional_walk_forward.json": conditional,
+        "conditional_walk_forward.json": conditional, "qqq_family_robustness.json": qqq_family,
     }
     for name, payload in payloads.items():
         (OUT_DIR / name).write_text(json.dumps(payload, indent=2, sort_keys=True))
@@ -135,6 +152,7 @@ def main():
         },
         "walk_forward": {symbol: walk_forward["targets"][symbol] for symbol in TARGETS},
         "conditional_walk_forward": {symbol: conditional["targets"][symbol] for symbol in TARGETS},
+        "qqq_family_robustness": qqq_family,
     }
     (OUT_DIR / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True))
 
@@ -153,6 +171,14 @@ def main():
             f"{sem['survivor_count']} first-pass / {sem_robust['robust_count']} robust / grades={sem_grades}; "
             f"walk-forward profitable={wf['profitable_count']}; conditional candidate strategies={cond['candidate_strategy_count']}"
         )
+
+    print(
+        "QQQ Phase 3B family: "
+        f"valid variants={qqq_family['valid_variant_count']} / "
+        f"passing={qqq_family['passing_variant_count']} / "
+        f"fraction={qqq_family['passing_variant_fraction']:.3f} / "
+        f"family_robust={qqq_family['family_robust']}"
+    )
 
 
 if __name__ == "__main__":
