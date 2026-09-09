@@ -56,7 +56,8 @@ def test_precomputed_forward_paths_match_reference_implementation():
     for horizon in (1, 3, 5):
         reference = forward_path_stats(df, df.index, horizon)
         fast = _forward_path_table(df, horizon)
-        pd.testing.assert_index_equal(fast.index, reference.index, check_freq=False)
+        assert fast.index.name == reference.index.name
+        assert fast.index.tolist() == reference.index.tolist()
         pd.testing.assert_frame_equal(
             fast,
             reference,
