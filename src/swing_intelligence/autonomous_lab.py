@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, replace
 from typing import Iterable
 
 import numpy as np
@@ -12,53 +12,23 @@ from .research import ResearchSplit, add_research_features, split_periods
 
 DEFAULT_HORIZONS = (1, 5, 10, 20, 30, 60, 120)
 
-# Only stationary or relative features are eligible for autonomous threshold discovery.
-# Raw prices and moving-average levels are intentionally excluded.
 DISCOVERY_FEATURES = (
-    "return_5d",
-    "return_10d",
-    "return_20d",
-    "gap_sma_20",
-    "gap_sma_50",
-    "gap_sma_200",
-    "sma20_slope_5d",
-    "rsi_5",
-    "rsi_14",
-    "zscore_20",
-    "drawdown_5d",
-    "realized_vol_10",
-    "realized_vol_20",
-    "downside_vol_20",
-    "atr_pct",
-    "atr_pct_rank_252",
-    "volume_z_20",
-    "rsp_spy_ret_5d",
-    "rsp_spy_ret_20d",
-    "qqq_spy_ret_5d",
-    "qqq_spy_ret_20d",
-    "iwm_spy_ret_5d",
-    "iwm_spy_ret_20d",
-    "smh_qqq_ret_5d",
-    "smh_qqq_ret_20d",
-    "vix_level",
-    "vix_change_1d",
-    "vix_change_5d",
-    "vix_z_60",
-    "vix_percentile_252",
+    "return_5d", "return_10d", "return_20d",
+    "gap_sma_20", "gap_sma_50", "gap_sma_200", "sma20_slope_5d",
+    "rsi_5", "rsi_14", "zscore_20", "drawdown_5d",
+    "realized_vol_10", "realized_vol_20", "downside_vol_20",
+    "atr_pct", "atr_pct_rank_252", "volume_z_20",
+    "rsp_spy_ret_5d", "rsp_spy_ret_20d",
+    "qqq_spy_ret_5d", "qqq_spy_ret_20d",
+    "iwm_spy_ret_5d", "iwm_spy_ret_20d",
+    "smh_qqq_ret_5d", "smh_qqq_ret_20d",
+    "vix_level", "vix_change_1d", "vix_change_5d", "vix_z_60", "vix_percentile_252",
 )
 
 PRICE_STATE_FEATURES = {
-    "return_5d",
-    "return_10d",
-    "return_20d",
-    "gap_sma_20",
-    "gap_sma_50",
-    "gap_sma_200",
-    "sma20_slope_5d",
-    "rsi_5",
-    "rsi_14",
-    "zscore_20",
-    "drawdown_5d",
+    "return_5d", "return_10d", "return_20d",
+    "gap_sma_20", "gap_sma_50", "gap_sma_200", "sma20_slope_5d",
+    "rsi_5", "rsi_14", "zscore_20", "drawdown_5d",
 }
 CONTEXT_FEATURES = set(DISCOVERY_FEATURES) - PRICE_STATE_FEATURES
 
@@ -114,11 +84,7 @@ def _eligible_features(train: pd.DataFrame) -> list[str]:
 
 
 def learn_hypotheses(full_features: pd.DataFrame, split: ResearchSplit = ResearchSplit(), config: LabConfig = LabConfig()) -> list[HypothesisRule]:
-    """Generate fixed hypotheses using training data only.
-
-    Thresholds are learned strictly from the train partition, then frozen before
-    validation/holdout evaluation. This prevents holdout-informed threshold selection.
-    """
+    """Generate fixed hypotheses from training data only."""
     train = split_periods(full_features, split)["train"]
     features = _eligible_features(train)
     rules: list[HypothesisRule] = []
@@ -147,9 +113,8 @@ def learn_hypotheses(full_features: pd.DataFrame, split: ResearchSplit = Researc
         for b in context_terms:
             if len(pair_rules) >= config.max_pair_rules:
                 break
-            name = f"{a.feature}_{a.op}_{a.threshold:.6g}__AND__{b.feature}_{b.op}_{b.threshold:.6g}"
             pair_rules.append(HypothesisRule(
-                name=name,
+                name=f"{a.feature}_{a.op}_{a.threshold:.6g}__AND__{b.feature}_{b.op}_{b.threshold:.6g}",
                 terms=(a, b),
                 rationale=f"Interaction hypothesis: {a.feature} {a.op} {a.threshold:.4g} while {b.feature} {b.op} {b.threshold:.4g}.",
             ))
@@ -160,25 +125,15 @@ def learn_hypotheses(full_features: pd.DataFrame, split: ResearchSplit = Researc
 
 
 def _baseline_cache(frame: pd.DataFrame, horizons: Iterable[int]) -> dict[int, dict]:
-    """Compute the unconditional forward-path baseline once per period/horizon."""
-    cache: dict[int, dict] = {}
-    for h in horizons:
-        cache[h] = summarize_forward_paths(forward_path_stats(frame, frame.index, h))
-    return cache
+    return {h: summarize_forward_paths(forward_path_stats(frame, frame.index, h)) for h in horizons}
 
 
-def _evaluate_rule_on_frame(
-    frame: pd.DataFrame,
-    rule: HypothesisRule,
-    baseline: dict[int, dict],
-    config: LabConfig,
-) -> dict:
+def _evaluate_rule_on_frame(frame: pd.DataFrame, rule: HypothesisRule, baseline: dict[int, dict], config: LabConfig) -> dict:
     entries = rule.mask(frame).reindex(frame.index).fillna(False)
     dates = list(frame.index[entries])
     result = {"name": rule.name, "rationale": rule.rationale, "entry_count": len(dates), "horizons": {}}
     for h in config.horizons:
-        conditional = forward_path_stats(frame, dates, h)
-        cs = summarize_forward_paths(conditional)
+        cs = summarize_forward_paths(forward_path_stats(frame, dates, h))
         bs = baseline[h]
         if cs.get("n", 0) == 0 or bs.get("n", 0) == 0:
             continue
@@ -210,7 +165,7 @@ def evaluate_hypothesis(
 
 
 def skeptic_verdict(result: dict, config: LabConfig = LabConfig()) -> dict:
-    """Apply a strict validation gate. Train performance alone can never pass."""
+    """Train performance alone can never pass this gate."""
     h = config.primary_horizon
     reasons: list[str] = []
 
@@ -256,19 +211,35 @@ def research_target(
 ) -> dict:
     features = add_research_features(frames, target)
     periods = split_periods(features, split)
-    baselines = {period: _baseline_cache(frame, config.horizons) for period, frame in periods.items()}
     rules = learn_hypotheses(features, split=split, config=config)
-    survivors = []
 
+    # Stage 1: screen every candidate only on the exact horizon used by the skeptic gate.
+    # This cannot change the survivor set because the gate depends only on primary_horizon.
+    screen_config = replace(config, horizons=(config.primary_horizon,))
+    screen_baselines = {
+        period: _baseline_cache(frame, screen_config.horizons)
+        for period, frame in periods.items()
+    }
+    passed_rules: list[tuple[HypothesisRule, dict]] = []
     for rule in rules:
-        result = evaluate_hypothesis(features, rule, split=split, config=config, baselines=baselines)
-        verdict = skeptic_verdict(result, config=config)
-        result["skeptic"] = verdict
+        screened = evaluate_hypothesis(features, rule, split=split, config=screen_config, baselines=screen_baselines)
+        verdict = skeptic_verdict(screened, config=config)
         if verdict["passed"]:
-            result["live_active"] = bool(rule.mask(features).iloc[-1])
-            survivors.append(result)
+            passed_rules.append((rule, verdict))
 
-    survivors.sort(key=lambda r: (r["skeptic"]["score"] is not None, r["skeptic"]["score"] or -np.inf), reverse=True)
+    # Stage 2: calculate the complete horizon set only for survivors.
+    full_baselines = {
+        period: _baseline_cache(frame, config.horizons)
+        for period, frame in periods.items()
+    } if passed_rules else {}
+    survivors = []
+    for rule, verdict in passed_rules:
+        result = evaluate_hypothesis(features, rule, split=split, config=config, baselines=full_baselines)
+        result["skeptic"] = verdict
+        result["live_active"] = bool(rule.mask(features).iloc[-1])
+        survivors.append(result)
+
+    survivors.sort(key=lambda r: r["skeptic"]["score"] if r["skeptic"]["score"] is not None else -np.inf, reverse=True)
     live = [r for r in survivors if r.get("live_active")]
 
     return {
@@ -288,11 +259,7 @@ def run_autonomous_lab(
     split: ResearchSplit = ResearchSplit(),
     config: LabConfig = LabConfig(),
 ) -> dict:
-    """Run the isolated SPY/QQQ research lab.
-
-    This function does not alter RE-ENTRY state, signals, trades, or production files.
-    It only returns research evidence.
-    """
+    """Run the isolated SPY/QQQ research lab without altering RE-ENTRY state or production files."""
     out = {"config": asdict(config), "targets": {}}
     for target in targets:
         target = target.upper()
