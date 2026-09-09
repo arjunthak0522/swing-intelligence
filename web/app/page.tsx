@@ -16,9 +16,9 @@ export const dynamic = "force-dynamic";
 
 function stateClass(value: string) {
   const v = value.toUpperCase();
-  if (v.includes("REPAIR") || v.includes("YES") || v.includes("LIVE") || v.includes("FAVORABLE")) return "good";
-  if (v.includes("WAIT") || v.includes("STABIL") || v.includes("DEVELOP") || v.includes("PARTIAL") || v.includes("RESET")) return "warn";
-  if (v.includes("NO") || v.includes("WORSEN") || v.includes("HEAVY") || v.includes("DEGRADED") || v.includes("DEEP")) return "bad";
+  if (v.includes("REPAIR") || v.includes("YES") || v.includes("LIVE") || v.includes("FAVORABLE") || v.includes("STABLE")) return "good";
+  if (v.includes("WAIT") || v.includes("STABIL") || v.includes("DEVELOP") || v.includes("PARTIAL") || v.includes("RESET") || v.includes("WATCH") || v.includes("CAUTION")) return "warn";
+  if (v.includes("NO") || v.includes("WORSEN") || v.includes("HEAVY") || v.includes("DEGRADED") || v.includes("DEEP") || v.includes("DETERIORATING")) return "bad";
   return "neutral";
 }
 
@@ -115,6 +115,8 @@ function IntradayMonitor({ live, official }: { live: IntradaySnapshot | null; of
   const spy = live?.quotes?.SPY;
   const qqq = live?.quotes?.QQQ;
   const vix = live?.quotes?.["^VIX"];
+  const quality = live?.state_quality;
+  const groups = live?.group_summary;
   const regularSession = spy?.market_state === "REGULAR";
   const lastBar = spy?.timestamp ? new Date(spy.timestamp) : null;
   const barLabel = lastBar
@@ -123,32 +125,45 @@ function IntradayMonitor({ live, official }: { live: IntradaySnapshot | null; of
   const updateLabel = lastBar
     ? lastBar.toLocaleString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit", timeZoneName: "short" })
     : "Unavailable";
-  const periodLabel = regularSession ? "today" : "last session";
   const statusLabel = live ? (regularSession ? live.status : "MARKET CLOSED") : "UNAVAILABLE";
+  const riskText = quality
+    ? [
+        quality.risks.broad_negative ? "SPY/QQQ are negative" : "SPY/QQQ are holding up",
+        quality.risks.breadth_below_half ? "less than half of sectors/subsectors are positive" : "market participation is above 50%",
+        quality.risks.vix_up ? "VIX is higher" : "VIX is not rising",
+      ]
+    : [];
 
   return (
     <section className="card section-card live-card">
       <div className="section-heading">
-        <div><span className="kicker">RIGHT NOW · PROVISIONAL</span><h2>{regularSession ? "Live market context" : "Latest intraday session"}</h2></div>
+        <div><span className="kicker">INTRADAY STATE QUALITY · PROVISIONAL</span><h2>{regularSession ? "Is today supporting the active RE-ENTRY state?" : "Latest intraday state quality"}</h2></div>
         <div className="eyebrow-row"><span className="freshness"><Radio size={14} /> Updated {updateLabel}</span><StatusPill>{statusLabel}</StatusPill></div>
       </div>
-      <p className="section-intro">
-        {regularSession
-          ? "This layer updates from 5-minute market bars so you can see what is happening now while the official completed-close decision remains in force."
-          : "The market is closed, so this panel shows the latest completed intraday session rather than implying prices are moving now."}
-        {` It does not replace the official ${formatDate(official.as_of)} close signal.`}
-      </p>
-      {live ? <>
-        <div className="live-grid">
-          <div className="live-stat"><small>SPY {periodLabel}</small><strong>{pct(spy?.change_pct, 2)}</strong><span>{spy?.price?.toFixed(2) ?? "-"}</span></div>
-          <div className="live-stat"><small>QQQ {periodLabel}</small><strong>{pct(qqq?.change_pct, 2)}</strong><span>{qqq?.price?.toFixed(2) ?? "-"}</span></div>
-          <div className="live-stat"><small>VIX {periodLabel}</small><strong>{pct(vix?.change_pct, 2)}</strong><span>{vix?.price?.toFixed(2) ?? "-"}</span></div>
-          <div className="live-stat"><small>Sectors positive</small><strong>{pct(live.summary.sectors_positive_share, 0)}</strong><span>11 tracked</span></div>
-          <div className="live-stat"><small>Subsectors positive</small><strong>{pct(live.summary.subsectors_positive_share, 0)}</strong><span>30+ tracked</span></div>
-          <div className="live-stat"><small>Factors positive</small><strong>{pct(live.summary.factors_positive_share, 0)}</strong><span>8 tracked</span></div>
+      {live && quality ? <>
+        <div className="intraday-quality-hero">
+          <div><span className="summary-label">CURRENT READ</span><strong className={stateClass(quality.label)}>{quality.label}</strong></div>
+          <p>{quality.label === "STABLE" ? "Today's intraday action is not showing the main deterioration conditions seen before some completed-close state changes." : quality.label === "WATCH" ? "One deterioration condition is present. The official RE-ENTRY state remains unchanged until the close." : quality.label === "CAUTION" ? "Two deterioration conditions are present. Historical reconstructed episodes showed a higher chance of a close-state change when multiple risks appeared, especially late morning." : "All three deterioration conditions are present. Treat the intraday backdrop as fragile, while the official RE-ENTRY decision still remains unchanged until the close."}</p>
         </div>
-        <div className="live-foot"><Radio size={14} /> Latest verified bar {barLabel} · {live.summary.tracked_quotes}/{live.summary.expected_quotes} quotes available · official decision remains <b>{official.signal}</b> until the close engine recalculates.</div>
-      </> : <div className="notice"><CircleAlert size={16} /> Intraday feed is temporarily unavailable. The official completed-close signal remains authoritative.</div>}
+        <div className="intraday-driver-grid">
+          <div><small>SPY + QQQ</small><b className={quality.risks.broad_negative ? "bad-text" : "good-text"}>{quality.risks.broad_negative ? "NEGATIVE" : "HOLDING UP"}</b><span>{pct(quality.broad_move, 2)} average today</span></div>
+          <div><small>MARKET BREADTH</small><b className={quality.risks.breadth_below_half ? "bad-text" : "good-text"}>{quality.risks.breadth_below_half ? "WEAK" : "BROAD"}</b><span>{pct(quality.breadth_positive_share, 0)} positive</span></div>
+          <div><small>VOLATILITY</small><b className={quality.risks.vix_up ? "bad-text" : "good-text"}>{quality.risks.vix_up ? "VIX RISING" : "NOT RISING"}</b><span>VIX {pct(quality.vix_change, 2)} today</span></div>
+        </div>
+        <div className="intraday-evidence-line"><CircleAlert size={15} /><span><b>{quality.risk_score}/3 deterioration conditions present.</b> In the two-year reconstructed test, 2-3 risks were associated with a higher same-day state-change rate than 0-1 risks, with the clearest separation around late morning. This is context only, not a second RE-ENTRY signal.</span></div>
+        <details className="intraday-detail-disclosure">
+          <summary>See live market detail</summary>
+          <div className="live-grid intraday-live-grid">
+            <div className="live-stat"><small>SPY today</small><strong>{pct(spy?.change_pct, 2)}</strong><span>30m {pct(spy?.last_30m_pct, 2)}</span></div>
+            <div className="live-stat"><small>QQQ today</small><strong>{pct(qqq?.change_pct, 2)}</strong><span>30m {pct(qqq?.last_30m_pct, 2)}</span></div>
+            <div className="live-stat"><small>VIX today</small><strong>{pct(vix?.change_pct, 2)}</strong><span>{vix?.price?.toFixed(2) ?? "-"}</span></div>
+            <div className="live-stat"><small>Sectors positive</small><strong>{pct(groups?.sectors?.positive_share, 0)}</strong><span>11 tracked</span></div>
+            <div className="live-stat"><small>Subsectors positive</small><strong>{pct(groups?.subsectors?.positive_share, 0)}</strong><span>{groups?.subsectors?.count ?? "-"} tracked</span></div>
+            <div className="live-stat"><small>Breadth since 10:30</small><strong>{pct(groups?.subsectors?.breadth_change_since_1030, 0)}</strong><span>subsector change</span></div>
+          </div>
+        </details>
+        <div className="live-foot"><Radio size={14} /> Latest verified bar {barLabel}. Official completed-close decision remains <b>{official.signal}</b> until the close engine recalculates.</div>
+      </> : <div className="notice"><CircleAlert size={16} /> Research intraday state-quality feed is temporarily unavailable. The official completed-close signal remains authoritative.</div>}
     </section>
   );
 }
@@ -206,12 +221,14 @@ function HistoricalTableLayoutFix() {
     .historical-evidence-card .episode-row>summary>strong{text-align:left;font-variant-numeric:tabular-nums}
     .historical-evidence-card .period-methodology{margin:12px 18px 16px}
     .episode-performance-strip .vehicle-primary strong{font-size:34px}
+    .intraday-quality-hero{display:grid;grid-template-columns:220px 1fr;gap:24px;align-items:center;padding:18px 20px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.42);margin:14px 0 12px}.intraday-quality-hero strong{display:block;font-size:34px;letter-spacing:-.04em;margin-top:5px}.intraday-quality-hero strong.good{color:var(--green)}.intraday-quality-hero strong.warn{color:var(--amber)}.intraday-quality-hero strong.bad{color:var(--red)}.intraday-quality-hero p{margin:0;font-size:13px;line-height:1.55;color:#454840}.intraday-driver-grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:14px;overflow:hidden}.intraday-driver-grid>div{padding:14px 16px}.intraday-driver-grid>div+div{border-left:1px solid var(--line)}.intraday-driver-grid small,.intraday-driver-grid span{display:block;color:var(--muted);font-size:9px}.intraday-driver-grid b{display:block;margin:5px 0 3px;font-size:13px}.intraday-evidence-line{display:flex;gap:8px;align-items:flex-start;margin-top:12px;padding:11px 13px;background:#f2efe8;border-radius:11px;color:var(--muted);font-size:10px;line-height:1.5}.intraday-detail-disclosure{margin-top:12px;border-top:1px solid var(--line)}.intraday-detail-disclosure>summary{cursor:pointer;padding:12px 0 8px;font-size:10px;font-weight:800;color:var(--muted)}.intraday-live-grid{margin-top:4px}
     @media(max-width:760px){
       .historical-evidence-card .episode-ledger{overflow-x:auto}
       .historical-evidence-card .episode-ledger-head,
       .historical-evidence-card .episode-row>summary{grid-template-columns:minmax(210px,1.7fr) 92px 92px 92px 24px!important;min-width:560px!important;gap:10px!important}
       .historical-evidence-card .episode-ledger-head,
       .historical-evidence-card .episode-row>summary{padding-left:14px!important;padding-right:14px!important}
+      .intraday-quality-hero{grid-template-columns:1fr;gap:8px}.intraday-driver-grid{grid-template-columns:1fr}.intraday-driver-grid>div+div{border-left:0;border-top:1px solid var(--line)}
     }
   `}</style>;
 }
@@ -238,6 +255,6 @@ export default async function Home() {
       <HistoricalEvidence evidence={historicalEvidence} ledger={historicalLedger} />
       <OutperformanceCard />
     </>}
-    <footer>Official RE-ENTRY decisions use completed-close data. Intraday data is provisional market context only and never overwrites the validated close signal. Historical ETF opportunity estimates remain suppressed until their input history is reproducible.</footer>
+    <footer>Official RE-ENTRY decisions use completed-close data. Intraday state quality is provisional context only and never overwrites the validated close signal. Historical ETF opportunity estimates remain suppressed until their input history is reproducible.</footer>
   </main>;
 }
