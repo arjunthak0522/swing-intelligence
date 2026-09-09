@@ -14,6 +14,56 @@ export interface HorizonMetric {
   false_start_rate_return_lt_minus_2pct: number;
 }
 
+export interface HistoricalEpisodeRow {
+  start: string;
+  favorable_through: string;
+  next_state_date: string | null;
+  next_state: string | null;
+  reenter_sessions: number;
+  signal_source: string;
+  analog_at_start: string;
+  SPY_start_close: number;
+  SPY_favorable_through_close: number;
+  SPY_episode_return: number;
+  SPY_max_gain_during_episode: number;
+  SPY_max_adverse_during_episode: number;
+  QQQ_start_close: number;
+  QQQ_favorable_through_close: number;
+  QQQ_episode_return: number;
+  QQQ_max_gain_during_episode: number;
+  QQQ_max_adverse_during_episode: number;
+  [key: string]: string | number | null;
+}
+
+export interface HistoricalEpisodeLedger {
+  provenance: {
+    classification: "RECONSTRUCTED" | string;
+    engine_commit: string;
+    rebuild_date: string;
+    data_note: string;
+  };
+  definition: string;
+  forward_return_definition: string;
+  episode_count: number;
+  completed_episode_count: number;
+  active_episode_count: number;
+  summary: {
+    SPY_episode_return: EpisodeSummaryMetric;
+    QQQ_episode_return: EpisodeSummaryMetric;
+    duration_sessions: EpisodeSummaryMetric;
+  };
+  episodes: HistoricalEpisodeRow[];
+}
+
+export interface EpisodeSummaryMetric {
+  n: number;
+  mean: number | null;
+  median: number | null;
+  positive_rate: number | null;
+  p25: number | null;
+  p75: number | null;
+}
+
 export interface CanonicalHistoricalEvidence {
   provenance: {
     source: string;
@@ -54,20 +104,25 @@ export interface CanonicalHistoricalEvidence {
   }>;
 }
 
-export async function getHistoricalEpisodeEvidence(): Promise<CanonicalHistoricalEvidence | null> {
-  const relative = path.join("reentry", "validation", "canonical_historical_evidence_2026-09-04.json");
+async function readJson<T>(relative: string): Promise<T | null> {
   const candidates = [
     path.join(process.cwd(), "public", relative),
     path.join(process.cwd(), "web", "public", relative),
   ];
-
   for (const file of candidates) {
     try {
-      const raw = await readFile(file, "utf-8");
-      return JSON.parse(raw) as CanonicalHistoricalEvidence;
+      return JSON.parse(await readFile(file, "utf-8")) as T;
     } catch {
       // Support both repository-root and web-root Vercel layouts.
     }
   }
   return null;
+}
+
+export async function getHistoricalEpisodeEvidence(): Promise<CanonicalHistoricalEvidence | null> {
+  return readJson<CanonicalHistoricalEvidence>(path.join("reentry", "validation", "canonical_historical_evidence_2026-09-04.json"));
+}
+
+export async function getHistoricalEpisodeLedger(): Promise<HistoricalEpisodeLedger | null> {
+  return readJson<HistoricalEpisodeLedger>(path.join("reentry", "validation", "historical_episode_ledger_2026-09-09.json"));
 }
