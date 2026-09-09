@@ -128,7 +128,9 @@ def _forward_path_table(frame: pd.DataFrame, horizon: int) -> pd.DataFrame:
     """Precompute the exact close-to-close return, MAE and MFE for every valid entry date."""
     n = len(frame)
     if horizon <= 0 or n <= horizon:
-        return pd.DataFrame(columns=["forward_return", "mae", "mfe"])
+        empty = pd.DataFrame(columns=["forward_return", "mae", "mfe"])
+        empty.index.name = "date"
+        return empty
 
     close = frame["close"].to_numpy(dtype=float)
     high = frame["high"].to_numpy(dtype=float)
@@ -142,7 +144,7 @@ def _forward_path_table(frame: pd.DataFrame, horizon: int) -> pd.DataFrame:
     future_high = high_windows[:valid_n].max(axis=1)
     future_low = low_windows[:valid_n].min(axis=1)
 
-    return pd.DataFrame(
+    out = pd.DataFrame(
         {
             "forward_return": end_close / entry - 1.0,
             "mae": future_low / entry - 1.0,
@@ -150,6 +152,8 @@ def _forward_path_table(frame: pd.DataFrame, horizon: int) -> pd.DataFrame:
         },
         index=frame.index[:valid_n],
     )
+    out.index.name = "date"
+    return out
 
 
 def _path_cache(frame: pd.DataFrame, horizons: Iterable[int]) -> dict[int, pd.DataFrame]:
