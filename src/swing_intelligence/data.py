@@ -133,24 +133,36 @@ def fetch_twelve_data_daily(request: DataRequest, api_key: str | None = None, ti
     return normalize_ohlcv(out)
 
 
-def fetch_fred_vix(start: str = "2000-01-01", end: str | None = None, timeout: int = 30) -> pd.DataFrame:
-    """Fetch FRED VIXCLS daily Cboe VIX closes for cross-asset state."""
-    params = {"id": "VIXCLS", "cosd": start}
+def fetch_fred_series(series_id: str, start: str = "2000-01-01", end: str | None = None, timeout: int = 30) -> pd.DataFrame:
+    """Fetch a positive-valued daily FRED series into the engine's frame schema.
+
+    Macro series are stored in the ``close`` column only so they can share the
+    existing cross-asset alignment plumbing. No price semantics are implied.
+    """
+    params = {"id": series_id, "cosd": start}
     if end:
         params["coed"] = end
     url = "https://fred.stlouisfed.org/graph/fredgraph.csv?" + urlencode(params)
     with urlopen(url, timeout=timeout) as resp:
         text = resp.read().decode("utf-8")
     raw = pd.read_csv(StringIO(text))
-    if raw.empty or "VIXCLS" not in raw.columns:
-        raise RuntimeError("No FRED VIXCLS data returned")
-    raw = raw.rename(columns={raw.columns[0]: "date", "VIXCLS": "close"})
+    if raw.empty or series_id not in raw.columns:
+        raise RuntimeError(f"No FRED {series_id} data returned")
+    raw = raw.rename(columns={raw.columns[0]: "date", series_id: "close"})
     raw["close"] = pd.to_numeric(raw["close"], errors="coerce")
     raw = raw.dropna(subset=["close"])
+    # normalize_ohlcv requires strictly positive values. These selected context
+    # series are positive; the derived yield-curve spread is computed later.
+    raw = raw.loc[raw["close"] > 0].copy()
     for col in ("open", "high", "low"):
         raw[col] = raw["close"]
     raw["volume"] = 0
     return normalize_ohlcv(raw[["date", "open", "high", "low", "close", "volume"]])
+
+
+def fetch_fred_vix(start: str = "2000-01-01", end: str | None = None, timeout: int = 30) -> pd.DataFrame:
+    """Fetch FRED VIXCLS daily Cboe VIX closes for cross-asset state."""
+    return fetch_fred_series("VIXCLS", start=start, end=end, timeout=timeout)
 
 
 def save_cache(df: pd.DataFrame, path: str | Path) -> None:
