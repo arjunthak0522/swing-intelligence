@@ -1,0 +1,40 @@
+name: Harden unified RE-ENTRY data feed
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/harden-unified-feed.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add GitHub API fallback for unified engine JSON
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('web/lib/reentry.ts')
+          s = p.read_text()
+          old = '''export async function getWashoutSnapshot(): Promise<WashoutSnapshot | null> {\n  try {\n    const response = await fetch(WASHOUT_URL, {\n      headers: { Accept: "application/json" },\n      cache: "no-store",\n    });\n    if (!response.ok) return null;\n    return (await response.json()) as WashoutSnapshot;\n  } catch {\n    return null;\n  }\n}\n'''
+          new = '''export async function getWashoutSnapshot(): Promise<WashoutSnapshot | null> {\n  try {\n    const response = await fetch(WASHOUT_URL, {\n      headers: { Accept: "application/json", "User-Agent": "RE-ENTRY-dashboard" },\n      cache: "no-store",\n    });\n    if (response.ok) return (await response.json()) as WashoutSnapshot;\n  } catch {\n    // Fall through to GitHub Contents API.\n  }\n\n  try {\n    const apiUrl = "https://api.github.com/repos/arjunthak0522/swing-intelligence/contents/data/reentry/exhaustion_intraday_current.json?ref=intraday-signal-research";\n    const response = await fetch(apiUrl, {\n      headers: { Accept: "application/vnd.github+json", "User-Agent": "RE-ENTRY-dashboard" },\n      cache: "no-store",\n    });\n    if (!response.ok) return null;\n    const body = await response.json() as { content?: string; encoding?: string };\n    if (!body.content || body.encoding !== "base64") return null;\n    const raw = Buffer.from(body.content.replace(/\\n/g, ""), "base64").toString("utf-8");\n    return JSON.parse(raw) as WashoutSnapshot;\n  } catch {\n    return null;\n  }\n}\n'''
+          if old not in s:
+              raise SystemExit('getWashoutSnapshot block not found')
+          p.write_text(s.replace(old, new, 1))
+          PY
+      - name: Build dashboard
+        working-directory: web
+        run: |
+          npm ci
+          npm run build
+      - name: Push feed hardening
+        run: |
+          git config user.name 're-entry-ui[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add web/lib/reentry.ts
+          git commit -m 'Harden unified RE-ENTRY feed with GitHub API fallback [skip ci]'
+          git push origin HEAD:main
