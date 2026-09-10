@@ -1,0 +1,48 @@
+{
+  "research_only": true,
+  "official_signal_modified": false,
+  "framework": "SELLING EXHAUSTION",
+  "data": {
+    "history_rows": 1,
+    "washout_or_stronger_rows": 1,
+    "developing_rows": 0,
+    "confirmed_rows": 0,
+    "core_missing_rate": 0.0,
+    "matured_10d_rows": 0,
+    "matured_30d_rows": 0
+  },
+  "gates": {
+    "source_completeness": {
+      "pass": true,
+      "value": 0.0,
+      "requirement": "missing core-field rate <= 5%"
+    },
+    "prospective_sample": {
+      "pass": false,
+      "value": 1,
+      "requirement": ">= 60 completed daily snapshots"
+    },
+    "washout_sample": {
+      "pass": false,
+      "value": 1,
+      "requirement": ">= 20 washout-or-stronger observations"
+    },
+    "matured_10d_sample": {
+      "pass": false,
+      "value": 0,
+      "requirement": ">= 20 observations with both SPY/QQQ 10D outcomes"
+    },
+    "matured_30d_sample": {
+      "pass": false,
+      "value": 0,
+      "requirement": ">= 12 observations with both SPY/QQQ 30D outcomes"
+    }
+  },
+  "sample_ready_for_promotion_review": false,
+  "paired_superiority_gate": {
+    "pass": false,
+    "status": "NOT_YET_EVALUABLE",
+    "requirement": "Paired prospective comparison against the frozen RE-ENTRY date must preserve or improve downside tails while providing useful earlier timing."
+  },
+  "promotion_status": "RESEARCH_ONLY_DO_NOT_PROMOTE"
+}
