@@ -1,0 +1,70 @@
+name: Unify RE-ENTRY runtime and final-close mode
+
+on:
+  push:
+    branches: [intraday-signal-research]
+    paths:
+      - '.github/workflows/unify-runtime-finalize.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: intraday-signal-research
+          fetch-depth: 0
+      - name: Extend collectors through final-close settlement window
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          replacements = {
+            'tools/reentry_exhaustion_intraday.py': [
+              ('return 9 * 60 + 30 <= minutes < 16 * 60', 'return 9 * 60 + 30 <= minutes <= 16 * 60 + 45'),
+              ('SKIPPED_OUTSIDE_REGULAR_SESSION', 'SKIPPED_OUTSIDE_REFRESH_WINDOW'),
+              ('No intraday evidence persisted outside 09:30-16:00 ET regular session.', 'No RE-ENTRY evidence persisted outside the 09:30-16:45 ET refresh/finalization window.'),
+            ],
+            'tools/reentry_mmfd_intraday.py': [
+              ('return 9 * 60 + 30 <= minutes < 16 * 60', 'return 9 * 60 + 30 <= minutes <= 16 * 60 + 45'),
+              ('SKIPPED_OUTSIDE_REGULAR_SESSION', 'SKIPPED_OUTSIDE_REFRESH_WINDOW'),
+            ],
+            'tools/reentry_skew_intraday.py': [
+              ('return 9 * 60 + 30 <= m < 16 * 60', 'return 9 * 60 + 30 <= m <= 16 * 60 + 45'),
+              ('SKIPPED_OUTSIDE_REGULAR_SESSION', 'SKIPPED_OUTSIDE_REFRESH_WINDOW'),
+            ],
+          }
+          for path, pairs in replacements.items():
+            p = Path(path)
+            s = p.read_text()
+            for old, new in pairs:
+              if old not in s:
+                raise SystemExit(f'{path}: missing expected text: {old}')
+              s = s.replace(old, new, 1)
+            p.write_text(s)
+          PY
+      - name: Make unified engine canonical in manual workflow
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('.github/workflows/reentry-exhaustion-intraday.yml')
+          s = p.read_text()
+          s = s.replace('name: RE-ENTRY Exhaustion Intraday Research', 'name: RE-ENTRY Unified Engine Manual Refresh')
+          s = s.replace('Calculate expanded less-strict early-go shadow score\n        run: python tools/reentry_expanded_shadow.py', 'Calculate single RE-ENTRY decision\n        run: python tools/reentry_unified_engine.py')
+          s = s.replace('data/reentry/expanded_shadow_history.csv', 'data/reentry/unified_engine_history.csv')
+          s = s.replace('research state', 'unified engine state')
+          s = s.replace('intraday research', 'RE-ENTRY')
+          p.write_text(s)
+          PY
+      - name: Remove obsolete expanded-shadow runner
+        run: rm -f tools/reentry_expanded_shadow.py .github/workflows/run-expanded-shadow-now.yml
+      - name: Commit runtime unification
+        run: |
+          git config user.name 're-entry-engine[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A tools .github/workflows
+          git commit -m 'Unify RE-ENTRY live and final-close runtime [skip ci]'
+          git pull --rebase origin intraday-signal-research
+          git push origin HEAD:intraday-signal-research
