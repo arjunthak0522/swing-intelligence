@@ -46,7 +46,9 @@ def _deployment_date_score(features: pd.DataFrame, config: CashDeploymentConfig)
 def _simulate_policy(features: pd.DataFrame, cash_yield_pct: pd.Series, deploy_fraction_by_day: pd.Series, config: CashDeploymentConfig) -> dict:
     idx = features.index
     close = pd.to_numeric(features["close"], errors="coerce").ffill()
+    open_px = pd.to_numeric(features.get("open", close), errors="coerce").fillna(close)
     px_ret = close.pct_change().fillna(0.0)
+    intraday_ret = (close / open_px - 1.0).fillna(0.0)
     cash_ret = _daily_cash_return(cash_yield_pct.reindex(idx))
 
     core = config.starting_capital * (1.0 - config.cash_sleeve_fraction)
@@ -67,7 +69,7 @@ def _simulate_policy(features: pd.DataFrame, cash_yield_pct: pd.Series, deploy_f
         if frac > 0 and sleeve_cash > 0:
             amount = min(sleeve_cash, config.starting_capital * config.cash_sleeve_fraction * frac)
             sleeve_cash -= amount
-            sleeve_equity += amount * (1.0 - one_way_cost)
+            sleeve_equity += amount * (1.0 - one_way_cost) * (1.0 + float(intraday_ret.iloc[i]))
             deployed += amount
 
         total_curve.append(core + sleeve_cash + sleeve_equity)
@@ -91,7 +93,7 @@ def run_cash_deployment_simulator(features: pd.DataFrame, cash_yield_pct: pd.Ser
 
     The core remains invested in SPY. Only the initial cash sleeve deployment timing differs.
     Score calibration always uses the full history available before each walk-forward fold;
-    performance measurement begins at `first_test_year`.
+    performance measurement begins at `first_test_year`. Deployments occur at the session open.
     """
     full_features = features.sort_index().copy()
     if len(full_features) < 2:
