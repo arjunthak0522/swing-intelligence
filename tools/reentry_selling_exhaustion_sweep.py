@@ -14,6 +14,8 @@ from reentry_walkforward_validation import generate_decisions
 MMTW_URL = "https://raw.githubusercontent.com/MiggoyGHP/Regime-dashboard/master/INDEX_MMTW%2C%201D_9513e.csv"
 HORIZONS = (5, 10, 30, 60)
 ROUND_TRIP_COST = 0.001
+FALSE_START_HORIZON = 5
+FALSE_START_RETURN = -0.02
 
 
 def fetch_csv(url: str) -> pd.DataFrame:
@@ -38,13 +40,39 @@ def episode_ids(mask: pd.Series) -> pd.Series:
     return starts.cumsum().where(mask, 0)
 
 
-def fwd(df: pd.DataFrame, symbol: str, date: pd.Timestamp, h: int) -> float | None:
-    if date not in df.index:
+def executable_fwd(df: pd.DataFrame, symbol: str, signal_date: pd.Timestamp, h: int) -> float | None:
+    """Signal on completed close t, hypothetical execution on next completed close t+1."""
+    if signal_date not in df.index:
         return None
-    i = df.index.get_loc(date)
-    if not isinstance(i, (int, np.integer)) or i + h >= len(df):
+    pos = df.index.get_loc(signal_date)
+    if not isinstance(pos, (int, np.integer)):
         return None
-    return float(df[symbol].iloc[i + h] / df[symbol].iloc[i] - 1.0 - ROUND_TRIP_COST)
+    entry_i = int(pos) + 1
+    exit_i = entry_i + h
+    if exit_i >= len(df):
+        return None
+    entry = df[symbol].iloc[entry_i]
+    exit_px = df[symbol].iloc[exit_i]
+    if pd.isna(entry) or pd.isna(exit_px):
+        return None
+    return float(exit_px / entry - 1.0 - ROUND_TRIP_COST)
+
+
+def adverse_excursion(df: pd.DataFrame, symbol: str, signal_date: pd.Timestamp, h: int = 10) -> float | None:
+    if signal_date not in df.index:
+        return None
+    pos = df.index.get_loc(signal_date)
+    if not isinstance(pos, (int, np.integer)):
+        return None
+    entry_i = int(pos) + 1
+    end_i = min(entry_i + h, len(df) - 1)
+    if entry_i >= len(df) or end_i <= entry_i:
+        return None
+    entry = df[symbol].iloc[entry_i]
+    path = df[symbol].iloc[entry_i : end_i + 1]
+    if pd.isna(entry) or path.dropna().empty:
+        return None
+    return float(path.min() / entry - 1.0)
 
 
 def summary(vals: list[float]) -> dict:
@@ -63,13 +91,16 @@ def first_true(s: pd.Series) -> pd.Timestamp | None:
 def candidate_masks(df: pd.DataFrame) -> dict[str, pd.Series]:
     masks = {}
     for threshold in (20.0, 25.0, 30.0):
-        washed = df["MMTW"] <= threshold
-        masks[f"washout_le_{int(threshold)}"] = washed
-        for turn in (2.0, 5.0):
-            masks[f"washout_le_{int(threshold)}_turn_{int(turn)}"] = washed.shift(1, fill_value=False) & (df["MMTW"].diff() >= turn)
-        masks[f"washout_le_{int(threshold)}_divergence"] = washed.shift(1, fill_value=False) & (df["SPY"] <= df["SPY"].shift(1).rolling(5, min_periods=3).min()) & (df["MMTW"] > df["MMTW"].shift(1).rolling(5, min_periods=3).min())
-        masks[f"washout_le_{int(threshold)}_turn2_vix_easing"] = washed.shift(1, fill_value=False) & (df["MMTW"].diff() >= 2.0) & (df["VIX"].diff() < 0)
-        masks[f"washout_le_{int(threshold)}_turn2_b50_improving"] = washed.shift(1, fill_value=False) & (df["MMTW"].diff() >= 2.0) & (df["B50"].diff() > 0)
+        oversold = df["MMTW"] <= threshold
+        for turn in (2.0, 5.0, 8.0):
+            masks[f"washout_le_{int(threshold)}_turn_{int(turn)}"] = oversold.shift(1, fill_value=False) & (df["MMTW"].diff() >= turn)
+        masks[f"washout_le_{int(threshold)}_divergence"] = (
+            oversold.shift(1, fill_value=False)
+            & (df["SPY"] <= df["SPY"].shift(1).rolling(5, min_periods=3).min())
+            & (df["MMTW"] > df["MMTW"].shift(1).rolling(5, min_periods=3).min())
+        )
+        masks[f"washout_le_{int(threshold)}_turn2_vix_easing"] = oversold.shift(1, fill_value=False) & (df["MMTW"].diff() >= 2.0) & (df["VIX"].diff() < 0)
+        masks[f"washout_le_{int(threshold)}_turn2_b50_improving"] = oversold.shift(1, fill_value=False) & (df["MMTW"].diff() >= 2.0) & (df["B50"].diff() > 0)
     return masks
 
 
@@ -78,6 +109,12 @@ def main() -> None:
     decisions = generate_decisions(frame)
     data = frame[["SPY", "QQQ", "B50", "VIX", "spy_dd20", "vix_change5", "curve_ratio"]].join(load_mmtw(), how="left")
     data["MMTW"] = data["MMTW"].ffill(limit=1)
+
+    common_start = max(decisions.index.min(), data["MMTW"].dropna().index.min())
+    common_end = min(decisions.index.max(), data["MMTW"].dropna().index.max())
+    decisions = decisions.loc[common_start:common_end].copy()
+    data = data.loc[common_start:common_end].copy()
+
     ids = episode_ids(weakness_mask(decisions))
     masks = candidate_masks(data)
 
@@ -96,6 +133,8 @@ def main() -> None:
     for name, mask in masks.items():
         leads = []
         buckets = {s: {h: [] for h in HORIZONS} for s in ("SPY", "QQQ")}
+        maes = {s: [] for s in ("SPY", "QQQ")}
+        false_starts = {s: [] for s in ("SPY", "QQQ")}
         by_era = {"2017-2020": [], "2021-2026": []}
         hits = 0
         for eid, dates in episode_dates.items():
@@ -110,8 +149,14 @@ def main() -> None:
                 era = "2017-2020" if cand.year <= 2020 else "2021-2026"
                 by_era[era].append(lead)
             for s in ("SPY", "QQQ"):
+                mae = adverse_excursion(data, s, cand, 10)
+                if mae is not None:
+                    maes[s].append(mae)
+                r5 = executable_fwd(data, s, cand, FALSE_START_HORIZON)
+                if r5 is not None:
+                    false_starts[s].append(r5 <= FALSE_START_RETURN)
                 for h in HORIZONS:
-                    r = fwd(data, s, cand, h)
+                    r = executable_fwd(data, s, cand, h)
                     if r is not None:
                         buckets[s][h].append(r)
         results[name] = {
@@ -124,24 +169,51 @@ def main() -> None:
                 "eras": {k: {"n": len(v), "median_lead": float(np.median(v)) if v else None, "share_before": float((np.asarray(v) > 0).mean()) if v else None} for k, v in by_era.items()},
             },
             "forward": {s: {f"{h}D": summary(buckets[s][h]) for h in HORIZONS} for s in ("SPY", "QQQ")},
+            "risk": {
+                s: {
+                    "mae_10d_median": float(np.median(maes[s])) if maes[s] else None,
+                    "mae_10d_p10": float(np.quantile(maes[s], 0.10)) if maes[s] else None,
+                    "false_start_rate_5d_le_minus_2pct": float(np.mean(false_starts[s])) if false_starts[s] else None,
+                    "n": len(false_starts[s]),
+                }
+                for s in ("SPY", "QQQ")
+            },
         }
 
     def score(item):
         _, r = item
         lead = r["lead"]
-        if lead["n"] < 20 or lead["share_before_model"] is None:
-            return -999
         spy10 = r["forward"]["SPY"]["10D"]
         qqq10 = r["forward"]["QQQ"]["10D"]
-        if spy10["n"] < 20 or qqq10["n"] < 20:
-            return -999
-        return (lead["share_before_model"] * 2.0 + max(0.0, lead["median_sessions_earlier"] or 0) * 0.05 + spy10["positive_rate"] + qqq10["positive_rate"] + spy10["median"] * 10 + qqq10["median"] * 10)
+        spy_risk = r["risk"]["SPY"]
+        qqq_risk = r["risk"]["QQQ"]
+        if lead["n"] < 20 or spy10["n"] < 20 or qqq10["n"] < 20:
+            return -999.0
+        false_start_penalty = (spy_risk["false_start_rate_5d_le_minus_2pct"] or 0) + (qqq_risk["false_start_rate_5d_le_minus_2pct"] or 0)
+        return float(
+            lead["share_before_model"] * 2.0
+            + max(0.0, lead["median_sessions_earlier"] or 0) * 0.05
+            + spy10["positive_rate"]
+            + qqq10["positive_rate"]
+            + spy10["median"] * 10
+            + qqq10["median"] * 10
+            - false_start_penalty
+        )
 
     ranked = [{"candidate": n, "screen_score": score((n, r)), **r} for n, r in sorted(results.items(), key=score, reverse=True)]
     payload = {
         "verdict": "RESEARCH_ONLY_DO_NOT_PROMOTE",
-        "purpose": "Screen simple short-breadth washout/turn definitions for earlier RE-ENTRY timing before adding broader historical breadth families.",
-        "important_limit": "This sweep uses historical MMTW plus existing canonical breadth/VIX proxies. It does not substitute for historical MMFD, BPSPX, NYMO/NAMO, NYUD/NAUD validation.",
+        "purpose": "Find the earliest executable first-turn washout candidate that improves timing without unacceptable false starts or downside tails.",
+        "methodology": {
+            "common_coverage_only": True,
+            "common_start": str(common_start.date()),
+            "common_end": str(common_end.date()),
+            "execution": "completed-close signal t; hypothetical entry next completed close t+1; 10 bps round-trip cost",
+            "false_start_definition": "5D return <= -2% from executable t+1 entry",
+            "mae_window": "10 sessions from executable t+1 entry",
+            "threshold_grid_predeclared": True,
+        },
+        "important_limit": "This sweep uses historical MMTW plus existing canonical breadth/VIX proxies. Historical MMFD, BPSPX, NYMO/NAMO and NYUD/NAUD remain separate evidence families and are not silently reconstructed.",
         "candidate_count": len(ranked),
         "ranked_candidates": ranked,
     }
