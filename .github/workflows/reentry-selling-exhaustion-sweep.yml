@@ -1,0 +1,32 @@
+name: RE-ENTRY Selling Exhaustion Sweep
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - intraday-signal-research
+    paths:
+      - tools/reentry_selling_exhaustion_sweep.py
+      - .github/workflows/reentry-selling-exhaustion-sweep.yml
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install numpy pandas yfinance scikit-learn
+      - name: Run exhaustion threshold sweep
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/reentry_selling_exhaustion_sweep.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: selling-exhaustion-sweep
+          path: artifacts/selling_exhaustion_sweep/
+          retention-days: 30
