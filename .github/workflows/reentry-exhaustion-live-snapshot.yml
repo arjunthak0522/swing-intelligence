@@ -30,7 +30,7 @@ jobs:
         run: python tools/reentry_exhaustion_persist.py
       - name: Commit research history when changed
         run: |
-          if git diff --quiet -- data/reentry/exhaustion_history.csv; then
+          if [ -z "$(git status --porcelain -- data/reentry/exhaustion_history.csv)" ]; then
             echo "No history change to commit"
             exit 0
           fi
