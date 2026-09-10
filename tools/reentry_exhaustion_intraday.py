@@ -75,10 +75,25 @@ def f(row: dict | None, key: str):
     return float(x) if finite(x) else None
 
 
+def market_is_open(now: datetime) -> bool:
+    if now.weekday() >= 5:
+        return False
+    minutes = now.hour * 60 + now.minute
+    return 9 * 60 + 30 <= minutes < 16 * 60
+
+
 def main() -> None:
     now = datetime.now(timezone.utc).astimezone(ET)
-    market_date = now.date().isoformat()
+    if not market_is_open(now):
+        print(json.dumps({
+            "research_only": True,
+            "status": "SKIPPED_OUTSIDE_REGULAR_SESSION",
+            "timestamp_et": now.isoformat(),
+            "note": "No intraday evidence persisted outside 09:30-16:00 ET regular session.",
+        }))
+        return
 
+    market_date = now.date().isoformat()
     daily_rows = load_daily()
     daily = latest_daily(daily_rows)
     intraday_rows = load_intraday()
@@ -109,7 +124,6 @@ def main() -> None:
     prior_nyr, prior_nar = f(prior, "nyse_down_up_ratio"), f(prior, "nasdaq_down_up_ratio")
 
     if prior is None:
-        # First intraday observation can still compare against the previous completed close.
         def yesterday(s):
             q = quotes.get(s)
             return float(q["close_yesterday"]) if q and finite(q.get("close_yesterday")) else None
@@ -190,7 +204,7 @@ def main() -> None:
             "down_up_ratio_relief": bool(ratio_relief),
         },
         "values": row,
-        "source_note": "StockCharts delayed intraday quote feed. This is a shadow research signal and can change before the close.",
+        "source_note": "StockCharts delayed intraday quote feed. Shadow research only; state can change before the close.",
         "errors": errors,
     }
     CURRENT.write_text(json.dumps(payload, indent=2), encoding="utf-8")
