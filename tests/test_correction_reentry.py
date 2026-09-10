@@ -75,5 +75,7 @@ def test_signal_uses_next_session(monkeypatch):
     out = run_correction_reentry_validation(f, CorrectionReentryConfig(first_test_year=2010))
     signaled = [r for r in out["rows"] if r["signal_found"]]
     assert signaled
-    assert signaled[0]["signal_date"] == "2010-03-10"
-    assert signaled[0]["signal_delay_days"] >= 1
+    # The fake score is already above threshold before the correction starts, so the
+    # first valid signal must be the correction onset itself; execution is next session.
+    assert signaled[0]["signal_date"] == signaled[0]["onset_date"]
+    assert signaled[0]["signal_delay_days"] == 1
