@@ -40,6 +40,11 @@ type WashoutSnapshot = {
     VVIX_STATE?: string | null;
     VVIX_PERCENTILE_2Y?: number | null;
     VVIX_DIRECTION?: string | null;
+    SKEW_LIVE_PROXY?: number | null;
+    SKEW_LIVE_PROXY_RATIO?: number | null;
+    SKEW_DIRECTION?: string | null;
+    SKEW_OFFICIAL_CLOSE?: number | null;
+    SKEW_OFFICIAL_PERCENTILE_2Y?: number | null;
     NYMO?: number | null;
     NAMO?: number | null;
     NYUD?: number | null;
@@ -171,6 +176,17 @@ function vvixState(percentile?: number | null, direction?: string | null) {
   if (Number(percentile) >= 60) return { label: "ELEVATED", cls: "warn", note: `Volatility stress is above normal${suffix}.` };
   if (Number(percentile) >= 20) return { label: "NORMAL", cls: "muted", note: `Volatility-of-volatility is in a normal historical zone${suffix}.` };
   return { label: "CALM", cls: "good-text", note: `Volatility-of-volatility is unusually subdued${suffix}.` };
+}
+
+function skewState(percentile?: number | null, direction?: string | null) {
+  if (!finite(percentile)) return { label: "UNAVAILABLE", cls: "muted", note: "Waiting for SPX tail-risk context." };
+  const dir = (direction || "").toUpperCase();
+  const live = dir === "WIDENING" ? " Live downside skew is widening." : dir === "NARROWING" ? " Live downside skew is narrowing." : dir === "FLAT" ? " Live downside skew is roughly unchanged." : "";
+  if (Number(percentile) >= 95) return { label: "EXTREME TAIL RISK", cls: "bad-text", note: `Official SKEW is above 95% of its two-year history.${live}` };
+  if (Number(percentile) >= 80) return { label: "HIGH TAIL RISK", cls: "bad-text", note: `Official SKEW is in the top 20% of its two-year history.${live}` };
+  if (Number(percentile) >= 60) return { label: "ELEVATED", cls: "warn", note: `Tail-risk pricing is above normal.${live}` };
+  if (Number(percentile) >= 20) return { label: "NORMAL", cls: "muted", note: `Tail-risk pricing is in a normal historical zone.${live}` };
+  return { label: "LOW TAIL RISK", cls: "good-text", note: `Tail-risk pricing is unusually subdued.${live}` };
 }
 
 function momentumState(value?: number | null) {
@@ -326,6 +342,7 @@ export default function MarketMovementTables({ snapshot, live }: { snapshot: Sna
           <MetricStat label="Nasdaq breadth momentum (NAMO)" value={signed(w?.NAMO, 1)} state={momentumState(w?.NAMO)} reference="-100 extreme · -50 oversold · 0 neutral · +50 strong" marker={position(w?.NAMO, -150, 150)} />
           <MetricStat label="Nasdaq breadth summation RSI (NASI+)" value={plain(w?.NASI_RSI, 1)} state={nasiState(w?.NASI_RSI, w?.NASI_DIRECTION)} reference="<10 extreme · <30 oversold · 50 neutral · >70 strong" note={`${nasiState(w?.NASI_RSI, w?.NASI_DIRECTION).note}${finite(w?.NASI_EMA10) ? ` EMA10 ${plain(w?.NASI_EMA10, 1)}.` : ""}`} marker={position(w?.NASI_RSI, 0, 100)} />
           <MetricStat label="Volatility of VIX (VVIX)" value={plain(w?.VVIX, 1)} state={vvixState(w?.VVIX_PERCENTILE_2Y, w?.VVIX_DIRECTION)} reference="2Y percentile: <20 calm · 20-60 normal · 60-80 elevated · 80-95 high · 95+ extreme" note={`${vvixState(w?.VVIX_PERCENTILE_2Y, w?.VVIX_DIRECTION).note}${finite(w?.VVIX_PERCENTILE_2Y) ? ` ${plain(w?.VVIX_PERCENTILE_2Y, 0)}th percentile.` : ""}`} marker={position(w?.VVIX_PERCENTILE_2Y, 0, 100)} />
+          <MetricStat label="S&P 500 tail-risk pricing (SKEW)" value={`${signed(w?.SKEW_LIVE_PROXY, 1)} vol pts`} state={skewState(w?.SKEW_OFFICIAL_PERCENTILE_2Y, w?.SKEW_DIRECTION)} reference="Live proxy = 25-delta SPX put IV minus call IV · higher/widening = more downside hedging" note={`${skewState(w?.SKEW_OFFICIAL_PERCENTILE_2Y, w?.SKEW_DIRECTION).note}${finite(w?.SKEW_OFFICIAL_CLOSE) ? ` Official SKEW close ${plain(w?.SKEW_OFFICIAL_CLOSE, 1)}.` : ""}${finite(w?.SKEW_OFFICIAL_PERCENTILE_2Y) ? ` ${plain(w?.SKEW_OFFICIAL_PERCENTILE_2Y, 0)}th percentile over 2Y.` : ""}`} marker={position(w?.SKEW_OFFICIAL_PERCENTILE_2Y, 0, 100)} />
           <MetricStat label="NYSE advance/decline volume" value={signed(w?.NYUD, 1)} state={adVolumeState(w?.NYUD)} reference="<0 selling leads · 0 balanced · >0 buying leads" marker={position(w?.NYUD, -1000, 1000)} />
           <MetricStat label="Nasdaq advance/decline volume" value={signed(w?.NAUD, 1)} state={adVolumeState(w?.NAUD)} reference="<0 selling leads · 0 balanced · >0 buying leads" marker={position(w?.NAUD, -1000, 1000)} />
           <MetricStat label="NYSE down/up volume ratio" value={`${plain(w?.nyse_down_up_ratio, 2)}x`} state={ratioState(w?.nyse_down_up_ratio)} reference="~1 balanced · 1.5 selling · 2 heavy · 3+ extreme" marker={position(w?.nyse_down_up_ratio, 0, 3.5)} />
