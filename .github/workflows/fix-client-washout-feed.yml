@@ -1,0 +1,50 @@
+name: Fix production washout feed path
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-client-washout-feed.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pass server-fetched unified snapshot into client UI
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path('web/app/MarketMovementTables.tsx')
+          s = p.read_text()
+          s = s.replace('import { useEffect, useMemo, useState, type ReactNode } from "react";', 'import { useMemo, useState, type ReactNode } from "react";')
+          old = '''export default function MarketMovementTables({ snapshot, live }: { snapshot: Snapshot; live: LiveSnapshot | null }) {\n  const [sectorSort, setSectorSort] = useState<SectorSort>("today");\n  const [sectorDirection, setSectorDirection] = useState<SortDirection>("desc");\n  const [subsectorSort, setSubsectorSort] = useState<SubsectorSort>("today");\n  const [subsectorDirection, setSubsectorDirection] = useState<SortDirection>("desc");\n  const [washout, setWashout] = useState<WashoutSnapshot | null>(null);\n\n  useEffect(() => {\n    let active = true;\n    const load = async () => {\n      try {\n        const url = `https://raw.githubusercontent.com/arjunthak0522/swing-intelligence/intraday-signal-research/data/reentry/exhaustion_intraday_current.json?t=${Date.now()}`;\n        const response = await fetch(url, { cache: "no-store" });\n        if (!response.ok) throw new Error(`HTTP ${response.status}`);\n        const data = await response.json();\n        if (active) setWashout(data);\n      } catch {\n        if (active) setWashout(null);\n      }\n    };\n    load();\n    const timer = window.setInterval(load, 60_000);\n    return () => { active = false; window.clearInterval(timer); };\n  }, []);\n'''
+          new = '''export default function MarketMovementTables({ snapshot, live, washout }: { snapshot: Snapshot; live: LiveSnapshot | null; washout: WashoutSnapshot | null }) {\n  const [sectorSort, setSectorSort] = useState<SectorSort>("today");\n  const [sectorDirection, setSectorDirection] = useState<SortDirection>("desc");\n  const [subsectorSort, setSubsectorSort] = useState<SubsectorSort>("today");\n  const [subsectorDirection, setSubsectorDirection] = useState<SortDirection>("desc");\n'''
+          if old not in s:
+              raise SystemExit('MarketMovementTables feed block not found')
+          p.write_text(s.replace(old, new, 1))
+
+          p = Path('web/app/page.tsx')
+          s = p.read_text()
+          old = '<MarketMovementTables snapshot={snapshot} live={intraday} />'
+          new = '<MarketMovementTables snapshot={snapshot} live={intraday} washout={washout} />'
+          if old not in s:
+              raise SystemExit('page MarketMovementTables call not found')
+          p.write_text(s.replace(old, new, 1))
+          PY
+      - name: Build dashboard
+        working-directory: web
+        run: |
+          npm ci
+          npm run build
+      - name: Push production feed fix
+        run: |
+          git config user.name 're-entry-ui[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add web/app/MarketMovementTables.tsx web/app/page.tsx
+          git commit -m 'Use server-fetched unified snapshot throughout dashboard [skip ci]'
+          git push origin HEAD:main
