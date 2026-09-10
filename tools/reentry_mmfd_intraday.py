@@ -74,7 +74,6 @@ def parse_pipe_file(text: str, symbol_field: str) -> list[str]:
         symbol = str(row.get(symbol_field, "")).strip()
         if not symbol:
             continue
-        # Keep ordinary listed equities/ADRs and drop obvious units, warrants, rights and preferred-class syntax.
         name = str(row.get("Security Name", "")).upper()
         if any(token in name for token in (" WARRANT", " WTS", " UNIT", " RIGHT", " PREFERRED")):
             continue
@@ -94,7 +93,6 @@ def extract_ticker_closes(frame: pd.DataFrame, ticker: str) -> pd.Series:
     if frame.empty:
         return pd.Series(dtype=float)
     if isinstance(frame.columns, pd.MultiIndex):
-        # yfinance can return either (Price, Ticker) or (Ticker, Price) depending on version/grouping.
         if ticker in frame.columns.get_level_values(0):
             sub = frame[ticker]
             if "Close" in sub.columns:
@@ -141,7 +139,6 @@ def calculate_mmfd(universe: list[str], market_date: str) -> dict:
                 last_date = pd.Timestamp(last_index).date().isoformat()
             except Exception:
                 last_date = ""
-            # We only count symbols whose daily bar is actually today's in-session bar.
             if last_date != market_date:
                 continue
             current_day_valid += 1
