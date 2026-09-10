@@ -1,0 +1,48 @@
+name: Clean unified RE-ENTRY dashboard language
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/unified-ui-cleanup.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove remaining legacy decision language
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('web/app/page.tsx')
+          s = p.read_text()
+          s = s.replace('if (v.includes("REPAIR") || v.includes("YES") || v.includes("LIVE") || v.includes("FAVORABLE")) return "good";', 'if (v.includes("GO_EARLY") || v.includes("GO EARLY") || v.includes("REPAIR") || v.includes("YES") || v.includes("LIVE") || v.includes("FAVORABLE")) return "good";')
+          s = s.replace('function EpisodeSummary({ episode, official, live }: { episode: ReentryEpisode | null; official: ReentrySnapshot; live: IntradaySnapshot | null })', 'function EpisodeSummary({ episode, live }: { episode: ReentryEpisode | null; live: IntradaySnapshot | null })')
+          s = s.replace('        {official.signal === "WAIT" ? " Today’s WAIT applies only to a new/additional deployment." : ""}\n', '')
+          s = s.replace('<div><span className="kicker">RIGHT NOW · PROVISIONAL</span><h2>{regularSession ? "Live market context" : "Latest intraday session"}</h2></div>', '<div><span className="kicker">{regularSession ? "RIGHT NOW · LIVE / PROVISIONAL" : "MARKET CLOSED · FINAL SESSION"}</span><h2>{regularSession ? "Live market context" : "Final market context"}</h2></div>')
+          s = s.replace('Intraday feed is temporarily unavailable. The official completed-close signal remains authoritative.', 'Market-data feed is temporarily unavailable. No alternate legacy decision is substituted.')
+          s = s.replace('{snapshot && episode ? <EpisodeSummary episode={episode} official={snapshot} live={intraday} /> : null}', '{snapshot && episode ? <EpisodeSummary episode={episode} live={intraday} /> : null}')
+          p.write_text(s)
+
+          p = Path('web/app/MarketMovementTables.tsx')
+          s = p.read_text()
+          s = s.replace('WAIT: the market may be oversold, but the expanded reversal evidence has not turned enough yet.', 'WAIT: the market may be oversold, but the unified reversal evidence has not turned enough yet.')
+          s = s.replace('Intraday WASHOUT research feed is temporarily unavailable. The official completed-close signal remains authoritative.', 'RE-ENTRY market-internals feed is temporarily unavailable. No alternate legacy decision is substituted.')
+          p.write_text(s)
+          PY
+      - name: Build dashboard
+        working-directory: web
+        run: |
+          npm ci
+          npm run build
+      - name: Push cleanup
+        run: |
+          git config user.name 're-entry-ui[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add web/app/page.tsx web/app/MarketMovementTables.tsx
+          git commit -m 'Remove remaining legacy decision language [skip ci]'
+          git push origin HEAD:main
