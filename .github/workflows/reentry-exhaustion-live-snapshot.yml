@@ -8,6 +8,7 @@ on:
       - 'tools/reentry_exhaustion_live_snapshot.py'
       - 'tools/reentry_exhaustion_persist.py'
       - 'tools/reentry_exhaustion_shadow_outcomes.py'
+      - 'tools/reentry_exhaustion_reliability_audit.py'
       - '.github/workflows/reentry-exhaustion-live-snapshot.yml'
   schedule:
     - cron: '10 21 * * 1-5'
@@ -33,6 +34,8 @@ jobs:
         run: python tools/reentry_exhaustion_persist.py
       - name: Update prospective 5D/10D/30D/60D outcomes
         run: python tools/reentry_exhaustion_shadow_outcomes.py
+      - name: Run selling exhaustion reliability gates
+        run: python tools/reentry_exhaustion_reliability_audit.py
       - name: Commit research history and matured outcomes when changed
         run: |
           if [ -z "$(git status --porcelain -- data/reentry/exhaustion_history.csv data/reentry/exhaustion_outcomes.csv)" ]; then
@@ -51,4 +54,5 @@ jobs:
             reentry-exhaustion-live-snapshot.json
             data/reentry/exhaustion_history.csv
             data/reentry/exhaustion_outcomes.csv
+            artifacts/selling_exhaustion_reliability/reliability_report.json
           retention-days: 30
