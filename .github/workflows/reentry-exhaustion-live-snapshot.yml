@@ -9,6 +9,7 @@ on:
       - 'tools/reentry_exhaustion_persist.py'
       - 'tools/reentry_washout_event_tracker.py'
       - 'tools/reentry_washout_event_outcomes.py'
+      - 'tools/reentry_washout_vs_model.py'
       - 'tools/reentry_exhaustion_shadow_outcomes.py'
       - 'tools/reentry_exhaustion_reliability_audit.py'
       - '.github/workflows/reentry-exhaustion-live-snapshot.yml'
@@ -29,7 +30,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install prospective validation dependencies
-        run: pip install pandas yfinance
+        run: pip install pandas numpy yfinance lxml
       - name: Capture StockCharts selling exhaustion research snapshot
         run: python tools/reentry_exhaustion_live_snapshot.py | tee reentry-exhaustion-live-snapshot.json
       - name: Persist completed daily breadth history
@@ -38,19 +39,21 @@ jobs:
         run: python tools/reentry_washout_event_tracker.py
       - name: Update washout-event forward outcomes
         run: python tools/reentry_washout_event_outcomes.py
+      - name: Compare first washout against existing model timing
+        run: python tools/reentry_washout_vs_model.py
       - name: Update prospective daily-state 5D/10D/30D/60D outcomes
         run: python tools/reentry_exhaustion_shadow_outcomes.py
       - name: Run selling exhaustion reliability gates
         run: python tools/reentry_exhaustion_reliability_audit.py
-      - name: Commit research history, events, outcomes, and reliability status when changed
+      - name: Commit research history, events, paired timing, outcomes, and reliability status when changed
         run: |
-          if [ -z "$(git status --porcelain -- data/reentry/exhaustion_history.csv data/reentry/washout_events.csv data/reentry/washout_event_outcomes.csv data/reentry/exhaustion_outcomes.csv data/reentry/exhaustion_reliability.json)" ]; then
+          if [ -z "$(git status --porcelain -- data/reentry/exhaustion_history.csv data/reentry/washout_events.csv data/reentry/washout_event_outcomes.csv data/reentry/washout_vs_model.csv data/reentry/exhaustion_outcomes.csv data/reentry/exhaustion_reliability.json)" ]; then
             echo "No research state change to commit"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/reentry/exhaustion_history.csv data/reentry/washout_events.csv data/reentry/washout_event_outcomes.csv data/reentry/exhaustion_outcomes.csv data/reentry/exhaustion_reliability.json
+          git add data/reentry/exhaustion_history.csv data/reentry/washout_events.csv data/reentry/washout_event_outcomes.csv data/reentry/washout_vs_model.csv data/reentry/exhaustion_outcomes.csv data/reentry/exhaustion_reliability.json
           git commit -m "Record selling exhaustion research state"
           git push origin HEAD:intraday-signal-research
       - uses: actions/upload-artifact@v4
@@ -61,7 +64,9 @@ jobs:
             data/reentry/exhaustion_history.csv
             data/reentry/washout_events.csv
             data/reentry/washout_event_outcomes.csv
+            data/reentry/washout_vs_model.csv
             data/reentry/exhaustion_outcomes.csv
             data/reentry/exhaustion_reliability.json
             artifacts/selling_exhaustion_reliability/reliability_report.json
+            artifacts/selling_exhaustion_reliability/washout_vs_model.json
           retention-days: 30
