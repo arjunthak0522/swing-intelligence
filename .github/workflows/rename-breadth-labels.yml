@@ -1,0 +1,46 @@
+name: Rename breadth labels
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/rename-breadth-labels.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  rename:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replace ticker-first labels with plain-English names
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('web/app/MarketMovementTables.tsx')
+          s = p.read_text()
+          replacements = {
+              'Fast breadth · SPXA20R': 'S&P 500 above 20-day average (SPXA20R)',
+              'Fast breadth · MMFD': 'U.S. stocks above 5-day average (MMFD)',
+              'Momentum · NYMO': 'NYSE breadth momentum (NYMO)',
+              'Momentum · NAMO': 'Nasdaq breadth momentum (NAMO)',
+              'NASI+ breadth RSI': 'Nasdaq breadth summation RSI (NASI+)',
+              'A/D volume · NYSE': 'NYSE advance/decline volume',
+              'A/D volume · Nasdaq': 'Nasdaq advance/decline volume',
+              'Selling intensity · NYSE': 'NYSE down/up volume ratio',
+              'Selling intensity · Nasdaq': 'Nasdaq down/up volume ratio',
+          }
+          for old, new in replacements.items():
+              if old not in s:
+                  raise SystemExit(f'Missing expected label: {old}')
+              s = s.replace(old, new)
+          p.write_text(s)
+          PY
+      - name: Commit label cleanup
+        run: |
+          git config user.name 're-entry-ui[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add web/app/MarketMovementTables.tsx
+          git commit -m 'Use plain-English breadth indicator names [skip ci]'
+          git push
