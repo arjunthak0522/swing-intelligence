@@ -5,6 +5,7 @@ import csv
 import io
 import json
 import math
+import subprocess
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -120,9 +121,21 @@ def parse_date(value: str) -> str | None:
 
 def fetch_nasdaq_daily_breadth(year: int) -> list[dict]:
     url = f"https://www.nasdaqtrader.com/dynamic/dailyfiles/daily{year}.txt"
-    req = Request(url, headers={"User-Agent": "Mozilla/5.0 RE-ENTRY-nasi-research/1.0"})
-    with urlopen(req, timeout=30) as resp:  # nosec - fixed Nasdaq Trader endpoint
-        text = resp.read().decode("utf-8-sig", errors="replace")
+    result = subprocess.run(
+        [
+            "curl", "--location", "--compressed", "--silent", "--show-error", "--fail",
+            "--max-time", "30",
+            "--user-agent", "Mozilla/5.0 RE-ENTRY-nasi-research/1.0",
+            url,
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=35,
+    )
+    text = result.stdout.lstrip("\ufeff")
+    if not text.strip():
+        raise ValueError(f"Nasdaq Trader daily{year}.txt returned an empty body")
 
     reader = csv.DictReader(io.StringIO(text))
     fields = reader.fieldnames or []
@@ -158,6 +171,8 @@ def fetch_nasdaq_daily_breadth(year: int) -> list[dict]:
         if advances < 0 or declines < 0 or advances + declines <= 0:
             continue
         rows.append({"market_date": market_date, "advances": advances, "declines": declines})
+    if not rows:
+        raise ValueError(f"Nasdaq Trader daily{year}.txt parsed zero breadth rows")
     return rows
 
 
