@@ -42,3 +42,4 @@ jobs:
           git fetch origin main
           git rebase origin/main
           git push origin HEAD:main
+      # retry after legacy engine retirement completed
