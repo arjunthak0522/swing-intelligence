@@ -38,19 +38,48 @@ def correction_state(features: pd.DataFrame, config: CorrectionReentryConfig) ->
     dd60 = close / close.rolling(60).max() - 1.0
     rsp = pd.to_numeric(features.get("rsp_spy_ret_20d", np.nan), errors="coerce")
     iwm = pd.to_numeric(features.get("iwm_spy_ret_20d", np.nan), errors="coerce")
+    qqq = pd.to_numeric(features.get("qqq_spy_ret_20d", np.nan), errors="coerce")
+    smh = pd.to_numeric(features.get("smh_qqq_ret_20d", np.nan), errors="coerce")
     vix_z = pd.to_numeric(features.get("vix_z_60", np.nan), errors="coerce")
     vix5 = pd.to_numeric(features.get("vix_change_5d", np.nan), errors="coerce")
 
     headline = dd60 <= config.headline_drawdown
-    rolling = (~headline) & (rsp <= -0.015) & (iwm <= -0.02)
-    internal = (~headline) & (~rolling) & (((rsp <= -0.01) & (vix_z >= 1.0)) | ((iwm <= -0.015) & (vix5 >= 0.15)))
+
+    # Rolling corrections can move in either direction beneath a relatively resilient headline index:
+    # 1) breadth-down: equal-weight/small caps lag SPY materially;
+    # 2) growth-down rotation: equal-weight/small caps hold up or lead while large-cap growth / semis weaken.
+    rolling_breadth_down = (~headline) & (rsp <= -0.015) & (iwm <= -0.02)
+    broad_holding_up = (rsp >= 0.005) | (iwm >= 0.005)
+    growth_leadership_weak = (qqq <= -0.015) | (smh <= -0.02)
+    rolling_growth_down = (~headline) & broad_holding_up & growth_leadership_weak
+    rolling = rolling_breadth_down | rolling_growth_down
+
+    internal = (~headline) & (~rolling) & (
+        ((rsp <= -0.01) & (vix_z >= 1.0))
+        | ((iwm <= -0.015) & (vix5 >= 0.15))
+        | ((qqq <= -0.01) & (vix_z >= 1.0))
+        | ((smh <= -0.015) & (vix5 >= 0.15))
+    )
     active = headline | rolling | internal
 
     typ = pd.Series("none", index=features.index, dtype=object)
     typ.loc[internal] = "internal"
-    typ.loc[rolling] = "rolling"
+    typ.loc[rolling_breadth_down] = "rolling_breadth_down"
+    typ.loc[rolling_growth_down] = "rolling_growth_down"
     typ.loc[headline] = "headline"
-    return pd.DataFrame({"drawdown_60d": dd60, "headline": headline, "rolling": rolling, "internal": internal, "active": active, "type": typ}, index=features.index)
+    return pd.DataFrame(
+        {
+            "drawdown_60d": dd60,
+            "headline": headline,
+            "rolling": rolling,
+            "rolling_breadth_down": rolling_breadth_down,
+            "rolling_growth_down": rolling_growth_down,
+            "internal": internal,
+            "active": active,
+            "type": typ,
+        },
+        index=features.index,
+    )
 
 
 def _episode_onsets(state: pd.DataFrame, config: CorrectionReentryConfig) -> list[int]:
