@@ -19,6 +19,7 @@ on:
       - 'src/swing_intelligence/opportunity_score_stress.py'
       - 'src/swing_intelligence/strategy_equity_curve.py'
       - 'src/swing_intelligence/cash_deployment.py'
+      - 'src/swing_intelligence/cash_deployment_episodes.py'
       - 'tests/test_autonomous_lab.py'
       - 'tests/test_autonomous_robustness.py'
       - 'tests/test_semantic_lab.py'
@@ -31,8 +32,10 @@ on:
       - 'tests/test_opportunity_score_stress.py'
       - 'tests/test_strategy_equity_curve.py'
       - 'tests/test_cash_deployment.py'
+      - 'tests/test_cash_deployment_episodes.py'
       - 'tools/run_autonomous_lab.py'
       - 'tools/run_cash_deployment.py'
+      - 'tools/run_cash_deployment_episodes.py'
       - '.github/workflows/autonomous-lab.yml'
   workflow_dispatch:
 
@@ -50,7 +53,7 @@ jobs:
       - name: Install package and test dependencies
         run: pip install -e '.[dev]'
       - name: Run autonomous lab tests
-        run: pytest -q tests/test_autonomous_lab.py tests/test_autonomous_robustness.py tests/test_semantic_lab.py tests/test_phase2b_validation.py tests/test_walk_forward.py tests/test_conditional_search.py tests/test_qqq_family_robustness.py tests/test_macro_context.py tests/test_opportunity_score.py tests/test_opportunity_score_stress.py tests/test_strategy_equity_curve.py tests/test_cash_deployment.py
+        run: pytest -q tests/test_autonomous_lab.py tests/test_autonomous_robustness.py tests/test_semantic_lab.py tests/test_phase2b_validation.py tests/test_walk_forward.py tests/test_conditional_search.py tests/test_qqq_family_robustness.py tests/test_macro_context.py tests/test_opportunity_score.py tests/test_opportunity_score_stress.py tests/test_strategy_equity_curve.py tests/test_cash_deployment.py tests/test_cash_deployment_episodes.py
 
   research:
     needs: test
@@ -71,6 +74,10 @@ jobs:
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/run_cash_deployment.py
+      - name: Run Phase 5B repeated cash deployment episodes
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/run_cash_deployment_episodes.py
       - name: Upload research evidence
         uses: actions/upload-artifact@v4
         with:
