@@ -13,7 +13,7 @@ SYMBOL_COLUMNS = [
 ]
 
 BASE_COLUMNS = [
-    "market_date", "generated_at_utc", "state", "washout_family_count",
+    "market_date", "generated_at_utc", "state", "candidate_action", "oversold_family_count",
     "turn_family_count", "selling_pressure_count", "nyse_down_up_ratio",
     "nasdaq_down_up_ratio",
 ]
@@ -31,7 +31,6 @@ def market_date(payload: dict) -> str:
             dates.append(raw[:10])
     if dates:
         return max(dates)
-    # EODData fallbacks can use dd Mon yy. Keep generated date only if no ISO quote exists.
     return str(payload.get("generated_at_utc", ""))[:10]
 
 
@@ -45,7 +44,8 @@ def build_row(payload: dict) -> dict:
         "market_date": market_date(payload),
         "generated_at_utc": payload.get("generated_at_utc", ""),
         "state": payload.get("framework", {}).get("state", ""),
-        "washout_family_count": payload.get("washout", {}).get("family_count", ""),
+        "candidate_action": payload.get("framework", {}).get("candidate_action", ""),
+        "oversold_family_count": payload.get("oversold", {}).get("family_count", ""),
         "turn_family_count": payload.get("turn", {}).get("family_count", ""),
         "selling_pressure_count": payload.get("selling_pressure", {}).get("count", ""),
         "nyse_down_up_ratio": payload.get("selling_pressure", {}).get("nyse_down_up_volume_ratio", ""),
