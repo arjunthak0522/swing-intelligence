@@ -36,6 +36,10 @@ type WashoutSnapshot = {
     SPXA20R?: number | null;
     MMFD?: number | null;
     MMFD_STATE?: string | null;
+    VVIX?: number | null;
+    VVIX_STATE?: string | null;
+    VVIX_PERCENTILE_2Y?: number | null;
+    VVIX_DIRECTION?: string | null;
     NYMO?: number | null;
     NAMO?: number | null;
     NYUD?: number | null;
@@ -52,6 +56,15 @@ type WashoutSnapshot = {
     valid_5d_observations?: number;
     coverage_pct?: number;
     above_5dma_count?: number;
+  };
+  vvix_live?: {
+    value?: number;
+    prior_close?: number;
+    change_points_vs_prior_close?: number;
+    direction_vs_prior_close?: string;
+    historical_percentile_2y?: number;
+    completed_history_sessions?: number;
+    state?: string;
   };
 };
 
@@ -147,6 +160,17 @@ function mmfdState(value?: number | null) {
   if (Number(value) <= 70) return { label: "NORMAL", cls: "muted", note: "Short-term participation is around a normal range." };
   if (Number(value) <= 85) return { label: "STRONG", cls: "good-text", note: "Short-term participation is broadly strong." };
   return { label: "EXTREME OVERBOUGHT", cls: "good-text", note: "More than 85% of stocks are above their 5-day average." };
+}
+
+function vvixState(percentile?: number | null, direction?: string | null) {
+  if (!finite(percentile)) return { label: "UNAVAILABLE", cls: "muted", note: "Waiting for live volatility-of-volatility data." };
+  const dir = (direction || "").toUpperCase();
+  const suffix = dir === "RISING" ? " and rising" : dir === "FALLING" ? " and falling" : "";
+  if (Number(percentile) >= 95) return { label: "EXTREME STRESS", cls: "bad-text", note: `VVIX is above 95% of its last two years${suffix}.` };
+  if (Number(percentile) >= 80) return { label: "HIGH STRESS", cls: "bad-text", note: `VVIX is in the top 20% of its two-year range${suffix}.` };
+  if (Number(percentile) >= 60) return { label: "ELEVATED", cls: "warn", note: `Volatility stress is above normal${suffix}.` };
+  if (Number(percentile) >= 20) return { label: "NORMAL", cls: "muted", note: `Volatility-of-volatility is in a normal historical zone${suffix}.` };
+  return { label: "CALM", cls: "good-text", note: `Volatility-of-volatility is unusually subdued${suffix}.` };
 }
 
 function momentumState(value?: number | null) {
@@ -301,6 +325,7 @@ export default function MarketMovementTables({ snapshot, live }: { snapshot: Sna
           <MetricStat label="NYSE breadth momentum (NYMO)" value={signed(w?.NYMO, 1)} state={momentumState(w?.NYMO)} reference="-100 extreme · -50 oversold · 0 neutral · +50 strong" marker={position(w?.NYMO, -150, 150)} />
           <MetricStat label="Nasdaq breadth momentum (NAMO)" value={signed(w?.NAMO, 1)} state={momentumState(w?.NAMO)} reference="-100 extreme · -50 oversold · 0 neutral · +50 strong" marker={position(w?.NAMO, -150, 150)} />
           <MetricStat label="Nasdaq breadth summation RSI (NASI+)" value={plain(w?.NASI_RSI, 1)} state={nasiState(w?.NASI_RSI, w?.NASI_DIRECTION)} reference="<10 extreme · <30 oversold · 50 neutral · >70 strong" note={`${nasiState(w?.NASI_RSI, w?.NASI_DIRECTION).note}${finite(w?.NASI_EMA10) ? ` EMA10 ${plain(w?.NASI_EMA10, 1)}.` : ""}`} marker={position(w?.NASI_RSI, 0, 100)} />
+          <MetricStat label="Volatility of VIX (VVIX)" value={plain(w?.VVIX, 1)} state={vvixState(w?.VVIX_PERCENTILE_2Y, w?.VVIX_DIRECTION)} reference="2Y percentile: <20 calm · 20-60 normal · 60-80 elevated · 80-95 high · 95+ extreme" note={`${vvixState(w?.VVIX_PERCENTILE_2Y, w?.VVIX_DIRECTION).note}${finite(w?.VVIX_PERCENTILE_2Y) ? ` ${plain(w?.VVIX_PERCENTILE_2Y, 0)}th percentile.` : ""}`} marker={position(w?.VVIX_PERCENTILE_2Y, 0, 100)} />
           <MetricStat label="NYSE advance/decline volume" value={signed(w?.NYUD, 1)} state={adVolumeState(w?.NYUD)} reference="<0 selling leads · 0 balanced · >0 buying leads" marker={position(w?.NYUD, -1000, 1000)} />
           <MetricStat label="Nasdaq advance/decline volume" value={signed(w?.NAUD, 1)} state={adVolumeState(w?.NAUD)} reference="<0 selling leads · 0 balanced · >0 buying leads" marker={position(w?.NAUD, -1000, 1000)} />
           <MetricStat label="NYSE down/up volume ratio" value={`${plain(w?.nyse_down_up_ratio, 2)}x`} state={ratioState(w?.nyse_down_up_ratio)} reference="~1 balanced · 1.5 selling · 2 heavy · 3+ extreme" marker={position(w?.nyse_down_up_ratio, 0, 3.5)} />
