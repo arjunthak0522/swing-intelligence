@@ -185,10 +185,10 @@ def main() -> None:
     volume_turn = (turn_tests["nyud_improving"] is True) or (turn_tests["naud_improving"] is True)
     turn_family_count = sum((fast_turn, structural_turn, momentum_turn, volume_turn))
 
-    # Semantics: OVERSOLD means stretched but still falling. WASHOUT is the first
-    # evidence that the selling impulse has started to turn and is therefore the
-    # research candidate for an EARLY GO. CONFIRMED is later corroboration, not a
-    # prerequisite for the early-entry candidate.
+    # Snapshot semantics are deliberately event-first. A first observable turn after
+    # an oversold condition is WASHOUT regardless of how many families turn at once.
+    # CONFIRMED is a temporal state and is assigned only by the persistence layer on
+    # a later market date when corroboration persists or broadens.
     immediate_turn = fast_turn or momentum_turn or volume_turn
     if oversold_family_count == 0:
         state = "NONE"
@@ -196,9 +196,6 @@ def main() -> None:
     elif not immediate_turn:
         state = "OVERSOLD"
         candidate_action = "WAIT_FOR_WASHOUT"
-    elif turn_family_count >= 2:
-        state = "CONFIRMED"
-        candidate_action = "GO_EARLY"
     else:
         state = "WASHOUT"
         candidate_action = "GO_EARLY"
@@ -212,7 +209,7 @@ def main() -> None:
             "state": state,
             "candidate_action": candidate_action,
             "sequence": ["OVERSOLD", "WASHOUT", "CONFIRMED"],
-            "note": "Research classification only. WASHOUT is the first turn after an oversold condition and is intentionally treated as the early-entry candidate. CONFIRMED is later corroboration, not a requirement to go.",
+            "note": "Research classification only. The first observable turn after an oversold condition is always WASHOUT and is intentionally treated as the early-entry candidate. CONFIRMED can only occur on a later market date if corroboration persists or broadens.",
         },
         "oversold": {
             "family_count": oversold_family_count,
