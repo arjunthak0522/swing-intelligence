@@ -14,6 +14,7 @@ from swing_intelligence.phase2b_validation import Phase2BConfig, phase2b_report
 from swing_intelligence.qqq_family_robustness import QQQFamilyConfig, run_qqq_family_robustness
 from swing_intelligence.research import add_research_features, split_periods
 from swing_intelligence.semantic_lab import build_semantic_features, run_semantic_lab
+from swing_intelligence.strategy_equity_curve import StrategyEquityCurveConfig, run_frozen_strategy_equity_curve
 from swing_intelligence.walk_forward import WalkForwardConfig, run_semantic_walk_forward
 
 
@@ -24,6 +25,7 @@ MACRO_CONTEXT = {
     "DGS2": "DGS2",
     "DGS10": "DGS10",
     "HY_SPREAD": "BAMLH0A0HYM2",
+    "DGS3MO": "DGS3MO",
 }
 
 
@@ -122,6 +124,10 @@ def main():
         min_random_superiority_fold_fraction=0.60,
         min_leave_crisis_trades=20,
     )
+    equity_curve_config = StrategyEquityCurveConfig(
+        first_test_year=2010, fold_years=2, trigger=70.0, horizon=30, min_gap=30,
+        transaction_cost_bps_round_trip=10.0, starting_capital=100000.0,
+    )
     conditional_config = ConditionalSearchConfig(
         walk_forward=wf_config,
         inner_validation_years=2,
@@ -169,6 +175,10 @@ def main():
         opportunity_stress["targets"][symbol] = run_opportunity_score_stress(features, symbol, config=opportunity_stress_config)
 
     qqq_family = run_qqq_family_robustness(semantic_features["QQQ"], qqq_family_config)
+    cash_yield = frames["DGS3MO"]["close"]
+    frozen_spy_equity_curve = run_frozen_strategy_equity_curve(
+        semantic_features["SPY"], cash_yield, config=equity_curve_config,
+    )
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     payloads = {
@@ -177,6 +187,7 @@ def main():
         "semantic_phase2b.json": semantic_phase2b, "walk_forward.json": walk_forward,
         "conditional_walk_forward.json": conditional, "qqq_family_robustness.json": qqq_family,
         "opportunity_score.json": opportunity, "opportunity_score_stress.json": opportunity_stress,
+        "frozen_spy_equity_curve.json": frozen_spy_equity_curve,
     }
     for name, payload in payloads.items():
         (OUT_DIR / name).write_text(json.dumps(payload, indent=2, sort_keys=True))
@@ -198,6 +209,7 @@ def main():
         "qqq_family_robustness": qqq_family,
         "opportunity_score": {symbol: opportunity["targets"][symbol] for symbol in TARGETS},
         "opportunity_score_stress": {symbol: opportunity_stress["targets"][symbol] for symbol in TARGETS},
+        "frozen_spy_equity_curve": frozen_spy_equity_curve,
     }
     (OUT_DIR / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True))
 
@@ -220,6 +232,15 @@ def main():
             f"opportunity-score qualified triggers={opp['qualifying_trigger_count']} latest={opp['latest'].get('opportunity_score')}; "
             f"score-stress base={stress['base_passing_variant_count']}/{stress['valid_variant_count']} full={stress['full_stress_passing_variant_count']} family_full={stress['family_full_stress_robust']}"
         )
+
+    m = frozen_spy_equity_curve.get("metrics", {})
+    print(
+        "Frozen SPY >=70 equity curve: "
+        f"trades={m.get('trade_count')} / strategy_end={m.get('strategy_ending_value')} / "
+        f"strategy_cagr={m.get('strategy_cagr')} / strategy_mdd={m.get('strategy_max_drawdown')} / "
+        f"buyhold_end={m.get('buy_hold_ending_value')} / buyhold_cagr={m.get('buy_hold_cagr')} / "
+        f"exposure={m.get('market_exposure_fraction')}"
+    )
 
     print(
         "QQQ Phase 3B family: "
