@@ -1,0 +1,51 @@
+name: RE-ENTRY Exhaustion Intraday Research
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [intraday-signal-research]
+    paths:
+      - 'tools/reentry_exhaustion_intraday.py'
+      - '.github/workflows/reentry-exhaustion-intraday.yml'
+  schedule:
+    - cron: '*/30 14-20 * * 1-5'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: reentry-exhaustion-intraday
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: intraday-signal-research
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Capture intraday washout shadow signal
+        run: python tools/reentry_exhaustion_intraday.py
+      - name: Persist intraday research state safely
+        run: |
+          if [ -z "$(git status --porcelain -- data/reentry/exhaustion_intraday_history.csv data/reentry/exhaustion_intraday_current.json)" ]; then
+            echo "No intraday research state change"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/reentry/exhaustion_intraday_history.csv data/reentry/exhaustion_intraday_current.json
+          git commit -m "Record intraday selling exhaustion research state"
+          git pull --rebase origin intraday-signal-research
+          git push origin HEAD:intraday-signal-research
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reentry-exhaustion-intraday
+          path: |
+            data/reentry/exhaustion_intraday_history.csv
+            data/reentry/exhaustion_intraday_current.json
+          retention-days: 30
