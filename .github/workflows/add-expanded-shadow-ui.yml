@@ -1,0 +1,68 @@
+name: Add expanded intraday decision UI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/add-expanded-shadow-ui.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Promote expanded shadow decision in intraday panel
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('web/app/MarketMovementTables.tsx')
+          s = p.read_text()
+
+          old = '''  vvix_live?: {\n    value?: number;\n    prior_close?: number;\n    change_points_vs_prior_close?: number;\n    direction_vs_prior_close?: string;\n    historical_percentile_2y?: number;\n    completed_history_sessions?: number;\n    state?: string;\n  };\n};'''
+          new = '''  vvix_live?: {\n    value?: number;\n    prior_close?: number;\n    change_points_vs_prior_close?: number;\n    direction_vs_prior_close?: string;\n    historical_percentile_2y?: number;\n    completed_history_sessions?: number;\n    state?: string;\n  };\n  expanded_shadow?: {\n    research_only?: boolean;\n    rule_version?: string;\n    official_completed_close_signal_modified?: boolean;\n    oversold_gate?: boolean;\n    fast_family_count?: number;\n    context_support_count?: number;\n    context_support?: Record<string, boolean>;\n    state?: string;\n    candidate_action?: string;\n    logic?: string;\n    timestamp_et?: string;\n  };\n};'''
+          if old not in s:
+              raise SystemExit('Missing expanded_shadow type insertion point')
+          s = s.replace(old, new, 1)
+
+          marker = '''function breadthState(value?: number | null) {'''
+          fn = '''function expandedClass(state?: string) {\n  const value = (state || "").toUpperCase();\n  if (value === "EARLY_GO") return "good-text";\n  if (value === "WATCH") return "warn";\n  if (value === "WAIT") return "bad-text";\n  return "muted";\n}\n\nfunction expandedLabel(state?: string) {\n  const value = (state || "").toUpperCase();\n  if (value === "EARLY_GO") return "GO EARLY";\n  if (value === "WATCH") return "WATCH";\n  if (value === "WAIT") return "WAIT";\n  return value || "UNAVAILABLE";\n}\n\nfunction expandedConclusion(x?: WashoutSnapshot["expanded_shadow"]) {\n  if (!x) return null;\n  const fast = x.fast_family_count ?? 0;\n  const context = x.context_support_count ?? 0;\n  if ((x.state || "").toUpperCase() === "EARLY_GO") {\n    if (fast >= 2) return `GO EARLY: ${fast} fast reversal families have turned.`;\n    return `GO EARLY: ${fast} fast reversal family plus ${context} independent context turn${context === 1 ? "" : "s"}.`;\n  }\n  if ((x.state || "").toUpperCase() === "WATCH") return `WATCH: ${fast} fast reversal families and ${context} context turns are supportive, but the expanded rule is not fully triggered.`;\n  return "WAIT: the market may be oversold, but the expanded reversal evidence has not turned enough yet.";\n}\n\n'''
+          if marker not in s:
+              raise SystemExit('Missing expanded helper insertion point')
+          s = s.replace(marker, fn + marker, 1)
+
+          old_vars = '''  const familyEntries = Object.entries(washout?.families || {});\n  const w = washout?.values;\n  const mmfdCoverage = finite(washout?.mmfd_live?.coverage_pct) ? ` Coverage ${plain(washout?.mmfd_live?.coverage_pct, 1)}%.` : "";'''
+          new_vars = '''  const familyEntries = Object.entries(washout?.families || {});\n  const w = washout?.values;\n  const expanded = washout?.expanded_shadow;\n  const decisionState = expanded?.state || washout?.state;\n  const decisionLabel = expanded ? expandedLabel(expanded.state) : washoutLabel(washout?.state);\n  const decisionClass = expanded ? expandedClass(expanded.state) : washoutClass(washout?.state);\n  const decisionConclusion = expandedConclusion(expanded) || washoutConclusion(washout?.state);\n  const contextEntries = Object.entries(expanded?.context_support || {});\n  const contextNames: Record<string, string> = { MMFD_IMPROVING: "5-day breadth improving", NASI_TURNING_UP: "Nasdaq breadth turning up", VVIX_EASING: "volatility stress easing", SKEW_NARROWING: "tail-risk skew narrowing" };\n  const mmfdCoverage = finite(washout?.mmfd_live?.coverage_pct) ? ` Coverage ${plain(washout?.mmfd_live?.coverage_pct, 1)}%.` : "";'''
+          if old_vars not in s:
+              raise SystemExit('Missing decision variable insertion point')
+          s = s.replace(old_vars, new_vars, 1)
+
+          old_head = '''        <span className={`pill ${washoutClass(washout?.state)}`}>{washoutLabel(washout?.state)}</span>\n      </div>\n      <p className="section-intro"><b>{washoutConclusion(washout?.state)}</b> Every number below is shown against its own reference scale so you can see whether it is normal, weak, oversold, or extreme. Research only - this never overwrites the official completed-close RE-ENTRY decision.</p>'''
+          new_head = '''        <span className={`pill ${decisionClass}`}>{decisionLabel}</span>\n      </div>\n      <p className="section-intro"><b>{decisionConclusion}</b> The live decision now uses the original fast reversal families plus independent confirmation from 5-day breadth, Nasdaq breadth, volatility stress and tail-risk skew. Research only - this never overwrites the official completed-close RE-ENTRY decision.</p>'''
+          if old_head not in s:
+              raise SystemExit('Missing header replacement point')
+          s = s.replace(old_head, new_head, 1)
+
+          old_first = '''          <MetricStat label="Independent reversal families" value={`${washout.turn_family_count ?? 0}/4`} state={(washout.turn_family_count ?? 0) >= 2 ? { label: "EARLY WASHOUT", cls: "good-text", note: "Two or more independent families have turned." } : (washout.turn_family_count ?? 0) === 1 ? { label: "WATCH", cls: "warn", note: "One family has turned. We need another independent confirmation." } : { label: "NO TURN YET", cls: "bad-text", note: "No independent reversal family has turned yet." }} reference="0 none · 1 watch · 2+ early WASHOUT" marker={position(washout.turn_family_count ?? 0, 0, 4)} />'''
+          new_first = '''          <MetricStat label="Expanded live RE-ENTRY evidence" value={`${expanded?.fast_family_count ?? washout.turn_family_count ?? 0} fast + ${expanded?.context_support_count ?? 0} context`} state={expanded?.state === "EARLY_GO" ? { label: "GO EARLY", cls: "good-text", note: "Oversold conditions plus enough independent reversal evidence are present." } : expanded?.state === "WATCH" ? { label: "WATCH", cls: "warn", note: "Some reversal evidence is present, but not enough for the expanded early-entry rule." } : { label: "WAIT", cls: "bad-text", note: "Oversold conditions are not yet accompanied by enough reversal evidence." }} reference="GO = 2+ fast turns OR 1 fast turn + 1 independent context turn" marker={position((expanded?.fast_family_count ?? washout.turn_family_count ?? 0) + (expanded?.context_support_count ?? 0), 0, 4)} />\n          <MetricStat label="Original fast reversal families" value={`${washout.turn_family_count ?? 0}/4`} state={(washout.turn_family_count ?? 0) >= 2 ? { label: "EARLY WASHOUT", cls: "good-text", note: "Two or more original fast families have turned." } : (washout.turn_family_count ?? 0) === 1 ? { label: "ONE TURN", cls: "warn", note: "One original fast family has turned." } : { label: "NO TURN YET", cls: "bad-text", note: "No original fast family has turned yet." }} reference="0 none · 1 partial turn · 2+ original early-WASHOUT path" marker={position(washout.turn_family_count ?? 0, 0, 4)} />'''
+          if old_first not in s:
+              raise SystemExit('Missing first metric replacement point')
+          s = s.replace(old_first, new_first, 1)
+
+          old_notice = '''        <div className="notice"><Radio size={14} /> {familyEntries.length ? familyEntries.map(([name, on]) => `${familyNames[name] || name}: ${on ? "TURN" : "not yet"}`).join(" · ") : "Awaiting family-level turn data."} · Snapshot {washoutTime}</div>'''
+          new_notice = '''        <div className="notice"><Radio size={14} /> {familyEntries.length ? familyEntries.map(([name, on]) => `${familyNames[name] || name}: ${on ? "TURN" : "not yet"}`).join(" · ") : "Awaiting family-level turn data."}{contextEntries.length ? ` · Context: ${contextEntries.map(([name, on]) => `${contextNames[name] || name}: ${on ? "SUPPORTIVE" : "not yet"}`).join(" · ")}` : ""} · Snapshot {washoutTime}</div>'''
+          if old_notice not in s:
+              raise SystemExit('Missing notice replacement point')
+          s = s.replace(old_notice, new_notice, 1)
+
+          p.write_text(s)
+          PY
+      - name: Commit expanded intraday decision UI
+        run: |
+          git config user.name 're-entry-ui[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add web/app/MarketMovementTables.tsx
+          git commit -m 'Promote expanded less-strict intraday RE-ENTRY decision [skip ci]'
+          git push
