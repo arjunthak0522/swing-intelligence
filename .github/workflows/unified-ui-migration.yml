@@ -1,0 +1,111 @@
+name: Migrate dashboard to unified RE-ENTRY engine
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/unified-ui-migration.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch unified engine UI and indicator semantics
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          # 1) Shared types
+          p = Path('web/lib/reentry.ts')
+          s = p.read_text()
+          old = '''export interface WashoutSnapshot {\n  state?: string;\n  candidate_action?: string;\n  turn_family_count?: number;\n  generated_at_utc?: string;\n  daily_context_state?: string;\n  families?: Record<string, boolean>;\n  values?: {\n    timestamp_et?: string | null;\n    SPXA20R?: number | null;\n    NYMO?: number | null;\n    NAMO?: number | null;\n    NYUD?: number | null;\n    NAUD?: number | null;\n    nyse_down_up_ratio?: number | null;\n    nasdaq_down_up_ratio?: number | null;\n  };\n}'''
+          new = '''export interface WashoutSnapshot {\n  state?: string;\n  candidate_action?: string;\n  turn_family_count?: number;\n  generated_at_utc?: string;\n  daily_context_state?: string;\n  families?: Record<string, boolean>;\n  values?: {\n    market_date?: string | null;\n    timestamp_et?: string | null;\n    SPXA20R?: number | null;\n    MMFD?: number | null;\n    MMFD_STATE?: string | null;\n    NYMO?: number | null;\n    NAMO?: number | null;\n    NYUD?: number | null;\n    NAUD?: number | null;\n    nyse_down_up_ratio?: number | null;\n    nasdaq_down_up_ratio?: number | null;\n    NASI_RSI?: number | null;\n    NASI_EMA4?: number | null;\n    NASI_EMA10?: number | null;\n    NASI_DIRECTION?: string | null;\n    VVIX?: number | null;\n    VVIX_PRIOR_CLOSE?: number | null;\n    VVIX_DIRECTION?: string | null;\n    VVIX_STATE?: string | null;\n    VVIX_PERCENTILE_2Y?: number | null;\n    SKEW_LIVE_PROXY?: number | null;\n    SKEW_LIVE_PROXY_RATIO?: number | null;\n    SKEW_DIRECTION?: string | null;\n    SKEW_OFFICIAL_CLOSE?: number | null;\n    SKEW_OFFICIAL_PERCENTILE_2Y?: number | null;\n  };\n  mmfd_live?: { coverage_pct?: number | null };\n  unified_engine?: {\n    engine_version?: string;\n    primary_engine?: boolean;\n    oversold_gate?: boolean;\n    fast_family_count?: number;\n    context_support_count?: number;\n    context_support?: Record<string, boolean>;\n    state?: string;\n    decision?: string;\n    logic?: string;\n    market_phase?: string;\n    timestamp_et?: string;\n    market_date?: string;\n  };\n}'''
+          if old not in s:
+              raise SystemExit('reentry.ts WashoutSnapshot block not found')
+          p.write_text(s.replace(old, new, 1))
+
+          # 2) Market internals panel: unified primary + correct semantic scales
+          p = Path('web/app/MarketMovementTables.tsx')
+          s = p.read_text()
+          s = s.replace('expanded_shadow?: {', 'unified_engine?: {')
+          s = s.replace('research_only?: boolean;\n    rule_version?: string;\n    official_completed_close_signal_modified?: boolean;', 'engine_version?: string;\n    primary_engine?: boolean;')
+          s = s.replace('candidate_action?: string;\n    logic?: string;\n    timestamp_et?: string;', 'decision?: string;\n    logic?: string;\n    market_phase?: string;\n    timestamp_et?: string;\n    market_date?: string;')
+          s = s.replace('function expandedClass(state?: string)', 'function unifiedClass(state?: string)')
+          s = s.replace('if (value === "EARLY_GO") return "good-text";', 'if (value === "GO_EARLY") return "good-text";')
+          s = s.replace('function expandedLabel(state?: string)', 'function unifiedLabel(state?: string)')
+          s = s.replace('if (value === "EARLY_GO") return "GO EARLY";', 'if (value === "GO_EARLY") return "GO EARLY";')
+          s = s.replace('function expandedConclusion(x?: WashoutSnapshot["expanded_shadow"])', 'function unifiedConclusion(x?: WashoutSnapshot["unified_engine"])')
+          s = s.replace('if ((x.state || "").toUpperCase() === "EARLY_GO")', 'if ((x.state || "").toUpperCase() === "GO_EARLY")')
+          s = s.replace('the expanded rule is not fully triggered.', 'the unified rule is not fully triggered.')
+
+          old_momentum = '''function momentumState(value?: number | null) {\n  if (!finite(value)) return { label: "UNAVAILABLE", cls: "muted", note: "Waiting for oscillator data." };\n  if (Number(value) <= -100) return { label: "EXTREME OVERSOLD", cls: "bad-text", note: "Breadth momentum is at an extreme negative reading." };\n  if (Number(value) <= -50) return { label: "OVERSOLD", cls: "bad-text", note: "Breadth momentum is materially negative." };\n  if (Number(value) < 0) return { label: "WEAK", cls: "warn", note: "Momentum is below neutral, but not extreme." };\n  if (Number(value) < 50) return { label: "IMPROVING", cls: "good-text", note: "Breadth momentum is positive." };\n  if (Number(value) < 100) return { label: "STRONG", cls: "good-text", note: "Breadth momentum is strong." };\n  return { label: "EXTREME POSITIVE", cls: "good-text", note: "Breadth momentum is extremely strong." };\n}'''
+          new_momentum = '''function momentumState(value?: number | null) {\n  if (!finite(value)) return { label: "UNAVAILABLE", cls: "muted", note: "Waiting for oscillator data." };\n  if (Number(value) <= -100) return { label: "OVERSOLD / EXTREME NEGATIVE", cls: "bad-text", note: "Breadth momentum is below the commonly used -100 oversold area." };\n  if (Number(value) < 0) return { label: "NEGATIVE", cls: "warn", note: "Breadth momentum is below the zero line, but not at the -100 oversold area." };\n  if (Number(value) < 100) return { label: "POSITIVE", cls: "good-text", note: "Breadth momentum is above the zero line." };\n  return { label: "OVERBOUGHT / EXTREME POSITIVE", cls: "good-text", note: "Breadth momentum is above the commonly used +100 extreme-positive area." };\n}'''
+          if old_momentum not in s:
+              raise SystemExit('momentumState block not found')
+          s = s.replace(old_momentum, new_momentum, 1)
+
+          old_ad = '''function adVolumeState(value?: number | null) {\n  if (!finite(value)) return { label: "UNAVAILABLE", cls: "muted", note: "Waiting for A/D volume data." };\n  if (Number(value) <= -500) return { label: "HEAVY SELLING", cls: "bad-text", note: "Declining volume is dominating." };\n  if (Number(value) < -100) return { label: "SELLING DOMINANT", cls: "bad-text", note: "More volume is flowing through declining issues." };\n  if (Number(value) <= 100) return { label: "NEAR BALANCED", cls: "muted", note: "Advancing and declining volume are close to balanced." };\n  if (Number(value) < 500) return { label: "BUYING DOMINANT", cls: "good-text", note: "Advancing volume has the edge." };\n  return { label: "STRONG BUYING", cls: "good-text", note: "Advancing volume is dominating." };\n}'''
+          new_ad = '''function adVolumeState(value?: number | null) {\n  if (!finite(value)) return { label: "UNAVAILABLE", cls: "muted", note: "Waiting for A/D volume data." };\n  if (Number(value) < 0) return { label: "DECLINING VOLUME LEADS", cls: "bad-text", note: "Net A/D volume is negative. Magnitude is shown without arbitrary fixed cutoffs." };\n  if (Number(value) > 0) return { label: "ADVANCING VOLUME LEADS", cls: "good-text", note: "Net A/D volume is positive. Magnitude is shown without arbitrary fixed cutoffs." };\n  return { label: "BALANCED", cls: "muted", note: "Advancing and declining volume are balanced." };\n}'''
+          if old_ad not in s:
+              raise SystemExit('adVolumeState block not found')
+          s = s.replace(old_ad, new_ad, 1)
+
+          old_ratio = '''function ratioState(value?: number | null) {\n  if (!finite(value)) return { label: "UNAVAILABLE", cls: "muted", note: "Waiting for down/up volume data." };\n  if (Number(value) >= 3) return { label: "EXTREME SELLING", cls: "bad-text", note: "At least 3x as much down volume as up volume." };\n  if (Number(value) >= 2) return { label: "HEAVY SELLING", cls: "bad-text", note: "At least 2x as much down volume as up volume." };\n  if (Number(value) >= 1.25) return { label: "SELLING DOMINANT", cls: "warn", note: "Down volume still leads." };\n  if (Number(value) >= 0.8) return { label: "BALANCED", cls: "muted", note: "Selling and buying intensity are roughly balanced." };\n  return { label: "RELIEF / BUYING EDGE", cls: "good-text", note: "Up volume is dominating down volume." };\n}'''
+          new_ratio = '''function ratioState(value?: number | null) {\n  if (!finite(value)) return { label: "UNAVAILABLE", cls: "muted", note: "Waiting for down/up volume data." };\n  if (Number(value) > 1) return { label: "DOWN VOLUME LEADS", cls: "warn", note: `Down volume is ${Math.round((Number(value) - 1) * 100)}% greater than up volume.` };\n  if (Number(value) < 1) return { label: "UP VOLUME LEADS", cls: "good-text", note: `Up volume exceeds down volume; the ratio is ${Number(value).toFixed(2)}x.` };\n  return { label: "BALANCED", cls: "muted", note: "Down and up volume are equal at the 1.00x arithmetic balance point." };\n}'''
+          if old_ratio not in s:
+              raise SystemExit('ratioState block not found')
+          s = s.replace(old_ratio, new_ratio, 1)
+
+          s = s.replace('const expanded = washout?.expanded_shadow;', 'const unified = washout?.unified_engine;')
+          s = s.replace('const decisionState = expanded?.state || washout?.state;', 'const decisionState = unified?.state || washout?.state;')
+          s = s.replace('const decisionLabel = expanded ? expandedLabel(expanded.state) : washoutLabel(washout?.state);', 'const decisionLabel = unified ? unifiedLabel(unified.state) : washoutLabel(washout?.state);')
+          s = s.replace('const decisionClass = expanded ? expandedClass(expanded.state) : washoutClass(washout?.state);', 'const decisionClass = unified ? unifiedClass(unified.state) : washoutClass(washout?.state);')
+          s = s.replace('const decisionConclusion = expandedConclusion(expanded) || washoutConclusion(washout?.state);', 'const decisionConclusion = unifiedConclusion(unified) || washoutConclusion(washout?.state);')
+          s = s.replace('const contextEntries = Object.entries(expanded?.context_support || {});', 'const contextEntries = Object.entries(unified?.context_support || {});')
+          s = s.replace('<span className="kicker">INTRADAY WASHOUT · SHADOW TEST</span><h2>Is the selling impulse starting to reverse?</h2>', '<span className="kicker">RE-ENTRY ENGINE</span><h2>Has waiting stopped helping?</h2>')
+          s = s.replace('The live decision now uses the original fast reversal families plus independent confirmation from 5-day breadth, Nasdaq breadth, volatility stress and tail-risk skew. Research only - this never overwrites the official completed-close RE-ENTRY decision.', 'One engine uses the same reversal logic all day. During market hours readings are live/provisional; after the close the final session snapshot remains the decision until the next session.')
+          s = s.replace('Expanded live RE-ENTRY evidence', 'Unified RE-ENTRY evidence')
+          s = s.replace('expanded?.fast_family_count', 'unified?.fast_family_count')
+          s = s.replace('expanded?.context_support_count', 'unified?.context_support_count')
+          s = s.replace('expanded?.state === "EARLY_GO"', 'unified?.state === "GO_EARLY"')
+          s = s.replace('expanded?.state === "WATCH"', 'unified?.state === "WATCH"')
+          s = s.replace('expanded early-entry rule', 'unified early-entry rule')
+          s = s.replace('reference="-100 extreme · -50 oversold · 0 neutral · +50 strong"', 'reference="<-100 oversold/extreme negative · 0 neutral · >+100 extreme positive"')
+          s = s.replace('reference="<0 selling leads · 0 balanced · >0 buying leads" marker={position(w?.NYUD, -1000, 1000)}', 'reference="<0 declining volume leads · 0 balanced · >0 advancing volume leads" marker={null}')
+          s = s.replace('reference="<0 selling leads · 0 balanced · >0 buying leads" marker={position(w?.NAUD, -1000, 1000)}', 'reference="<0 declining volume leads · 0 balanced · >0 advancing volume leads" marker={null}')
+          s = s.replace('reference="~1 balanced · 1.5 selling · 2 heavy · 3+ extreme"', 'reference="1.00x = exact arithmetic balance · >1 down volume leads · <1 up volume leads"')
+          p.write_text(s)
+
+          # 3) Page: make unified decision the single primary verdict, old snapshot only supplies context tables.
+          p = Path('web/app/page.tsx')
+          s = p.read_text()
+          start = s.index('function Hero(')
+          end = s.index('\nfunction EpisodeSummary', start)
+          hero = '''function UnifiedHero({ washout }: { washout: WashoutSnapshot }) {\n  const u = washout.unified_engine;\n  const phase = u?.market_phase || "UNAVAILABLE";\n  const decision = u?.decision || u?.state || "UNAVAILABLE";\n  const label = decision === "GO_EARLY" ? "GO EARLY" : decision;\n  const phaseLabel = phase === "MARKET_CLOSED_FINAL" ? "MARKET CLOSED · FINAL" : phase === "CLOSE_SETTLING" ? "CLOSE SETTLING" : phase === "LIVE_PROVISIONAL" ? "LIVE · PROVISIONAL" : "UNAVAILABLE";\n  const fast = u?.fast_family_count ?? washout.turn_family_count ?? 0;\n  const context = u?.context_support_count ?? 0;\n  const explanation = decision === "GO_EARLY"\n    ? `Oversold conditions are present and reversal evidence has reached the early re-entry threshold: ${fast} fast turn${fast === 1 ? "" : "s"} plus ${context} context turn${context === 1 ? "" : "s"}.`\n    : decision === "WATCH"\n      ? `The market is washed out and some reversal evidence is appearing, but the unified threshold is not fully triggered yet.`\n      : `The market may be weak or oversold, but there is not enough reversal evidence yet.`;\n  return (\n    <section className="hero card">\n      <div className="eyebrow-row"><span className="eyebrow">RE-ENTRY DECISION</span><span className="freshness"><Clock3 size={14} /> {phaseLabel}</span></div>\n      <div className="hero-grid">\n        <div><div className={`signal ${stateClass(decision)}`}>{label}</div><div className="signal-subline">{explanation}</div></div>\n        <div className="decision-summary"><span className="summary-label">ONE ENGINE</span><p>Same indicators and same decision rule during the session and after the close. Only the data status changes from provisional to final.</p><div className="decision-tags"><span><small>Oversold setup</small><b>{u?.oversold_gate ? "YES" : "NO"}</b></span><span><small>Fast turns</small><b>{fast}/4</b></span><span><small>Context turns</small><b>{context}/4</b></span></div></div>\n      </div>\n    </section>\n  );\n}\n'''
+          s = s[:start] + hero + s[end:]
+          s = s.replace('function IntradayMonitor({ live, washout, official }: { live: IntradaySnapshot | null; washout: WashoutSnapshot | null; official: ReentrySnapshot })', 'function IntradayMonitor({ live, washout }: { live: IntradaySnapshot | null; washout: WashoutSnapshot | null })')
+          s = s.replace('        {` It does not replace the official ${formatDate(official.as_of)} close signal.`}', '')
+          s = s.replace(' · official decision remains <b>{official.signal}</b> until the close engine recalculates.', '.')
+
+          home_start = s.index('export default async function Home()')
+          new_home = '''export default async function Home() {\n  const [snapshot, intraday, episode, washout] = await Promise.all([getLatestSnapshot(), getIntradaySnapshot(), getLatestEpisode(), getWashoutSnapshot()]);\n  const unified = washout?.unified_engine;\n\n  return <main className="shell">\n    <header className="topbar"><div><span className="brand">RE-ENTRY</span><span className="tagline">Know when waiting stops helping.</span></div><div className="top-status">{unified?.market_phase === "MARKET_CLOSED_FINAL" ? "Market closed · final" : unified?.market_phase === "LIVE_PROVISIONAL" ? <><span className="live-dot" /> Live engine</> : "Updating"}</div></header>\n    {!washout || !unified ? <section className="card data-blocked"><CircleAlert /> <div><b>RE-ENTRY FEED UNAVAILABLE</b><p>No fallback decision is shown when the unified engine cannot be loaded.</p></div></section> : <>\n      <ProductPurpose />\n      <UnifiedHero washout={washout} />\n      {snapshot && episode ? <EpisodeSummary episode={episode} official={snapshot} live={intraday} /> : null}\n      <IntradayMonitor live={intraday} washout={washout} />\n      {snapshot ? <MarketMovementTables snapshot={snapshot} live={intraday} /> : null}\n    </>}\n    <footer>One RE-ENTRY engine. Live/provisional during market hours, final after the close. Historical analog research is supporting evidence only and cannot override the primary decision.</footer>\n  </main>;\n}\n'''
+          s = s[:home_start] + new_home
+          p.write_text(s)
+          PY
+      - name: Typecheck/build dashboard
+        working-directory: web
+        run: |
+          npm ci
+          npm run build
+      - name: Commit unified UI
+        run: |
+          git config user.name 're-entry-ui[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add web/lib/reentry.ts web/app/page.tsx web/app/MarketMovementTables.tsx
+          git commit -m 'Make unified RE-ENTRY engine the single dashboard decision [skip ci]'
+          git pull --rebase origin main
+          git push origin HEAD:main
