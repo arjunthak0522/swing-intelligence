@@ -1,0 +1,2 @@
+market_date,timestamp_et,state,candidate_action,turn_family_count,daily_context_state,SPXA20R,NYMO,NAMO,NYUD,NAUD,nyse_down_up_ratio,nasdaq_down_up_ratio
+2026-09-10,2026-09-10T08:45:14.427916-04:00,OVERSOLD,WAIT_FOR_WASHOUT,0,OVERSOLD,23.2,-47.79,-35.52,-2560.5458,-2131.8773,3.2236777452267553,1.8175311546382458
