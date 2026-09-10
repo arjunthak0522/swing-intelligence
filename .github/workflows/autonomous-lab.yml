@@ -21,6 +21,7 @@ on:
       - 'src/swing_intelligence/cash_deployment.py'
       - 'src/swing_intelligence/cash_deployment_episodes.py'
       - 'src/swing_intelligence/score_accelerated_dca.py'
+      - 'src/swing_intelligence/correction_reentry.py'
       - 'tests/test_autonomous_lab.py'
       - 'tests/test_autonomous_robustness.py'
       - 'tests/test_semantic_lab.py'
@@ -35,10 +36,12 @@ on:
       - 'tests/test_cash_deployment.py'
       - 'tests/test_cash_deployment_episodes.py'
       - 'tests/test_score_accelerated_dca.py'
+      - 'tests/test_correction_reentry.py'
       - 'tools/run_autonomous_lab.py'
       - 'tools/run_cash_deployment.py'
       - 'tools/run_cash_deployment_episodes.py'
       - 'tools/run_score_accelerated_dca.py'
+      - 'tools/run_correction_reentry.py'
       - '.github/workflows/autonomous-lab.yml'
   workflow_dispatch:
 
@@ -56,7 +59,7 @@ jobs:
       - name: Install package and test dependencies
         run: pip install -e '.[dev]'
       - name: Run autonomous lab tests
-        run: pytest -q tests/test_autonomous_lab.py tests/test_autonomous_robustness.py tests/test_semantic_lab.py tests/test_phase2b_validation.py tests/test_walk_forward.py tests/test_conditional_search.py tests/test_qqq_family_robustness.py tests/test_macro_context.py tests/test_opportunity_score.py tests/test_opportunity_score_stress.py tests/test_strategy_equity_curve.py tests/test_cash_deployment.py tests/test_cash_deployment_episodes.py tests/test_score_accelerated_dca.py
+        run: pytest -q tests/test_autonomous_lab.py tests/test_autonomous_robustness.py tests/test_semantic_lab.py tests/test_phase2b_validation.py tests/test_walk_forward.py tests/test_conditional_search.py tests/test_qqq_family_robustness.py tests/test_macro_context.py tests/test_opportunity_score.py tests/test_opportunity_score_stress.py tests/test_strategy_equity_curve.py tests/test_cash_deployment.py tests/test_cash_deployment_episodes.py tests/test_score_accelerated_dca.py tests/test_correction_reentry.py
 
   research:
     needs: test
@@ -85,6 +88,10 @@ jobs:
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/run_score_accelerated_dca.py
+      - name: Run Phase 7 correction-only re-entry validation
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/run_correction_reentry.py
       - name: Upload research evidence
         uses: actions/upload-artifact@v4
         with:
