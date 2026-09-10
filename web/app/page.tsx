@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 
 function stateClass(value: string) {
   const v = value.toUpperCase();
-  if (v.includes("REPAIR") || v.includes("YES") || v.includes("LIVE") || v.includes("FAVORABLE")) return "good";
+  if (v.includes("GO_EARLY") || v.includes("GO EARLY") || v.includes("REPAIR") || v.includes("YES") || v.includes("LIVE") || v.includes("FAVORABLE")) return "good";
   if (v.includes("WAIT") || v.includes("STABIL") || v.includes("DEVELOP") || v.includes("PARTIAL") || v.includes("RESET")) return "warn";
   if (v.includes("NO") || v.includes("WORSEN") || v.includes("HEAVY") || v.includes("DEGRADED") || v.includes("DEEP")) return "bad";
   return "neutral";
@@ -89,7 +89,7 @@ function UnifiedHero({ washout }: { washout: WashoutSnapshot }) {
   );
 }
 
-function EpisodeSummary({ episode, official, live }: { episode: ReentryEpisode | null; official: ReentrySnapshot; live: IntradaySnapshot | null }) {
+function EpisodeSummary({ episode, live }: { episode: ReentryEpisode | null; live: IntradaySnapshot | null }) {
   if (!episode) return null;
   const spyNow = live?.quotes?.SPY?.price;
   const qqqNow = live?.quotes?.QQQ?.price;
@@ -101,7 +101,6 @@ function EpisodeSummary({ episode, official, live }: { episode: ReentryEpisode |
       </div>
       <p className="section-intro">
         Performance since the first RE-ENTRY signal in this continuous episode.
-        {official.signal === "WAIT" ? " Today’s WAIT applies only to a new/additional deployment." : ""}
       </p>
       <div className="vehicle-strip">
         <div className="vehicle-primary"><div><span>S&P 500</span><b>SPY</b></div><small>Return since RE-ENTRY began</small><strong>{episodeReturn(spyNow, episode.entry_closes.SPY)}</strong><em>From {formatDate(episode.episode_start)}</em></div>
@@ -130,7 +129,7 @@ function IntradayMonitor({ live, washout }: { live: IntradaySnapshot | null; was
   return (
     <section className="card section-card live-card">
       <div className="section-heading">
-        <div><span className="kicker">RIGHT NOW · PROVISIONAL</span><h2>{regularSession ? "Live market context" : "Latest intraday session"}</h2></div>
+        <div><span className="kicker">{regularSession ? "RIGHT NOW · LIVE / PROVISIONAL" : "MARKET CLOSED · FINAL SESSION"}</span><h2>{regularSession ? "Live market context" : "Final market context"}</h2></div>
         <div className="eyebrow-row"><span className="freshness"><Radio size={14} /> Updated {updateLabel}</span><StatusPill>{statusLabel}</StatusPill></div>
       </div>
       <p className="section-intro">
@@ -149,7 +148,7 @@ function IntradayMonitor({ live, washout }: { live: IntradaySnapshot | null; was
           <div className="live-stat"><small>Nasdaq down/up volume</small><strong>{ratio(w?.nasdaq_down_up_ratio)}</strong><span>Lower means selling is easing</span></div>
         </div>
         <div className="live-foot"><Radio size={14} /> Latest verified price bar {barLabel} · {live.summary.tracked_quotes}/{live.summary.expected_quotes} quotes available.</div>
-      </> : <div className="notice"><CircleAlert size={16} /> Intraday feed is temporarily unavailable. The official completed-close signal remains authoritative.</div>}
+      </> : <div className="notice"><CircleAlert size={16} /> Market-data feed is temporarily unavailable. No alternate legacy decision is substituted.</div>}
     </section>
   );
 }
@@ -189,7 +188,7 @@ export default async function Home() {
     {!washout || !unified ? <section className="card data-blocked"><CircleAlert /> <div><b>RE-ENTRY FEED UNAVAILABLE</b><p>No fallback decision is shown when the unified engine cannot be loaded.</p></div></section> : <>
       <ProductPurpose />
       <UnifiedHero washout={washout} />
-      {snapshot && episode ? <EpisodeSummary episode={episode} official={snapshot} live={intraday} /> : null}
+      {snapshot && episode ? <EpisodeSummary episode={episode} live={intraday} /> : null}
       <IntradayMonitor live={intraday} washout={washout} />
       {snapshot ? <MarketMovementTables snapshot={snapshot} live={intraday} /> : null}
     </>}

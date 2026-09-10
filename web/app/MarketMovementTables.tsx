@@ -187,7 +187,7 @@ function unifiedConclusion(x?: WashoutSnapshot["unified_engine"]) {
     return `GO EARLY: ${fast} fast reversal family plus ${context} independent context turn${context === 1 ? "" : "s"}.`;
   }
   if ((x.state || "").toUpperCase() === "WATCH") return `WATCH: ${fast} fast reversal families and ${context} context turns are supportive, but the unified rule is not fully triggered.`;
-  return "WAIT: the market may be oversold, but the expanded reversal evidence has not turned enough yet.";
+  return "WAIT: the market may be oversold, but the unified reversal evidence has not turned enough yet.";
 }
 
 function breadthState(value?: number | null) {
@@ -393,7 +393,7 @@ export default function MarketMovementTables({ snapshot, live }: { snapshot: Sna
           <MetricStat label="Nasdaq down/up volume ratio" value={`${plain(w?.nasdaq_down_up_ratio, 2)}x`} state={ratioState(w?.nasdaq_down_up_ratio)} reference="1.00x = exact arithmetic balance · >1 down volume leads · <1 up volume leads" marker={position(w?.nasdaq_down_up_ratio, 0, 3.5)} />
         </div>
         <div className="notice"><Radio size={14} /> {familyEntries.length ? familyEntries.map(([name, on]) => `${familyNames[name] || name}: ${on ? "TURN" : "not yet"}`).join(" · ") : "Awaiting family-level turn data."}{contextEntries.length ? ` · Context: ${contextEntries.map(([name, on]) => `${contextNames[name] || name}: ${on ? "SUPPORTIVE" : "not yet"}`).join(" · ")}` : ""} · Snapshot {washoutTime}</div>
-      </> : <div className="notice">Intraday WASHOUT research feed is temporarily unavailable. The official completed-close signal remains authoritative.</div>}
+      </> : <div className="notice">RE-ENTRY market-internals feed is temporarily unavailable. No alternate legacy decision is substituted.</div>}
     </section>
 
     <section className="card section-card">
