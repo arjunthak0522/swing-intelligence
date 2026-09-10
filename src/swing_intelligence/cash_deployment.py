@@ -39,16 +39,11 @@ def _deployment_date_score(features: pd.DataFrame, config: CashDeploymentConfig)
             first_hit = hits[hits].index[0]
             pos = features.index.get_indexer([first_hit])[0]
             if pos + 1 < len(features.index):
-                marks.iloc[pos + 1] = True  # signal known after close; deploy next session
+                marks.iloc[pos + 1] = True
     return marks
 
 
-def _simulate_policy(
-    features: pd.DataFrame,
-    cash_yield_pct: pd.Series,
-    deploy_fraction_by_day: pd.Series,
-    config: CashDeploymentConfig,
-) -> dict:
+def _simulate_policy(features: pd.DataFrame, cash_yield_pct: pd.Series, deploy_fraction_by_day: pd.Series, config: CashDeploymentConfig) -> dict:
     idx = features.index
     close = pd.to_numeric(features["close"], errors="coerce").ffill()
     px_ret = close.pct_change().fillna(0.0)
@@ -57,29 +52,24 @@ def _simulate_policy(
     core = config.starting_capital * (1.0 - config.cash_sleeve_fraction)
     sleeve_cash = config.starting_capital * config.cash_sleeve_fraction
     sleeve_equity = 0.0
-    equity_curve = []
-    cash_curve = []
-    sleeve_curve = []
     total_curve = []
     deployed = 0.0
     one_way_cost = config.transaction_cost_bps / 10000.0
 
-    for i, dt in enumerate(idx):
+    deploy = deploy_fraction_by_day.reindex(idx).fillna(0.0)
+    for i, _ in enumerate(idx):
         if i > 0:
             core *= 1.0 + float(px_ret.iloc[i])
             sleeve_equity *= 1.0 + float(px_ret.iloc[i])
             sleeve_cash *= 1.0 + float(cash_ret.iloc[i])
 
-        frac = float(deploy_fraction_by_day.reindex(idx).fillna(0.0).iloc[i])
+        frac = float(deploy.iloc[i])
         if frac > 0 and sleeve_cash > 0:
             amount = min(sleeve_cash, config.starting_capital * config.cash_sleeve_fraction * frac)
             sleeve_cash -= amount
             sleeve_equity += amount * (1.0 - one_way_cost)
             deployed += amount
 
-        equity_curve.append(core)
-        cash_curve.append(sleeve_cash)
-        sleeve_curve.append(sleeve_equity)
         total_curve.append(core + sleeve_cash + sleeve_equity)
 
     total = pd.Series(total_curve, index=idx, dtype=float)
@@ -87,50 +77,43 @@ def _simulate_policy(
     dd = total / peak - 1.0
     years = max((idx[-1] - idx[0]).days / 365.25, 1.0 / 365.25)
     end = float(total.iloc[-1])
-    cagr = float((end / config.starting_capital) ** (1.0 / years) - 1.0)
     return {
         "ending_value": end,
         "total_return": float(end / config.starting_capital - 1.0),
-        "cagr": cagr,
+        "cagr": float((end / config.starting_capital) ** (1.0 / years) - 1.0),
         "max_drawdown": float(dd.min()),
         "deployed_fraction_of_initial_sleeve": float(deployed / (config.starting_capital * config.cash_sleeve_fraction)),
-        "equity_curve": total,
     }
 
 
-def run_cash_deployment_simulator(
-    features: pd.DataFrame,
-    cash_yield_pct: pd.Series,
-    config: CashDeploymentConfig = CashDeploymentConfig(),
-) -> dict:
+def run_cash_deployment_simulator(features: pd.DataFrame, cash_yield_pct: pd.Series, config: CashDeploymentConfig = CashDeploymentConfig()) -> dict:
     """Compare ways to deploy a pre-existing cash sleeve into SPY.
 
-    Core portfolio stays invested in SPY. Only the cash sleeve timing differs.
-    SPY Opportunity Score v1.0 is frozen at the supplied trigger and calibrated
-    strictly from prior data in each walk-forward fold.
+    The core remains invested in SPY. Only the initial cash sleeve deployment timing differs.
+    Score calibration always uses the full history available before each walk-forward fold;
+    performance measurement begins at `first_test_year`.
     """
-    features = features.sort_index().copy()
+    full_features = features.sort_index().copy()
+    if len(full_features) < 2:
+        return {"config": asdict(config), "policies": {}}
+
+    score_marks_full = _deployment_date_score(full_features, config)
+    start = pd.Timestamp(f"{config.first_test_year}-01-01")
+    features = full_features.loc[full_features.index >= start]
     idx = features.index
     if len(idx) < 2:
         return {"config": asdict(config), "policies": {}}
-
-    start_pos = int(np.searchsorted(idx.values, pd.Timestamp(f"{config.first_test_year}-01-01").to_datetime64()))
-    features = features.iloc[start_pos:]
-    idx = features.index
     cash_yield_pct = cash_yield_pct.reindex(idx).ffill().fillna(0.0)
 
-    # Immediate: deploy entire sleeve on first investable day.
     immediate = pd.Series(0.0, index=idx)
     immediate.iloc[0] = 1.0
 
-    # DCA: equal installments over first N trading days.
     dca = pd.Series(0.0, index=idx)
     n_dca = min(config.dca_days, len(idx))
     if n_dca:
         dca.iloc[:n_dca] = 1.0 / n_dca
 
-    # Score-guided: deploy full sleeve at first next-day-open after score >= trigger.
-    score_marks = _deployment_date_score(features, config)
+    score_marks = score_marks_full.reindex(idx).fillna(False)
     score_policy = pd.Series(0.0, index=idx)
     if score_marks.any():
         score_policy.loc[score_marks[score_marks].index[0]] = 1.0
@@ -141,15 +124,11 @@ def run_cash_deployment_simulator(
         "score_triggered": _simulate_policy(features, cash_yield_pct, score_policy, config),
     }
 
-    # Random deployment provides a distribution, not one cherry-picked date.
     rng = np.random.default_rng(20260909)
-    random_ends = []
-    random_cagrs = []
-    random_mdds = []
+    random_ends, random_cagrs, random_mdds = [], [], []
     for _ in range(config.random_iterations):
         p = pd.Series(0.0, index=idx)
-        pos = int(rng.integers(0, len(idx)))
-        p.iloc[pos] = 1.0
+        p.iloc[int(rng.integers(0, len(idx)))] = 1.0
         r = _simulate_policy(features, cash_yield_pct, p, config)
         random_ends.append(r["ending_value"])
         random_cagrs.append(r["cagr"])
@@ -163,14 +142,7 @@ def run_cash_deployment_simulator(
         "p90_ending_value": float(np.percentile(random_ends, 90)),
     }
 
-    for name in ("immediate", "dca", "score_triggered"):
-        policies[name].pop("equity_curve", None)
-
-    if score_marks.any():
-        policies["score_triggered"]["deployment_date"] = str(score_marks[score_marks].index[0].date())
-    else:
-        policies["score_triggered"]["deployment_date"] = None
-
+    policies["score_triggered"]["deployment_date"] = str(score_marks[score_marks].index[0].date()) if score_marks.any() else None
     score_end = policies["score_triggered"]["ending_value"]
     policies["score_triggered"]["vs_immediate_ending_value"] = float(score_end - policies["immediate"]["ending_value"])
     policies["score_triggered"]["vs_dca_ending_value"] = float(score_end - policies["dca"]["ending_value"])
