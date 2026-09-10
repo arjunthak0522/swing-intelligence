@@ -2,6 +2,12 @@ name: RE-ENTRY Exhaustion Intraday Research
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - intraday-signal-research
+    paths:
+      - '.github/workflows/reentry-exhaustion-intraday.yml'
+      - 'tools/reentry_exhaustion_intraday.py'
   schedule:
     - cron: '*/30 13-20 * * 1-5'
 
