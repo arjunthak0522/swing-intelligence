@@ -77,7 +77,7 @@ def market_is_open(now: datetime) -> bool:
     if now_et.weekday() >= 5:
         return False
     minutes = now_et.hour * 60 + now_et.minute
-    return 9 * 60 + 30 <= minutes < 16 * 60
+    return 9 * 60 + 30 <= minutes <= 16 * 60 + 45
 
 
 def latest_same_day(rows: list[dict], market_date: str) -> dict | None:
@@ -309,9 +309,9 @@ def main() -> None:
     if not market_is_open(now):
         print(json.dumps({
             "research_only": True,
-            "status": "SKIPPED_OUTSIDE_REGULAR_SESSION",
+            "status": "SKIPPED_OUTSIDE_REFRESH_WINDOW",
             "timestamp_et": now.isoformat(),
-            "note": "No intraday evidence persisted outside 09:30-16:00 ET regular session.",
+            "note": "No RE-ENTRY evidence persisted outside the 09:30-16:45 ET refresh/finalization window.",
         }))
         return
 

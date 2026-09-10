@@ -32,7 +32,7 @@ def market_is_open(now: datetime) -> bool:
     if now.weekday() >= 5:
         return False
     m = now.hour * 60 + now.minute
-    return 9 * 60 + 30 <= m < 16 * 60
+    return 9 * 60 + 30 <= m <= 16 * 60 + 45
 
 
 def norm_cdf(x: float) -> float:
@@ -149,7 +149,7 @@ def append_history(row: dict) -> None:
 def main() -> None:
     now = datetime.now(timezone.utc).astimezone(ET)
     if not market_is_open(now):
-        print(json.dumps({"status": "SKIPPED_OUTSIDE_REGULAR_SESSION", "timestamp_et": now.isoformat()}))
+        print(json.dumps({"status": "SKIPPED_OUTSIDE_REFRESH_WINDOW", "timestamp_et": now.isoformat()}))
         return
     if not CURRENT.exists():
         raise SystemExit(f"Missing {CURRENT}")

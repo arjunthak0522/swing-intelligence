@@ -40,7 +40,7 @@ def market_is_open(now: datetime) -> bool:
     if now_et.weekday() >= 5:
         return False
     minutes = now_et.hour * 60 + now_et.minute
-    return 9 * 60 + 30 <= minutes < 16 * 60
+    return 9 * 60 + 30 <= minutes <= 16 * 60 + 45
 
 
 def curl_text(url: str) -> str:
@@ -275,7 +275,7 @@ def calculate_vvix(now: datetime) -> dict:
 def main() -> None:
     now = datetime.now(timezone.utc).astimezone(ET)
     if not market_is_open(now):
-        print(json.dumps({"status": "SKIPPED_OUTSIDE_REGULAR_SESSION", "timestamp_et": now.isoformat()}))
+        print(json.dumps({"status": "SKIPPED_OUTSIDE_REFRESH_WINDOW", "timestamp_et": now.isoformat()}))
         return
     if not CURRENT.exists():
         raise SystemExit(f"Missing {CURRENT}")
