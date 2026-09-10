@@ -63,9 +63,30 @@ def latest_daily(rows: list[dict]) -> dict | None:
     return max(rows, key=lambda r: r["market_date"]) if rows else None
 
 
+def market_is_open(now: datetime) -> bool:
+    now_et = now.astimezone(ET) if now.tzinfo else now.replace(tzinfo=ET)
+    if now_et.weekday() >= 5:
+        return False
+    minutes = now_et.hour * 60 + now_et.minute
+    return 9 * 60 + 30 <= minutes < 16 * 60
+
+
 def latest_same_day(rows: list[dict], market_date: str) -> dict | None:
-    same = [r for r in rows if r.get("market_date") == market_date]
-    return same[-1] if same else None
+    valid = []
+    for row in rows:
+        if row.get("market_date") != market_date:
+            continue
+        raw_timestamp = row.get("timestamp_et")
+        if not raw_timestamp:
+            continue
+        try:
+            timestamp = datetime.fromisoformat(raw_timestamp).astimezone(ET)
+        except (TypeError, ValueError):
+            continue
+        if timestamp.date().isoformat() != market_date or not market_is_open(timestamp):
+            continue
+        valid.append((timestamp, row))
+    return max(valid, key=lambda item: item[0])[1] if valid else None
 
 
 def f(row: dict | None, key: str):
@@ -73,13 +94,6 @@ def f(row: dict | None, key: str):
         return None
     x = row.get(key)
     return float(x) if finite(x) else None
-
-
-def market_is_open(now: datetime) -> bool:
-    if now.weekday() >= 5:
-        return False
-    minutes = now.hour * 60 + now.minute
-    return 9 * 60 + 30 <= minutes < 16 * 60
 
 
 def main() -> None:
