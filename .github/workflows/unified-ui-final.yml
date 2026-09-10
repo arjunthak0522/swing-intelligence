@@ -1,0 +1,50 @@
+name: Finalize unified RE-ENTRY dashboard
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/unified-ui-final.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: unified-ui-final
+  cancel-in-progress: false
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply validated unified UI migration
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          text = Path('.github/workflows/unified-ui-migration.yml').read_text()
+          start = text.index("          python - <<'PY'\n") + len("          python - <<'PY'\n")
+          end = text.index("\n          PY", start)
+          lines = text[start:end].splitlines()
+          code = "\n".join(line[10:] if line.startswith("          ") else line for line in lines)
+          Path('/tmp/patch.py').write_text(code + '\n')
+          PY
+          python /tmp/patch.py
+      - name: Build dashboard
+        working-directory: web
+        run: |
+          npm ci
+          npm run build
+      - name: Discard dependency lock noise
+        run: git restore web/package-lock.json
+      - name: Commit unified source only
+        run: |
+          git config user.name 're-entry-ui[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add web/lib/reentry.ts web/app/page.tsx web/app/MarketMovementTables.tsx
+          git commit -m 'Make unified RE-ENTRY engine the single dashboard decision [skip ci]'
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main
