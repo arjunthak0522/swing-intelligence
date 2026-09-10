@@ -57,6 +57,10 @@ const pct = (value?: number | null, digits = 1) => typeof value === "number" && 
   ? `${value >= 0 ? "+" : ""}${(value * 100).toFixed(digits)}%`
   : "-";
 
+const levelPct = (value?: number | null, digits = 0) => typeof value === "number" && Number.isFinite(value)
+  ? `${(value * 100).toFixed(digits)}%`
+  : "-";
+
 function subsectorState(x: SubsectorProxy) {
   if (x.repairing) return { label: "REPAIRING", dot: "repair", cls: "good-text", rank: 4 };
   if (x.drawdown_20d <= -0.05) return { label: "DEEP CORRECTION", dot: "damage", cls: "bad-text", rank: 0 };
@@ -178,19 +182,22 @@ export default function MarketMovementTables({ snapshot, live }: { snapshot: Sna
       <div className="sort-bar" aria-label="Sort sectors"><span>Sort by</span><SortButton active={sectorSort === "today"} direction={sectorDirection} onClick={() => toggleSectorSort("today")}>Today</SortButton><SortButton active={sectorSort === "drawdown"} direction={sectorDirection} onClick={() => toggleSectorSort("drawdown")}>Below 20D high</SortButton><SortButton active={sectorSort === "status"} direction={sectorDirection} onClick={() => toggleSectorSort("status")}>Repair status</SortButton></div>
       <div className="sector-table movement-table">
         <div className="sector-table-head sector-move-head"><span>Sector</span><span>Today</span><span>Below 20D high</span><span>Subsectors 3%+ down</span><span>Status</span></div>
-        {sectors.map((row) => <div className="sector-table-row sector-move-row" key={row.symbol}><div><b>{row.label}</b><small>{row.symbol}</small></div><strong className={numeric(row.today, 0) > 0 ? "good-text" : numeric(row.today, 0) < 0 ? "bad-text" : "muted"}>{pct(row.today)}</strong><span>{pct(row.drawdown)}</span><span>{pct(row.damageShare)}</span><span className={row.repairing ? "good-text" : "muted"}>{row.repairing ? "Repairing" : "No broad repair"}</span></div>)}
+        {sectors.map((row) => <div className="sector-table-row sector-move-row" key={row.symbol}><div><b>{row.label}</b><small>{row.symbol}</small></div><strong className={numeric(row.today, 0) > 0 ? "good-text" : numeric(row.today, 0) < 0 ? "bad-text" : "muted"}>{pct(row.today)}</strong><span>{pct(row.drawdown)}</span><span>{levelPct(row.damageShare, 0)}</span><span className={row.repairing ? "good-text" : "muted"}>{row.repairing ? "Repairing" : "No broad repair"}</span></div>)}
       </div>
       <div className="notice">Sector 5-day return is not currently published by the validated close snapshot, so it is intentionally not shown rather than inferred.</div>
     </section>
 
-    <section className="card section-card">
-      <div className="section-heading"><div><span className="kicker">ALL SUBSECTORS</span><h2>Subsector Daily Moves &amp; Repair</h2></div><span className="pill">{subsectors.length} tracked</span></div>
-      <p className="section-intro">Today&apos;s movement first, with the 5-day move and recent pullback immediately beside it. Every tracked subsector remains visible.</p>
+    <details className="card section-card">
+      <summary className="section-heading" style={{ cursor: "pointer", listStyle: "none" }}>
+        <div><span className="kicker">ALL SUBSECTORS</span><h2>Subsector Daily Moves &amp; Repair</h2></div>
+        <div className="eyebrow-row"><span className="pill">{subsectors.length} tracked</span><ChevronDown size={18} /></div>
+      </summary>
+      <p className="section-intro">Today&apos;s movement first, with the 5-day move and recent pullback immediately beside it. Expand only when you want the full subsector table.</p>
       <div className="sort-bar" aria-label="Sort subsectors"><span>Sort by</span><SortButton active={subsectorSort === "today"} direction={subsectorDirection} onClick={() => toggleSubsectorSort("today")}>Today</SortButton><SortButton active={subsectorSort === "fiveDay"} direction={subsectorDirection} onClick={() => toggleSubsectorSort("fiveDay")}>5D</SortButton><SortButton active={subsectorSort === "drawdown"} direction={subsectorDirection} onClick={() => toggleSubsectorSort("drawdown")}>Below 20D high</SortButton><SortButton active={subsectorSort === "status"} direction={subsectorDirection} onClick={() => toggleSubsectorSort("status")}>Status</SortButton></div>
       <div className="subsector-head"><span>Subsector</span><span>Today</span><span>5D</span><span>Below 20D high</span><span>Status</span><span></span></div>
       <div className="internal-list">
         {subsectors.map(({ symbol, x, state, today }) => <details key={symbol} className="internal-row movement-row"><summary><div className="name-wrap"><span className="state-dot" data-state={state.dot} /><div><b>{x.label} <span>({symbol})</span></b><small>{sectorNames[x.parent_sector] || x.parent_sector}</small></div></div><div className="movement-metrics"><strong className={numeric(today, 0) > 0 ? "good-text" : numeric(today, 0) < 0 ? "bad-text" : "muted"}>{pct(today)}</strong><span>{pct(x.return_5d)}</span><span>{pct(x.drawdown_20d)}</span><b className={state.cls}>{state.label}</b><ChevronRight size={17} /></div></summary><div className="detail-grid"><span>Today <b>{pct(today)}</b></span><span>5D return <b>{pct(x.return_5d)}</b></span><span>Below 20D high <b>{pct(x.drawdown_20d)}</b></span><span>Below 60D high <b>{pct(x.drawdown_60d)}</b></span><span>vs SPY 20D <b>{pct(x.relative_strength_20d_vs_spy)}</b></span><span>vs {x.parent_sector} 20D <b>{pct(x.relative_strength_20d_vs_parent)}</b></span></div><p className="detail-copy">{x.repairing ? `${x.label} is repairing after a meaningful reset. This is constructive context, not an independent re-entry trigger.` : state.label === "NEUTRAL" ? `${x.label} is not materially damaged on the 20-day measure and is not currently in repair mode.` : `${x.label} remains in a reset or correction. The engine tracks whether this weakness begins to stabilize and broaden into repair.`}</p></details>)}
       </div>
-    </section>
+    </details>
   </>;
 }
