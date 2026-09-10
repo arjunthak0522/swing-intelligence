@@ -1,7 +1,7 @@
 {
   "research_only": true,
   "official_completed_close_signal_modified": false,
-  "generated_at_utc": "2026-09-10T20:27:56.312372+00:00",
+  "generated_at_utc": "2026-09-10T20:37:17.796301+00:00",
   "state": "OVERSOLD",
   "candidate_action": "WAIT_FOR_WASHOUT",
   "semantics": {
@@ -20,7 +20,7 @@
   },
   "values": {
     "market_date": "2026-09-10",
-    "timestamp_et": "2026-09-10T16:27:55.018963-04:00",
+    "timestamp_et": "2026-09-10T16:37:16.220611-04:00",
     "state": "OVERSOLD",
     "candidate_action": "WAIT_FOR_WASHOUT",
     "turn_family_count": 0,
@@ -30,8 +30,8 @@
     "NAMO": -35.52,
     "NYUD": -1100.1117,
     "NAUD": -1407.2154,
-    "nyse_down_up_ratio": 1.7308122555284629,
-    "nasdaq_down_up_ratio": 1.5575798054387717,
+    "nyse_down_up_ratio": 1.730812295771159,
+    "nasdaq_down_up_ratio": 1.5575798288907985,
     "NAADV": 1385.0,
     "NADEC": 3429.0,
     "NASI_RSI": 27.631812407716453,
@@ -45,9 +45,9 @@
     "MMFD_STATE": "OVERSOLD",
     "VVIX_STATE": "ELEVATED",
     "VVIX_PERCENTILE_2Y": 67.4,
-    "SKEW_LIVE_PROXY": 3.366818138122554,
-    "SKEW_LIVE_PROXY_RATIO": 1.263567944855372,
-    "SKEW_DIRECTION": "WIDENING",
+    "SKEW_LIVE_PROXY": 2.856416748046875,
+    "SKEW_LIVE_PROXY_RATIO": 1.2204646975809366,
+    "SKEW_DIRECTION": "NARROWING",
     "SKEW_OFFICIAL_CLOSE": 149.25,
     "SKEW_OFFICIAL_PERCENTILE_2Y": 63.05220883534137
   },
@@ -94,7 +94,7 @@
     },
     "failed_symbol_slots": 0,
     "state": "OVERSOLD",
-    "timestamp_et": "2026-09-10T16:27:56.927068-04:00",
+    "timestamp_et": "2026-09-10T16:37:20.016872-04:00",
     "vendor_crosscheck": null
   },
   "vvix_live": {
@@ -109,50 +109,62 @@
     "state": "ELEVATED",
     "provisional_intraday": true,
     "source": "Yahoo Finance intraday VVIX quote and daily history",
-    "timestamp_et": "2026-09-10T16:27:56.927068-04:00"
+    "timestamp_et": "2026-09-10T16:37:20.016872-04:00"
   },
   "skew_live": {
     "name": "S&P 500 Tail-Risk Pricing",
     "official_symbol": "SKEW",
-    "provisional_intraday": false,
+    "provisional_intraday": true,
     "live_metric": "25-delta SPX put IV minus 25-delta SPX call IV",
-    "live_proxy_vol_points": 3.366818138122554,
-    "live_proxy_ratio": 1.263567944855372,
-    "direction_vs_prior_snapshot": "WIDENING",
-    "spot": 7589.25,
+    "live_proxy_vol_points": 2.856416748046875,
+    "live_proxy_ratio": 1.2204646975809366,
+    "direction_vs_prior_snapshot": "NARROWING",
+    "spot": 7592.2998046875,
     "expiry": "2026-10-09",
     "dte": 29,
-    "risk_free_rate": null,
-    "put_25_delta": null,
-    "call_25_delta": null,
+    "risk_free_rate": 0.03845000028610229,
+    "put_25_delta": {
+      "strike": 7400.0,
+      "iv": 0.15812762046813963,
+      "delta": -0.2525766681273721,
+      "bid": 60.1,
+      "ask": 60.7
+    },
+    "call_25_delta": {
+      "strike": 7800.0,
+      "iv": 0.12956345298767089,
+      "delta": 0.26202753000955925,
+      "bid": 38.2,
+      "ask": 38.9
+    },
     "official_skew_latest_close": 149.25,
     "official_skew_prior_close": 148.86000061035156,
     "official_skew_date": "2026-09-09",
     "official_skew_direction": "WIDENING",
     "official_skew_percentile_2y": 63.05220883534137,
     "official_skew_history_sessions": 498,
-    "source_mode": "FINAL_CLOSE_OFFICIAL_SKEW_WITH_LAST_VALID_INTRADAY_PROXY",
-    "proxy_error": "ValueError: No SPX expiry between 23 and 37 DTE",
-    "source": "Yahoo Finance SPX option chain for live proxy; official SKEW daily close/history. After-close fallback uses official SKEW direction with the last valid intraday proxy for display if the option chain is unavailable.",
-    "timestamp_et": "2026-09-10T16:34:49.741123-04:00"
+    "source_mode": "LIVE_SPX_OPTIONS",
+    "proxy_error": null,
+    "source": "Yahoo Finance SPX option chain for live proxy; official SKEW daily close/history. If the post-close option chain is unavailable, the engine preserves the last valid same-session SPX skew proxy and its direction rather than substituting a stale official-close direction.",
+    "timestamp_et": "2026-09-10T16:43:46.803830-04:00"
   },
   "unified_engine": {
     "engine_version": "REENTRY_UNIFIED_v1",
     "primary_engine": true,
     "oversold_gate": true,
     "fast_family_count": 0,
-    "context_support_count": 0,
+    "context_support_count": 1,
     "context_support": {
       "MMFD_IMPROVING": false,
       "NASI_TURNING_UP": false,
       "VVIX_EASING": false,
-      "SKEW_NARROWING": false
+      "SKEW_NARROWING": true
     },
     "state": "WAIT",
     "decision": "WAIT",
     "logic": "Oversold setup required. GO EARLY when either 2+ fast reversal families turn, or 1 fast family turns with at least 1 independent context turn from MMFD, NASI+, VVIX, or SKEW.",
     "market_phase": "MARKET_CLOSED_FINAL",
-    "timestamp_et": "2026-09-10T16:34:50.337382-04:00",
+    "timestamp_et": "2026-09-10T16:43:48.009181-04:00",
     "market_date": "2026-09-10"
   }
 }
