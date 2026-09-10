@@ -32,6 +32,7 @@ on:
       - 'tests/test_strategy_equity_curve.py'
       - 'tests/test_cash_deployment.py'
       - 'tools/run_autonomous_lab.py'
+      - 'tools/run_cash_deployment.py'
       - '.github/workflows/autonomous-lab.yml'
   workflow_dispatch:
 
@@ -66,6 +67,10 @@ jobs:
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python tools/run_autonomous_lab.py
+      - name: Run Phase 5A cash deployment comparison
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/run_cash_deployment.py
       - name: Upload research evidence
         uses: actions/upload-artifact@v4
         with:
