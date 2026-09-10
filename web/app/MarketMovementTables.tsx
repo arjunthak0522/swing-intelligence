@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { ChevronDown, ChevronRight, Radio } from "lucide-react";
 
 type SubsectorProxy = {
   label: string;
@@ -23,6 +23,25 @@ type Snapshot = {
 };
 
 type LiveSnapshot = { quotes: Record<string, { change_pct: number | null }> };
+
+type WashoutSnapshot = {
+  state?: string;
+  candidate_action?: string;
+  turn_family_count?: number;
+  generated_at_utc?: string;
+  daily_context_state?: string;
+  families?: Record<string, boolean>;
+  values?: {
+    timestamp_et?: string;
+    SPXA20R?: number | null;
+    NYMO?: number | null;
+    NAMO?: number | null;
+    NYUD?: number | null;
+    NAUD?: number | null;
+    nyse_down_up_ratio?: number | null;
+    nasdaq_down_up_ratio?: number | null;
+  };
+};
 
 const sectorNames: Record<string, string> = {
   XLC: "Communication Services", XLY: "Consumer Discretionary", XLP: "Consumer Staples",
@@ -50,6 +69,22 @@ function numeric(value: number | null | undefined, fallback = Number.NEGATIVE_IN
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
 
+function washoutClass(state?: string) {
+  const value = (state || "").toUpperCase();
+  if (value === "WASHOUT") return "good-text";
+  if (value === "WASHOUT_WATCH") return "warn";
+  if (value === "OVERSOLD") return "bad-text";
+  return "muted";
+}
+
+function washoutLabel(state?: string) {
+  const value = (state || "").toUpperCase();
+  if (value === "WASHOUT") return "GO EARLY";
+  if (value === "WASHOUT_WATCH") return "WATCH";
+  if (value === "OVERSOLD") return "WAIT";
+  return value || "UNAVAILABLE";
+}
+
 function SortButton({ active, direction, children, onClick }: { active: boolean; direction: SortDirection; children: ReactNode; onClick: () => void }) {
   return <button type="button" className={`sort-chip${active ? " active" : ""}`} onClick={onClick}>{children}{active ? <ChevronDown size={12} className={direction === "asc" ? "sort-up" : ""} /> : null}</button>;
 }
@@ -59,6 +94,25 @@ export default function MarketMovementTables({ snapshot, live }: { snapshot: Sna
   const [sectorDirection, setSectorDirection] = useState<SortDirection>("desc");
   const [subsectorSort, setSubsectorSort] = useState<SubsectorSort>("today");
   const [subsectorDirection, setSubsectorDirection] = useState<SortDirection>("desc");
+  const [washout, setWashout] = useState<WashoutSnapshot | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        const url = `https://raw.githubusercontent.com/arjunthak0522/swing-intelligence/intraday-signal-research/data/reentry/exhaustion_intraday_current.json?t=${Date.now()}`;
+        const response = await fetch(url, { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        if (active) setWashout(data);
+      } catch {
+        if (active) setWashout(null);
+      }
+    };
+    load();
+    const timer = window.setInterval(load, 60_000);
+    return () => { active = false; window.clearInterval(timer); };
+  }, []);
 
   const toggleSectorSort = (next: SectorSort) => {
     if (next === sectorSort) setSectorDirection((d) => d === "desc" ? "asc" : "desc");
@@ -93,7 +147,31 @@ export default function MarketMovementTables({ snapshot, live }: { snapshot: Sna
     return subsectorDirection === "desc" ? bv - av : av - bv;
   }), [snapshot, live, subsectorSort, subsectorDirection]);
 
+  const washoutTime = washout?.values?.timestamp_et
+    ? new Date(washout.values.timestamp_et).toLocaleTimeString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit", timeZoneName: "short" })
+    : "Awaiting first valid session snapshot";
+  const familyEntries = Object.entries(washout?.families || {});
+
   return <>
+    <section className="card section-card live-card">
+      <div className="section-heading">
+        <div><span className="kicker">INTRADAY WASHOUT · SHADOW TEST</span><h2>Is the selling impulse starting to reverse?</h2></div>
+        <span className={`pill ${washoutClass(washout?.state)}`}>{washoutLabel(washout?.state)}</span>
+      </div>
+      <p className="section-intro">Research signal only. It updates from the live intraday exhaustion study and does not overwrite the official completed-close RE-ENTRY decision.</p>
+      {washout ? <>
+        <div className="live-grid">
+          <div className="live-stat"><small>State</small><strong className={washoutClass(washout.state)}>{washout.state || "-"}</strong><span>{washout.candidate_action || "-"}</span></div>
+          <div className="live-stat"><small>Independent turns</small><strong>{washout.turn_family_count ?? 0}</strong><span>2+ = intraday WASHOUT</span></div>
+          <div className="live-stat"><small>S&amp;P breadth</small><strong>{washout.values?.SPXA20R?.toFixed?.(1) ?? "-"}</strong><span>% above 20D avg</span></div>
+          <div className="live-stat"><small>NYSE down/up volume</small><strong>{washout.values?.nyse_down_up_ratio?.toFixed?.(2) ?? "-"}x</strong><span>Selling pressure</span></div>
+          <div className="live-stat"><small>Nasdaq down/up volume</small><strong>{washout.values?.nasdaq_down_up_ratio?.toFixed?.(2) ?? "-"}x</strong><span>Selling pressure</span></div>
+          <div className="live-stat"><small>Last update</small><strong>{washoutTime}</strong><span>30-minute research snapshots</span></div>
+        </div>
+        <div className="notice"><Radio size={14} /> {familyEntries.length ? familyEntries.map(([name, on]) => `${name.replaceAll("_", " ")}: ${on ? "TURN" : "no turn"}`).join(" · ") : "Awaiting family-level turn data."}</div>
+      </> : <div className="notice">Intraday WASHOUT research feed is temporarily unavailable. The official completed-close signal remains authoritative.</div>}
+    </section>
+
     <section className="card section-card">
       <div className="section-heading"><div><span className="kicker">ALL 11 SECTORS</span><h2>Sector Daily Moves &amp; Repair</h2></div><span className="pill">{sectors.length}/11 loaded</span></div>
       <p className="section-intro">Today&apos;s movement first, with pullback and repair context beside it. The default view ranks the strongest sectors today from top to bottom.</p>
