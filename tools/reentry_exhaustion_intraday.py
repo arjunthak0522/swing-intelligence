@@ -153,7 +153,7 @@ def fetch_nasdaq_daily_breadth(year: int) -> list[dict]:
                 return name
             if kind == "dec" and "decline" in norm:
                 return name
-        raise ValueError(f"Could not resolve Nasdaq {kind} column from fields: {fields}")
+        raise ValueError(f"Could not resolve Nasdaq {kind} column for {year} from fields: {fields}")
 
     date_field = find_field("date")
     adv_field = find_field("adv")
@@ -256,6 +256,8 @@ def calculate_nasi_plus(completed: list[dict], live_adv: float, live_dec: float,
     return {
         "formula_version": "NASI_PLUS_RSI14_RANA_19_39_EMA4_EMA10_v1",
         "provisional_intraday": True,
+        "bootstrap_start_date": series[0]["market_date"] if series else None,
+        "bootstrap_end_date": series[-2]["market_date"] if len(series) > 1 else None,
         "completed_daily_observations": len(series) - 1,
         "live_advances": live_adv,
         "live_declines": live_dec,
@@ -269,7 +271,7 @@ def calculate_nasi_plus(completed: list[dict], live_adv: float, live_dec: float,
         "direction_vs_prior_close": direction,
         "oversold_below_30": finite(current_rsi) and float(current_rsi) < 30,
         "extreme_oversold_below_10": finite(current_rsi) and float(current_rsi) < 10,
-        "historical_source": "Nasdaq Trader daily market files",
+        "historical_source": "Nasdaq Trader daily market file for verified current-year history",
         "intraday_source": "StockCharts Nasdaq advancing/declining issues",
     }
 
@@ -342,11 +344,8 @@ def main() -> None:
     nasi = None
     if finite(naadv) and finite(nadec):
         try:
-            history = []
-            for year in (now.year - 1, now.year):
-                history.extend(fetch_nasdaq_daily_breadth(year))
-            history_by_date = {r["market_date"]: r for r in history}
-            nasi = calculate_nasi_plus(list(history_by_date.values()), float(naadv), float(nadec), market_date)
+            history = fetch_nasdaq_daily_breadth(now.year)
+            nasi = calculate_nasi_plus(history, float(naadv), float(nadec), market_date)
         except Exception as exc:
             errors["NASI_CALC"] = f"{type(exc).__name__}: {exc}"
     else:
@@ -437,7 +436,7 @@ def main() -> None:
         },
         "values": row,
         "nasi_plus": nasi,
-        "source_note": "Intraday breadth from StockCharts delayed quote feed; NASI+ is calculated internally from raw Nasdaq breadth with Nasdaq Trader daily history. Shadow research only; state can change before the close.",
+        "source_note": "Intraday breadth from StockCharts delayed quote feed; NASI+ is calculated internally from raw Nasdaq breadth with verified Nasdaq Trader current-year daily history. Shadow research only; state can change before the close.",
         "errors": errors,
     }
     CURRENT.write_text(json.dumps(payload, indent=2), encoding="utf-8")
