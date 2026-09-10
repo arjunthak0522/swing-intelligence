@@ -42,3 +42,4 @@ jobs:
           git commit -m 'Record unified RE-ENTRY final-close state [skip ci]'
           git pull --rebase origin intraday-signal-research
           git push origin HEAD:intraday-signal-research
+      # rerun after SKEW final-close fallback hardening
