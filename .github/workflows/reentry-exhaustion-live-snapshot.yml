@@ -6,25 +6,43 @@ on:
     branches: [intraday-signal-research]
     paths:
       - 'tools/reentry_exhaustion_live_snapshot.py'
+      - 'tools/reentry_exhaustion_persist.py'
       - '.github/workflows/reentry-exhaustion-live-snapshot.yml'
   schedule:
     - cron: '10 21 * * 1-5'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   snapshot:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: intraday-signal-research
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - name: Capture StockCharts selling exhaustion research snapshot
         run: python tools/reentry_exhaustion_live_snapshot.py | tee reentry-exhaustion-live-snapshot.json
+      - name: Persist completed daily breadth history
+        run: python tools/reentry_exhaustion_persist.py
+      - name: Commit research history when changed
+        run: |
+          if git diff --quiet -- data/reentry/exhaustion_history.csv; then
+            echo "No history change to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/reentry/exhaustion_history.csv
+          git commit -m "Record selling exhaustion breadth snapshot"
+          git push origin HEAD:intraday-signal-research
       - uses: actions/upload-artifact@v4
         with:
           name: reentry-exhaustion-live-snapshot
-          path: reentry-exhaustion-live-snapshot.json
+          path: |
+            reentry-exhaustion-live-snapshot.json
+            data/reentry/exhaustion_history.csv
           retention-days: 30
