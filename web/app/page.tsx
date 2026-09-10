@@ -4,10 +4,12 @@ import {
   getIntradaySnapshot,
   getLatestEpisode,
   getLatestSnapshot,
+  getWashoutSnapshot,
   pct,
   type IntradaySnapshot,
   type ReentryEpisode,
   type ReentrySnapshot,
+  type WashoutSnapshot,
 } from "../lib/reentry";
 
 export const dynamic = "force-dynamic";
@@ -28,12 +30,6 @@ function retailHistoryLabel(value: string) {
   return value;
 }
 
-function levelPct(value?: number | null, digits = 0) {
-  return typeof value === "number" && Number.isFinite(value)
-    ? `${(value * 100).toFixed(digits)}%`
-    : "-";
-}
-
 function StatusPill({ children }: { children: React.ReactNode }) {
   return <span className="pill">{children}</span>;
 }
@@ -50,11 +46,20 @@ function episodeReturn(current?: number | null, entry?: number | null) {
   return pct(current / entry - 1, 2);
 }
 
+function signedNumber(value?: number | null, digits = 1) {
+  if (typeof value !== "number" || !Number.isFinite(value)) return "-";
+  return `${value > 0 ? "+" : ""}${value.toFixed(digits)}`;
+}
+
+function ratio(value?: number | null) {
+  return typeof value === "number" && Number.isFinite(value) ? `${value.toFixed(2)}x` : "-";
+}
+
 function ProductPurpose() {
   return (
     <section className="card purpose-card">
       <span className="kicker">WHAT RE-ENTRY DOES</span>
-      <h1>After a market pullback, should you keep waiting—or put cash back into SPY/QQQ?</h1>
+      <h1>After a market pullback, should you keep waiting or put cash back into SPY/QQQ?</h1>
       <p>This is not a stock picker or trading dashboard. It tells you when waiting after a market pullback may no longer be helping.</p>
     </section>
   );
@@ -111,10 +116,9 @@ function EpisodeSummary({ episode, official, live }: { episode: ReentryEpisode |
   );
 }
 
-function IntradayMonitor({ live, official }: { live: IntradaySnapshot | null; official: ReentrySnapshot }) {
+function IntradayMonitor({ live, washout, official }: { live: IntradaySnapshot | null; washout: WashoutSnapshot | null; official: ReentrySnapshot }) {
   const spy = live?.quotes?.SPY;
   const qqq = live?.quotes?.QQQ;
-  const vix = live?.quotes?.["^VIX"];
   const regularSession = spy?.market_state === "REGULAR";
   const lastBar = spy?.timestamp ? new Date(spy.timestamp) : null;
   const barLabel = lastBar
@@ -125,6 +129,7 @@ function IntradayMonitor({ live, official }: { live: IntradaySnapshot | null; of
     : "Unavailable";
   const periodLabel = regularSession ? "today" : "last session";
   const statusLabel = live ? (regularSession ? live.status : "MARKET CLOSED") : "UNAVAILABLE";
+  const w = washout?.values;
 
   return (
     <section className="card section-card live-card">
@@ -134,7 +139,7 @@ function IntradayMonitor({ live, official }: { live: IntradaySnapshot | null; of
       </div>
       <p className="section-intro">
         {regularSession
-          ? "This layer updates from 5-minute market bars so you can see what is happening now while the official completed-close decision remains in force."
+          ? "Current price action plus the market internals most directly tied to selling exhaustion."
           : "The market is closed, so this panel shows the latest completed intraday session rather than implying prices are moving now."}
         {` It does not replace the official ${formatDate(official.as_of)} close signal.`}
       </p>
@@ -142,12 +147,12 @@ function IntradayMonitor({ live, official }: { live: IntradaySnapshot | null; of
         <div className="live-grid">
           <div className="live-stat"><small>SPY {periodLabel}</small><strong>{pct(spy?.change_pct, 2)}</strong><span>{spy?.price?.toFixed(2) ?? "-"}</span></div>
           <div className="live-stat"><small>QQQ {periodLabel}</small><strong>{pct(qqq?.change_pct, 2)}</strong><span>{qqq?.price?.toFixed(2) ?? "-"}</span></div>
-          <div className="live-stat"><small>VIX {periodLabel}</small><strong>{pct(vix?.change_pct, 2)}</strong><span>{vix?.price?.toFixed(2) ?? "-"}</span></div>
-          <div className="live-stat"><small>Sectors positive</small><strong>{levelPct(live.summary.sectors_positive_share, 0)}</strong><span>11 tracked</span></div>
-          <div className="live-stat"><small>Subsectors positive</small><strong>{levelPct(live.summary.subsectors_positive_share, 0)}</strong><span>30+ tracked</span></div>
-          <div className="live-stat"><small>Factors positive</small><strong>{levelPct(live.summary.factors_positive_share, 0)}</strong><span>8 tracked</span></div>
+          <div className="live-stat"><small>NYSE A/D volume</small><strong>{signedNumber(w?.NYUD)}</strong><span>Net breadth-volume pressure</span></div>
+          <div className="live-stat"><small>Nasdaq A/D volume</small><strong>{signedNumber(w?.NAUD)}</strong><span>Net breadth-volume pressure</span></div>
+          <div className="live-stat"><small>NYSE down/up volume</small><strong>{ratio(w?.nyse_down_up_ratio)}</strong><span>Lower means selling is easing</span></div>
+          <div className="live-stat"><small>Nasdaq down/up volume</small><strong>{ratio(w?.nasdaq_down_up_ratio)}</strong><span>Lower means selling is easing</span></div>
         </div>
-        <div className="live-foot"><Radio size={14} /> Latest verified bar {barLabel} · {live.summary.tracked_quotes}/{live.summary.expected_quotes} quotes available · official decision remains <b>{official.signal}</b> until the close engine recalculates.</div>
+        <div className="live-foot"><Radio size={14} /> Latest verified price bar {barLabel} · {live.summary.tracked_quotes}/{live.summary.expected_quotes} quotes available · official decision remains <b>{official.signal}</b> until the close engine recalculates.</div>
       </> : <div className="notice"><CircleAlert size={16} /> Intraday feed is temporarily unavailable. The official completed-close signal remains authoritative.</div>}
     </section>
   );
@@ -179,17 +184,8 @@ function WhyNow({ s }: { s: ReentrySnapshot }) {
   );
 }
 
-function OutperformanceCard() {
-  return (
-    <section className="card section-card action-card">
-      <div className="section-heading"><div><span className="kicker">HISTORICAL OPPORTUNITY</span><h2>ETF relative-opportunity layer</h2></div><StatusPill>UNDER VALIDATION</StatusPill></div>
-      <p className="section-intro">This section remains visible, but its ETF ranking numbers are temporarily suppressed while the input history is being made point-in-time reproducible.</p>
-    </section>
-  );
-}
-
 export default async function Home() {
-  const [snapshot, intraday, episode] = await Promise.all([getLatestSnapshot(), getIntradaySnapshot(), getLatestEpisode()]);
+  const [snapshot, intraday, episode, washout] = await Promise.all([getLatestSnapshot(), getIntradaySnapshot(), getLatestEpisode(), getWashoutSnapshot()]);
   if (!snapshot) {
     return <main className="shell"><section className="card data-blocked"><CircleAlert /> <div><b>OFFICIAL FEED UNAVAILABLE</b><p>No fallback decision is shown when the canonical close snapshot cannot be loaded.</p></div></section></main>;
   }
@@ -204,9 +200,8 @@ export default async function Home() {
       <EpisodeSummary episode={episode} official={s} live={intraday} />
       <WhyNow s={s} />
       <div className="context-divider"><span className="kicker">WHAT IS HAPPENING TODAY · CONTEXT ONLY</span><p>Live movement helps explain what is happening underneath the official decision. It never replaces the completed-close RE-ENTRY signal.</p></div>
-      <IntradayMonitor live={intraday} official={s} />
+      <IntradayMonitor live={intraday} washout={washout} official={s} />
       <MarketMovementTables snapshot={s} live={intraday} />
-      <OutperformanceCard />
     </>}
     <footer>Official RE-ENTRY decisions use completed-close data. Intraday data is provisional market context only and never overwrites the validated close signal.</footer>
   </main>;
