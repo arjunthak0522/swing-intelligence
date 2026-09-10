@@ -162,6 +162,25 @@ export interface IntradaySnapshot {
   errors: string[];
 }
 
+export interface WashoutSnapshot {
+  state?: string;
+  candidate_action?: string;
+  turn_family_count?: number;
+  generated_at_utc?: string;
+  daily_context_state?: string;
+  families?: Record<string, boolean>;
+  values?: {
+    timestamp_et?: string | null;
+    SPXA20R?: number | null;
+    NYMO?: number | null;
+    NAMO?: number | null;
+    NYUD?: number | null;
+    NAUD?: number | null;
+    nyse_down_up_ratio?: number | null;
+    nasdaq_down_up_ratio?: number | null;
+  };
+}
+
 export const pct = (value?: number | null, digits = 1) =>
   typeof value === "number" && Number.isFinite(value)
     ? `${value >= 0 ? "+" : ""}${(value * 100).toFixed(digits)}%`
@@ -234,6 +253,7 @@ export async function getLatestEpisode(): Promise<ReentryEpisode | null> {
 }
 
 const INTRADAY_URL = "https://gexrdfzxmlnaawzmtlrk.supabase.co/functions/v1/reentry-intraday";
+const WASHOUT_URL = "https://raw.githubusercontent.com/arjunthak0522/swing-intelligence/intraday-signal-research/data/reentry/exhaustion_intraday_current.json";
 
 export async function getIntradaySnapshot(): Promise<IntradaySnapshot | null> {
   try {
@@ -243,6 +263,19 @@ export async function getIntradaySnapshot(): Promise<IntradaySnapshot | null> {
     });
     if (!response.ok) return null;
     return (await response.json()) as IntradaySnapshot;
+  } catch {
+    return null;
+  }
+}
+
+export async function getWashoutSnapshot(): Promise<WashoutSnapshot | null> {
+  try {
+    const response = await fetch(WASHOUT_URL, {
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+    });
+    if (!response.ok) return null;
+    return (await response.json()) as WashoutSnapshot;
   } catch {
     return null;
   }
