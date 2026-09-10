@@ -38,3 +38,4 @@ jobs:
           git add web/lib/reentry.ts
           git commit -m 'Harden unified RE-ENTRY feed with GitHub API fallback [skip ci]'
           git push origin HEAD:main
+      # explicit trigger after feed-unavailable regression
