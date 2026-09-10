@@ -1,9 +1,9 @@
 {
   "research_only": true,
   "official_completed_close_signal_modified": false,
-  "generated_at_utc": "2026-09-10T12:45:15.208267+00:00",
-  "state": "OVERSOLD",
-  "candidate_action": "WAIT_FOR_WASHOUT",
+  "generated_at_utc": "2026-09-10T15:53:08.752521+00:00",
+  "state": "WASHOUT_WATCH",
+  "candidate_action": "WATCH_EARLY_TURN",
   "semantics": {
     "OVERSOLD": "selling remains stretched with no intraday turn",
     "WASHOUT_WATCH": "one independent family has turned",
@@ -11,28 +11,28 @@
     "CONFIRMED": "reserved for later completed-session corroboration; never assigned by this intraday script"
   },
   "daily_context_state": "OVERSOLD",
-  "turn_family_count": 0,
+  "turn_family_count": 1,
   "families": {
     "fast_breadth_turn": false,
     "momentum_turn": false,
-    "net_volume_turn": false,
+    "net_volume_turn": true,
     "down_up_ratio_relief": false
   },
   "values": {
     "market_date": "2026-09-10",
-    "timestamp_et": "2026-09-10T08:45:14.427916-04:00",
-    "state": "OVERSOLD",
-    "candidate_action": "WAIT_FOR_WASHOUT",
-    "turn_family_count": 0,
+    "timestamp_et": "2026-09-10T11:53:07.461265-04:00",
+    "state": "WASHOUT_WATCH",
+    "candidate_action": "WATCH_EARLY_TURN",
+    "turn_family_count": 1,
     "daily_context_state": "OVERSOLD",
-    "SPXA20R": 23.2,
+    "SPXA20R": 19.4,
     "NYMO": -47.79,
     "NAMO": -35.52,
-    "NYUD": -2560.5458,
-    "NAUD": -2131.8773,
-    "nyse_down_up_ratio": 3.2236777452267553,
-    "nasdaq_down_up_ratio": 1.8175311546382458
+    "NYUD": -329.61146799999995,
+    "NAUD": 29.9399820000001,
+    "nyse_down_up_ratio": 1.5587572550816864,
+    "nasdaq_down_up_ratio": 0.9823726191470125
   },
-  "source_note": "StockCharts delayed intraday quote feed. This is a shadow research signal and can change before the close.",
+  "source_note": "StockCharts delayed intraday quote feed. Shadow research only; state can change before the close.",
   "errors": {}
 }
