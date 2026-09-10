@@ -303,11 +303,25 @@ export async function getIntradaySnapshot(): Promise<IntradaySnapshot | null> {
 export async function getWashoutSnapshot(): Promise<WashoutSnapshot | null> {
   try {
     const response = await fetch(WASHOUT_URL, {
-      headers: { Accept: "application/json" },
+      headers: { Accept: "application/json", "User-Agent": "RE-ENTRY-dashboard" },
+      cache: "no-store",
+    });
+    if (response.ok) return (await response.json()) as WashoutSnapshot;
+  } catch {
+    // Fall through to GitHub Contents API.
+  }
+
+  try {
+    const apiUrl = "https://api.github.com/repos/arjunthak0522/swing-intelligence/contents/data/reentry/exhaustion_intraday_current.json?ref=intraday-signal-research";
+    const response = await fetch(apiUrl, {
+      headers: { Accept: "application/vnd.github+json", "User-Agent": "RE-ENTRY-dashboard" },
       cache: "no-store",
     });
     if (!response.ok) return null;
-    return (await response.json()) as WashoutSnapshot;
+    const body = await response.json() as { content?: string; encoding?: string };
+    if (!body.content || body.encoding !== "base64") return null;
+    const raw = Buffer.from(body.content.replace(/\n/g, ""), "base64").toString("utf-8");
+    return JSON.parse(raw) as WashoutSnapshot;
   } catch {
     return null;
   }
