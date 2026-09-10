@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   description: "Know when waiting stops helping."
 };
 
+// The unified dashboard owns decision freshness and market-phase labeling.
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
