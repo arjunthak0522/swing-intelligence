@@ -65,29 +65,25 @@ function ProductPurpose() {
   );
 }
 
-function Hero({ s }: { s: ReentrySnapshot }) {
-  const closer = s.signal === "WAIT" && ["DEVELOPING", "MEANINGFUL", "BROAD"].includes(s.internal_reset);
-  const displaySignal = s.signal === "WAIT" ? "WAIT FOR NEW ENTRY" : s.signal;
+function UnifiedHero({ washout }: { washout: WashoutSnapshot }) {
+  const u = washout.unified_engine;
+  const phase = u?.market_phase || "UNAVAILABLE";
+  const decision = u?.decision || u?.state || "UNAVAILABLE";
+  const label = decision === "GO_EARLY" ? "GO EARLY" : decision;
+  const phaseLabel = phase === "MARKET_CLOSED_FINAL" ? "MARKET CLOSED · FINAL" : phase === "CLOSE_SETTLING" ? "CLOSE SETTLING" : phase === "LIVE_PROVISIONAL" ? "LIVE · PROVISIONAL" : "UNAVAILABLE";
+  const fast = u?.fast_family_count ?? washout.turn_family_count ?? 0;
+  const context = u?.context_support_count ?? 0;
+  const explanation = decision === "GO_EARLY"
+    ? `Oversold conditions are present and reversal evidence has reached the early re-entry threshold: ${fast} fast turn${fast === 1 ? "" : "s"} plus ${context} context turn${context === 1 ? "" : "s"}.`
+    : decision === "WATCH"
+      ? `The market is washed out and some reversal evidence is appearing, but the unified threshold is not fully triggered yet.`
+      : `The market may be weak or oversold, but there is not enough reversal evidence yet.`;
   return (
     <section className="hero card">
-      <div className="eyebrow-row">
-        <span className="eyebrow">OFFICIAL RE-ENTRY DECISION</span>
-        <span className="freshness"><Clock3 size={14} /> {formatDate(s.as_of)} completed close</span>
-      </div>
+      <div className="eyebrow-row"><span className="eyebrow">RE-ENTRY DECISION</span><span className="freshness"><Clock3 size={14} /> {phaseLabel}</span></div>
       <div className="hero-grid">
-        <div>
-          <div className={`signal ${stateClass(s.signal)}`}>{displaySignal}</div>
-          <div className="signal-subline">{closer ? "A prior entry already occurred. Wait for a new setup before deploying additional cash." : s.signal_interpretation}</div>
-        </div>
-        <div className="decision-summary">
-          <span className="summary-label">BOTTOM LINE</span>
-          <p>{s.signal_interpretation}</p>
-          <div className="decision-tags">
-            <span><small>Pullback</small><b>{s.market_damage}</b></span>
-            <span><small>Selling</small><b>{s.selling_pressure}</b></span>
-            <span><small>Similar past markets</small><b>{retailHistoryLabel(s.analog_decision)}</b></span>
-          </div>
-        </div>
+        <div><div className={`signal ${stateClass(decision)}`}>{label}</div><div className="signal-subline">{explanation}</div></div>
+        <div className="decision-summary"><span className="summary-label">ONE ENGINE</span><p>Same indicators and same decision rule during the session and after the close. Only the data status changes from provisional to final.</p><div className="decision-tags"><span><small>Oversold setup</small><b>{u?.oversold_gate ? "YES" : "NO"}</b></span><span><small>Fast turns</small><b>{fast}/4</b></span><span><small>Context turns</small><b>{context}/4</b></span></div></div>
       </div>
     </section>
   );
@@ -116,7 +112,7 @@ function EpisodeSummary({ episode, official, live }: { episode: ReentryEpisode |
   );
 }
 
-function IntradayMonitor({ live, washout, official }: { live: IntradaySnapshot | null; washout: WashoutSnapshot | null; official: ReentrySnapshot }) {
+function IntradayMonitor({ live, washout }: { live: IntradaySnapshot | null; washout: WashoutSnapshot | null }) {
   const spy = live?.quotes?.SPY;
   const qqq = live?.quotes?.QQQ;
   const regularSession = spy?.market_state === "REGULAR";
@@ -141,7 +137,7 @@ function IntradayMonitor({ live, washout, official }: { live: IntradaySnapshot |
         {regularSession
           ? "Current price action plus the market internals most directly tied to selling exhaustion."
           : "The market is closed, so this panel shows the latest completed intraday session rather than implying prices are moving now."}
-        {` It does not replace the official ${formatDate(official.as_of)} close signal.`}
+
       </p>
       {live ? <>
         <div className="live-grid">
@@ -152,7 +148,7 @@ function IntradayMonitor({ live, washout, official }: { live: IntradaySnapshot |
           <div className="live-stat"><small>NYSE down/up volume</small><strong>{ratio(w?.nyse_down_up_ratio)}</strong><span>Lower means selling is easing</span></div>
           <div className="live-stat"><small>Nasdaq down/up volume</small><strong>{ratio(w?.nasdaq_down_up_ratio)}</strong><span>Lower means selling is easing</span></div>
         </div>
-        <div className="live-foot"><Radio size={14} /> Latest verified price bar {barLabel} · {live.summary.tracked_quotes}/{live.summary.expected_quotes} quotes available · official decision remains <b>{official.signal}</b> until the close engine recalculates.</div>
+        <div className="live-foot"><Radio size={14} /> Latest verified price bar {barLabel} · {live.summary.tracked_quotes}/{live.summary.expected_quotes} quotes available.</div>
       </> : <div className="notice"><CircleAlert size={16} /> Intraday feed is temporarily unavailable. The official completed-close signal remains authoritative.</div>}
     </section>
   );
@@ -186,23 +182,17 @@ function WhyNow({ s }: { s: ReentrySnapshot }) {
 
 export default async function Home() {
   const [snapshot, intraday, episode, washout] = await Promise.all([getLatestSnapshot(), getIntradaySnapshot(), getLatestEpisode(), getWashoutSnapshot()]);
-  if (!snapshot) {
-    return <main className="shell"><section className="card data-blocked"><CircleAlert /> <div><b>OFFICIAL FEED UNAVAILABLE</b><p>No fallback decision is shown when the canonical close snapshot cannot be loaded.</p></div></section></main>;
-  }
-  const s = snapshot;
-  const fresh = s.data_freshness?.same_day_complete === true;
+  const unified = washout?.unified_engine;
 
   return <main className="shell">
-    <header className="topbar"><div><span className="brand">RE-ENTRY</span><span className="tagline">Know when waiting stops helping.</span></div><div className="top-status">{fresh ? <><span className="live-dot" /> Official close feed</> : "DATA INCOMPLETE"}</div></header>
-    {!fresh ? <section className="card data-blocked"><CircleAlert /> <div><b>DATA INCOMPLETE</b><p>The current decision is suppressed until every required input resolves to the same completed market session.</p></div></section> : <>
+    <header className="topbar"><div><span className="brand">RE-ENTRY</span><span className="tagline">Know when waiting stops helping.</span></div><div className="top-status">{unified?.market_phase === "MARKET_CLOSED_FINAL" ? "Market closed · final" : unified?.market_phase === "LIVE_PROVISIONAL" ? <><span className="live-dot" /> Live engine</> : "Updating"}</div></header>
+    {!washout || !unified ? <section className="card data-blocked"><CircleAlert /> <div><b>RE-ENTRY FEED UNAVAILABLE</b><p>No fallback decision is shown when the unified engine cannot be loaded.</p></div></section> : <>
       <ProductPurpose />
-      <Hero s={s} />
-      <EpisodeSummary episode={episode} official={s} live={intraday} />
-      <WhyNow s={s} />
-      <div className="context-divider"><span className="kicker">WHAT IS HAPPENING TODAY · CONTEXT ONLY</span><p>Live movement helps explain what is happening underneath the official decision. It never replaces the completed-close RE-ENTRY signal.</p></div>
-      <IntradayMonitor live={intraday} washout={washout} official={s} />
-      <MarketMovementTables snapshot={s} live={intraday} />
+      <UnifiedHero washout={washout} />
+      {snapshot && episode ? <EpisodeSummary episode={episode} official={snapshot} live={intraday} /> : null}
+      <IntradayMonitor live={intraday} washout={washout} />
+      {snapshot ? <MarketMovementTables snapshot={snapshot} live={intraday} /> : null}
     </>}
-    <footer>Official RE-ENTRY decisions use completed-close data. Intraday data is provisional market context only and never overwrites the validated close signal.</footer>
+    <footer>One RE-ENTRY engine. Live/provisional during market hours, final after the close. Historical analog research is supporting evidence only and cannot override the primary decision.</footer>
   </main>;
 }

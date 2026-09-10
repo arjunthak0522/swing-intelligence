@@ -170,14 +170,46 @@ export interface WashoutSnapshot {
   daily_context_state?: string;
   families?: Record<string, boolean>;
   values?: {
+    market_date?: string | null;
     timestamp_et?: string | null;
     SPXA20R?: number | null;
+    MMFD?: number | null;
+    MMFD_STATE?: string | null;
     NYMO?: number | null;
     NAMO?: number | null;
     NYUD?: number | null;
     NAUD?: number | null;
     nyse_down_up_ratio?: number | null;
     nasdaq_down_up_ratio?: number | null;
+    NASI_RSI?: number | null;
+    NASI_EMA4?: number | null;
+    NASI_EMA10?: number | null;
+    NASI_DIRECTION?: string | null;
+    VVIX?: number | null;
+    VVIX_PRIOR_CLOSE?: number | null;
+    VVIX_DIRECTION?: string | null;
+    VVIX_STATE?: string | null;
+    VVIX_PERCENTILE_2Y?: number | null;
+    SKEW_LIVE_PROXY?: number | null;
+    SKEW_LIVE_PROXY_RATIO?: number | null;
+    SKEW_DIRECTION?: string | null;
+    SKEW_OFFICIAL_CLOSE?: number | null;
+    SKEW_OFFICIAL_PERCENTILE_2Y?: number | null;
+  };
+  mmfd_live?: { coverage_pct?: number | null };
+  unified_engine?: {
+    engine_version?: string;
+    primary_engine?: boolean;
+    oversold_gate?: boolean;
+    fast_family_count?: number;
+    context_support_count?: number;
+    context_support?: Record<string, boolean>;
+    state?: string;
+    decision?: string;
+    logic?: string;
+    market_phase?: string;
+    timestamp_et?: string;
+    market_date?: string;
   };
 }
 

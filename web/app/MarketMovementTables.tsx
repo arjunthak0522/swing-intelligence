@@ -71,18 +71,19 @@ type WashoutSnapshot = {
     completed_history_sessions?: number;
     state?: string;
   };
-  expanded_shadow?: {
-    research_only?: boolean;
-    rule_version?: string;
-    official_completed_close_signal_modified?: boolean;
+  unified_engine?: {
+    engine_version?: string;
+    primary_engine?: boolean;
     oversold_gate?: boolean;
     fast_family_count?: number;
     context_support_count?: number;
     context_support?: Record<string, boolean>;
     state?: string;
-    candidate_action?: string;
+    decision?: string;
     logic?: string;
+    market_phase?: string;
     timestamp_et?: string;
+    market_date?: string;
   };
 };
 
@@ -161,31 +162,31 @@ function washoutConclusion(state?: string) {
   return "Waiting for a valid regular-session washout observation.";
 }
 
-function expandedClass(state?: string) {
+function unifiedClass(state?: string) {
   const value = (state || "").toUpperCase();
-  if (value === "EARLY_GO") return "good-text";
+  if (value === "GO_EARLY") return "good-text";
   if (value === "WATCH") return "warn";
   if (value === "WAIT") return "bad-text";
   return "muted";
 }
 
-function expandedLabel(state?: string) {
+function unifiedLabel(state?: string) {
   const value = (state || "").toUpperCase();
-  if (value === "EARLY_GO") return "GO EARLY";
+  if (value === "GO_EARLY") return "GO EARLY";
   if (value === "WATCH") return "WATCH";
   if (value === "WAIT") return "WAIT";
   return value || "UNAVAILABLE";
 }
 
-function expandedConclusion(x?: WashoutSnapshot["expanded_shadow"]) {
+function unifiedConclusion(x?: WashoutSnapshot["unified_engine"]) {
   if (!x) return null;
   const fast = x.fast_family_count ?? 0;
   const context = x.context_support_count ?? 0;
-  if ((x.state || "").toUpperCase() === "EARLY_GO") {
+  if ((x.state || "").toUpperCase() === "GO_EARLY") {
     if (fast >= 2) return `GO EARLY: ${fast} fast reversal families have turned.`;
     return `GO EARLY: ${fast} fast reversal family plus ${context} independent context turn${context === 1 ? "" : "s"}.`;
   }
-  if ((x.state || "").toUpperCase() === "WATCH") return `WATCH: ${fast} fast reversal families and ${context} context turns are supportive, but the expanded rule is not fully triggered.`;
+  if ((x.state || "").toUpperCase() === "WATCH") return `WATCH: ${fast} fast reversal families and ${context} context turns are supportive, but the unified rule is not fully triggered.`;
   return "WAIT: the market may be oversold, but the expanded reversal evidence has not turned enough yet.";
 }
 
@@ -232,30 +233,24 @@ function skewState(percentile?: number | null, direction?: string | null) {
 
 function momentumState(value?: number | null) {
   if (!finite(value)) return { label: "UNAVAILABLE", cls: "muted", note: "Waiting for oscillator data." };
-  if (Number(value) <= -100) return { label: "EXTREME OVERSOLD", cls: "bad-text", note: "Breadth momentum is at an extreme negative reading." };
-  if (Number(value) <= -50) return { label: "OVERSOLD", cls: "bad-text", note: "Breadth momentum is materially negative." };
-  if (Number(value) < 0) return { label: "WEAK", cls: "warn", note: "Momentum is below neutral, but not extreme." };
-  if (Number(value) < 50) return { label: "IMPROVING", cls: "good-text", note: "Breadth momentum is positive." };
-  if (Number(value) < 100) return { label: "STRONG", cls: "good-text", note: "Breadth momentum is strong." };
-  return { label: "EXTREME POSITIVE", cls: "good-text", note: "Breadth momentum is extremely strong." };
+  if (Number(value) <= -100) return { label: "OVERSOLD / EXTREME NEGATIVE", cls: "bad-text", note: "Breadth momentum is below the commonly used -100 oversold area." };
+  if (Number(value) < 0) return { label: "NEGATIVE", cls: "warn", note: "Breadth momentum is below the zero line, but not at the -100 oversold area." };
+  if (Number(value) < 100) return { label: "POSITIVE", cls: "good-text", note: "Breadth momentum is above the zero line." };
+  return { label: "OVERBOUGHT / EXTREME POSITIVE", cls: "good-text", note: "Breadth momentum is above the commonly used +100 extreme-positive area." };
 }
 
 function adVolumeState(value?: number | null) {
   if (!finite(value)) return { label: "UNAVAILABLE", cls: "muted", note: "Waiting for A/D volume data." };
-  if (Number(value) <= -500) return { label: "HEAVY SELLING", cls: "bad-text", note: "Declining volume is dominating." };
-  if (Number(value) < -100) return { label: "SELLING DOMINANT", cls: "bad-text", note: "More volume is flowing through declining issues." };
-  if (Number(value) <= 100) return { label: "NEAR BALANCED", cls: "muted", note: "Advancing and declining volume are close to balanced." };
-  if (Number(value) < 500) return { label: "BUYING DOMINANT", cls: "good-text", note: "Advancing volume has the edge." };
-  return { label: "STRONG BUYING", cls: "good-text", note: "Advancing volume is dominating." };
+  if (Number(value) < 0) return { label: "DECLINING VOLUME LEADS", cls: "bad-text", note: "Net A/D volume is negative. Magnitude is shown without arbitrary fixed cutoffs." };
+  if (Number(value) > 0) return { label: "ADVANCING VOLUME LEADS", cls: "good-text", note: "Net A/D volume is positive. Magnitude is shown without arbitrary fixed cutoffs." };
+  return { label: "BALANCED", cls: "muted", note: "Advancing and declining volume are balanced." };
 }
 
 function ratioState(value?: number | null) {
   if (!finite(value)) return { label: "UNAVAILABLE", cls: "muted", note: "Waiting for down/up volume data." };
-  if (Number(value) >= 3) return { label: "EXTREME SELLING", cls: "bad-text", note: "At least 3x as much down volume as up volume." };
-  if (Number(value) >= 2) return { label: "HEAVY SELLING", cls: "bad-text", note: "At least 2x as much down volume as up volume." };
-  if (Number(value) >= 1.25) return { label: "SELLING DOMINANT", cls: "warn", note: "Down volume still leads." };
-  if (Number(value) >= 0.8) return { label: "BALANCED", cls: "muted", note: "Selling and buying intensity are roughly balanced." };
-  return { label: "RELIEF / BUYING EDGE", cls: "good-text", note: "Up volume is dominating down volume." };
+  if (Number(value) > 1) return { label: "DOWN VOLUME LEADS", cls: "warn", note: `Down volume is ${Math.round((Number(value) - 1) * 100)}% greater than up volume.` };
+  if (Number(value) < 1) return { label: "UP VOLUME LEADS", cls: "good-text", note: `Up volume exceeds down volume; the ratio is ${Number(value).toFixed(2)}x.` };
+  return { label: "BALANCED", cls: "muted", note: "Down and up volume are equal at the 1.00x arithmetic balance point." };
 }
 
 function nasiState(value?: number | null, direction?: string | null) {
@@ -347,12 +342,12 @@ export default function MarketMovementTables({ snapshot, live }: { snapshot: Sna
     : "Awaiting first valid session snapshot";
   const familyEntries = Object.entries(washout?.families || {});
   const w = washout?.values;
-  const expanded = washout?.expanded_shadow;
-  const decisionState = expanded?.state || washout?.state;
-  const decisionLabel = expanded ? expandedLabel(expanded.state) : washoutLabel(washout?.state);
-  const decisionClass = expanded ? expandedClass(expanded.state) : washoutClass(washout?.state);
-  const decisionConclusion = expandedConclusion(expanded) || washoutConclusion(washout?.state);
-  const contextEntries = Object.entries(expanded?.context_support || {});
+  const unified = washout?.unified_engine;
+  const decisionState = unified?.state || washout?.state;
+  const decisionLabel = unified ? unifiedLabel(unified.state) : washoutLabel(washout?.state);
+  const decisionClass = unified ? unifiedClass(unified.state) : washoutClass(washout?.state);
+  const decisionConclusion = unifiedConclusion(unified) || washoutConclusion(washout?.state);
+  const contextEntries = Object.entries(unified?.context_support || {});
   const contextNames: Record<string, string> = { MMFD_IMPROVING: "5-day breadth improving", NASI_TURNING_UP: "Nasdaq breadth turning up", VVIX_EASING: "volatility stress easing", SKEW_NARROWING: "tail-risk skew narrowing" };
   const mmfdCoverage = finite(washout?.mmfd_live?.coverage_pct) ? ` Coverage ${plain(washout?.mmfd_live?.coverage_pct, 1)}%.` : "";
 
@@ -377,25 +372,25 @@ export default function MarketMovementTables({ snapshot, live }: { snapshot: Sna
     `}</style>
     <section className="card section-card live-card">
       <div className="section-heading">
-        <div><span className="kicker">INTRADAY WASHOUT · SHADOW TEST</span><h2>Is the selling impulse starting to reverse?</h2></div>
+        <div><span className="kicker">RE-ENTRY ENGINE</span><h2>Has waiting stopped helping?</h2></div>
         <span className={`pill ${decisionClass}`}>{decisionLabel}</span>
       </div>
-      <p className="section-intro"><b>{decisionConclusion}</b> The live decision now uses the original fast reversal families plus independent confirmation from 5-day breadth, Nasdaq breadth, volatility stress and tail-risk skew. Research only - this never overwrites the official completed-close RE-ENTRY decision.</p>
+      <p className="section-intro"><b>{decisionConclusion}</b> One engine uses the same reversal logic all day. During market hours readings are live/provisional; after the close the final session snapshot remains the decision until the next session.</p>
       {washout ? <>
         <div className="live-grid washout-grid">
-          <MetricStat label="Expanded live RE-ENTRY evidence" value={`${expanded?.fast_family_count ?? washout.turn_family_count ?? 0} fast + ${expanded?.context_support_count ?? 0} context`} state={expanded?.state === "EARLY_GO" ? { label: "GO EARLY", cls: "good-text", note: "Oversold conditions plus enough independent reversal evidence are present." } : expanded?.state === "WATCH" ? { label: "WATCH", cls: "warn", note: "Some reversal evidence is present, but not enough for the expanded early-entry rule." } : { label: "WAIT", cls: "bad-text", note: "Oversold conditions are not yet accompanied by enough reversal evidence." }} reference="GO = 2+ fast turns OR 1 fast turn + 1 independent context turn" marker={position((expanded?.fast_family_count ?? washout.turn_family_count ?? 0) + (expanded?.context_support_count ?? 0), 0, 4)} />
+          <MetricStat label="Unified RE-ENTRY evidence" value={`${unified?.fast_family_count ?? washout.turn_family_count ?? 0} fast + ${unified?.context_support_count ?? 0} context`} state={unified?.state === "GO_EARLY" ? { label: "GO EARLY", cls: "good-text", note: "Oversold conditions plus enough independent reversal evidence are present." } : unified?.state === "WATCH" ? { label: "WATCH", cls: "warn", note: "Some reversal evidence is present, but not enough for the unified early-entry rule." } : { label: "WAIT", cls: "bad-text", note: "Oversold conditions are not yet accompanied by enough reversal evidence." }} reference="GO = 2+ fast turns OR 1 fast turn + 1 independent context turn" marker={position((unified?.fast_family_count ?? washout.turn_family_count ?? 0) + (unified?.context_support_count ?? 0), 0, 4)} />
           <MetricStat label="Original fast reversal families" value={`${washout.turn_family_count ?? 0}/4`} state={(washout.turn_family_count ?? 0) >= 2 ? { label: "EARLY WASHOUT", cls: "good-text", note: "Two or more original fast families have turned." } : (washout.turn_family_count ?? 0) === 1 ? { label: "ONE TURN", cls: "warn", note: "One original fast family has turned." } : { label: "NO TURN YET", cls: "bad-text", note: "No original fast family has turned yet." }} reference="0 none · 1 partial turn · 2+ original early-WASHOUT path" marker={position(washout.turn_family_count ?? 0, 0, 4)} />
           <MetricStat label="S&P 500 above 20-day average (SPXA20R)" value={`${plain(w?.SPXA20R, 1)}%`} state={breadthState(w?.SPXA20R)} reference="<10 extreme · <30 oversold · ~50 neutral · >70 strong" marker={position(w?.SPXA20R, 0, 100)} />
           <MetricStat label="U.S. stocks above 5-day average (MMFD)" value={`${plain(w?.MMFD, 1)}%`} state={mmfdState(w?.MMFD)} reference="<15 extreme · <30 oversold · ~50 neutral · >70 strong · >85 extreme" note={`${mmfdState(w?.MMFD).note}${mmfdCoverage}`} marker={position(w?.MMFD, 0, 100)} />
-          <MetricStat label="NYSE breadth momentum (NYMO)" value={signed(w?.NYMO, 1)} state={momentumState(w?.NYMO)} reference="-100 extreme · -50 oversold · 0 neutral · +50 strong" marker={position(w?.NYMO, -150, 150)} />
-          <MetricStat label="Nasdaq breadth momentum (NAMO)" value={signed(w?.NAMO, 1)} state={momentumState(w?.NAMO)} reference="-100 extreme · -50 oversold · 0 neutral · +50 strong" marker={position(w?.NAMO, -150, 150)} />
+          <MetricStat label="NYSE breadth momentum (NYMO)" value={signed(w?.NYMO, 1)} state={momentumState(w?.NYMO)} reference="<-100 oversold/extreme negative · 0 neutral · >+100 extreme positive" marker={position(w?.NYMO, -150, 150)} />
+          <MetricStat label="Nasdaq breadth momentum (NAMO)" value={signed(w?.NAMO, 1)} state={momentumState(w?.NAMO)} reference="<-100 oversold/extreme negative · 0 neutral · >+100 extreme positive" marker={position(w?.NAMO, -150, 150)} />
           <MetricStat label="Nasdaq breadth summation RSI (NASI+)" value={plain(w?.NASI_RSI, 1)} state={nasiState(w?.NASI_RSI, w?.NASI_DIRECTION)} reference="<10 extreme · <30 oversold · 50 neutral · >70 strong" note={`${nasiState(w?.NASI_RSI, w?.NASI_DIRECTION).note}${finite(w?.NASI_EMA10) ? ` EMA10 ${plain(w?.NASI_EMA10, 1)}.` : ""}`} marker={position(w?.NASI_RSI, 0, 100)} />
           <MetricStat label="Volatility of VIX (VVIX)" value={plain(w?.VVIX, 1)} state={vvixState(w?.VVIX_PERCENTILE_2Y, w?.VVIX_DIRECTION)} reference="2Y percentile: <20 calm · 20-60 normal · 60-80 elevated · 80-95 high · 95+ extreme" note={`${vvixState(w?.VVIX_PERCENTILE_2Y, w?.VVIX_DIRECTION).note}${finite(w?.VVIX_PERCENTILE_2Y) ? ` ${plain(w?.VVIX_PERCENTILE_2Y, 0)}th percentile.` : ""}`} marker={position(w?.VVIX_PERCENTILE_2Y, 0, 100)} />
           <MetricStat label="S&P 500 tail-risk pricing (SKEW)" value={`${signed(w?.SKEW_LIVE_PROXY, 1)} vol pts`} state={skewState(w?.SKEW_OFFICIAL_PERCENTILE_2Y, w?.SKEW_DIRECTION)} reference="Live proxy = 25-delta SPX put IV minus call IV · higher/widening = more downside hedging" note={`${skewState(w?.SKEW_OFFICIAL_PERCENTILE_2Y, w?.SKEW_DIRECTION).note}${finite(w?.SKEW_OFFICIAL_CLOSE) ? ` Official SKEW close ${plain(w?.SKEW_OFFICIAL_CLOSE, 1)}.` : ""}${finite(w?.SKEW_OFFICIAL_PERCENTILE_2Y) ? ` ${plain(w?.SKEW_OFFICIAL_PERCENTILE_2Y, 0)}th percentile over 2Y.` : ""}`} marker={position(w?.SKEW_OFFICIAL_PERCENTILE_2Y, 0, 100)} />
-          <MetricStat label="NYSE advance/decline volume" value={signed(w?.NYUD, 1)} state={adVolumeState(w?.NYUD)} reference="<0 selling leads · 0 balanced · >0 buying leads" marker={position(w?.NYUD, -1000, 1000)} />
-          <MetricStat label="Nasdaq advance/decline volume" value={signed(w?.NAUD, 1)} state={adVolumeState(w?.NAUD)} reference="<0 selling leads · 0 balanced · >0 buying leads" marker={position(w?.NAUD, -1000, 1000)} />
-          <MetricStat label="NYSE down/up volume ratio" value={`${plain(w?.nyse_down_up_ratio, 2)}x`} state={ratioState(w?.nyse_down_up_ratio)} reference="~1 balanced · 1.5 selling · 2 heavy · 3+ extreme" marker={position(w?.nyse_down_up_ratio, 0, 3.5)} />
-          <MetricStat label="Nasdaq down/up volume ratio" value={`${plain(w?.nasdaq_down_up_ratio, 2)}x`} state={ratioState(w?.nasdaq_down_up_ratio)} reference="~1 balanced · 1.5 selling · 2 heavy · 3+ extreme" marker={position(w?.nasdaq_down_up_ratio, 0, 3.5)} />
+          <MetricStat label="NYSE advance/decline volume" value={signed(w?.NYUD, 1)} state={adVolumeState(w?.NYUD)} reference="<0 declining volume leads · 0 balanced · >0 advancing volume leads" marker={null} />
+          <MetricStat label="Nasdaq advance/decline volume" value={signed(w?.NAUD, 1)} state={adVolumeState(w?.NAUD)} reference="<0 declining volume leads · 0 balanced · >0 advancing volume leads" marker={null} />
+          <MetricStat label="NYSE down/up volume ratio" value={`${plain(w?.nyse_down_up_ratio, 2)}x`} state={ratioState(w?.nyse_down_up_ratio)} reference="1.00x = exact arithmetic balance · >1 down volume leads · <1 up volume leads" marker={position(w?.nyse_down_up_ratio, 0, 3.5)} />
+          <MetricStat label="Nasdaq down/up volume ratio" value={`${plain(w?.nasdaq_down_up_ratio, 2)}x`} state={ratioState(w?.nasdaq_down_up_ratio)} reference="1.00x = exact arithmetic balance · >1 down volume leads · <1 up volume leads" marker={position(w?.nasdaq_down_up_ratio, 0, 3.5)} />
         </div>
         <div className="notice"><Radio size={14} /> {familyEntries.length ? familyEntries.map(([name, on]) => `${familyNames[name] || name}: ${on ? "TURN" : "not yet"}`).join(" · ") : "Awaiting family-level turn data."}{contextEntries.length ? ` · Context: ${contextEntries.map(([name, on]) => `${contextNames[name] || name}: ${on ? "SUPPORTIVE" : "not yet"}`).join(" · ")}` : ""} · Snapshot {washoutTime}</div>
       </> : <div className="notice">Intraday WASHOUT research feed is temporarily unavailable. The official completed-close signal remains authoritative.</div>}
