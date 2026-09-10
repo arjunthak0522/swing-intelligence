@@ -8,6 +8,7 @@ from pathlib import Path
 HISTORY = Path("data/reentry/exhaustion_history.csv")
 OUTCOMES = Path("data/reentry/exhaustion_outcomes.csv")
 REPORT = Path("artifacts/selling_exhaustion_reliability/reliability_report.json")
+STATUS = Path("data/reentry/exhaustion_reliability.json")
 
 CORE_FIELDS = (
     "MMFD", "MMTW", "SPXA20R", "SPXA50R", "BPSPX",
@@ -15,9 +16,6 @@ CORE_FIELDS = (
     "NYUPV", "NYDNV", "NAUPV", "NADNV",
 )
 
-# These gates are deliberately conservative. Passing them does not automatically
-# modify the frozen official RE-ENTRY engine. It only makes the research layer
-# eligible for a separate promotion review.
 MIN_PROSPECTIVE_ROWS = 60
 MIN_WASHOUT_ROWS = 20
 MIN_MATURED_10D = 20
@@ -105,10 +103,6 @@ def main() -> None:
         },
     }
 
-    # Promotion is intentionally impossible from one metric. We require data
-    # quality plus a meaningful prospective sample. Performance superiority vs
-    # the frozen RE-ENTRY model is a separate comparison gate and remains false
-    # until enough paired observations exist.
     sample_ready = all(g["pass"] for g in gates.values())
 
     state_metrics = {}
@@ -158,8 +152,11 @@ def main() -> None:
     }
 
     REPORT.parent.mkdir(parents=True, exist_ok=True)
-    REPORT.write_text(json.dumps(report, indent=2), encoding="utf-8")
-    print(json.dumps(report, indent=2))
+    STATUS.parent.mkdir(parents=True, exist_ok=True)
+    payload = json.dumps(report, indent=2)
+    REPORT.write_text(payload, encoding="utf-8")
+    STATUS.write_text(payload, encoding="utf-8")
+    print(payload)
 
 
 if __name__ == "__main__":
