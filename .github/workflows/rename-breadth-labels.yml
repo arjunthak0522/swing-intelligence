@@ -1,5 +1,6 @@
 name: Rename breadth labels
 
+# One-time UI cleanup: plain-English names first, symbols second.
 on:
   push:
     branches: [main]
