@@ -1,0 +1,51 @@
+name: Preserve final SKEW direction correctly
+
+on:
+  push:
+    branches: [intraday-signal-research]
+    paths:
+      - '.github/workflows/fix-final-skew-direction.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: intraday-signal-research
+          fetch-depth: 0
+      - name: Use last two live SPX skew observations when official close is not current
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('tools/reentry_skew_intraday.py')
+          s = p.read_text()
+          old = '''def prior_live_row() -> dict | None:\n    if not HISTORY.exists():\n        return None\n    with HISTORY.open(newline="", encoding="utf-8") as f:\n        rows = list(csv.DictReader(f))\n    for row in reversed(rows):\n        if finite(row.get("put_call_iv_spread_vol_points")):\n            return row\n    return None\n'''
+          new = '''def live_rows() -> list[dict]:\n    if not HISTORY.exists():\n        return []\n    with HISTORY.open(newline="", encoding="utf-8") as f:\n        rows = list(csv.DictReader(f))\n    return [\n        row for row in rows\n        if finite(row.get("put_call_iv_spread_vol_points"))\n        and str(row.get("source_mode") or "") != "FINAL_CLOSE_OFFICIAL_SKEW_WITH_LAST_VALID_INTRADAY_PROXY"\n    ]\n\n\ndef prior_live_row() -> dict | None:\n    rows = live_rows()\n    return rows[-1] if rows else None\n\n\ndef last_live_direction() -> str:\n    rows = live_rows()\n    if len(rows) < 2:\n        return "UNAVAILABLE"\n    latest = float(rows[-1]["put_call_iv_spread_vol_points"])\n    prior = float(rows[-2]["put_call_iv_spread_vol_points"])\n    delta = latest - prior\n    return "WIDENING" if delta > 0.10 else "NARROWING" if delta < -0.10 else "FLAT"\n'''
+          if old not in s:
+              raise SystemExit('prior_live_row block not found')
+          s = s.replace(old, new, 1)
+          old2 = '''            "direction": official["direction_vs_prior_close"],'''
+          new2 = '''            "direction": last_live_direction(),'''
+          if old2 not in s:
+              raise SystemExit('fallback direction line not found')
+          s = s.replace(old2, new2, 1)
+          old3 = '''"source": "Yahoo Finance SPX option chain for live proxy; official SKEW daily close/history. After-close fallback uses official SKEW direction with the last valid intraday proxy for display if the option chain is unavailable.",'''
+          new3 = '''"source": "Yahoo Finance SPX option chain for live proxy; official SKEW daily close/history. If the post-close option chain is unavailable, the engine preserves the last valid same-session SPX skew proxy and its direction rather than substituting a stale official-close direction.",'''
+          if old3 not in s:
+              raise SystemExit('source note not found')
+          s = s.replace(old3, new3, 1)
+          p.write_text(s)
+          PY
+      - name: Syntax check
+        run: python -m py_compile tools/reentry_skew_intraday.py
+      - name: Commit
+        run: |
+          git config user.name 're-entry-engine[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tools/reentry_skew_intraday.py
+          git commit -m 'Preserve last live SKEW turn at final close [skip ci]'
+          git push origin HEAD:intraday-signal-research
