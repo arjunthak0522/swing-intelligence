@@ -27,7 +27,7 @@ def finite(x) -> bool:
         return False
 
 
-def market_is_open(now: datetime) -> bool:
+def refresh_window(now: datetime) -> bool:
     now = now.astimezone(ET)
     if now.weekday() >= 5:
         return False
@@ -120,40 +120,61 @@ def official_skew_close() -> dict:
     close = pd.to_numeric(close, errors="coerce").dropna()
     if close.empty:
         raise ValueError("No official SKEW closes")
-    current = float(close.iloc[-1])
-    pct = 100.0 * float((close <= current).sum()) / float(len(close))
-    return {"value": current, "percentile_2y": pct, "sessions": int(len(close))}
+    dated = close.copy()
+    dated.index = pd.to_datetime(dated.index)
+    current = float(dated.iloc[-1])
+    prior = float(dated.iloc[-2]) if len(dated) >= 2 else None
+    latest_date = pd.Timestamp(dated.index[-1]).date().isoformat()
+    pct = 100.0 * float((dated <= current).sum()) / float(len(dated))
+    direction = "UNAVAILABLE"
+    if finite(prior):
+        delta = current - float(prior)
+        direction = "WIDENING" if delta > 0.10 else "NARROWING" if delta < -0.10 else "FLAT"
+    return {
+        "value": current,
+        "prior_close": prior,
+        "date": latest_date,
+        "direction_vs_prior_close": direction,
+        "percentile_2y": pct,
+        "sessions": int(len(dated)),
+    }
 
 
-def prior_live_proxy() -> float | None:
+def prior_live_row() -> dict | None:
     if not HISTORY.exists():
         return None
     with HISTORY.open(newline="", encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
     for row in reversed(rows):
         if finite(row.get("put_call_iv_spread_vol_points")):
-            return float(row["put_call_iv_spread_vol_points"])
+            return row
     return None
 
 
 def append_history(row: dict) -> None:
     HISTORY.parent.mkdir(parents=True, exist_ok=True)
-    exists = HISTORY.exists()
-    with HISTORY.open("a", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=list(row))
-        if not exists:
+    if not HISTORY.exists():
+        with HISTORY.open("w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=list(row))
             writer.writeheader()
+            writer.writerow(row)
+        return
+    with HISTORY.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        rows = list(reader)
+        fields = reader.fieldnames or []
+    all_fields = list(fields)
+    for key in row:
+        if key not in all_fields:
+            all_fields.append(key)
+    with HISTORY.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=all_fields)
+        writer.writeheader()
+        writer.writerows(rows)
         writer.writerow(row)
 
 
-def main() -> None:
-    now = datetime.now(timezone.utc).astimezone(ET)
-    if not market_is_open(now):
-        print(json.dumps({"status": "SKIPPED_OUTSIDE_REFRESH_WINDOW", "timestamp_et": now.isoformat()}))
-        return
-    if not CURRENT.exists():
-        raise SystemExit(f"Missing {CURRENT}")
-
+def live_proxy(now: datetime) -> dict:
     spx = yf.Ticker("^SPX")
     spot = last_price("^SPX")
     expiry, dte = choose_expiry(spx, now)
@@ -164,39 +185,87 @@ def main() -> None:
     put25 = select_25_delta(chain.puts, spot, t, r, False)
     spread = (put25["iv"] - call25["iv"]) * 100.0
     ratio = put25["iv"] / call25["iv"] if call25["iv"] > 0 else None
-    prior = prior_live_proxy()
+    prior_row = prior_live_row()
+    prior = float(prior_row["put_call_iv_spread_vol_points"]) if prior_row and finite(prior_row.get("put_call_iv_spread_vol_points")) else None
     direction = "UNAVAILABLE"
     if finite(prior):
         delta = spread - float(prior)
         direction = "WIDENING" if delta > 0.10 else "NARROWING" if delta < -0.10 else "FLAT"
-
-    official = official_skew_close()
-    result = {
-        "name": "S&P 500 Tail-Risk Pricing",
-        "official_symbol": "SKEW",
-        "provisional_intraday": True,
-        "live_metric": "25-delta SPX put IV minus 25-delta SPX call IV",
-        "live_proxy_vol_points": spread,
-        "live_proxy_ratio": ratio,
-        "direction_vs_prior_snapshot": direction,
+    return {
+        "spread": spread,
+        "ratio": ratio,
+        "direction": direction,
         "spot": spot,
         "expiry": expiry,
         "dte": dte,
-        "risk_free_rate": r,
-        "put_25_delta": put25,
-        "call_25_delta": call25,
+        "rate": r,
+        "put25": put25,
+        "call25": call25,
+        "source_mode": "LIVE_SPX_OPTIONS",
+    }
+
+
+def main() -> None:
+    now = datetime.now(timezone.utc).astimezone(ET)
+    if not refresh_window(now):
+        print(json.dumps({"status": "SKIPPED_OUTSIDE_REFRESH_WINDOW", "timestamp_et": now.isoformat()}))
+        return
+    if not CURRENT.exists():
+        raise SystemExit(f"Missing {CURRENT}")
+
+    official = official_skew_close()
+    proxy_error = None
+    try:
+        proxy = live_proxy(now)
+    except Exception as exc:
+        proxy_error = f"{type(exc).__name__}: {exc}"
+        prior_row = prior_live_row()
+        if not prior_row:
+            raise
+        proxy = {
+            "spread": float(prior_row["put_call_iv_spread_vol_points"]),
+            "ratio": float(prior_row["put_call_iv_ratio"]) if finite(prior_row.get("put_call_iv_ratio")) else None,
+            "direction": official["direction_vs_prior_close"],
+            "spot": float(prior_row["spot"]) if finite(prior_row.get("spot")) else None,
+            "expiry": prior_row.get("expiry"),
+            "dte": int(float(prior_row["dte"])) if finite(prior_row.get("dte")) else None,
+            "rate": None,
+            "put25": None,
+            "call25": None,
+            "source_mode": "FINAL_CLOSE_OFFICIAL_SKEW_WITH_LAST_VALID_INTRADAY_PROXY",
+        }
+
+    result = {
+        "name": "S&P 500 Tail-Risk Pricing",
+        "official_symbol": "SKEW",
+        "provisional_intraday": proxy["source_mode"] == "LIVE_SPX_OPTIONS",
+        "live_metric": "25-delta SPX put IV minus 25-delta SPX call IV",
+        "live_proxy_vol_points": proxy["spread"],
+        "live_proxy_ratio": proxy["ratio"],
+        "direction_vs_prior_snapshot": proxy["direction"],
+        "spot": proxy["spot"],
+        "expiry": proxy["expiry"],
+        "dte": proxy["dte"],
+        "risk_free_rate": proxy["rate"],
+        "put_25_delta": proxy["put25"],
+        "call_25_delta": proxy["call25"],
         "official_skew_latest_close": official["value"],
+        "official_skew_prior_close": official["prior_close"],
+        "official_skew_date": official["date"],
+        "official_skew_direction": official["direction_vs_prior_close"],
         "official_skew_percentile_2y": official["percentile_2y"],
         "official_skew_history_sessions": official["sessions"],
-        "source": "Yahoo Finance SPX option chain for live proxy; official SKEW daily close/history",
+        "source_mode": proxy["source_mode"],
+        "proxy_error": proxy_error,
+        "source": "Yahoo Finance SPX option chain for live proxy; official SKEW daily close/history. After-close fallback uses official SKEW direction with the last valid intraday proxy for display if the option chain is unavailable.",
         "timestamp_et": now.isoformat(),
     }
 
     payload = json.loads(CURRENT.read_text(encoding="utf-8"))
     values = payload.setdefault("values", {})
-    values["SKEW_LIVE_PROXY"] = spread
-    values["SKEW_LIVE_PROXY_RATIO"] = ratio
-    values["SKEW_DIRECTION"] = direction
+    values["SKEW_LIVE_PROXY"] = proxy["spread"]
+    values["SKEW_LIVE_PROXY_RATIO"] = proxy["ratio"]
+    values["SKEW_DIRECTION"] = proxy["direction"]
     values["SKEW_OFFICIAL_CLOSE"] = official["value"]
     values["SKEW_OFFICIAL_PERCENTILE_2Y"] = official["percentile_2y"]
     payload["skew_live"] = result
@@ -204,13 +273,14 @@ def main() -> None:
 
     append_history({
         "timestamp_et": now.isoformat(),
-        "expiry": expiry,
-        "dte": dte,
-        "spot": spot,
-        "put_call_iv_spread_vol_points": spread,
-        "put_call_iv_ratio": ratio,
+        "expiry": proxy["expiry"],
+        "dte": proxy["dte"],
+        "spot": proxy["spot"],
+        "put_call_iv_spread_vol_points": proxy["spread"],
+        "put_call_iv_ratio": proxy["ratio"],
         "official_skew_close": official["value"],
         "official_skew_percentile_2y": official["percentile_2y"],
+        "source_mode": proxy["source_mode"],
     })
     print(json.dumps(result, indent=2))
 
