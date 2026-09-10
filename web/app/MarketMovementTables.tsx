@@ -34,6 +34,8 @@ type WashoutSnapshot = {
   values?: {
     timestamp_et?: string;
     SPXA20R?: number | null;
+    MMFD?: number | null;
+    MMFD_STATE?: string | null;
     NYMO?: number | null;
     NAMO?: number | null;
     NYUD?: number | null;
@@ -44,6 +46,12 @@ type WashoutSnapshot = {
     NASI_EMA4?: number | null;
     NASI_EMA10?: number | null;
     NASI_DIRECTION?: string | null;
+  };
+  mmfd_live?: {
+    universe_size?: number;
+    valid_5d_observations?: number;
+    coverage_pct?: number;
+    above_5dma_count?: number;
   };
 };
 
@@ -129,6 +137,16 @@ function breadthState(value?: number | null) {
   if (Number(value) < 50) return { label: "WEAK", cls: "warn", note: "Below neutral participation." };
   if (Number(value) < 70) return { label: "NORMAL / BROAD", cls: "muted", note: "Breadth is in a normal-to-healthy zone." };
   return { label: "STRONG", cls: "good-text", note: "Broad participation is strong." };
+}
+
+function mmfdState(value?: number | null) {
+  if (!finite(value)) return { label: "UNAVAILABLE", cls: "muted", note: "Waiting for live 5-day breadth calculation." };
+  if (Number(value) < 15) return { label: "EXTREME OVERSOLD", cls: "bad-text", note: "Fewer than 15% of U.S. stocks are above their own 5-day average." };
+  if (Number(value) < 30) return { label: "OVERSOLD", cls: "bad-text", note: "Short-term breadth is broadly washed out." };
+  if (Number(value) < 50) return { label: "WEAK", cls: "warn", note: "Fewer than half of stocks are above their 5-day average." };
+  if (Number(value) <= 70) return { label: "NORMAL", cls: "muted", note: "Short-term participation is around a normal range." };
+  if (Number(value) <= 85) return { label: "STRONG", cls: "good-text", note: "Short-term participation is broadly strong." };
+  return { label: "EXTREME OVERBOUGHT", cls: "good-text", note: "More than 85% of stocks are above their 5-day average." };
 }
 
 function momentumState(value?: number | null) {
@@ -248,6 +266,7 @@ export default function MarketMovementTables({ snapshot, live }: { snapshot: Sna
     : "Awaiting first valid session snapshot";
   const familyEntries = Object.entries(washout?.families || {});
   const w = washout?.values;
+  const mmfdCoverage = finite(washout?.mmfd_live?.coverage_pct) ? ` Coverage ${plain(washout?.mmfd_live?.coverage_pct, 1)}%.` : "";
 
   return <>
     <style>{`
@@ -278,6 +297,7 @@ export default function MarketMovementTables({ snapshot, live }: { snapshot: Sna
         <div className="live-grid washout-grid">
           <MetricStat label="Independent reversal families" value={`${washout.turn_family_count ?? 0}/4`} state={(washout.turn_family_count ?? 0) >= 2 ? { label: "EARLY WASHOUT", cls: "good-text", note: "Two or more independent families have turned." } : (washout.turn_family_count ?? 0) === 1 ? { label: "WATCH", cls: "warn", note: "One family has turned. We need another independent confirmation." } : { label: "NO TURN YET", cls: "bad-text", note: "No independent reversal family has turned yet." }} reference="0 none · 1 watch · 2+ early WASHOUT" marker={position(washout.turn_family_count ?? 0, 0, 4)} />
           <MetricStat label="Fast breadth · SPXA20R" value={`${plain(w?.SPXA20R, 1)}%`} state={breadthState(w?.SPXA20R)} reference="<10 extreme · <30 oversold · ~50 neutral · >70 strong" marker={position(w?.SPXA20R, 0, 100)} />
+          <MetricStat label="Fast breadth · MMFD" value={`${plain(w?.MMFD, 1)}%`} state={mmfdState(w?.MMFD)} reference="<15 extreme · <30 oversold · ~50 neutral · >70 strong · >85 extreme" note={`${mmfdState(w?.MMFD).note}${mmfdCoverage}`} marker={position(w?.MMFD, 0, 100)} />
           <MetricStat label="Momentum · NYMO" value={signed(w?.NYMO, 1)} state={momentumState(w?.NYMO)} reference="-100 extreme · -50 oversold · 0 neutral · +50 strong" marker={position(w?.NYMO, -150, 150)} />
           <MetricStat label="Momentum · NAMO" value={signed(w?.NAMO, 1)} state={momentumState(w?.NAMO)} reference="-100 extreme · -50 oversold · 0 neutral · +50 strong" marker={position(w?.NAMO, -150, 150)} />
           <MetricStat label="NASI+ breadth RSI" value={plain(w?.NASI_RSI, 1)} state={nasiState(w?.NASI_RSI, w?.NASI_DIRECTION)} reference="<10 extreme · <30 oversold · 50 neutral · >70 strong" note={`${nasiState(w?.NASI_RSI, w?.NASI_DIRECTION).note}${finite(w?.NASI_EMA10) ? ` EMA10 ${plain(w?.NASI_EMA10, 1)}.` : ""}`} marker={position(w?.NASI_RSI, 0, 100)} />
