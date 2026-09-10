@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import re
 import time
 from datetime import datetime, timezone
+from html import unescape
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 
@@ -23,6 +25,11 @@ SYMBOLS = {
     "$MMTW": "Percent of stocks above 20-day average",
 }
 
+EODDATA_FALLBACK = {
+    "$MMFD": "https://eoddata.com/stockquote/INDEX/MMFD.htm",
+    "$MMTW": "https://eoddata.com/stockquote/INDEX/MMTW.htm",
+}
+
 
 def fetch_quote(symbol: str) -> dict | None:
     url = f"https://stockcharts.com/quotebrain/quotes?s={quote(symbol)}&f=json&randomNumber={int(time.time()*1000)}"
@@ -41,6 +48,54 @@ def fetch_quote(symbol: str) -> dict | None:
         "zone": (row.get("time") or {}).get("zone"),
         "realtime": row.get("realtime"),
         "cached": row.get("cached"),
+        "source": "StockCharts delayed quotebrain feed",
+    }
+
+
+def fetch_eoddata_fallback(symbol: str) -> dict | None:
+    url = EODDATA_FALLBACK[symbol]
+    req = Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urlopen(req, timeout=20) as resp:  # nosec - fixed EODData endpoint
+        raw = resp.read().decode("utf-8", errors="replace")
+    text = unescape(re.sub(r"<[^>]+>", " ", raw))
+    text = re.sub(r"\s+", " ", text)
+
+    # Prefer the first completed EOD row, not the intraday LAST field.
+    row = re.search(
+        r"RECENT END OF DAY PRICES\s+Date\s+Open\s+High\s+Low\s+Close\s+Volume\s+"
+        r"(\d{2}\s+[A-Za-z]{3}\s+\d{2})\s+"
+        r"([-+]?\d+(?:\.\d+)?)\s+([-+]?\d+(?:\.\d+)?)\s+"
+        r"([-+]?\d+(?:\.\d+)?)\s+([-+]?\d+(?:\.\d+)?)\s+\d+",
+        text,
+        re.IGNORECASE,
+    )
+    if not row:
+        return None
+
+    first_date = row.group(1)
+    first_close = float(row.group(5))
+
+    after = text[row.end():]
+    second = re.search(
+        r"(\d{2}\s+[A-Za-z]{3}\s+\d{2})\s+"
+        r"([-+]?\d+(?:\.\d+)?)\s+([-+]?\d+(?:\.\d+)?)\s+"
+        r"([-+]?\d+(?:\.\d+)?)\s+([-+]?\d+(?:\.\d+)?)\s+\d+",
+        after,
+        re.IGNORECASE,
+    )
+    prev_close = float(second.group(5)) if second else None
+
+    return {
+        "symbol": symbol,
+        "name": SYMBOLS[symbol],
+        "close": first_close,
+        "close_yesterday": prev_close,
+        "as_of": first_date,
+        "zone": "America/New_York",
+        "realtime": False,
+        "cached": None,
+        "source": "EODData free recent EOD page fallback",
+        "source_url": url,
     }
 
 
@@ -51,11 +106,10 @@ def finite(x):
         return False
 
 
-def improved(q: dict | None, higher_is_better: bool = True) -> bool | None:
+def improved(q: dict | None) -> bool | None:
     if not q or not finite(q.get("close")) or not finite(q.get("close_yesterday")):
         return None
-    now, prev = float(q["close"]), float(q["close_yesterday"])
-    return now > prev if higher_is_better else now < prev
+    return float(q["close"]) > float(q["close_yesterday"])
 
 
 def main() -> None:
@@ -64,17 +118,31 @@ def main() -> None:
     for symbol in SYMBOLS:
         try:
             q = fetch_quote(symbol)
+            if q is None and symbol in EODDATA_FALLBACK:
+                q = fetch_eoddata_fallback(symbol)
             quotes[symbol] = q
             if q is None:
-                errors[symbol] = "EMPTY_PAYLOAD"
+                errors[symbol] = "EMPTY_PAYLOAD_ALL_FREE_SOURCES"
         except Exception as exc:
+            # A StockCharts failure should not prevent the known MMFD/MMTW fallback.
+            if symbol in EODDATA_FALLBACK:
+                try:
+                    q = fetch_eoddata_fallback(symbol)
+                    quotes[symbol] = q
+                    if q is None:
+                        errors[symbol] = f"FALLBACK_EMPTY_AFTER_{type(exc).__name__}"
+                    continue
+                except Exception as fallback_exc:
+                    errors[symbol] = f"StockCharts {type(exc).__name__}; EODData {type(fallback_exc).__name__}: {fallback_exc}"
+            else:
+                errors[symbol] = f"{type(exc).__name__}: {exc}"
             quotes[symbol] = None
-            errors[symbol] = f"{type(exc).__name__}: {exc}"
 
     def val(symbol):
         q = quotes.get(symbol)
         return float(q["close"]) if q and finite(q.get("close")) else None
 
+    mmfd, mmtw = val("$MMFD"), val("$MMTW")
     sp20, sp50, bpi = val("$SPXA20R"), val("$SPXA50R"), val("$BPSPX")
     nymo, namo = val("$NYMO"), val("$NAMO")
     nyud, naud = val("$NYUD"), val("$NAUD")
@@ -85,13 +153,20 @@ def main() -> None:
     na_ratio = (nadnv / naupv) if finite(nadnv) and finite(naupv) and naupv > 0 else None
 
     washout_tests = {
+        "mmfd_below_20": mmfd is not None and mmfd <= 20,
+        "mmtw_below_30": mmtw is not None and mmtw <= 30,
         "sp500_20dma_below_30": sp20 is not None and sp20 <= 30,
         "sp500_50dma_below_40": sp50 is not None and sp50 <= 40,
         "bpspx_below_40": bpi is not None and bpi <= 40,
         "nymo_below_minus_100": nymo is not None and nymo <= -100,
         "namo_below_minus_100": namo is not None and namo <= -100,
     }
-    washout_count = sum(bool(v) for v in washout_tests.values())
+    # Count correlated breadth groups conservatively rather than treating all raw tests as votes.
+    fast_breadth = any(washout_tests[k] for k in ("mmfd_below_20", "mmtw_below_30", "sp500_20dma_below_30"))
+    intermediate_breadth = washout_tests["sp500_50dma_below_40"]
+    structural_breadth = washout_tests["bpspx_below_40"]
+    momentum_extreme = washout_tests["nymo_below_minus_100"] or washout_tests["namo_below_minus_100"]
+    washout_family_count = sum((fast_breadth, intermediate_breadth, structural_breadth, momentum_extreme))
 
     pressure_tests = {
         "nyse_net_volume_negative": nyud is not None and nyud < 0,
@@ -102,6 +177,8 @@ def main() -> None:
     pressure_count = sum(bool(v) for v in pressure_tests.values())
 
     turn_tests = {
+        "mmfd_improving": improved(quotes.get("$MMFD")),
+        "mmtw_improving": improved(quotes.get("$MMTW")),
         "sp500_20dma_improving": improved(quotes.get("$SPXA20R")),
         "bpspx_improving": improved(quotes.get("$BPSPX")),
         "nymo_improving": improved(quotes.get("$NYMO")),
@@ -109,19 +186,21 @@ def main() -> None:
         "nyud_improving": improved(quotes.get("$NYUD")),
         "naud_improving": improved(quotes.get("$NAUD")),
     }
-    turn_count = sum(v is True for v in turn_tests.values())
+    # Again group correlated turn signals into families.
+    fast_turn = any(turn_tests[k] is True for k in ("mmfd_improving", "mmtw_improving", "sp500_20dma_improving"))
+    structural_turn = turn_tests["bpspx_improving"] is True
+    momentum_turn = (turn_tests["nymo_improving"] is True) or (turn_tests["namo_improving"] is True)
+    volume_turn = (turn_tests["nyud_improving"] is True) or (turn_tests["naud_improving"] is True)
+    turn_family_count = sum((fast_turn, structural_turn, momentum_turn, volume_turn))
 
-    if washout_count == 0:
+    if washout_family_count == 0:
         state = "NONE"
-    elif pressure_count >= 2 and turn_count == 0:
-        state = "WASHOUT"
-    elif turn_count >= 2:
+    elif turn_family_count >= 3 and pressure_count <= 2:
+        state = "CONFIRMED"
+    elif turn_family_count >= 2:
         state = "DEVELOPING"
     else:
         state = "WASHOUT"
-
-    if washout_count >= 2 and turn_count >= 3 and pressure_count <= 2:
-        state = "CONFIRMED"
 
     payload = {
         "research_only": True,
@@ -133,17 +212,38 @@ def main() -> None:
             "families": ["WASHOUT", "SELLING_PRESSURE", "TURN"],
             "note": "Research classification only. Correlated indicators are grouped into families rather than counted as independent official votes.",
         },
-        "washout": {"count": washout_count, "tests": washout_tests},
+        "washout": {
+            "family_count": washout_family_count,
+            "family_tests": {
+                "fast_breadth": fast_breadth,
+                "intermediate_breadth": intermediate_breadth,
+                "structural_breadth": structural_breadth,
+                "momentum_extreme": momentum_extreme,
+            },
+            "raw_tests": washout_tests,
+        },
         "selling_pressure": {
             "count": pressure_count,
             "tests": pressure_tests,
             "nyse_down_up_volume_ratio": ny_ratio,
             "nasdaq_down_up_volume_ratio": na_ratio,
         },
-        "turn": {"count": turn_count, "tests": turn_tests},
+        "turn": {
+            "family_count": turn_family_count,
+            "family_tests": {
+                "fast_breadth_turn": fast_turn,
+                "structural_turn": structural_turn,
+                "momentum_turn": momentum_turn,
+                "volume_turn": volume_turn,
+            },
+            "raw_tests": turn_tests,
+        },
         "quotes": quotes,
         "missing_or_unavailable": errors,
-        "source": "StockCharts delayed quotebrain feed",
+        "sources": [
+            "StockCharts delayed quotebrain feed",
+            "EODData free recent EOD page fallback for MMFD/MMTW when StockCharts payload is empty",
+        ],
     }
     print(json.dumps(payload, indent=2))
 
