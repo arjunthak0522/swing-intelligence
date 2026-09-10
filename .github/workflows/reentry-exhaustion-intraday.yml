@@ -2,6 +2,10 @@ name: RE-ENTRY Exhaustion Intraday Research
 
 on:
   workflow_dispatch:
+  push:
+    branches: [intraday-signal-research]
+    paths:
+      - '.github/workflows/reentry-exhaustion-intraday.yml'
 
 permissions:
   contents: write
@@ -26,7 +30,7 @@ jobs:
         run: python -m pip install --quiet pandas yfinance
       - name: Capture intraday washout shadow signal
         run: python tools/reentry_exhaustion_intraday.py
-      - name: Calculate provisional live MMFD from US equity universe
+      - name: Calculate provisional live MMFD and VVIX context
         run: python tools/reentry_mmfd_intraday.py
       - name: Persist intraday research state safely
         run: |
