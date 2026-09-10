@@ -1,4 +1,4 @@
-name: RE-ENTRY Exhaustion Intraday Research
+name: RE-ENTRY Unified Engine Manual Refresh
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: reentry-exhaustion-intraday
+  group: reentry-unified-manual
   cancel-in-progress: false
 
 jobs:
@@ -22,34 +22,34 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install intraday research dependencies
+      - name: Install RE-ENTRY dependencies
         run: python -m pip install --quiet pandas yfinance
-      - name: Capture intraday washout shadow signal
+      - name: Capture breadth and fast reversal families
         run: python tools/reentry_exhaustion_intraday.py
-      - name: Calculate provisional live MMFD and VVIX context
+      - name: Calculate MMFD and VVIX
         run: python tools/reentry_mmfd_intraday.py
-      - name: Calculate provisional live SPX downside skew
+      - name: Calculate SPX downside skew
         run: python tools/reentry_skew_intraday.py
-      - name: Calculate expanded less-strict early-go shadow score
-        run: python tools/reentry_expanded_shadow.py
-      - name: Persist intraday research state safely
+      - name: Calculate single RE-ENTRY decision
+        run: python tools/reentry_unified_engine.py
+      - name: Persist unified RE-ENTRY state
         run: |
-          if [ -z "$(git status --porcelain -- data/reentry/exhaustion_intraday_history.csv data/reentry/exhaustion_intraday_current.json data/reentry/skew_intraday_history.csv data/reentry/expanded_shadow_history.csv)" ]; then
-            echo "No intraday research state change"
+          if [ -z "$(git status --porcelain -- data/reentry/exhaustion_intraday_history.csv data/reentry/exhaustion_intraday_current.json data/reentry/skew_intraday_history.csv data/reentry/unified_engine_history.csv)" ]; then
+            echo "No RE-ENTRY state change"
             exit 0
           fi
-          git config user.name "github-actions[bot]"
+          git config user.name "re-entry-engine[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/reentry/exhaustion_intraday_history.csv data/reentry/exhaustion_intraday_current.json data/reentry/skew_intraday_history.csv data/reentry/expanded_shadow_history.csv
-          git commit -m "Record intraday selling exhaustion research state [skip ci]"
+          git add data/reentry/exhaustion_intraday_history.csv data/reentry/exhaustion_intraday_current.json data/reentry/skew_intraday_history.csv data/reentry/unified_engine_history.csv
+          git commit -m "Record unified RE-ENTRY state [skip ci]"
           git pull --rebase origin intraday-signal-research
           git push origin HEAD:intraday-signal-research
       - uses: actions/upload-artifact@v4
         with:
-          name: reentry-exhaustion-intraday
+          name: reentry-unified-engine
           path: |
             data/reentry/exhaustion_intraday_history.csv
             data/reentry/exhaustion_intraday_current.json
             data/reentry/skew_intraday_history.csv
-            data/reentry/expanded_shadow_history.csv
+            data/reentry/unified_engine_history.csv
           retention-days: 30
