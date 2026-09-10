@@ -55,6 +55,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/reentry/exhaustion_history.csv data/reentry/washout_events.csv data/reentry/washout_event_outcomes.csv data/reentry/washout_vs_model.csv data/reentry/exhaustion_outcomes.csv data/reentry/exhaustion_reliability.json
           git commit -m "Record selling exhaustion research state"
+          git pull --rebase origin intraday-signal-research
           git push origin HEAD:intraday-signal-research
       - uses: actions/upload-artifact@v4
         with:
