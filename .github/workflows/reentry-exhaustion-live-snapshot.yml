@@ -1,0 +1,25 @@
+name: RE-ENTRY Exhaustion Live Snapshot
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '10 21 * * 1-5'
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Capture StockCharts selling exhaustion research snapshot
+        run: python tools/reentry_exhaustion_live_snapshot.py | tee reentry-exhaustion-live-snapshot.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reentry-exhaustion-live-snapshot
+          path: reentry-exhaustion-live-snapshot.json
+          retention-days: 30
