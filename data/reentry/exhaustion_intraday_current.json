@@ -43,7 +43,12 @@
     "VVIX": 101.12999725341797,
     "VVIX_STATE": "ELEVATED",
     "VVIX_PERCENTILE_2Y": 61.67664670658683,
-    "VVIX_DIRECTION": "RISING"
+    "VVIX_DIRECTION": "RISING",
+    "SKEW_LIVE_PROXY": 3.1644504718780526,
+    "SKEW_LIVE_PROXY_RATIO": 1.248661434811732,
+    "SKEW_DIRECTION": "UNAVAILABLE",
+    "SKEW_OFFICIAL_CLOSE": 149.25,
+    "SKEW_OFFICIAL_PERCENTILE_2Y": 63.12625250501002
   },
   "nasi_plus": {
     "formula_version": "NASI_PLUS_RSI14_RANA_19_39_EMA4_EMA10_v1",
@@ -104,5 +109,37 @@
     "provisional_intraday": true,
     "source": "Yahoo Finance intraday VVIX quote and daily history",
     "timestamp_et": "2026-09-10T14:39:57.652356-04:00"
+  },
+  "skew_live": {
+    "name": "S&P 500 Tail-Risk Pricing",
+    "official_symbol": "SKEW",
+    "provisional_intraday": true,
+    "live_metric": "25-delta SPX put IV minus 25-delta SPX call IV",
+    "live_proxy_vol_points": 3.1644504718780526,
+    "live_proxy_ratio": 1.248661434811732,
+    "direction_vs_prior_snapshot": "UNAVAILABLE",
+    "spot": 7588.02978515625,
+    "expiry": "2026-10-09",
+    "dte": 29,
+    "risk_free_rate": 0.03845000028610229,
+    "put_25_delta": {
+      "strike": 7400.0,
+      "iv": 0.15890390359878542,
+      "delta": -0.2575858590468041,
+      "bid": 61.9,
+      "ask": 62.3
+    },
+    "call_25_delta": {
+      "strike": 7800.0,
+      "iv": 0.1272593988800049,
+      "delta": 0.25303143159426505,
+      "bid": 36.1,
+      "ask": 36.5
+    },
+    "official_skew_latest_close": 149.25,
+    "official_skew_percentile_2y": 63.12625250501002,
+    "official_skew_history_sessions": 499,
+    "source": "Yahoo Finance SPX option chain for live proxy; official SKEW daily close/history",
+    "timestamp_et": "2026-09-10T15:03:34.898001-04:00"
   }
 }
