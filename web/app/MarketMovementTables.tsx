@@ -49,6 +49,13 @@ const sectorNames: Record<string, string> = {
   XLB: "Materials", XLRE: "Real Estate", XLK: "Technology", XLU: "Utilities",
 };
 
+const familyNames: Record<string, string> = {
+  fast_breadth_turn: "Fast breadth",
+  momentum_turn: "Momentum",
+  net_volume_turn: "A/D volume",
+  down_up_ratio_relief: "Selling intensity",
+};
+
 type SortDirection = "desc" | "asc";
 type SectorSort = "today" | "drawdown" | "status";
 type SubsectorSort = "today" | "fiveDay" | "drawdown" | "status";
@@ -59,6 +66,14 @@ const pct = (value?: number | null, digits = 1) => typeof value === "number" && 
 
 const levelPct = (value?: number | null, digits = 0) => typeof value === "number" && Number.isFinite(value)
   ? `${(value * 100).toFixed(digits)}%`
+  : "-";
+
+const signed = (value?: number | null, digits = 1) => typeof value === "number" && Number.isFinite(value)
+  ? `${value > 0 ? "+" : ""}${value.toFixed(digits)}`
+  : "-";
+
+const plain = (value?: number | null, digits = 1) => typeof value === "number" && Number.isFinite(value)
+  ? value.toFixed(digits)
   : "-";
 
 function subsectorState(x: SubsectorProxy) {
@@ -87,6 +102,14 @@ function washoutLabel(state?: string) {
   if (value === "WASHOUT_WATCH") return "WATCH";
   if (value === "OVERSOLD") return "WAIT";
   return value || "UNAVAILABLE";
+}
+
+function washoutConclusion(state?: string) {
+  const value = (state || "").toUpperCase();
+  if (value === "WASHOUT") return "Two or more independent fast families have turned. The first credible internal reversal is underway.";
+  if (value === "WASHOUT_WATCH") return "An early internal turn is developing, but only one independent family has reversed so far.";
+  if (value === "OVERSOLD") return "Selling remains stretched and is not yet reversing across the fast internal families.";
+  return "Waiting for a valid regular-session washout observation.";
 }
 
 function SortButton({ active, direction, children, onClick }: { active: boolean; direction: SortDirection; children: ReactNode; onClick: () => void }) {
@@ -162,17 +185,19 @@ export default function MarketMovementTables({ snapshot, live }: { snapshot: Sna
         <div><span className="kicker">INTRADAY WASHOUT · SHADOW TEST</span><h2>Is the selling impulse starting to reverse?</h2></div>
         <span className={`pill ${washoutClass(washout?.state)}`}>{washoutLabel(washout?.state)}</span>
       </div>
-      <p className="section-intro">Research signal only. It updates from the live intraday exhaustion study and does not overwrite the official completed-close RE-ENTRY decision.</p>
+      <p className="section-intro"><b>{washoutConclusion(washout?.state)}</b> Research only - this never overwrites the official completed-close RE-ENTRY decision.</p>
       {washout ? <>
         <div className="live-grid">
-          <div className="live-stat"><small>State</small><strong className={washoutClass(washout.state)}>{washout.state || "-"}</strong><span>{washout.candidate_action || "-"}</span></div>
-          <div className="live-stat"><small>Independent turns</small><strong>{washout.turn_family_count ?? 0}</strong><span>2+ = intraday WASHOUT</span></div>
-          <div className="live-stat"><small>S&amp;P breadth</small><strong>{washout.values?.SPXA20R?.toFixed?.(1) ?? "-"}</strong><span>% above 20D avg</span></div>
-          <div className="live-stat"><small>NYSE down/up volume</small><strong>{washout.values?.nyse_down_up_ratio?.toFixed?.(2) ?? "-"}x</strong><span>Selling pressure</span></div>
-          <div className="live-stat"><small>Nasdaq down/up volume</small><strong>{washout.values?.nasdaq_down_up_ratio?.toFixed?.(2) ?? "-"}x</strong><span>Selling pressure</span></div>
-          <div className="live-stat"><small>Last update</small><strong>{washoutTime}</strong><span>30-minute research snapshots</span></div>
+          <div className="live-stat"><small>Independent reversal families</small><strong>{washout.turn_family_count ?? 0}/4</strong><span>2/4 = early WASHOUT</span></div>
+          <div className="live-stat"><small>Fast breadth · SPXA20R</small><strong>{plain(washout.values?.SPXA20R, 1)}%</strong><span>S&amp;P stocks above 20D avg</span></div>
+          <div className="live-stat"><small>Momentum · NYMO</small><strong>{signed(washout.values?.NYMO, 1)}</strong><span>NYSE McClellan oscillator</span></div>
+          <div className="live-stat"><small>Momentum · NAMO</small><strong>{signed(washout.values?.NAMO, 1)}</strong><span>Nasdaq McClellan oscillator</span></div>
+          <div className="live-stat"><small>A/D volume · NYSE</small><strong>{signed(washout.values?.NYUD, 1)}</strong><span>More positive = improving</span></div>
+          <div className="live-stat"><small>A/D volume · Nasdaq</small><strong>{signed(washout.values?.NAUD, 1)}</strong><span>More positive = improving</span></div>
+          <div className="live-stat"><small>Selling intensity · NYSE</small><strong>{plain(washout.values?.nyse_down_up_ratio, 2)}x</strong><span>Down/up volume - lower is relief</span></div>
+          <div className="live-stat"><small>Selling intensity · Nasdaq</small><strong>{plain(washout.values?.nasdaq_down_up_ratio, 2)}x</strong><span>Down/up volume - lower is relief</span></div>
         </div>
-        <div className="notice"><Radio size={14} /> {familyEntries.length ? familyEntries.map(([name, on]) => `${name.replaceAll("_", " ")}: ${on ? "TURN" : "no turn"}`).join(" · ") : "Awaiting family-level turn data."}</div>
+        <div className="notice"><Radio size={14} /> {familyEntries.length ? familyEntries.map(([name, on]) => `${familyNames[name] || name}: ${on ? "TURN" : "not yet"}`).join(" · ") : "Awaiting family-level turn data."} · Snapshot {washoutTime}</div>
       </> : <div className="notice">Intraday WASHOUT research feed is temporarily unavailable. The official completed-close signal remains authoritative.</div>}
     </section>
 
