@@ -36,16 +36,16 @@ jobs:
         run: python tools/reentry_exhaustion_shadow_outcomes.py
       - name: Run selling exhaustion reliability gates
         run: python tools/reentry_exhaustion_reliability_audit.py
-      - name: Commit research history and matured outcomes when changed
+      - name: Commit research history, outcomes, and reliability status when changed
         run: |
-          if [ -z "$(git status --porcelain -- data/reentry/exhaustion_history.csv data/reentry/exhaustion_outcomes.csv)" ]; then
-            echo "No research history or outcome change to commit"
+          if [ -z "$(git status --porcelain -- data/reentry/exhaustion_history.csv data/reentry/exhaustion_outcomes.csv data/reentry/exhaustion_reliability.json)" ]; then
+            echo "No research state change to commit"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/reentry/exhaustion_history.csv data/reentry/exhaustion_outcomes.csv
-          git commit -m "Record selling exhaustion breadth snapshot and outcomes"
+          git add data/reentry/exhaustion_history.csv data/reentry/exhaustion_outcomes.csv data/reentry/exhaustion_reliability.json
+          git commit -m "Record selling exhaustion research state"
           git push origin HEAD:intraday-signal-research
       - uses: actions/upload-artifact@v4
         with:
@@ -54,5 +54,6 @@ jobs:
             reentry-exhaustion-live-snapshot.json
             data/reentry/exhaustion_history.csv
             data/reentry/exhaustion_outcomes.csv
+            data/reentry/exhaustion_reliability.json
             artifacts/selling_exhaustion_reliability/reliability_report.json
           retention-days: 30
