@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import FreshnessStatus from "./FreshnessStatus";
 import "./globals.css";
 import "./retail-overrides.css";
 
@@ -11,10 +10,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>
-        <FreshnessStatus />
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
