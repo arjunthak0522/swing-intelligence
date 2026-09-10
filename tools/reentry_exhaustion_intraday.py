@@ -22,7 +22,7 @@ CURRENT = ROOT / "data/reentry/exhaustion_intraday_current.json"
 SYMBOLS = [
     "$SPXA20R", "$NYMO", "$NAMO", "$NYUD", "$NAUD",
     "$NYUPV", "$NYDNV", "$NAUPV", "$NADNV",
-    "$NAADV", "$NADEC",
+    "$NAADV", "$NADEC", "$VVIX",
 ]
 NASI_RSI_LENGTH = 14
 NASI_EMA_FAST = 4
@@ -338,6 +338,15 @@ def main() -> None:
     nyud, naud = qv("$NYUD"), qv("$NAUD")
     nyupv, nydnv, naupv, nadnv = qv("$NYUPV"), qv("$NYDNV"), qv("$NAUPV"), qv("$NADNV")
     naadv, nadec = qv("$NAADV"), qv("$NADEC")
+    vvix = qv("$VVIX")
+    vvix_prior_close = None
+    vvix_quote = quotes.get("$VVIX")
+    if vvix_quote and finite(vvix_quote.get("close_yesterday")):
+        vvix_prior_close = float(vvix_quote["close_yesterday"])
+    vvix_direction = "UNAVAILABLE"
+    if finite(vvix) and finite(vvix_prior_close):
+        vvix_delta = float(vvix) - float(vvix_prior_close)
+        vvix_direction = "RISING" if vvix_delta > 0.25 else "FALLING" if vvix_delta < -0.25 else "FLAT"
     ny_ratio = nydnv / nyupv if finite(nydnv) and finite(nyupv) and nyupv > 0 else None
     na_ratio = nadnv / naupv if finite(nadnv) and finite(naupv) and naupv > 0 else None
 
@@ -411,6 +420,9 @@ def main() -> None:
         "NASI_EMA4": nasi.get("nasi_ema4") if nasi else None,
         "NASI_EMA10": nasi.get("nasi_ema10") if nasi else None,
         "NASI_DIRECTION": nasi.get("direction_vs_prior_close") if nasi else None,
+        "VVIX": vvix,
+        "VVIX_PRIOR_CLOSE": vvix_prior_close,
+        "VVIX_DIRECTION": vvix_direction,
     }
     append_history(row)
 
@@ -436,7 +448,7 @@ def main() -> None:
         },
         "values": row,
         "nasi_plus": nasi,
-        "source_note": "Intraday breadth from StockCharts delayed quote feed; NASI+ is calculated internally from raw Nasdaq breadth with verified Nasdaq Trader current-year daily history. Shadow research only; state can change before the close.",
+        "source_note": "Intraday breadth and VVIX from StockCharts delayed quote feed; NASI+ is calculated internally from raw Nasdaq breadth with verified Nasdaq Trader current-year daily history. Shadow research only; state can change before the close.",
         "errors": errors,
     }
     CURRENT.write_text(json.dumps(payload, indent=2), encoding="utf-8")
