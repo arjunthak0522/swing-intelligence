@@ -1,7 +1,7 @@
 {
   "classification": "RESEARCH_ONLY_PROSPECTIVE",
   "engine_impact": "NONE",
-  "generated_at": "2026-09-10T22:04:26.037285+00:00",
+  "generated_at": "2026-09-10T22:51:13.630386+00:00",
   "source": "unified_engine_history.csv",
   "purpose": "Measure state instability and persistence using only actually captured REENTRY_UNIFIED_v1 snapshots. No historical states are invented.",
   "unified_history_rows": 2,
