@@ -29,6 +29,18 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Diagnose Nasdaq Trader history transport
+        run: |
+          curl --location --compressed --silent --show-error \
+            --user-agent 'Mozilla/5.0 RE-ENTRY-nasi-research/1.0' \
+            --dump-header /tmp/nasdaq-headers.txt \
+            --output /tmp/daily2026.txt \
+            'https://www.nasdaqtrader.com/dynamic/dailyfiles/daily2026.txt'
+          echo 'BODY_BYTES:' $(wc -c < /tmp/daily2026.txt)
+          echo 'FIRST_LINE:'
+          head -n 1 /tmp/daily2026.txt || true
+          echo 'RESPONSE_HEADERS:'
+          grep -Ei '^(HTTP/|content-type:|content-length:|location:)' /tmp/nasdaq-headers.txt || true
       - name: Capture intraday washout shadow signal
         run: python tools/reentry_exhaustion_intraday.py
       - name: Persist intraday research state safely
