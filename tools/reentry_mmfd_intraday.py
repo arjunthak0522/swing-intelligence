@@ -210,6 +210,68 @@ def classify(value: float) -> str:
     return "EXTREME_OVERBOUGHT"
 
 
+def calculate_vvix(now: datetime) -> dict:
+    intraday = yf.download(
+        tickers="^VVIX",
+        period="1d",
+        interval="5m",
+        auto_adjust=False,
+        progress=False,
+        threads=False,
+        timeout=20,
+    )
+    intraday_close = extract_ticker_closes(intraday, "^VVIX")
+    if intraday_close.empty:
+        raise ValueError("No current VVIX intraday quote")
+    current = float(intraday_close.iloc[-1])
+
+    history = yf.download(
+        tickers="^VVIX",
+        period="2y",
+        interval="1d",
+        auto_adjust=False,
+        progress=False,
+        threads=False,
+        timeout=20,
+    )
+    daily = extract_ticker_closes(history, "^VVIX")
+    if daily.empty:
+        raise ValueError("No VVIX daily history")
+    dated = daily.copy()
+    dated.index = pd.to_datetime(dated.index)
+    completed = dated[dated.index.date < now.date()]
+    if len(completed) < 100:
+        raise ValueError(f"Insufficient VVIX history: {len(completed)} completed sessions")
+    prior_close = float(completed.iloc[-1])
+    percentile = 100.0 * float((completed <= current).sum()) / float(len(completed))
+    delta = current - prior_close
+    direction = "RISING" if delta > 0.25 else "FALLING" if delta < -0.25 else "FLAT"
+    if percentile >= 95:
+        state = "EXTREME_STRESS"
+    elif percentile >= 80:
+        state = "HIGH_STRESS"
+    elif percentile >= 60:
+        state = "ELEVATED"
+    elif percentile >= 20:
+        state = "NORMAL"
+    else:
+        state = "CALM"
+    return {
+        "symbol": "^VVIX",
+        "name": "Volatility of VIX",
+        "value": current,
+        "prior_close": prior_close,
+        "change_points_vs_prior_close": delta,
+        "direction_vs_prior_close": direction,
+        "historical_percentile_2y": percentile,
+        "completed_history_sessions": int(len(completed)),
+        "state": state,
+        "provisional_intraday": True,
+        "source": "Yahoo Finance intraday VVIX quote and daily history",
+        "timestamp_et": now.isoformat(),
+    }
+
+
 def main() -> None:
     now = datetime.now(timezone.utc).astimezone(ET)
     if not market_is_open(now):
@@ -237,8 +299,19 @@ def main() -> None:
     payload.setdefault("values", {})["MMFD"] = value
     payload["values"]["MMFD_STATE"] = result["state"]
     payload["mmfd_live"] = result
+
+    try:
+        vvix = calculate_vvix(now)
+        payload["values"]["VVIX"] = vvix["value"]
+        payload["values"]["VVIX_STATE"] = vvix["state"]
+        payload["values"]["VVIX_PERCENTILE_2Y"] = vvix["historical_percentile_2y"]
+        payload["values"]["VVIX_DIRECTION"] = vvix["direction_vs_prior_close"]
+        payload["vvix_live"] = vvix
+    except Exception as exc:
+        payload["vvix_live"] = {"error": f"{type(exc).__name__}: {exc}", "timestamp_et": now.isoformat()}
+
     CURRENT.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps(result, indent=2))
+    print(json.dumps({"mmfd_live": result, "vvix_live": payload.get("vvix_live")}, indent=2))
 
 
 if __name__ == "__main__":
