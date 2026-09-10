@@ -1,0 +1,24 @@
+name: StockCharts oversold source diagnostic
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [intraday-signal-research]
+    paths:
+      - 'tools/stockcharts_oversold_source_diagnostic.py'
+      - '.github/workflows/stockcharts-oversold-source-diagnostic.yml'
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Query StockCharts delayed breadth symbols
+        run: python tools/stockcharts_oversold_source_diagnostic.py | tee stockcharts-oversold-source-diagnostic.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stockcharts-oversold-source-diagnostic
+          path: stockcharts-oversold-source-diagnostic.json
