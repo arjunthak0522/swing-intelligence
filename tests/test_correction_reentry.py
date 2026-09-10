@@ -15,6 +15,8 @@ def _frame():
         "close": close,
         "rsp_spy_ret_20d": 0.0,
         "iwm_spy_ret_20d": 0.0,
+        "qqq_spy_ret_20d": 0.0,
+        "smh_qqq_ret_20d": 0.0,
         "vix_z_60": 0.0,
         "vix_change_5d": 0.0,
     }, index=idx)
@@ -33,7 +35,20 @@ def test_rolling_correction_detected_without_headline():
     f.loc["2010-04-01":"2010-04-30", "rsp_spy_ret_20d"] = -0.02
     f.loc["2010-04-01":"2010-04-30", "iwm_spy_ret_20d"] = -0.03
     s = correction_state(f, CorrectionReentryConfig())
-    assert s.loc["2010-04-01":"2010-04-30", "rolling"].any()
+    assert s.loc["2010-04-01":"2010-04-30", "rolling_breadth_down"].any()
+
+
+def test_growth_led_rolling_correction_detected_when_broad_market_outperforms():
+    f = _frame()
+    f["close"] = 100.0
+    mask = (f.index >= "2010-05-03") & (f.index <= "2010-05-31")
+    f.loc[mask, "rsp_spy_ret_20d"] = 0.012
+    f.loc[mask, "iwm_spy_ret_20d"] = 0.015
+    f.loc[mask, "qqq_spy_ret_20d"] = -0.02
+    f.loc[mask, "smh_qqq_ret_20d"] = -0.025
+    s = correction_state(f, CorrectionReentryConfig())
+    assert s.loc[mask, "rolling_growth_down"].any()
+    assert (s.loc[mask & s["rolling_growth_down"], "type"] == "rolling_growth_down").all()
 
 
 def test_no_signal_does_not_fabricate_entry(monkeypatch):
