@@ -71,6 +71,19 @@ type WashoutSnapshot = {
     completed_history_sessions?: number;
     state?: string;
   };
+  expanded_shadow?: {
+    research_only?: boolean;
+    rule_version?: string;
+    official_completed_close_signal_modified?: boolean;
+    oversold_gate?: boolean;
+    fast_family_count?: number;
+    context_support_count?: number;
+    context_support?: Record<string, boolean>;
+    state?: string;
+    candidate_action?: string;
+    logic?: string;
+    timestamp_et?: string;
+  };
 };
 
 const sectorNames: Record<string, string> = {
@@ -146,6 +159,34 @@ function washoutConclusion(state?: string) {
   if (value === "WASHOUT_WATCH") return "An early internal turn is developing, but only one independent family has reversed so far.";
   if (value === "OVERSOLD") return "Selling remains stretched and is not yet reversing across the fast internal families.";
   return "Waiting for a valid regular-session washout observation.";
+}
+
+function expandedClass(state?: string) {
+  const value = (state || "").toUpperCase();
+  if (value === "EARLY_GO") return "good-text";
+  if (value === "WATCH") return "warn";
+  if (value === "WAIT") return "bad-text";
+  return "muted";
+}
+
+function expandedLabel(state?: string) {
+  const value = (state || "").toUpperCase();
+  if (value === "EARLY_GO") return "GO EARLY";
+  if (value === "WATCH") return "WATCH";
+  if (value === "WAIT") return "WAIT";
+  return value || "UNAVAILABLE";
+}
+
+function expandedConclusion(x?: WashoutSnapshot["expanded_shadow"]) {
+  if (!x) return null;
+  const fast = x.fast_family_count ?? 0;
+  const context = x.context_support_count ?? 0;
+  if ((x.state || "").toUpperCase() === "EARLY_GO") {
+    if (fast >= 2) return `GO EARLY: ${fast} fast reversal families have turned.`;
+    return `GO EARLY: ${fast} fast reversal family plus ${context} independent context turn${context === 1 ? "" : "s"}.`;
+  }
+  if ((x.state || "").toUpperCase() === "WATCH") return `WATCH: ${fast} fast reversal families and ${context} context turns are supportive, but the expanded rule is not fully triggered.`;
+  return "WAIT: the market may be oversold, but the expanded reversal evidence has not turned enough yet.";
 }
 
 function breadthState(value?: number | null) {
@@ -306,6 +347,13 @@ export default function MarketMovementTables({ snapshot, live }: { snapshot: Sna
     : "Awaiting first valid session snapshot";
   const familyEntries = Object.entries(washout?.families || {});
   const w = washout?.values;
+  const expanded = washout?.expanded_shadow;
+  const decisionState = expanded?.state || washout?.state;
+  const decisionLabel = expanded ? expandedLabel(expanded.state) : washoutLabel(washout?.state);
+  const decisionClass = expanded ? expandedClass(expanded.state) : washoutClass(washout?.state);
+  const decisionConclusion = expandedConclusion(expanded) || washoutConclusion(washout?.state);
+  const contextEntries = Object.entries(expanded?.context_support || {});
+  const contextNames: Record<string, string> = { MMFD_IMPROVING: "5-day breadth improving", NASI_TURNING_UP: "Nasdaq breadth turning up", VVIX_EASING: "volatility stress easing", SKEW_NARROWING: "tail-risk skew narrowing" };
   const mmfdCoverage = finite(washout?.mmfd_live?.coverage_pct) ? ` Coverage ${plain(washout?.mmfd_live?.coverage_pct, 1)}%.` : "";
 
   return <>
@@ -330,12 +378,13 @@ export default function MarketMovementTables({ snapshot, live }: { snapshot: Sna
     <section className="card section-card live-card">
       <div className="section-heading">
         <div><span className="kicker">INTRADAY WASHOUT · SHADOW TEST</span><h2>Is the selling impulse starting to reverse?</h2></div>
-        <span className={`pill ${washoutClass(washout?.state)}`}>{washoutLabel(washout?.state)}</span>
+        <span className={`pill ${decisionClass}`}>{decisionLabel}</span>
       </div>
-      <p className="section-intro"><b>{washoutConclusion(washout?.state)}</b> Every number below is shown against its own reference scale so you can see whether it is normal, weak, oversold, or extreme. Research only - this never overwrites the official completed-close RE-ENTRY decision.</p>
+      <p className="section-intro"><b>{decisionConclusion}</b> The live decision now uses the original fast reversal families plus independent confirmation from 5-day breadth, Nasdaq breadth, volatility stress and tail-risk skew. Research only - this never overwrites the official completed-close RE-ENTRY decision.</p>
       {washout ? <>
         <div className="live-grid washout-grid">
-          <MetricStat label="Independent reversal families" value={`${washout.turn_family_count ?? 0}/4`} state={(washout.turn_family_count ?? 0) >= 2 ? { label: "EARLY WASHOUT", cls: "good-text", note: "Two or more independent families have turned." } : (washout.turn_family_count ?? 0) === 1 ? { label: "WATCH", cls: "warn", note: "One family has turned. We need another independent confirmation." } : { label: "NO TURN YET", cls: "bad-text", note: "No independent reversal family has turned yet." }} reference="0 none · 1 watch · 2+ early WASHOUT" marker={position(washout.turn_family_count ?? 0, 0, 4)} />
+          <MetricStat label="Expanded live RE-ENTRY evidence" value={`${expanded?.fast_family_count ?? washout.turn_family_count ?? 0} fast + ${expanded?.context_support_count ?? 0} context`} state={expanded?.state === "EARLY_GO" ? { label: "GO EARLY", cls: "good-text", note: "Oversold conditions plus enough independent reversal evidence are present." } : expanded?.state === "WATCH" ? { label: "WATCH", cls: "warn", note: "Some reversal evidence is present, but not enough for the expanded early-entry rule." } : { label: "WAIT", cls: "bad-text", note: "Oversold conditions are not yet accompanied by enough reversal evidence." }} reference="GO = 2+ fast turns OR 1 fast turn + 1 independent context turn" marker={position((expanded?.fast_family_count ?? washout.turn_family_count ?? 0) + (expanded?.context_support_count ?? 0), 0, 4)} />
+          <MetricStat label="Original fast reversal families" value={`${washout.turn_family_count ?? 0}/4`} state={(washout.turn_family_count ?? 0) >= 2 ? { label: "EARLY WASHOUT", cls: "good-text", note: "Two or more original fast families have turned." } : (washout.turn_family_count ?? 0) === 1 ? { label: "ONE TURN", cls: "warn", note: "One original fast family has turned." } : { label: "NO TURN YET", cls: "bad-text", note: "No original fast family has turned yet." }} reference="0 none · 1 partial turn · 2+ original early-WASHOUT path" marker={position(washout.turn_family_count ?? 0, 0, 4)} />
           <MetricStat label="S&P 500 above 20-day average (SPXA20R)" value={`${plain(w?.SPXA20R, 1)}%`} state={breadthState(w?.SPXA20R)} reference="<10 extreme · <30 oversold · ~50 neutral · >70 strong" marker={position(w?.SPXA20R, 0, 100)} />
           <MetricStat label="U.S. stocks above 5-day average (MMFD)" value={`${plain(w?.MMFD, 1)}%`} state={mmfdState(w?.MMFD)} reference="<15 extreme · <30 oversold · ~50 neutral · >70 strong · >85 extreme" note={`${mmfdState(w?.MMFD).note}${mmfdCoverage}`} marker={position(w?.MMFD, 0, 100)} />
           <MetricStat label="NYSE breadth momentum (NYMO)" value={signed(w?.NYMO, 1)} state={momentumState(w?.NYMO)} reference="-100 extreme · -50 oversold · 0 neutral · +50 strong" marker={position(w?.NYMO, -150, 150)} />
@@ -348,7 +397,7 @@ export default function MarketMovementTables({ snapshot, live }: { snapshot: Sna
           <MetricStat label="NYSE down/up volume ratio" value={`${plain(w?.nyse_down_up_ratio, 2)}x`} state={ratioState(w?.nyse_down_up_ratio)} reference="~1 balanced · 1.5 selling · 2 heavy · 3+ extreme" marker={position(w?.nyse_down_up_ratio, 0, 3.5)} />
           <MetricStat label="Nasdaq down/up volume ratio" value={`${plain(w?.nasdaq_down_up_ratio, 2)}x`} state={ratioState(w?.nasdaq_down_up_ratio)} reference="~1 balanced · 1.5 selling · 2 heavy · 3+ extreme" marker={position(w?.nasdaq_down_up_ratio, 0, 3.5)} />
         </div>
-        <div className="notice"><Radio size={14} /> {familyEntries.length ? familyEntries.map(([name, on]) => `${familyNames[name] || name}: ${on ? "TURN" : "not yet"}`).join(" · ") : "Awaiting family-level turn data."} · Snapshot {washoutTime}</div>
+        <div className="notice"><Radio size={14} /> {familyEntries.length ? familyEntries.map(([name, on]) => `${familyNames[name] || name}: ${on ? "TURN" : "not yet"}`).join(" · ") : "Awaiting family-level turn data."}{contextEntries.length ? ` · Context: ${contextEntries.map(([name, on]) => `${contextNames[name] || name}: ${on ? "SUPPORTIVE" : "not yet"}`).join(" · ")}` : ""} · Snapshot {washoutTime}</div>
       </> : <div className="notice">Intraday WASHOUT research feed is temporarily unavailable. The official completed-close signal remains authoritative.</div>}
     </section>
 
