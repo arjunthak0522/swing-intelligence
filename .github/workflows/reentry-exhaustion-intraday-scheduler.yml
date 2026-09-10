@@ -17,7 +17,7 @@ concurrency:
 jobs:
   snapshot:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - name: Checkout intraday research branch
         uses: actions/checkout@v4
@@ -30,8 +30,14 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install MMFD research dependencies
+        run: python -m pip install --quiet pandas yfinance
+
       - name: Calculate current intraday breadth and washout state
         run: python tools/reentry_exhaustion_intraday.py
+
+      - name: Calculate provisional live MMFD from US equity universe
+        run: python tools/reentry_mmfd_intraday.py
 
       - name: Persist research output only
         run: |
