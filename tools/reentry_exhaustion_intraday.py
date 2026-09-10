@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import csv
+import io
 import json
 import math
 import time
@@ -17,7 +18,14 @@ DAILY = ROOT / "data/reentry/exhaustion_history.csv"
 HISTORY = ROOT / "data/reentry/exhaustion_intraday_history.csv"
 CURRENT = ROOT / "data/reentry/exhaustion_intraday_current.json"
 
-SYMBOLS = ["$SPXA20R", "$NYMO", "$NAMO", "$NYUD", "$NAUD", "$NYUPV", "$NYDNV", "$NAUPV", "$NADNV"]
+SYMBOLS = [
+    "$SPXA20R", "$NYMO", "$NAMO", "$NYUD", "$NAUD",
+    "$NYUPV", "$NYDNV", "$NAUPV", "$NADNV",
+    "$NAADV", "$NADEC",
+]
+NASI_RSI_LENGTH = 14
+NASI_EMA_FAST = 4
+NASI_EMA_SLOW = 10
 
 
 def finite(x):
@@ -96,6 +104,185 @@ def f(row: dict | None, key: str):
     return float(x) if finite(x) else None
 
 
+def normalize_header(value: str) -> str:
+    return "".join(ch.lower() for ch in (value or "") if ch.isalnum())
+
+
+def parse_date(value: str) -> str | None:
+    value = (value or "").strip()
+    for fmt in ("%m/%d/%Y", "%Y-%m-%d", "%m/%d/%y"):
+        try:
+            return datetime.strptime(value, fmt).date().isoformat()
+        except ValueError:
+            pass
+    return None
+
+
+def fetch_nasdaq_daily_breadth(year: int) -> list[dict]:
+    url = f"https://www.nasdaqtrader.com/dynamic/dailyfiles/daily{year}.csv"
+    req = Request(url, headers={"User-Agent": "Mozilla/5.0 RE-ENTRY-nasi-research/1.0"})
+    with urlopen(req, timeout=30) as resp:  # nosec - fixed Nasdaq Trader endpoint
+        text = resp.read().decode("utf-8-sig", errors="replace")
+
+    reader = csv.DictReader(io.StringIO(text))
+    fields = reader.fieldnames or []
+    normalized = {name: normalize_header(name) for name in fields}
+
+    def find_field(kind: str) -> str:
+        for name, norm in normalized.items():
+            if kind == "date" and (norm == "date" or norm.endswith("tradedate")):
+                return name
+            if kind == "adv" and "nasdaq" in norm and "advance" in norm and "decline" not in norm:
+                return name
+            if kind == "dec" and "nasdaq" in norm and "decline" in norm:
+                return name
+        raise ValueError(f"Could not resolve Nasdaq {kind} column from fields: {fields}")
+
+    date_field = find_field("date")
+    adv_field = find_field("adv")
+    dec_field = find_field("dec")
+    rows = []
+    for row in reader:
+        market_date = parse_date(row.get(date_field, ""))
+        if not market_date:
+            continue
+        try:
+            advances = float(str(row.get(adv_field, "")).replace(",", ""))
+            declines = float(str(row.get(dec_field, "")).replace(",", ""))
+        except ValueError:
+            continue
+        if advances < 0 or declines < 0 or advances + declines <= 0:
+            continue
+        rows.append({"market_date": market_date, "advances": advances, "declines": declines})
+    return rows
+
+
+def ema_step(value: float, previous: float | None, length: int) -> float:
+    if previous is None:
+        return value
+    alpha = 2.0 / (length + 1.0)
+    return previous + alpha * (value - previous)
+
+
+def rsi_wilder(values: list[float], length: int) -> list[float | None]:
+    out: list[float | None] = [None] * len(values)
+    if len(values) <= length:
+        return out
+    changes = [values[i] - values[i - 1] for i in range(1, len(values))]
+    gains = [max(change, 0.0) for change in changes]
+    losses = [max(-change, 0.0) for change in changes]
+    avg_gain = sum(gains[:length]) / length
+    avg_loss = sum(losses[:length]) / length
+
+    def to_rsi(gain: float, loss: float) -> float:
+        if loss == 0:
+            return 100.0 if gain > 0 else 50.0
+        rs = gain / loss
+        return 100.0 - 100.0 / (1.0 + rs)
+
+    out[length] = to_rsi(avg_gain, avg_loss)
+    for i in range(length + 1, len(values)):
+        gain = gains[i - 1]
+        loss = losses[i - 1]
+        avg_gain = ((avg_gain * (length - 1)) + gain) / length
+        avg_loss = ((avg_loss * (length - 1)) + loss) / length
+        out[i] = to_rsi(avg_gain, avg_loss)
+    return out
+
+
+def calculate_nasi_plus(completed: list[dict], live_adv: float, live_dec: float, market_date: str) -> dict:
+    series = [r for r in completed if r["market_date"] < market_date]
+    series.append({"market_date": market_date, "advances": live_adv, "declines": live_dec})
+    series.sort(key=lambda r: r["market_date"])
+
+    ema19 = None
+    ema39 = None
+    summation = 0.0
+    summation_values: list[float] = []
+    calculations = []
+    for item in series:
+        total = item["advances"] + item["declines"]
+        rana = 1000.0 * (item["advances"] - item["declines"]) / total
+        ema19 = ema_step(rana, ema19, 19)
+        ema39 = ema_step(rana, ema39, 39)
+        oscillator = ema19 - ema39
+        summation += oscillator
+        summation_values.append(summation)
+        calculations.append({
+            "market_date": item["market_date"],
+            "ratio_adjusted_net_advances": rana,
+            "mcclellan_oscillator": oscillator,
+            "summation_index": summation,
+        })
+
+    rsi_values = rsi_wilder(summation_values, NASI_RSI_LENGTH)
+    ema4 = None
+    ema10 = None
+    for i, rsi in enumerate(rsi_values):
+        if rsi is None:
+            continue
+        ema4 = ema_step(rsi, ema4, NASI_EMA_FAST)
+        ema10 = ema_step(rsi, ema10, NASI_EMA_SLOW)
+        calculations[i]["nasi_rsi"] = rsi
+        calculations[i]["nasi_ema4"] = ema4
+        calculations[i]["nasi_ema10"] = ema10
+
+    latest = calculations[-1]
+    prior_rsi = next((c.get("nasi_rsi") for c in reversed(calculations[:-1]) if c.get("nasi_rsi") is not None), None)
+    current_rsi = latest.get("nasi_rsi")
+    direction = "UNAVAILABLE"
+    if finite(current_rsi) and finite(prior_rsi):
+        delta = float(current_rsi) - float(prior_rsi)
+        direction = "RISING" if delta > 0.05 else "FALLING" if delta < -0.05 else "FLAT"
+    return {
+        "formula_version": "NASI_PLUS_RSI14_RANA_19_39_EMA4_EMA10_v1",
+        "provisional_intraday": True,
+        "completed_daily_observations": len(series) - 1,
+        "live_advances": live_adv,
+        "live_declines": live_dec,
+        "ratio_adjusted_net_advances": latest["ratio_adjusted_net_advances"],
+        "mcclellan_oscillator": latest["mcclellan_oscillator"],
+        "summation_index": latest["summation_index"],
+        "nasi_rsi": current_rsi,
+        "nasi_ema4": latest.get("nasi_ema4"),
+        "nasi_ema10": latest.get("nasi_ema10"),
+        "prior_completed_rsi": prior_rsi,
+        "direction_vs_prior_close": direction,
+        "oversold_below_30": finite(current_rsi) and float(current_rsi) < 30,
+        "extreme_oversold_below_10": finite(current_rsi) and float(current_rsi) < 10,
+        "historical_source": "Nasdaq Trader daily market files",
+        "intraday_source": "StockCharts Nasdaq advancing/declining issues",
+    }
+
+
+def append_history(row: dict) -> None:
+    HISTORY.parent.mkdir(parents=True, exist_ok=True)
+    if not HISTORY.exists():
+        with HISTORY.open("w", newline="", encoding="utf-8") as fobj:
+            writer = csv.DictWriter(fobj, fieldnames=list(row))
+            writer.writeheader()
+            writer.writerow(row)
+        return
+
+    with HISTORY.open(newline="", encoding="utf-8") as fobj:
+        reader = csv.DictReader(fobj)
+        old_rows = list(reader)
+        old_fields = reader.fieldnames or []
+    fieldnames = list(old_fields)
+    for key in row:
+        if key not in fieldnames:
+            fieldnames.append(key)
+    if fieldnames != old_fields:
+        with HISTORY.open("w", newline="", encoding="utf-8") as fobj:
+            writer = csv.DictWriter(fobj, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(old_rows)
+            writer.writerow(row)
+    else:
+        with HISTORY.open("a", newline="", encoding="utf-8") as fobj:
+            csv.DictWriter(fobj, fieldnames=fieldnames).writerow(row)
+
+
 def main() -> None:
     now = datetime.now(timezone.utc).astimezone(ET)
     if not market_is_open(now):
@@ -129,8 +316,22 @@ def main() -> None:
     sp20, nymo, namo = qv("$SPXA20R"), qv("$NYMO"), qv("$NAMO")
     nyud, naud = qv("$NYUD"), qv("$NAUD")
     nyupv, nydnv, naupv, nadnv = qv("$NYUPV"), qv("$NYDNV"), qv("$NAUPV"), qv("$NADNV")
+    naadv, nadec = qv("$NAADV"), qv("$NADEC")
     ny_ratio = nydnv / nyupv if finite(nydnv) and finite(nyupv) and nyupv > 0 else None
     na_ratio = nadnv / naupv if finite(nadnv) and finite(naupv) and naupv > 0 else None
+
+    nasi = None
+    if finite(naadv) and finite(nadec):
+        try:
+            history = []
+            for year in (now.year - 1, now.year):
+                history.extend(fetch_nasdaq_daily_breadth(year))
+            history_by_date = {r["market_date"]: r for r in history}
+            nasi = calculate_nasi_plus(list(history_by_date.values()), float(naadv), float(nadec), market_date)
+        except Exception as exc:
+            errors["NASI_CALC"] = f"{type(exc).__name__}: {exc}"
+    else:
+        errors["NASI_CALC"] = "Live Nasdaq advances/declines unavailable"
 
     prior_sp20 = f(prior, "SPXA20R")
     prior_nymo, prior_namo = f(prior, "NYMO"), f(prior, "NAMO")
@@ -186,16 +387,14 @@ def main() -> None:
         "NAUD": naud,
         "nyse_down_up_ratio": ny_ratio,
         "nasdaq_down_up_ratio": na_ratio,
+        "NAADV": naadv,
+        "NADEC": nadec,
+        "NASI_RSI": nasi.get("nasi_rsi") if nasi else None,
+        "NASI_EMA4": nasi.get("nasi_ema4") if nasi else None,
+        "NASI_EMA10": nasi.get("nasi_ema10") if nasi else None,
+        "NASI_DIRECTION": nasi.get("direction_vs_prior_close") if nasi else None,
     }
-
-    fieldnames = list(row)
-    HISTORY.parent.mkdir(parents=True, exist_ok=True)
-    exists = HISTORY.exists()
-    with HISTORY.open("a", newline="", encoding="utf-8") as fobj:
-        writer = csv.DictWriter(fobj, fieldnames=fieldnames)
-        if not exists:
-            writer.writeheader()
-        writer.writerow(row)
+    append_history(row)
 
     payload = {
         "research_only": True,
@@ -218,7 +417,8 @@ def main() -> None:
             "down_up_ratio_relief": bool(ratio_relief),
         },
         "values": row,
-        "source_note": "StockCharts delayed intraday quote feed. Shadow research only; state can change before the close.",
+        "nasi_plus": nasi,
+        "source_note": "Intraday breadth from StockCharts delayed quote feed; NASI+ is calculated internally from raw Nasdaq breadth with Nasdaq Trader daily history. Shadow research only; state can change before the close.",
         "errors": errors,
     }
     CURRENT.write_text(json.dumps(payload, indent=2), encoding="utf-8")
