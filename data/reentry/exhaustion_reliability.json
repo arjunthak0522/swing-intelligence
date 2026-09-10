@@ -1,11 +1,40 @@
 {
+  "generated_at_utc": "2026-09-10T11:40:02.552082+00:00",
   "research_only": true,
   "official_signal_modified": false,
   "framework": "SELLING EXHAUSTION",
+  "semantics": {
+    "OVERSOLD": "stretched internals but no turn yet",
+    "WASHOUT": "first internal turn after oversold - early GO candidate",
+    "CONFIRMED": "later corroboration after the early GO candidate"
+  },
+  "architecture": {
+    "oversold": [
+      "MMFD",
+      "MMTW",
+      "SPXA20R",
+      "SPXA50R",
+      "BPSPX",
+      "NYMO",
+      "NAMO"
+    ],
+    "selling_pressure": [
+      "NYUD",
+      "NAUD",
+      "NYUPV/NYDNV",
+      "NAUPV/NADNV"
+    ],
+    "immediate_turn": [
+      "fast breadth recovery",
+      "McClellan recovery",
+      "net-volume recovery"
+    ],
+    "anti_double_counting": "Correlated raw indicators are grouped into families before state classification."
+  },
   "data": {
     "history_rows": 1,
-    "washout_or_stronger_rows": 1,
-    "developing_rows": 0,
+    "oversold_rows": 1,
+    "washout_go_rows": 0,
     "confirmed_rows": 0,
     "core_missing_rate": 0.0,
     "matured_10d_rows": 0,
@@ -22,10 +51,10 @@
       "value": 1,
       "requirement": ">= 60 completed daily snapshots"
     },
-    "washout_sample": {
+    "washout_go_sample": {
       "pass": false,
-      "value": 1,
-      "requirement": ">= 20 washout-or-stronger observations"
+      "value": 0,
+      "requirement": ">= 20 WASHOUT/CONFIRMED early-go observations"
     },
     "matured_10d_sample": {
       "pass": false,
@@ -42,7 +71,162 @@
   "paired_superiority_gate": {
     "pass": false,
     "status": "NOT_YET_EVALUABLE",
-    "requirement": "Paired prospective comparison against the frozen RE-ENTRY date must preserve or improve downside tails while providing useful earlier timing."
+    "requirement": "Compare first WASHOUT date directly with frozen RE-ENTRY date. WASHOUT must arrive earlier often enough to matter without materially worsening false starts or downside tails."
   },
-  "promotion_status": "RESEARCH_ONLY_DO_NOT_PROMOTE"
+  "promotion_status": "RESEARCH_ONLY_DO_NOT_PROMOTE",
+  "state_forward_metrics": {
+    "OVERSOLD": {
+      "rows": 1,
+      "SPY_5D": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "positive_rate": null
+      },
+      "SPY_10D": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "positive_rate": null
+      },
+      "SPY_30D": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "positive_rate": null
+      },
+      "SPY_60D": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "positive_rate": null
+      },
+      "QQQ_5D": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "positive_rate": null
+      },
+      "QQQ_10D": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "positive_rate": null
+      },
+      "QQQ_30D": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "positive_rate": null
+      },
+      "QQQ_60D": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "positive_rate": null
+      }
+    },
+    "WASHOUT": {
+      "rows": 0,
+      "SPY_5D": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "positive_rate": null
+      },
+      "SPY_10D": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "positive_rate": null
+      },
+      "SPY_30D": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "positive_rate": null
+      },
+      "SPY_60D": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "positive_rate": null
+      },
+      "QQQ_5D": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "positive_rate": null
+      },
+      "QQQ_10D": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "positive_rate": null
+      },
+      "QQQ_30D": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "positive_rate": null
+      },
+      "QQQ_60D": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "positive_rate": null
+      }
+    },
+    "CONFIRMED": {
+      "rows": 0,
+      "SPY_5D": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "positive_rate": null
+      },
+      "SPY_10D": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "positive_rate": null
+      },
+      "SPY_30D": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "positive_rate": null
+      },
+      "SPY_60D": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "positive_rate": null
+      },
+      "QQQ_5D": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "positive_rate": null
+      },
+      "QQQ_10D": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "positive_rate": null
+      },
+      "QQQ_30D": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "positive_rate": null
+      },
+      "QQQ_60D": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "positive_rate": null
+      }
+    }
+  }
 }
