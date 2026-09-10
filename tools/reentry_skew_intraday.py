@@ -140,15 +140,31 @@ def official_skew_close() -> dict:
     }
 
 
-def prior_live_row() -> dict | None:
+def live_rows() -> list[dict]:
     if not HISTORY.exists():
-        return None
+        return []
     with HISTORY.open(newline="", encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
-    for row in reversed(rows):
-        if finite(row.get("put_call_iv_spread_vol_points")):
-            return row
-    return None
+    return [
+        row for row in rows
+        if finite(row.get("put_call_iv_spread_vol_points"))
+        and str(row.get("source_mode") or "") != "FINAL_CLOSE_OFFICIAL_SKEW_WITH_LAST_VALID_INTRADAY_PROXY"
+    ]
+
+
+def prior_live_row() -> dict | None:
+    rows = live_rows()
+    return rows[-1] if rows else None
+
+
+def last_live_direction() -> str:
+    rows = live_rows()
+    if len(rows) < 2:
+        return "UNAVAILABLE"
+    latest = float(rows[-1]["put_call_iv_spread_vol_points"])
+    prior = float(rows[-2]["put_call_iv_spread_vol_points"])
+    delta = latest - prior
+    return "WIDENING" if delta > 0.10 else "NARROWING" if delta < -0.10 else "FLAT"
 
 
 def append_history(row: dict) -> None:
@@ -225,7 +241,7 @@ def main() -> None:
         proxy = {
             "spread": float(prior_row["put_call_iv_spread_vol_points"]),
             "ratio": float(prior_row["put_call_iv_ratio"]) if finite(prior_row.get("put_call_iv_ratio")) else None,
-            "direction": official["direction_vs_prior_close"],
+            "direction": last_live_direction(),
             "spot": float(prior_row["spot"]) if finite(prior_row.get("spot")) else None,
             "expiry": prior_row.get("expiry"),
             "dte": int(float(prior_row["dte"])) if finite(prior_row.get("dte")) else None,
@@ -257,7 +273,7 @@ def main() -> None:
         "official_skew_history_sessions": official["sessions"],
         "source_mode": proxy["source_mode"],
         "proxy_error": proxy_error,
-        "source": "Yahoo Finance SPX option chain for live proxy; official SKEW daily close/history. After-close fallback uses official SKEW direction with the last valid intraday proxy for display if the option chain is unavailable.",
+        "source": "Yahoo Finance SPX option chain for live proxy; official SKEW daily close/history. If the post-close option chain is unavailable, the engine preserves the last valid same-session SPX skew proxy and its direction rather than substituting a stale official-close direction.",
         "timestamp_et": now.isoformat(),
     }
 
