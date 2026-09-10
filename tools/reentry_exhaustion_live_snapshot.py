@@ -59,8 +59,6 @@ def fetch_eoddata_fallback(symbol: str) -> dict | None:
         raw = resp.read().decode("utf-8", errors="replace")
     text = unescape(re.sub(r"<[^>]+>", " ", raw))
     text = re.sub(r"\s+", " ", text)
-
-    # Prefer the first completed EOD row, not the intraday LAST field.
     row = re.search(
         r"RECENT END OF DAY PRICES\s+Date\s+Open\s+High\s+Low\s+Close\s+Volume\s+"
         r"(\d{2}\s+[A-Za-z]{3}\s+\d{2})\s+"
@@ -71,10 +69,8 @@ def fetch_eoddata_fallback(symbol: str) -> dict | None:
     )
     if not row:
         return None
-
     first_date = row.group(1)
     first_close = float(row.group(5))
-
     after = text[row.end():]
     second = re.search(
         r"(\d{2}\s+[A-Za-z]{3}\s+\d{2})\s+"
@@ -84,7 +80,6 @@ def fetch_eoddata_fallback(symbol: str) -> dict | None:
         re.IGNORECASE,
     )
     prev_close = float(second.group(5)) if second else None
-
     return {
         "symbol": symbol,
         "name": SYMBOLS[symbol],
@@ -124,7 +119,6 @@ def main() -> None:
             if q is None:
                 errors[symbol] = "EMPTY_PAYLOAD_ALL_FREE_SOURCES"
         except Exception as exc:
-            # A StockCharts failure should not prevent the known MMFD/MMTW fallback.
             if symbol in EODDATA_FALLBACK:
                 try:
                     q = fetch_eoddata_fallback(symbol)
@@ -152,7 +146,7 @@ def main() -> None:
     ny_ratio = (nydnv / nyupv) if finite(nydnv) and finite(nyupv) and nyupv > 0 else None
     na_ratio = (nadnv / naupv) if finite(nadnv) and finite(naupv) and naupv > 0 else None
 
-    washout_tests = {
+    oversold_tests = {
         "mmfd_below_20": mmfd is not None and mmfd <= 20,
         "mmtw_below_30": mmtw is not None and mmtw <= 30,
         "sp500_20dma_below_30": sp20 is not None and sp20 <= 30,
@@ -161,12 +155,11 @@ def main() -> None:
         "nymo_below_minus_100": nymo is not None and nymo <= -100,
         "namo_below_minus_100": namo is not None and namo <= -100,
     }
-    # Count correlated breadth groups conservatively rather than treating all raw tests as votes.
-    fast_breadth = any(washout_tests[k] for k in ("mmfd_below_20", "mmtw_below_30", "sp500_20dma_below_30"))
-    intermediate_breadth = washout_tests["sp500_50dma_below_40"]
-    structural_breadth = washout_tests["bpspx_below_40"]
-    momentum_extreme = washout_tests["nymo_below_minus_100"] or washout_tests["namo_below_minus_100"]
-    washout_family_count = sum((fast_breadth, intermediate_breadth, structural_breadth, momentum_extreme))
+    fast_breadth = any(oversold_tests[k] for k in ("mmfd_below_20", "mmtw_below_30", "sp500_20dma_below_30"))
+    intermediate_breadth = oversold_tests["sp500_50dma_below_40"]
+    structural_breadth = oversold_tests["bpspx_below_40"]
+    momentum_extreme = oversold_tests["nymo_below_minus_100"] or oversold_tests["namo_below_minus_100"]
+    oversold_family_count = sum((fast_breadth, intermediate_breadth, structural_breadth, momentum_extreme))
 
     pressure_tests = {
         "nyse_net_volume_negative": nyud is not None and nyud < 0,
@@ -186,21 +179,29 @@ def main() -> None:
         "nyud_improving": improved(quotes.get("$NYUD")),
         "naud_improving": improved(quotes.get("$NAUD")),
     }
-    # Again group correlated turn signals into families.
     fast_turn = any(turn_tests[k] is True for k in ("mmfd_improving", "mmtw_improving", "sp500_20dma_improving"))
     structural_turn = turn_tests["bpspx_improving"] is True
     momentum_turn = (turn_tests["nymo_improving"] is True) or (turn_tests["namo_improving"] is True)
     volume_turn = (turn_tests["nyud_improving"] is True) or (turn_tests["naud_improving"] is True)
     turn_family_count = sum((fast_turn, structural_turn, momentum_turn, volume_turn))
 
-    if washout_family_count == 0:
+    # Semantics: OVERSOLD means stretched but still falling. WASHOUT is the first
+    # evidence that the selling impulse has started to turn and is therefore the
+    # research candidate for an EARLY GO. CONFIRMED is later corroboration, not a
+    # prerequisite for the early-entry candidate.
+    immediate_turn = fast_turn or momentum_turn or volume_turn
+    if oversold_family_count == 0:
         state = "NONE"
-    elif turn_family_count >= 3 and pressure_count <= 2:
-        state = "CONFIRMED"
+        candidate_action = "WAIT"
+    elif not immediate_turn:
+        state = "OVERSOLD"
+        candidate_action = "WAIT_FOR_WASHOUT"
     elif turn_family_count >= 2:
-        state = "DEVELOPING"
+        state = "CONFIRMED"
+        candidate_action = "GO_EARLY"
     else:
         state = "WASHOUT"
+        candidate_action = "GO_EARLY"
 
     payload = {
         "research_only": True,
@@ -209,18 +210,19 @@ def main() -> None:
         "framework": {
             "name": "SELLING EXHAUSTION",
             "state": state,
-            "families": ["WASHOUT", "SELLING_PRESSURE", "TURN"],
-            "note": "Research classification only. Correlated indicators are grouped into families rather than counted as independent official votes.",
+            "candidate_action": candidate_action,
+            "sequence": ["OVERSOLD", "WASHOUT", "CONFIRMED"],
+            "note": "Research classification only. WASHOUT is the first turn after an oversold condition and is intentionally treated as the early-entry candidate. CONFIRMED is later corroboration, not a requirement to go.",
         },
-        "washout": {
-            "family_count": washout_family_count,
+        "oversold": {
+            "family_count": oversold_family_count,
             "family_tests": {
                 "fast_breadth": fast_breadth,
                 "intermediate_breadth": intermediate_breadth,
                 "structural_breadth": structural_breadth,
                 "momentum_extreme": momentum_extreme,
             },
-            "raw_tests": washout_tests,
+            "raw_tests": oversold_tests,
         },
         "selling_pressure": {
             "count": pressure_count,
@@ -229,6 +231,7 @@ def main() -> None:
             "nasdaq_down_up_volume_ratio": na_ratio,
         },
         "turn": {
+            "immediate_turn": immediate_turn,
             "family_count": turn_family_count,
             "family_tests": {
                 "fast_breadth_turn": fast_turn,
