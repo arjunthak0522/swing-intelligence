@@ -1,15 +1,16 @@
 {
-  "generated_at_utc": "2026-09-10T12:07:47.710758+00:00",
+  "generated_at_utc": "2026-09-10T12:08:25.614877+00:00",
   "research_only": true,
   "official_signal_modified": false,
   "framework": "SELLING EXHAUSTION",
   "semantics": {
-    "OVERSOLD": "stretched internals but no turn yet",
+    "OVERSOLD": "internals stretched but still deteriorating - no GO",
     "WASHOUT": "first internal turn after oversold - early GO candidate",
-    "CONFIRMED": "later corroboration after the early GO candidate"
+    "CONFIRMED": "later corroboration, not required for the early GO"
   },
+  "execution_convention": "completed-close signal at t; hypothetical entry at next completed close t+1; 10 bps round-trip cost",
   "architecture": {
-    "oversold": [
+    "oversold_family": [
       "MMFD",
       "MMTW",
       "SPXA20R",
@@ -18,27 +19,27 @@
       "NYMO",
       "NAMO"
     ],
-    "selling_pressure": [
+    "selling_pressure_family": [
       "NYUD",
       "NAUD",
       "NYUPV/NYDNV",
       "NAUPV/NADNV"
     ],
-    "immediate_turn": [
+    "turn_family": [
       "fast breadth recovery",
       "McClellan recovery",
       "net-volume recovery"
     ],
-    "anti_double_counting": "Correlated raw indicators are grouped into families before state classification."
+    "anti_double_counting": "Correlated indicators are grouped into families before state classification."
   },
   "data": {
-    "history_rows": 1,
-    "oversold_rows": 1,
-    "washout_go_rows": 0,
-    "confirmed_rows": 0,
+    "daily_history_rows": 1,
+    "daily_outcome_rows": 0,
+    "first_washout_events": 0,
+    "first_washout_event_outcomes": 0,
     "core_missing_rate": 0.0,
-    "matured_10d_rows": 0,
-    "matured_30d_rows": 0
+    "matured_event_10d_rows": 0,
+    "matured_event_30d_rows": 0
   },
   "gates": {
     "source_completeness": {
@@ -46,186 +47,93 @@
       "value": 0.0,
       "requirement": "missing core-field rate <= 5%"
     },
-    "prospective_sample": {
+    "prospective_daily_sample": {
       "pass": false,
       "value": 1,
       "requirement": ">= 60 completed daily snapshots"
     },
-    "washout_go_sample": {
+    "first_washout_event_sample": {
       "pass": false,
       "value": 0,
-      "requirement": ">= 20 WASHOUT/CONFIRMED early-go observations"
+      "requirement": ">= 20 independent first-WASHOUT GO events"
     },
-    "matured_10d_sample": {
+    "matured_event_10d_sample": {
       "pass": false,
       "value": 0,
-      "requirement": ">= 20 observations with both SPY/QQQ 10D outcomes"
+      "requirement": ">= 20 first-WASHOUT events with both SPY/QQQ 10D outcomes"
     },
-    "matured_30d_sample": {
+    "matured_event_30d_sample": {
       "pass": false,
       "value": 0,
-      "requirement": ">= 12 observations with both SPY/QQQ 30D outcomes"
+      "requirement": ">= 12 first-WASHOUT events with both SPY/QQQ 30D outcomes"
     }
   },
   "sample_ready_for_promotion_review": false,
   "paired_superiority_gate": {
     "pass": false,
     "status": "NOT_YET_EVALUABLE",
-    "requirement": "Compare first WASHOUT date directly with frozen RE-ENTRY date. WASHOUT must arrive earlier often enough to matter without materially worsening false starts or downside tails."
+    "requirement": "First-WASHOUT GO must lead the frozen RE-ENTRY signal often enough to matter while preserving or improving 10D/30D positive rates and p10 downside tails in paired episodes."
   },
   "promotion_status": "RESEARCH_ONLY_DO_NOT_PROMOTE",
-  "state_forward_metrics": {
-    "OVERSOLD": {
-      "rows": 0,
-      "SPY_5D": {
+  "first_washout_forward_metrics": {
+    "SPY": {
+      "5D": {
         "n": 0,
         "mean": null,
         "median": null,
-        "positive_rate": null
+        "positive_rate": null,
+        "p10": null
       },
-      "SPY_10D": {
+      "10D": {
         "n": 0,
         "mean": null,
         "median": null,
-        "positive_rate": null
+        "positive_rate": null,
+        "p10": null
       },
-      "SPY_30D": {
+      "30D": {
         "n": 0,
         "mean": null,
         "median": null,
-        "positive_rate": null
+        "positive_rate": null,
+        "p10": null
       },
-      "SPY_60D": {
+      "60D": {
         "n": 0,
         "mean": null,
         "median": null,
-        "positive_rate": null
-      },
-      "QQQ_5D": {
-        "n": 0,
-        "mean": null,
-        "median": null,
-        "positive_rate": null
-      },
-      "QQQ_10D": {
-        "n": 0,
-        "mean": null,
-        "median": null,
-        "positive_rate": null
-      },
-      "QQQ_30D": {
-        "n": 0,
-        "mean": null,
-        "median": null,
-        "positive_rate": null
-      },
-      "QQQ_60D": {
-        "n": 0,
-        "mean": null,
-        "median": null,
-        "positive_rate": null
+        "positive_rate": null,
+        "p10": null
       }
     },
-    "WASHOUT": {
-      "rows": 0,
-      "SPY_5D": {
+    "QQQ": {
+      "5D": {
         "n": 0,
         "mean": null,
         "median": null,
-        "positive_rate": null
+        "positive_rate": null,
+        "p10": null
       },
-      "SPY_10D": {
+      "10D": {
         "n": 0,
         "mean": null,
         "median": null,
-        "positive_rate": null
+        "positive_rate": null,
+        "p10": null
       },
-      "SPY_30D": {
+      "30D": {
         "n": 0,
         "mean": null,
         "median": null,
-        "positive_rate": null
+        "positive_rate": null,
+        "p10": null
       },
-      "SPY_60D": {
+      "60D": {
         "n": 0,
         "mean": null,
         "median": null,
-        "positive_rate": null
-      },
-      "QQQ_5D": {
-        "n": 0,
-        "mean": null,
-        "median": null,
-        "positive_rate": null
-      },
-      "QQQ_10D": {
-        "n": 0,
-        "mean": null,
-        "median": null,
-        "positive_rate": null
-      },
-      "QQQ_30D": {
-        "n": 0,
-        "mean": null,
-        "median": null,
-        "positive_rate": null
-      },
-      "QQQ_60D": {
-        "n": 0,
-        "mean": null,
-        "median": null,
-        "positive_rate": null
-      }
-    },
-    "CONFIRMED": {
-      "rows": 0,
-      "SPY_5D": {
-        "n": 0,
-        "mean": null,
-        "median": null,
-        "positive_rate": null
-      },
-      "SPY_10D": {
-        "n": 0,
-        "mean": null,
-        "median": null,
-        "positive_rate": null
-      },
-      "SPY_30D": {
-        "n": 0,
-        "mean": null,
-        "median": null,
-        "positive_rate": null
-      },
-      "SPY_60D": {
-        "n": 0,
-        "mean": null,
-        "median": null,
-        "positive_rate": null
-      },
-      "QQQ_5D": {
-        "n": 0,
-        "mean": null,
-        "median": null,
-        "positive_rate": null
-      },
-      "QQQ_10D": {
-        "n": 0,
-        "mean": null,
-        "median": null,
-        "positive_rate": null
-      },
-      "QQQ_30D": {
-        "n": 0,
-        "mean": null,
-        "median": null,
-        "positive_rate": null
-      },
-      "QQQ_60D": {
-        "n": 0,
-        "mean": null,
-        "median": null,
-        "positive_rate": null
+        "positive_rate": null,
+        "p10": null
       }
     }
   }
