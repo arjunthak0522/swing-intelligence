@@ -9,6 +9,7 @@ import yfinance as yf
 HISTORY = Path("data/reentry/exhaustion_history.csv")
 OUT = Path("data/reentry/exhaustion_outcomes.csv")
 HORIZONS = (5, 10, 30, 60)
+ROUND_TRIP_COST = 0.001
 
 
 def load_prices(start: str) -> pd.DataFrame:
@@ -18,10 +19,6 @@ def load_prices(start: str) -> pd.DataFrame:
     close = raw["Close"].copy()
     close.index = pd.to_datetime(close.index).tz_localize(None).normalize()
     return close.sort_index()
-
-
-def pct(a: float, b: float) -> float:
-    return float(b / a - 1.0)
 
 
 def main() -> None:
@@ -36,15 +33,18 @@ def main() -> None:
 
     rows: list[dict] = []
     for rec in hist.to_dict("records"):
-        dt = pd.Timestamp(rec["market_date"]).normalize()
-        eligible = prices.index[prices.index >= dt]
-        if len(eligible) == 0:
+        signal_dt = pd.Timestamp(rec["market_date"]).normalize()
+        if signal_dt not in prices.index:
             continue
-        entry_dt = pd.Timestamp(eligible[0])
-        i = int(prices.index.get_loc(entry_dt))
+        signal_i = int(prices.index.get_loc(signal_dt))
+        entry_i = signal_i + 1
+        if entry_i >= len(prices):
+            continue
+        entry_dt = prices.index[entry_i]
         row = {
-            "market_date": dt.date().isoformat(),
+            "market_date": signal_dt.date().isoformat(),
             "state": rec.get("state", ""),
+            "signal_date": signal_dt.date().isoformat(),
             "entry_price_date": entry_dt.date().isoformat(),
             "MMFD": rec.get("MMFD", ""),
             "MMTW": rec.get("MMTW", ""),
@@ -54,26 +54,26 @@ def main() -> None:
             "NAUD": rec.get("NAUD", ""),
         }
         for symbol in ("SPY", "QQQ"):
-            entry = prices[symbol].iloc[i]
+            entry = prices[symbol].iloc[entry_i]
             for h in HORIZONS:
+                exit_i = entry_i + h
                 key = f"{symbol}_{h}D"
-                if i + h < len(prices) and pd.notna(entry) and pd.notna(prices[symbol].iloc[i + h]):
-                    row[key] = pct(float(entry), float(prices[symbol].iloc[i + h]))
+                if exit_i < len(prices) and pd.notna(entry) and pd.notna(prices[symbol].iloc[exit_i]):
+                    row[key] = float(prices[symbol].iloc[exit_i] / entry - 1.0 - ROUND_TRIP_COST)
                 else:
                     row[key] = ""
         rows.append(row)
 
     fields = [
-        "market_date", "state", "entry_price_date", "MMFD", "MMTW", "NYMO", "NAMO", "NYUD", "NAUD",
+        "market_date", "state", "signal_date", "entry_price_date", "MMFD", "MMTW", "NYMO", "NAMO", "NYUD", "NAUD",
         *[f"{s}_{h}D" for s in ("SPY", "QQQ") for h in HORIZONS],
     ]
     OUT.parent.mkdir(parents=True, exist_ok=True)
     with OUT.open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fields)
         writer.writeheader()
-        for row in rows:
-            writer.writerow(row)
-    print(f"wrote {len(rows)} prospective exhaustion rows to {OUT}")
+        writer.writerows(rows)
+    print(f"wrote {len(rows)} prospective exhaustion rows using t+1 close execution")
 
 
 if __name__ == "__main__":
