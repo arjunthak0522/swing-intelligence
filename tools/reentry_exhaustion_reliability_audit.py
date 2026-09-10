@@ -68,8 +68,8 @@ def main() -> None:
     missing_cells = sum(1 for row in history for field in CORE_FIELDS if not present(row.get(field)))
     missing_rate = missing_cells / total_cells
 
-    washout_history = [r for r in history if r.get("state") in {"WASHOUT", "DEVELOPING", "CONFIRMED"}]
-    developing_history = [r for r in history if r.get("state") == "DEVELOPING"]
+    oversold_history = [r for r in history if r.get("state") == "OVERSOLD"]
+    washout_history = [r for r in history if r.get("state") in {"WASHOUT", "CONFIRMED"}]
     confirmed_history = [r for r in history if r.get("state") == "CONFIRMED"]
 
     matured_10 = [r for r in outcomes if present(r.get("SPY_10D")) and present(r.get("QQQ_10D"))]
@@ -86,10 +86,10 @@ def main() -> None:
             "value": len(history),
             "requirement": f">= {MIN_PROSPECTIVE_ROWS} completed daily snapshots",
         },
-        "washout_sample": {
+        "washout_go_sample": {
             "pass": len(washout_history) >= MIN_WASHOUT_ROWS,
             "value": len(washout_history),
-            "requirement": f">= {MIN_WASHOUT_ROWS} washout-or-stronger observations",
+            "requirement": f">= {MIN_WASHOUT_ROWS} WASHOUT/CONFIRMED early-go observations",
         },
         "matured_10d_sample": {
             "pass": len(matured_10) >= MIN_MATURED_10D,
@@ -106,7 +106,7 @@ def main() -> None:
     sample_ready = all(g["pass"] for g in gates.values())
 
     state_metrics = {}
-    for state in ("WASHOUT", "DEVELOPING", "CONFIRMED"):
+    for state in ("OVERSOLD", "WASHOUT", "CONFIRMED"):
         rows = [r for r in outcomes if r.get("state") == state]
         state_metrics[state] = {
             "rows": len(rows),
@@ -125,16 +125,21 @@ def main() -> None:
         "research_only": True,
         "official_signal_modified": False,
         "framework": "SELLING EXHAUSTION",
+        "semantics": {
+            "OVERSOLD": "stretched internals but no turn yet",
+            "WASHOUT": "first internal turn after oversold - early GO candidate",
+            "CONFIRMED": "later corroboration after the early GO candidate",
+        },
         "architecture": {
-            "washout": ["MMFD", "MMTW", "SPXA20R", "SPXA50R", "BPSPX", "NYMO", "NAMO"],
+            "oversold": ["MMFD", "MMTW", "SPXA20R", "SPXA50R", "BPSPX", "NYMO", "NAMO"],
             "selling_pressure": ["NYUD", "NAUD", "NYUPV/NYDNV", "NAUPV/NADNV"],
-            "turn": ["fast breadth recovery", "BPI recovery", "McClellan recovery", "net-volume recovery"],
+            "immediate_turn": ["fast breadth recovery", "McClellan recovery", "net-volume recovery"],
             "anti_double_counting": "Correlated raw indicators are grouped into families before state classification.",
         },
         "data": {
             "history_rows": len(history),
-            "washout_or_stronger_rows": len(washout_history),
-            "developing_rows": len(developing_history),
+            "oversold_rows": len(oversold_history),
+            "washout_go_rows": len(washout_history),
             "confirmed_rows": len(confirmed_history),
             "core_missing_rate": missing_rate,
             "matured_10d_rows": len(matured_10),
@@ -145,7 +150,7 @@ def main() -> None:
         "paired_superiority_gate": {
             "pass": False,
             "status": "NOT_YET_EVALUABLE",
-            "requirement": "Paired prospective comparison against the frozen RE-ENTRY date must preserve/improve downside tails while providing useful earlier timing.",
+            "requirement": "Compare first WASHOUT date directly with frozen RE-ENTRY date. WASHOUT must arrive earlier often enough to matter without materially worsening false starts or downside tails.",
         },
         "promotion_status": "RESEARCH_ONLY_DO_NOT_PROMOTE",
         "state_forward_metrics": state_metrics,
