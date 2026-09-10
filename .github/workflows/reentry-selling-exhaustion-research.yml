@@ -1,0 +1,41 @@
+name: RE-ENTRY Selling Exhaustion Research
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - intraday-signal-research
+    paths:
+      - tools/reentry_selling_exhaustion_research.py
+      - .github/workflows/reentry-selling-exhaustion-research.yml
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install numpy pandas yfinance scikit-learn
+
+      - name: Run selling exhaustion research
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/reentry_selling_exhaustion_research.py
+
+      - name: Upload research artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selling-exhaustion-research
+          path: artifacts/selling_exhaustion_research/
+          if-no-files-found: warn
+          retention-days: 30
