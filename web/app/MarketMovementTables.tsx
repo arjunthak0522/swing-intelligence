@@ -250,6 +250,24 @@ export default function MarketMovementTables({ snapshot, live }: { snapshot: Sna
   const w = washout?.values;
 
   return <>
+    <style>{`
+      .washout-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .washout-grid .live-stat { border-left: 0; border-top: 1px solid var(--line); }
+      .washout-grid .live-stat:nth-child(-n+3) { border-top: 0; }
+      .washout-grid .live-stat:not(:nth-child(3n+1)) { border-left: 1px solid var(--line); }
+      .metric-stat { padding: 17px 16px 16px; }
+      .metric-stat .metric-state { display: block; margin: 1px 0 9px; font-size: 9px; letter-spacing: .05em; }
+      .metric-scale { position: relative; height: 5px; border-radius: 999px; background: #ddd9cf; margin: 8px 0 7px; }
+      .metric-scale i { position: absolute; top: -3px; width: 2px; height: 11px; border-radius: 2px; background: var(--ink); transform: translateX(-1px); }
+      .metric-stat .metric-reference { font-size: 8px; line-height: 1.35; min-height: 22px; }
+      .metric-stat .metric-meaning { margin-top: 6px; color: #454840; font-size: 9px; line-height: 1.4; }
+      .warn { color: var(--amber); }
+      @media (max-width: 760px) {
+        .washout-grid { grid-template-columns: 1fr; }
+        .washout-grid .live-stat, .washout-grid .live-stat:not(:nth-child(3n+1)) { border-left: 0; border-top: 1px solid var(--line); }
+        .washout-grid .live-stat:first-child { border-top: 0; }
+      }
+    `}</style>
     <section className="card section-card live-card">
       <div className="section-heading">
         <div><span className="kicker">INTRADAY WASHOUT · SHADOW TEST</span><h2>Is the selling impulse starting to reverse?</h2></div>
