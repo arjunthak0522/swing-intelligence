@@ -110,7 +110,7 @@ def normalize_header(value: str) -> str:
 
 def parse_date(value: str) -> str | None:
     value = (value or "").strip()
-    for fmt in ("%m/%d/%Y", "%Y-%m-%d", "%m/%d/%y"):
+    for fmt in ("%m/%d/%Y %H:%M:%S", "%m/%d/%Y", "%Y-%m-%d", "%m/%d/%y"):
         try:
             return datetime.strptime(value, fmt).date().isoformat()
         except ValueError:
@@ -119,7 +119,7 @@ def parse_date(value: str) -> str | None:
 
 
 def fetch_nasdaq_daily_breadth(year: int) -> list[dict]:
-    url = f"https://www.nasdaqtrader.com/dynamic/dailyfiles/daily{year}.csv"
+    url = f"https://www.nasdaqtrader.com/dynamic/dailyfiles/daily{year}.txt"
     req = Request(url, headers={"User-Agent": "Mozilla/5.0 RE-ENTRY-nasi-research/1.0"})
     with urlopen(req, timeout=30) as resp:  # nosec - fixed Nasdaq Trader endpoint
         text = resp.read().decode("utf-8-sig", errors="replace")
@@ -129,12 +129,16 @@ def fetch_nasdaq_daily_breadth(year: int) -> list[dict]:
     normalized = {name: normalize_header(name) for name in fields}
 
     def find_field(kind: str) -> str:
+        exact = {"date": "date", "adv": "advances", "dec": "declines"}[kind]
         for name, norm in normalized.items():
-            if kind == "date" and (norm == "date" or norm.endswith("tradedate")):
+            if norm == exact:
                 return name
-            if kind == "adv" and "nasdaq" in norm and "advance" in norm and "decline" not in norm:
+        for name, norm in normalized.items():
+            if kind == "date" and norm.endswith("tradedate"):
                 return name
-            if kind == "dec" and "nasdaq" in norm and "decline" in norm:
+            if kind == "adv" and "advance" in norm and "decline" not in norm:
+                return name
+            if kind == "dec" and "decline" in norm:
                 return name
         raise ValueError(f"Could not resolve Nasdaq {kind} column from fields: {fields}")
 
