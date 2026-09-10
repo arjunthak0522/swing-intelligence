@@ -2,12 +2,6 @@ name: RE-ENTRY Exhaustion Intraday Research
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - intraday-signal-research
-    paths:
-      - 'tools/reentry_mmfd_intraday.py'
-      - '.github/workflows/reentry-exhaustion-intraday.yml'
 
 permissions:
   contents: write
