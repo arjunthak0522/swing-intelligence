@@ -1,0 +1,65 @@
+{
+  "classification": "RESEARCH_ONLY_PROSPECTIVE",
+  "engine_impact": "NONE",
+  "source": "unified_engine_history.csv (price context unavailable)",
+  "generated_at": "2026-09-10T22:04:26.088971+00:00",
+  "captured_snapshots": 2,
+  "market_days": 1,
+  "baseline": {
+    "state_transitions": 0,
+    "go_early_episodes": 0
+  },
+  "variants": {
+    "confirm_2_snapshots": {
+      "confirmation_snapshots_required": 2,
+      "market_days": 1,
+      "state_transitions": 0,
+      "go_early_episodes": 0,
+      "mean_first_go_delay_minutes": null,
+      "days_with_measurable_go_delay": 0,
+      "daily": {
+        "2026-09-10": {
+          "snapshots": 2,
+          "raw_state_counts": {
+            "WAIT": 2
+          },
+          "shadow_state_counts": {
+            "WAIT": 2
+          },
+          "raw_transitions": 0,
+          "shadow_transitions": 0,
+          "first_go_timing": null
+        }
+      }
+    },
+    "confirm_3_snapshots": {
+      "confirmation_snapshots_required": 3,
+      "market_days": 1,
+      "state_transitions": 0,
+      "go_early_episodes": 0,
+      "mean_first_go_delay_minutes": null,
+      "days_with_measurable_go_delay": 0,
+      "daily": {
+        "2026-09-10": {
+          "snapshots": 2,
+          "raw_state_counts": {
+            "WAIT": 2
+          },
+          "shadow_state_counts": {
+            "WAIT": 2
+          },
+          "raw_transitions": 0,
+          "shadow_transitions": 0,
+          "first_go_timing": null
+        }
+      }
+    }
+  },
+  "promotion_status": "DO_NOT_PROMOTE_FROM_THIS_REPORT",
+  "limitations": [
+    "Confirmation is measured in captured snapshots, not fixed clock minutes.",
+    "A variant that reduces flips can still be worse if it misses rebound upside.",
+    "Forward-return and adverse-excursion comparisons are required before any engine change.",
+    "This script does not modify REENTRY_UNIFIED_v1 or the dashboard decision."
+  ]
+}

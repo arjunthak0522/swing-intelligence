@@ -1,214 +1,307 @@
-import { CircleAlert, Clock3, Radio, ChevronDown } from "lucide-react";
-import MarketMovementTables from "./MarketMovementTables";
-import HistoricalEvidence from "./HistoricalEvidence";
-import ShadowValidationPanel from "./ShadowValidationPanel";
-import VolumeBreadthPanel from "./VolumeBreadthPanel";
-import { getHistoricalEpisodeEvidence } from "../lib/historicalEvidence";
+import { AlertTriangle, CheckCircle2, Clock3, Database, Radio } from "lucide-react";
 import {
-  getIntradaySnapshot,
-  getLatestEpisode,
-  getLatestSnapshot,
+  decisionLabel,
+  getUnifiedSnapshot,
+  num,
   pct,
-  type IntradaySnapshot,
-  type ReentryEpisode,
-  type ReentrySnapshot,
-} from "../lib/reentry";
+  phaseLabel,
+  type UnifiedSnapshot,
+} from "../lib/unifiedReentry";
+import "./unified-dashboard.css";
 
 export const dynamic = "force-dynamic";
 
-function stateClass(value: string) {
-  const v = value.toUpperCase();
-  if (v.includes("REPAIR") || v.includes("YES") || v.includes("LIVE") || v.includes("FAVORABLE") || v.includes("STABLE")) return "good";
-  if (v.includes("WAIT") || v.includes("STABIL") || v.includes("DEVELOP") || v.includes("PARTIAL") || v.includes("RESET") || v.includes("WATCH") || v.includes("CAUTION")) return "warn";
-  if (v.includes("NO") || v.includes("WORSEN") || v.includes("HEAVY") || v.includes("DEGRADED") || v.includes("DEEP") || v.includes("DETERIORATING")) return "bad";
-  return "neutral";
+function decisionClass(value?: string | null) {
+  if (value === "GO_EARLY") return "u-good";
+  if (value === "WATCH") return "u-warn";
+  if (value === "WAIT") return "u-neutral";
+  return "u-bad";
 }
 
-function retailHistoryLabel(value: string) {
-  const v = value.toUpperCase();
-  if (v === "CAUTIOUS YES") return "FAVORABLE";
-  if (v.includes("YES")) return "FAVORABLE";
-  if (v.includes("NO")) return "UNFAVORABLE";
-  return value;
+function qualityClass(value?: string | null) {
+  if (value === "OK") return "ok";
+  if (value === "PARTIAL") return "partial";
+  return "degraded";
 }
 
-function formatDate(value?: string | null) {
-  if (!value) return "-";
-  const date = new Date(`${value}T00:00:00Z`);
+function formatTimestamp(value?: string | null) {
+  if (!value) return "Unavailable";
+  const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+  return date.toLocaleString("en-US", {
+    timeZone: "America/New_York",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+  });
 }
 
-function DecisionHero({ s }: { s: ReentrySnapshot }) {
-  const closer = s.signal === "WAIT" && ["DEVELOPING", "MEANINGFUL", "BROAD"].includes(s.internal_reset);
-  const displaySignal = s.signal === "WAIT" ? "WAIT FOR NEW ENTRY" : s.signal;
-  return (
-    <section className="decision-hero">
-      <div className="decision-label-row">
-        <span className="kicker">OFFICIAL DECISION</span>
-        <span className="freshness"><Clock3 size={14} /> {formatDate(s.as_of)} completed close</span>
-      </div>
-      <div className={`decision-word ${stateClass(s.signal)}`}>{displaySignal}</div>
-      <p className="decision-copy">{closer ? "A prior entry already occurred. Wait for a new setup before deploying additional cash." : s.signal_interpretation}</p>
-    </section>
-  );
-}
-
-function EpisodeStrip({ episode, live }: { episode: ReentryEpisode | null; live: IntradaySnapshot | null }) {
-  if (!episode) return null;
-  const spyPrice = live?.quotes?.SPY?.price;
-  const qqqPrice = live?.quotes?.QQQ?.price;
-  const spyPerformance = typeof spyPrice === "number" && episode.entry_closes.SPY > 0 ? spyPrice / episode.entry_closes.SPY - 1 : null;
-  const qqqPerformance = typeof qqqPrice === "number" && episode.entry_closes.QQQ > 0 ? qqqPrice / episode.entry_closes.QQQ - 1 : null;
-  return (
-    <section className="episode-strip">
-      <div className="episode-meta"><span className="kicker">CURRENT RE-ENTRY EPISODE</span><b>Started {formatDate(episode.episode_start)}</b></div>
-      <div className="episode-metric"><span>SPY</span><strong className={typeof spyPerformance === "number" ? (spyPerformance >= 0 ? "good-text" : "bad-text") : "muted"}>{pct(spyPerformance, 2)}</strong><small>since re-entry</small></div>
-      <div className="episode-metric"><span>QQQ</span><strong className={typeof qqqPerformance === "number" ? (qqqPerformance >= 0 ? "good-text" : "bad-text") : "muted"}>{pct(qqqPerformance, 2)}</strong><small>since re-entry</small></div>
-      <span className="pill">{episode.active ? "ACTIVE" : "COMPLETED"}</span>
-    </section>
-  );
-}
-
-function LiveToday({ live, official }: { live: IntradaySnapshot | null; official: ReentrySnapshot }) {
-  const quality = live?.state_quality;
-  const spy = live?.quotes?.SPY;
-  const qqq = live?.quotes?.QQQ;
-  const vix = live?.quotes?.["^VIX"];
-  const regular = spy?.market_state === "REGULAR";
-  const updated = spy?.timestamp ? new Date(spy.timestamp).toLocaleTimeString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit", timeZoneName: "short" }) : null;
-
-  if (!live || !quality) {
-    return <section className="today-card"><div><span className="kicker">LIVE TODAY</span><h2>Intraday context unavailable</h2></div><p>The completed-close decision remains authoritative.</p></section>;
+function explanation(snapshot: UnifiedSnapshot) {
+  const u = snapshot.unified_engine;
+  if (!u) return "The unified decision is unavailable.";
+  if (u.decision === "GO_EARLY") {
+    return `The market is in an oversold setup and reversal evidence has crossed the early re-entry threshold with ${u.fast_family_count} fast turn${u.fast_family_count === 1 ? "" : "s"} and ${u.context_support_count} context turn${u.context_support_count === 1 ? "" : "s"}.`;
   }
+  if (u.decision === "WATCH") {
+    return `The market is oversold and reversal evidence is developing, but it has not yet crossed the GO EARLY threshold. Current evidence: ${u.fast_family_count} fast turn${u.fast_family_count === 1 ? "" : "s"} and ${u.context_support_count} context turn${u.context_support_count === 1 ? "" : "s"}.`;
+  }
+  if (u.oversold_gate) {
+    return `The market is oversold, but reversal evidence is not strong enough yet. Current evidence: ${u.fast_family_count} fast turns and ${u.context_support_count} context turns.`;
+  }
+  return "The market is not currently inside the unified engine's oversold setup gate, so RE-ENTRY remains at WAIT.";
+}
 
+function FamilyPill({ active, label }: { active: boolean; label: string }) {
+  return <span className={`u-pill ${active ? "on" : "off"}`}>{active ? "TURNING" : "NOT TURNING"} - {label}</span>;
+}
+
+function IndicatorRow({
+  name,
+  family,
+  value,
+  active,
+  note,
+}: {
+  name: string;
+  family: string;
+  value: string;
+  active: boolean;
+  note: string;
+}) {
   return (
-    <section className="today-card">
-      <div className="today-topline">
-        <div><span className="kicker">LIVE TODAY · CONTEXT ONLY</span><h2 className={stateClass(quality.label)}>{quality.label}</h2></div>
-        <span className="freshness"><Radio size={14} /> {regular ? "Live" : "Latest session"}{updated ? ` · ${updated}` : ""}</span>
+    <div className="u-indicator-row">
+      <div className="u-indicator-name"><strong>{name}</strong><small>{family}</small></div>
+      <div className="u-indicator-value">{value}</div>
+      <FamilyPill active={active} label={active ? "supporting" : "inactive"} />
+      <div className="u-indicator-note">{note}</div>
+    </div>
+  );
+}
+
+function DecisionHero({ snapshot }: { snapshot: UnifiedSnapshot }) {
+  const u = snapshot.unified_engine!;
+  const q = snapshot.data_quality;
+  const degraded = q?.status === "DEGRADED";
+  return (
+    <section className="u-card">
+      <div className="u-hero-top">
+        <div><span className="u-kicker">RE-ENTRY DECISION</span></div>
+        <span className="u-phase"><Clock3 size={14} /> {phaseLabel(u.market_phase)} - {formatTimestamp(u.timestamp_et)}</span>
       </div>
-      <div className="today-drivers">
-        <div><small>PRICE</small><b className={quality.risks.broad_negative ? "bad-text" : "good-text"}>{quality.risks.broad_negative ? "WEAK" : "HOLDING UP"}</b></div>
-        <VolumeBreadthPanel compact />
-        <div><small>VOLATILITY</small><b className={quality.risks.vix_up ? "bad-text" : "good-text"}>{quality.risks.vix_up ? "VIX RISING" : "NOT RISING"}</b></div>
+      <div className={`u-decision ${degraded ? "u-bad" : decisionClass(u.decision)}`}>
+        {degraded ? "DATA DEGRADED" : decisionLabel(u.decision)}
       </div>
-      <p className="today-copy">{quality.label === "DETERIORATING" ? "Today's market action is putting meaningful pressure on the active RE-ENTRY state." : quality.label === "CAUTION" ? "Multiple deterioration conditions are present, but the official close decision has not changed." : quality.label === "WATCH" ? "One deterioration condition is present. The official close decision remains unchanged." : "Today's market action is broadly supporting the existing RE-ENTRY state."}</p>
-      <details className="compact-disclosure">
-        <summary>View live detail <ChevronDown size={15} /></summary>
-        <div className="live-detail-grid">
-          <div><small>SPY today</small><b>{pct(spy?.change_pct, 2)}</b></div>
-          <div><small>QQQ today</small><b>{pct(qqq?.change_pct, 2)}</b></div>
-          <div><small>VIX today</small><b>{pct(vix?.change_pct, 2)}</b></div>
-        </div>
-        <VolumeBreadthPanel />
-        <div className="context-note"><CircleAlert size={15} /> Official decision remains <b>{official.signal}</b> until the completed-close engine recalculates.</div>
-      </details>
+      <p className="u-hero-copy">
+        {degraded
+          ? "One or more required data families are incomplete. The underlying REENTRY_UNIFIED_v1 calculation is preserved for audit, but this snapshot should not be treated as actionable until data quality recovers."
+          : explanation(snapshot)}
+      </p>
+      <div className="u-score-grid">
+        <div className="u-score"><small>Oversold setup</small><strong>{u.oversold_gate ? "YES" : "NO"}</strong></div>
+        <div className="u-score"><small>Fast reversal families</small><strong>{u.fast_family_count}/4</strong></div>
+        <div className="u-score"><small>Context families</small><strong>{u.context_support_count}/4</strong></div>
+      </div>
     </section>
   );
 }
 
-function WhyDecision({ s }: { s: ReentrySnapshot }) {
-  const support = s.market_insights?.supporting_reentry || [];
-  const hold = s.market_insights?.holding_back || [];
+function MarketContext({ snapshot }: { snapshot: UnifiedSnapshot }) {
+  const prices = snapshot.market_prices || {};
   const rows = [
-    { label: "Market damage", value: s.market_damage, detail: "How much broad-market damage is present relative to the pullback context." },
-    { label: "Internal reset", value: s.internal_reset, detail: support[0] || s.market_insights?.headline || s.signal_interpretation },
-    { label: "Selling pressure", value: s.selling_pressure, detail: hold[0] || "Completed-close evidence describing whether selling pressure is worsening or stabilizing." },
-    { label: "Similar past markets", value: retailHistoryLabel(s.analog_decision), detail: "Nearest prior broad-market states are used as historical context for the official decision." },
-  ];
+    ["SPY", "S&P 500 ETF"],
+    ["QQQ", "Nasdaq 100 ETF"],
+    ["^VIX", "VIX"],
+  ] as const;
   return (
-    <section className="simple-section">
-      <div className="simple-heading"><span className="kicker">WHY THIS DECISION</span><h2>Four things that matter</h2></div>
-      <div className="evidence-list">
-        {rows.map((row) => <details key={row.label} className="evidence-row"><summary><span>{row.label}</span><b className={stateClass(row.value)}>{row.value}</b><ChevronDown size={16} /></summary><p>{row.detail}</p></details>)}
+    <section className="u-card">
+      <div className="u-section-heading">
+        <div><span className="u-kicker">MARKET CONTEXT</span><h2>Current market move</h2></div>
+        <span className="u-phase"><Radio size={14} /> Display context only - not a decision input</span>
+      </div>
+      <div className="u-market-grid">
+        {rows.map(([symbol, label]) => {
+          const row = prices[symbol];
+          return (
+            <div className="u-market-stat" key={symbol}>
+              <small>{label}</small>
+              <strong>{row?.price != null ? num(row.price, 2) : "-"}</strong>
+              <span>{pct(row?.change_pct, 2)} vs prior close</span>
+            </div>
+          );
+        })}
       </div>
     </section>
   );
 }
 
-function MarketInternalsSummary({ snapshot, live }: { snapshot: ReentrySnapshot; live: IntradaySnapshot | null }) {
-  const sectors = Object.keys(snapshot.signal_snapshot?.sectors || {}).map((symbol) => ({ symbol, move: live?.quotes?.[symbol]?.change_pct ?? null })).filter((x) => typeof x.move === "number") as { symbol: string; move: number }[];
-  sectors.sort((a, b) => b.move - a.move);
-  const strongest = sectors.slice(0, 3);
-  const weakest = sectors.slice(-3).reverse();
+function IndicatorMatrix({ snapshot }: { snapshot: UnifiedSnapshot }) {
+  const v = snapshot.values || {};
+  const f = snapshot.families || {};
+  const c = snapshot.unified_engine?.context_support || {
+    MMFD_IMPROVING: false,
+    NASI_TURNING_UP: false,
+    VVIX_EASING: false,
+    SKEW_NARROWING: false,
+  };
+
   return (
-    <section className="simple-section">
-      <div className="simple-heading"><span className="kicker">MARKET INTERNALS</span><h2>What is leading and lagging today?</h2></div>
-      <div className="internals-summary-grid internals-summary-grid-two">
-        <div><small>STRONGEST SECTORS</small>{strongest.map((x) => <span key={x.symbol}><b>{x.symbol}</b>{pct(x.move, 1)}</span>)}</div>
-        <div><small>WEAKEST SECTORS</small>{weakest.map((x) => <span key={x.symbol}><b>{x.symbol}</b>{pct(x.move, 1)}</span>)}</div>
+    <section className="u-card">
+      <div className="u-section-heading">
+        <div><span className="u-kicker">WHAT THE ENGINE SEES</span><h2>All 8 decision families</h2></div>
+        <span className="u-phase"><Database size={14} /> One unified rule</span>
       </div>
-      <details className="deep-disclosure"><summary>Explore all sectors & subsectors <ChevronDown size={16} /></summary><div className="nested-detail"><MarketMovementTables snapshot={snapshot} live={live} /></div></details>
+      <p className="u-section-intro">These are the exact fast and context families used by REENTRY_UNIFIED_v1. No analog vote, legacy completed-close strategy, or separate intraday trading rule is shown here.</p>
+      <div className="u-indicator-table">
+        <IndicatorRow
+          name="Fast breadth"
+          family="FAST 1 OF 4"
+          value={v.SPXA20R != null ? `${num(v.SPXA20R, 1)}% above 20DMA` : "-"}
+          active={Boolean(f.fast_breadth_turn)}
+          note="Turns on when S&P 500 short-term breadth improves versus the preceding same-session snapshot."
+        />
+        <IndicatorRow
+          name="Breadth momentum"
+          family="FAST 2 OF 4"
+          value={`NYMO ${num(v.NYMO, 1)} / NAMO ${num(v.NAMO, 1)}`}
+          active={Boolean(f.momentum_turn)}
+          note="Turns on when either NYMO or NAMO improves versus the preceding same-session snapshot."
+        />
+        <IndicatorRow
+          name="A/D volume"
+          family="FAST 3 OF 4"
+          value={`NYSE ${num(v.NYUD, 0)} / Nasdaq ${num(v.NAUD, 0)}`}
+          active={Boolean(f.net_volume_turn)}
+          note="Turns on when net advance-decline volume improves on either exchange."
+        />
+        <IndicatorRow
+          name="Down/up volume relief"
+          family="FAST 4 OF 4"
+          value={`NYSE ${num(v.nyse_down_up_ratio, 2)}x / Nasdaq ${num(v.nasdaq_down_up_ratio, 2)}x`}
+          active={Boolean(f.down_up_ratio_relief)}
+          note="Turns on when either down/up volume ratio improves by more than 15% versus the preceding same-session snapshot."
+        />
+        <IndicatorRow
+          name="MMFD"
+          family="CONTEXT 1 OF 4"
+          value={v.MMFD != null ? `${num(v.MMFD, 1)}% above live 5DMA` : "-"}
+          active={Boolean(c.MMFD_IMPROVING)}
+          note={`Internal all-stock breadth calculation. Coverage ${snapshot.data_quality?.mmfd_coverage_pct != null ? `${num(snapshot.data_quality.mmfd_coverage_pct, 1)}%` : "unavailable"}.`}
+        />
+        <IndicatorRow
+          name="NASI+"
+          family="CONTEXT 2 OF 4"
+          value={`${num(v.NASI_RSI, 1)} - ${v.NASI_DIRECTION || "UNAVAILABLE"}`}
+          active={Boolean(c.NASI_TURNING_UP)}
+          note="Internal ratio-adjusted McClellan Summation Index RSI. Research is separately checking bootstrap stability."
+        />
+        <IndicatorRow
+          name="VVIX"
+          family="CONTEXT 3 OF 4"
+          value={`${num(v.VVIX, 1)} - ${v.VVIX_DIRECTION || "UNAVAILABLE"}`}
+          active={Boolean(c.VVIX_EASING)}
+          note={`Volatility-of-volatility context. Two-year percentile ${v.VVIX_PERCENTILE_2Y != null ? `${num(v.VVIX_PERCENTILE_2Y, 1)}%` : "unavailable"}.`}
+        />
+        <IndicatorRow
+          name="SPX downside skew"
+          family="CONTEXT 4 OF 4"
+          value={`${num(v.SKEW_LIVE_PROXY, 2)} vol pts - ${v.SKEW_DIRECTION || "UNAVAILABLE"}`}
+          active={Boolean(c.SKEW_NARROWING)}
+          note="Live 25-delta SPX put IV minus call IV proxy. Post-close fallback preserves only the last valid same-session proxy."
+        />
+      </div>
     </section>
   );
 }
 
-function ResearchSection() {
+function DataQuality({ snapshot }: { snapshot: UnifiedSnapshot }) {
+  const q = snapshot.data_quality;
+  const problems = [...(q?.issues || []), ...(q?.warnings || [])];
   return (
-    <details className="research-section">
-      <summary><div><span className="kicker">RESEARCH & VALIDATION</span><h2>Experimental layers and forward testing</h2><p>Nothing here changes the official RE-ENTRY decision.</p></div><div className="research-status"><span className="pill">COLLAPSED BY DEFAULT</span><ChevronDown size={18} /></div></summary>
-      <div className="research-body">
-        <ShadowValidationPanel />
-        <section className="research-note">
-          <div><span className="kicker">ETF RELATIVE OPPORTUNITY</span><h3>Under validation</h3></div>
-          <p>Historical ETF ranking percentages remain suppressed until the underlying adjusted-price history is point-in-time reproducible.</p>
-        </section>
-        <section className="research-note">
-          <div><span className="kicker">SHORT-TERM OVERSOLD / EXHAUSTION</span><h3>Research planned</h3></div>
-          <p>Breadth exhaustion, normalized downside stretch, VWAP recovery, and volatility reversal are not yet part of the official or live decision layer.</p>
-        </section>
+    <section className="u-card">
+      <div className="u-quality-top">
+        <div><span className="u-kicker">DATA RELIABILITY</span><h2>Can this snapshot be trusted?</h2></div>
+        <span className={`u-quality-pill ${qualityClass(q?.status)}`}>
+          {q?.status === "OK" ? <CheckCircle2 size={14} /> : <AlertTriangle size={14} />}
+          {q?.status || "UNAVAILABLE"}
+        </span>
       </div>
-    </details>
+      {problems.length ? (
+        <ul className="u-quality-list">{problems.map((x) => <li key={x}>{x}</li>)}</ul>
+      ) : (
+        <p className="u-quality-clear">All required decision families are present and the current hard coverage checks passed.</p>
+      )}
+      {snapshot.market_price_errors?.length ? (
+        <ul className="u-quality-list">{snapshot.market_price_errors.map((x) => <li key={x}>Display-only price context: {x}</li>)}</ul>
+      ) : null}
+    </section>
   );
 }
 
-function PageStyles() {
-  return <style>{`
-    .decision-hero{padding:34px 0 26px;border-bottom:1px solid var(--line)}
-    .decision-label-row,.today-topline,.simple-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
-    .decision-word{font-size:72px;line-height:.95;font-weight:900;letter-spacing:-.065em;margin:16px 0 12px}.decision-word.good{color:var(--green)}.decision-word.warn{color:var(--amber)}.decision-word.bad{color:var(--red)}
-    .decision-copy{max-width:760px;margin:0;font-size:17px;line-height:1.55;color:#41433e}
-    .episode-strip{display:grid;grid-template-columns:1.5fr 1fr 1fr auto;gap:20px;align-items:center;padding:20px 0;border-bottom:1px solid var(--line)}.episode-meta span,.episode-meta b,.episode-metric span,.episode-metric strong,.episode-metric small{display:block}.episode-meta b{margin-top:5px}.episode-metric span,.episode-metric small{font-size:9px;color:var(--muted)}.episode-metric strong{font-size:32px;letter-spacing:-.04em;margin:2px 0}
-    .today-card{padding:26px 0;border-bottom:1px solid var(--line)}.today-card h2{font-size:38px;margin:4px 0 0;letter-spacing:-.04em}.today-card h2.good{color:var(--green)}.today-card h2.warn{color:var(--amber)}.today-card h2.bad{color:var(--red)}
-    .today-drivers{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:18px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.today-drivers>div{padding:14px 0}.today-drivers>div+div{border-left:1px solid var(--line);padding-left:18px}.today-drivers small,.today-drivers b{display:block}.today-drivers small{font-size:9px;color:var(--muted);margin-bottom:4px}.today-copy{font-size:13px;color:#4a4d46;margin:14px 0 0}
-    .compact-disclosure,.deep-disclosure{margin-top:12px}.compact-disclosure>summary,.deep-disclosure>summary{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:11px;font-weight:800;color:var(--muted);list-style:none}.compact-disclosure>summary::-webkit-details-marker,.deep-disclosure>summary::-webkit-details-marker{display:none}.compact-disclosure[open]>summary svg,.deep-disclosure[open]>summary svg{transform:rotate(180deg)}
-    .live-detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.live-detail-grid>div{padding:12px;background:#f4f1eb;border-radius:10px}.live-detail-grid small,.live-detail-grid b{display:block}.live-detail-grid small{font-size:9px;color:var(--muted)}.live-detail-grid b{margin-top:3px}.context-note{display:flex;gap:8px;align-items:flex-start;margin-top:10px;font-size:10px;color:var(--muted)}
-    .simple-section{padding:30px 0;border-bottom:1px solid var(--line)}.simple-heading h2{font-size:26px;letter-spacing:-.025em;margin:4px 0 0}
-    .evidence-list{margin-top:16px;border-top:1px solid var(--line)}.evidence-row{border-bottom:1px solid var(--line)}.evidence-row>summary{display:grid;grid-template-columns:1fr auto 22px;gap:16px;align-items:center;padding:15px 0;cursor:pointer;list-style:none}.evidence-row>summary::-webkit-details-marker{display:none}.evidence-row>summary span{font-size:12px;font-weight:700}.evidence-row>summary b{font-size:12px}.evidence-row>summary b.good{color:var(--green)}.evidence-row>summary b.warn{color:var(--amber)}.evidence-row>summary b.bad{color:var(--red)}.evidence-row[open]>summary svg{transform:rotate(180deg)}.evidence-row p{margin:0 0 15px;max-width:760px;font-size:11px;color:var(--muted);line-height:1.5}
-    .internals-summary-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:16px}.internals-summary-grid-two{grid-template-columns:1fr 1fr}.internals-summary-grid>div{padding:14px 0}.internals-summary-grid small{display:block;color:var(--muted);font-size:9px;margin-bottom:7px}.internals-summary-grid span{display:flex;justify-content:space-between;gap:10px;font-size:11px;padding:3px 0}.internals-summary-grid strong{display:block;font-size:28px;letter-spacing:-.04em}.nested-detail{margin-top:16px}.nested-detail>.card,.nested-detail>section.card,.nested-detail>details.card{box-shadow:none!important}
-    .research-section{margin:30px 0 12px;border:1px solid var(--line);border-radius:16px;overflow:hidden}.research-section>summary{display:flex;justify-content:space-between;gap:20px;align-items:center;padding:20px 22px;cursor:pointer;list-style:none}.research-section>summary::-webkit-details-marker{display:none}.research-section>summary h2{margin:4px 0 3px;font-size:20px}.research-section>summary p{margin:0;color:var(--muted);font-size:10px}.research-status{display:flex;align-items:center;gap:8px}.research-section[open] .research-status svg{transform:rotate(180deg)}.research-body{padding:0 16px 16px;border-top:1px solid var(--line)}.research-note{padding:18px 8px;border-top:1px solid var(--line)}.research-note h3{margin:3px 0 0;font-size:16px}.research-note p{margin:8px 0 0;font-size:11px;color:var(--muted);max-width:760px}
-    .good-text{color:var(--green)}.bad-text{color:var(--red)}
-    @media(max-width:760px){.decision-word{font-size:48px}.decision-label-row,.today-topline,.simple-heading{display:block}.freshness{display:inline-flex;margin-top:8px}.episode-strip{grid-template-columns:1fr 1fr}.episode-meta{grid-column:1/-1}.today-drivers,.live-detail-grid,.internals-summary-grid{grid-template-columns:1fr 1fr}.today-drivers>div+div{border-left:0;padding-left:0}.today-drivers>div:nth-child(3){grid-column:1/-1}.research-section>summary{align-items:flex-start}.research-status .pill{display:none}}
-  `}</style>;
+function ProspectiveEvidence({ snapshot }: { snapshot: UnifiedSnapshot }) {
+  const h = snapshot.prospective_history;
+  return (
+    <section className="u-card">
+      <div className="u-section-heading">
+        <div><span className="u-kicker">PROSPECTIVE VALIDATION</span><h2>Evidence being captured now</h2></div>
+      </div>
+      <p className="u-section-intro">This is live point-in-time evidence for the new unified engine. It is intentionally kept separate from historical statistics generated by the retired model.</p>
+      <div className="u-history-grid">
+        <div className="u-history-stat"><small>Snapshots</small><strong>{h?.snapshot_count ?? 0}</strong><span>actual captured states</span></div>
+        <div className="u-history-stat"><small>Market days</small><strong>{h?.market_days ?? 0}</strong><span>with unified evidence</span></div>
+        <div className="u-history-stat"><small>State transitions</small><strong>{h?.state_transitions ?? 0}</strong><span>same-day flips</span></div>
+        <div className="u-history-stat"><small>GO EARLY</small><strong>{h?.go_early_snapshots ?? 0}</strong><span>captured snapshots</span></div>
+        <div className="u-history-stat"><small>WATCH</small><strong>{h?.watch_snapshots ?? 0}</strong><span>captured snapshots</span></div>
+      </div>
+      <div className="u-research-note">Whipsaw and persistence variants are being measured in shadow research only. No confirmation delay, hysteresis rule, or CPCE threshold has been promoted into the live decision.</div>
+    </section>
+  );
 }
 
-export default async function Home() {
-  const [snapshot, intraday, episode, historicalEvidence] = await Promise.all([
-    getLatestSnapshot(),
-    getIntradaySnapshot(),
-    getLatestEpisode(),
-    getHistoricalEpisodeEvidence(),
-  ]);
+function Sources({ snapshot }: { snapshot: UnifiedSnapshot }) {
+  const sources = snapshot.sources || {};
+  return (
+    <section className="u-card">
+      <div className="u-section-heading"><div><span className="u-kicker">PROVENANCE</span><h2>Where each family comes from</h2></div></div>
+      <div className="u-source-grid">
+        {Object.entries(sources).map(([key, row]) => (
+          <div className="u-source" key={key}>
+            <strong>{key.replaceAll("_", " ")}</strong>
+            <small>{row.provider || "Source unavailable"}</small>
+            <small>{row.timestamp ? `Observed ${formatTimestamp(row.timestamp)}` : "Source timestamp not separately available"}</small>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
 
-  if (!snapshot) {
-    return <main className="shell"><section className="card data-blocked"><CircleAlert /> <div><b>OFFICIAL FEED UNAVAILABLE</b><p>No fallback decision is shown when the canonical close snapshot cannot be loaded.</p></div></section></main>;
+export default async function Page() {
+  const snapshot = await getUnifiedSnapshot();
+  if (!snapshot?.unified_engine) {
+    return (
+      <main className="unified-shell">
+        <div className="u-unavailable">
+          <h1>RE-ENTRY unavailable</h1>
+          <p>The unified snapshot could not be loaded. No legacy decision is substituted.</p>
+        </div>
+      </main>
+    );
   }
 
-  const fresh = snapshot.data_freshness?.same_day_complete === true;
-
-  return <main className="shell">
-    <PageStyles />
-    <header className="topbar"><div><span className="brand">RE-ENTRY</span><span className="tagline">Know when waiting stops helping.</span></div><div className="top-status">{fresh ? <><span className="live-dot" /> Official close feed</> : "DATA INCOMPLETE"}</div></header>
-    {!fresh ? <section className="card data-blocked"><CircleAlert /> <div><b>DATA INCOMPLETE</b><p>The current decision is suppressed until every required input resolves to the same completed market session.</p></div></section> : <>
-      <DecisionHero s={snapshot} />
-      <EpisodeStrip episode={episode} live={intraday} />
-      <LiveToday live={intraday} official={snapshot} />
-      <WhyDecision s={snapshot} />
-      <MarketInternalsSummary snapshot={snapshot} live={intraday} />
-      <HistoricalEvidence evidence={historicalEvidence} />
-      <ResearchSection />
-    </>}
-    <footer>Official RE-ENTRY decisions use completed-close data. Live context and research layers never overwrite the validated close signal.</footer>
-  </main>;
+  return (
+    <main className="unified-shell">
+      <header className="unified-header">
+        <div className="unified-brand">RE-ENTRY</div>
+        <div className="unified-purpose">After a market pullback, should you keep waiting or begin putting cash back into SPY/QQQ? One engine answers that question during the session and after the close.</div>
+      </header>
+      <DecisionHero snapshot={snapshot} />
+      <MarketContext snapshot={snapshot} />
+      <IndicatorMatrix snapshot={snapshot} />
+      <DataQuality snapshot={snapshot} />
+      <ProspectiveEvidence snapshot={snapshot} />
+      <Sources snapshot={snapshot} />
+    </main>
+  );
 }

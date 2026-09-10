@@ -304,6 +304,18 @@ def append_history(row: dict) -> None:
             csv.DictWriter(fobj, fieldnames=fieldnames).writerow(row)
 
 
+def quote_provenance(quotes: dict) -> dict:
+    out = {}
+    for symbol, row in quotes.items():
+        out[symbol] = {
+            "vendor_timestamp": row.get("as_of") if isinstance(row, dict) else None,
+            "realtime": row.get("realtime") if isinstance(row, dict) else None,
+            "cached": row.get("cached") if isinstance(row, dict) else None,
+            "available": bool(isinstance(row, dict) and finite(row.get("close"))),
+        }
+    return out
+
+
 def main() -> None:
     now = datetime.now(timezone.utc).astimezone(ET)
     if not market_is_open(now):
@@ -448,7 +460,8 @@ def main() -> None:
         },
         "values": row,
         "nasi_plus": nasi,
-        "source_note": "Intraday breadth and VVIX from StockCharts delayed quote feed; NASI+ is calculated internally from raw Nasdaq breadth with verified Nasdaq Trader current-year daily history. Shadow research only; state can change before the close.",
+        "stockcharts_quote_provenance": quote_provenance(quotes),
+        "source_note": "Intraday breadth and VVIX from StockCharts delayed quote feed; per-symbol vendor timestamp/realtime/cached metadata is preserved in stockcharts_quote_provenance. NASI+ is calculated internally from raw Nasdaq breadth with verified Nasdaq Trader current-year daily history. Shadow research only; state can change before the close.",
         "errors": errors,
     }
     CURRENT.write_text(json.dumps(payload, indent=2), encoding="utf-8")

@@ -140,25 +140,42 @@ def official_skew_close() -> dict:
     }
 
 
-def live_rows() -> list[dict]:
+def row_market_date(row: dict) -> str | None:
+    explicit = str(row.get("market_date") or "").strip()
+    if explicit:
+        return explicit
+    raw = str(row.get("timestamp_et") or "").strip()
+    if not raw:
+        return None
+    try:
+        return datetime.fromisoformat(raw).astimezone(ET).date().isoformat()
+    except (TypeError, ValueError):
+        return None
+
+
+def live_rows(market_date: str | None = None) -> list[dict]:
     if not HISTORY.exists():
         return []
     with HISTORY.open(newline="", encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
-    return [
+    valid = [
         row for row in rows
         if finite(row.get("put_call_iv_spread_vol_points"))
         and str(row.get("source_mode") or "") != "FINAL_CLOSE_OFFICIAL_SKEW_WITH_LAST_VALID_INTRADAY_PROXY"
     ]
+    if market_date is not None:
+        valid = [row for row in valid if row_market_date(row) == market_date]
+    valid.sort(key=lambda row: str(row.get("timestamp_et") or ""))
+    return valid
 
 
-def prior_live_row() -> dict | None:
-    rows = live_rows()
+def prior_live_row(market_date: str) -> dict | None:
+    rows = live_rows(market_date)
     return rows[-1] if rows else None
 
 
-def last_live_direction() -> str:
-    rows = live_rows()
+def last_live_direction(market_date: str) -> str:
+    rows = live_rows(market_date)
     if len(rows) < 2:
         return "UNAVAILABLE"
     latest = float(rows[-1]["put_call_iv_spread_vol_points"])
@@ -191,6 +208,7 @@ def append_history(row: dict) -> None:
 
 
 def live_proxy(now: datetime) -> dict:
+    market_date = now.astimezone(ET).date().isoformat()
     spx = yf.Ticker("^SPX")
     spot = last_price("^SPX")
     expiry, dte = choose_expiry(spx, now)
@@ -201,7 +219,7 @@ def live_proxy(now: datetime) -> dict:
     put25 = select_25_delta(chain.puts, spot, t, r, False)
     spread = (put25["iv"] - call25["iv"]) * 100.0
     ratio = put25["iv"] / call25["iv"] if call25["iv"] > 0 else None
-    prior_row = prior_live_row()
+    prior_row = prior_live_row(market_date)
     prior = float(prior_row["put_call_iv_spread_vol_points"]) if prior_row and finite(prior_row.get("put_call_iv_spread_vol_points")) else None
     direction = "UNAVAILABLE"
     if finite(prior):
@@ -229,19 +247,20 @@ def main() -> None:
     if not CURRENT.exists():
         raise SystemExit(f"Missing {CURRENT}")
 
+    market_date = now.date().isoformat()
     official = official_skew_close()
     proxy_error = None
     try:
         proxy = live_proxy(now)
     except Exception as exc:
         proxy_error = f"{type(exc).__name__}: {exc}"
-        prior_row = prior_live_row()
+        prior_row = prior_live_row(market_date)
         if not prior_row:
             raise
         proxy = {
             "spread": float(prior_row["put_call_iv_spread_vol_points"]),
             "ratio": float(prior_row["put_call_iv_ratio"]) if finite(prior_row.get("put_call_iv_ratio")) else None,
-            "direction": last_live_direction(),
+            "direction": last_live_direction(market_date),
             "spot": float(prior_row["spot"]) if finite(prior_row.get("spot")) else None,
             "expiry": prior_row.get("expiry"),
             "dte": int(float(prior_row["dte"])) if finite(prior_row.get("dte")) else None,
@@ -288,6 +307,7 @@ def main() -> None:
     CURRENT.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
     append_history({
+        "market_date": market_date,
         "timestamp_et": now.isoformat(),
         "expiry": proxy["expiry"],
         "dte": proxy["dte"],

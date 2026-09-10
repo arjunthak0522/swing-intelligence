@@ -120,24 +120,38 @@ def evaluate(payload: dict, prior: dict | None) -> dict:
 
     if not oversold_gate:
         state, action = "WAIT", "WAIT"
+        reason = "Oversold setup gate is not active."
     elif fast_count >= 2:
         state, action = "GO_EARLY", "GO_EARLY"
+        reason = "Oversold setup is active and at least two independent fast reversal families are turning."
     elif fast_count >= 1 and context_count >= 1:
         state, action = "GO_EARLY", "GO_EARLY"
+        reason = "Oversold setup is active with at least one fast reversal family and at least one independent context turn."
     elif fast_count >= 1 or context_count >= 2:
         state, action = "WATCH", "WATCH"
+        reason = "Oversold setup is active and reversal evidence is developing, but the GO EARLY threshold is not met."
     else:
         state, action = "WAIT", "WAIT"
+        reason = "Oversold setup is active, but reversal evidence has not reached WATCH or GO EARLY."
+
+    fast_families = {
+        "FAST_BREADTH_TURN": bool((payload.get("families") or {}).get("fast_breadth_turn")),
+        "MOMENTUM_TURN": bool((payload.get("families") or {}).get("momentum_turn")),
+        "NET_VOLUME_TURN": bool((payload.get("families") or {}).get("net_volume_turn")),
+        "DOWN_UP_RATIO_RELIEF": bool((payload.get("families") or {}).get("down_up_ratio_relief")),
+    }
 
     return {
         "engine_version": "REENTRY_UNIFIED_v1",
         "primary_engine": True,
         "oversold_gate": oversold_gate,
         "fast_family_count": fast_count,
+        "fast_families": fast_families,
         "context_support_count": context_count,
         "context_support": context,
         "state": state,
         "decision": action,
+        "decision_reason": reason,
         "logic": "Oversold setup required. GO EARLY when either 2+ fast reversal families turn, or 1 fast family turns with at least 1 independent context turn from MMFD, NASI+, VVIX, or SKEW.",
     }
 
@@ -171,11 +185,22 @@ def main() -> None:
         "decision": result["decision"],
         "oversold_gate": int(result["oversold_gate"]),
         "fast_family_count": result["fast_family_count"],
+        "FAST_BREADTH_TURN": int(result["fast_families"]["FAST_BREADTH_TURN"]),
+        "MOMENTUM_TURN": int(result["fast_families"]["MOMENTUM_TURN"]),
+        "NET_VOLUME_TURN": int(result["fast_families"]["NET_VOLUME_TURN"]),
+        "DOWN_UP_RATIO_RELIEF": int(result["fast_families"]["DOWN_UP_RATIO_RELIEF"]),
         "context_support_count": result["context_support_count"],
         "MMFD_IMPROVING": int(result["context_support"]["MMFD_IMPROVING"]),
         "NASI_TURNING_UP": int(result["context_support"]["NASI_TURNING_UP"]),
         "VVIX_EASING": int(result["context_support"]["VVIX_EASING"]),
         "SKEW_NARROWING": int(result["context_support"]["SKEW_NARROWING"]),
+        "SPXA20R": values.get("SPXA20R"),
+        "NYMO": values.get("NYMO"),
+        "NAMO": values.get("NAMO"),
+        "NYUD": values.get("NYUD"),
+        "NAUD": values.get("NAUD"),
+        "nyse_down_up_ratio": values.get("nyse_down_up_ratio"),
+        "nasdaq_down_up_ratio": values.get("nasdaq_down_up_ratio"),
         "MMFD": values.get("MMFD"),
         "NASI_RSI": values.get("NASI_RSI"),
         "VVIX": values.get("VVIX"),

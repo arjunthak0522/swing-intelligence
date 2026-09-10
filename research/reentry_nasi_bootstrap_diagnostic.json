@@ -1,0 +1,55 @@
+{
+  "classification": "RESEARCH_ONLY_DIAGNOSTIC",
+  "engine_impact": "NONE",
+  "generated_at": "2026-09-10T22:29:41.094936+00:00",
+  "market_date": "2026-09-10",
+  "formula_version": "NASI_PLUS_RSI14_RANA_19_39_EMA4_EMA10_v1",
+  "requested_years": [
+    2023,
+    2024,
+    2025,
+    2026
+  ],
+  "loaded_years": [
+    2026
+  ],
+  "source_complete": false,
+  "materially_longer_history": false,
+  "valid_multi_year_test": false,
+  "existing_current_year": {
+    "formula_version": "NASI_PLUS_RSI14_RANA_19_39_EMA4_EMA10_v1",
+    "provisional_intraday": true,
+    "bootstrap_start_date": "2026-01-02",
+    "bootstrap_end_date": "2026-09-08",
+    "completed_daily_observations": 170,
+    "live_advances": 1385.0,
+    "live_declines": 3429.0,
+    "ratio_adjusted_net_advances": -424.5949314499377,
+    "mcclellan_oscillator": -32.62207403384076,
+    "summation_index": -2419.499065873257,
+    "nasi_rsi": 27.631812407716453,
+    "nasi_ema4": 32.3122830662294,
+    "nasi_ema10": 39.24692032521133,
+    "prior_completed_rsi": 32.1457296114951,
+    "direction_vs_prior_close": "FALLING",
+    "oversold_below_30": true,
+    "extreme_oversold_below_10": false,
+    "historical_source": "Nasdaq Trader daily market file for verified current-year history",
+    "intraday_source": "StockCharts Nasdaq advancing/declining issues"
+  },
+  "multi_year": null,
+  "comparison": {
+    "rsi_difference_multi_year_minus_current_year": null,
+    "direction_match": null,
+    "oversold_classification_match": null,
+    "existing_observations": 170,
+    "multi_year_observations": null
+  },
+  "source_errors": [
+    "2023: ValueError: Could not resolve Nasdaq date column for 2023 from fields: []",
+    "2024: ValueError: Could not resolve Nasdaq date column for 2024 from fields: []",
+    "2025: ValueError: Could not resolve Nasdaq date column for 2025 from fields: []"
+  ],
+  "promotion_status": "NO_CHANGE_TO_LIVE_NASI_PLUS",
+  "diagnostic_status": "INCOMPLETE_SOURCE_HISTORY"
+}

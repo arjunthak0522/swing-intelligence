@@ -1,19 +1,21 @@
-name: RE-ENTRY Unified Engine Manual Refresh
+name: RE-ENTRY Unified Prospective Capture
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '*/15 13-22 * * 1-5'
 
 permissions:
   contents: write
 
 concurrency:
-  group: reentry-unified-manual
+  group: reentry-unified-prospective-capture
   cancel-in-progress: false
 
 jobs:
-  snapshot:
+  capture:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,29 +32,19 @@ jobs:
         run: python tools/reentry_mmfd_intraday.py
       - name: Calculate SPX downside skew
         run: python tools/reentry_skew_intraday.py
-      - name: Calculate single RE-ENTRY decision
+      - name: Calculate unified RE-ENTRY decision
         run: python tools/reentry_unified_engine.py
       - name: Finalize canonical unified snapshot
         run: python tools/reentry_unified_snapshot_finalize.py
-      - name: Persist unified RE-ENTRY state
+      - name: Persist prospective point-in-time snapshot
         run: |
           if [ -z "$(git status --porcelain -- data/reentry/exhaustion_intraday_history.csv data/reentry/exhaustion_intraday_current.json data/reentry/skew_intraday_history.csv data/reentry/unified_engine_history.csv data/reentry/unified_snapshot_ledger.csv)" ]; then
-            echo "No RE-ENTRY state change"
+            echo "No prospective RE-ENTRY state change"
             exit 0
           fi
           git config user.name "re-entry-engine[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/reentry/exhaustion_intraday_history.csv data/reentry/exhaustion_intraday_current.json data/reentry/skew_intraday_history.csv data/reentry/unified_engine_history.csv data/reentry/unified_snapshot_ledger.csv
-          git commit -m "Record unified RE-ENTRY state [skip ci]"
+          git commit -m "Capture prospective unified RE-ENTRY state [skip ci]"
           git pull --rebase origin intraday-signal-research
           git push origin HEAD:intraday-signal-research
-      - uses: actions/upload-artifact@v4
-        with:
-          name: reentry-unified-engine
-          path: |
-            data/reentry/exhaustion_intraday_history.csv
-            data/reentry/exhaustion_intraday_current.json
-            data/reentry/skew_intraday_history.csv
-            data/reentry/unified_engine_history.csv
-            data/reentry/unified_snapshot_ledger.csv
-          retention-days: 30

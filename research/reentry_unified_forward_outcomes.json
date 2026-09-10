@@ -1,0 +1,897 @@
+{
+  "classification": "RESEARCH_ONLY_PROSPECTIVE",
+  "engine_impact": "NONE",
+  "generated_at": "2026-09-10T22:04:27.006531+00:00",
+  "source": "data/reentry/unified_snapshot_ledger.csv",
+  "captured_snapshots": 0,
+  "horizons_sessions": [
+    1,
+    3,
+    5,
+    10,
+    15,
+    30,
+    60
+  ],
+  "event_definition": "First GO EARLY observation inside each prospectively captured continuous oversold-gate episode.",
+  "variants": {
+    "baseline": 1,
+    "confirm_2_snapshots": 2,
+    "confirm_3_snapshots": 3
+  },
+  "summaries": {
+    "baseline": {
+      "event_count": 0,
+      "SPY": {
+        "1D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "3D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "5D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "10D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "15D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "30D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "60D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        }
+      },
+      "QQQ": {
+        "1D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "3D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "5D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "10D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "15D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "30D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "60D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        }
+      }
+    },
+    "confirm_2_snapshots": {
+      "event_count": 0,
+      "SPY": {
+        "1D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "3D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "5D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "10D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "15D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "30D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "60D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        }
+      },
+      "QQQ": {
+        "1D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "3D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "5D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "10D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "15D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "30D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "60D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        }
+      }
+    },
+    "confirm_3_snapshots": {
+      "event_count": 0,
+      "SPY": {
+        "1D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "3D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "5D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "10D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "15D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "30D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "60D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        }
+      },
+      "QQQ": {
+        "1D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "3D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "5D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "10D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "15D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "30D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        },
+        "60D": {
+          "returns": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MAE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          },
+          "MFE": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "positive_rate": null
+          }
+        }
+      }
+    }
+  },
+  "events": {
+    "baseline": [],
+    "confirm_2_snapshots": [],
+    "confirm_3_snapshots": []
+  },
+  "promotion_status": "INSUFFICIENT_UNTIL_OUTCOMES_MATURE",
+  "limitations": [
+    "Only prospective point-in-time events are included.",
+    "Forward outcomes use subsequent unadjusted daily closes relative to the captured intraday entry price.",
+    "MAE and MFE are based on daily closes, not intraday highs and lows.",
+    "No variant is promoted based on transition reduction alone."
+  ]
+}

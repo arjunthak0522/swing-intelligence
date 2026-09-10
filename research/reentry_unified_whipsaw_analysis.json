@@ -1,0 +1,118 @@
+{
+  "classification": "RESEARCH_ONLY_PROSPECTIVE",
+  "engine_impact": "NONE",
+  "generated_at": "2026-09-10T22:04:26.037285+00:00",
+  "source": "unified_engine_history.csv",
+  "purpose": "Measure state instability and persistence using only actually captured REENTRY_UNIFIED_v1 snapshots. No historical states are invented.",
+  "unified_history_rows": 2,
+  "market_days": 1,
+  "aggregate": {
+    "state_transition_count": 0,
+    "go_early_episode_count": 0,
+    "watch_episode_count": 0,
+    "go_early_under_10m_count": 0,
+    "watch_under_10m_count": 0,
+    "family_changes_at_state_transitions": {}
+  },
+  "daily": {
+    "2026-09-10": {
+      "snapshots": 2,
+      "state_counts": {
+        "WAIT": 2
+      },
+      "transition_count": 0,
+      "transition_types": {},
+      "transition_family_changes": {},
+      "max_state": "WAIT",
+      "final_state": "WAIT",
+      "go_early_episodes": 0,
+      "watch_episodes": 0,
+      "wait_episodes": 1,
+      "go_early_durations_minutes": [],
+      "watch_durations_minutes": [],
+      "ephemeral_go_under_10m": 0,
+      "ephemeral_watch_under_10m": 0,
+      "median_snapshot_spacing_minutes": 8.96119665,
+      "family_flip_analysis": {
+        "FAST_BREADTH_TURN": {
+          "observations": 0,
+          "true_count": 0,
+          "flip_count": 0
+        },
+        "MOMENTUM_TURN": {
+          "observations": 0,
+          "true_count": 0,
+          "flip_count": 0
+        },
+        "NET_VOLUME_TURN": {
+          "observations": 0,
+          "true_count": 0,
+          "flip_count": 0
+        },
+        "DOWN_UP_RATIO_RELIEF": {
+          "observations": 0,
+          "true_count": 0,
+          "flip_count": 0
+        },
+        "MMFD_IMPROVING": {
+          "observations": 2,
+          "true_count": 0,
+          "flip_count": 0
+        },
+        "NASI_TURNING_UP": {
+          "observations": 2,
+          "true_count": 0,
+          "flip_count": 0
+        },
+        "VVIX_EASING": {
+          "observations": 2,
+          "true_count": 0,
+          "flip_count": 0
+        },
+        "SKEW_NARROWING": {
+          "observations": 2,
+          "true_count": 1,
+          "flip_count": 1
+        }
+      }
+    }
+  },
+  "precursor_metric_direction_flip_analysis": {
+    "2026-09-10": {
+      "SPXA20R": {
+        "observations": 16,
+        "direction_flip_count": 3
+      },
+      "NYUD": {
+        "observations": 16,
+        "direction_flip_count": 8
+      },
+      "NAUD": {
+        "observations": 16,
+        "direction_flip_count": 4
+      },
+      "nyse_down_up_ratio": {
+        "observations": 16,
+        "direction_flip_count": 8
+      },
+      "nasdaq_down_up_ratio": {
+        "observations": 16,
+        "direction_flip_count": 6
+      },
+      "NASI_RSI": {
+        "observations": 10,
+        "direction_flip_count": 6
+      },
+      "VVIX": {
+        "observations": 4,
+        "direction_flip_count": 1
+      }
+    }
+  },
+  "limitations": [
+    "This is prospective captured-history analysis, not a historical reconstruction.",
+    "Durations reflect snapshot spacing, so irregular workflow cadence can understate or overstate persistence.",
+    "A family change at the same snapshot as a state transition is attribution evidence, not proof of causation.",
+    "No persistence or hysteresis rule is promoted by this report."
+  ]
+}

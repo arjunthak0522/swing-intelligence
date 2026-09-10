@@ -1,0 +1,55 @@
+name: RE-ENTRY Unified Research Suite
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [intraday-signal-research]
+    paths:
+      - 'data/reentry/unified_engine_history.csv'
+      - 'data/reentry/unified_snapshot_ledger.csv'
+      - 'data/reentry/exhaustion_intraday_history.csv'
+      - 'tools/reentry_unified_whipsaw_analysis.py'
+      - 'tools/reentry_unified_persistence_shadow.py'
+      - 'tools/reentry_unified_forward_outcomes.py'
+      - '.github/workflows/reentry-unified-whipsaw-analysis.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: reentry-unified-research-suite
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: intraday-signal-research
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install research dependencies
+        run: python -m pip install --quiet pandas yfinance
+      - name: Analyze captured unified-state whipsaw
+        run: python tools/reentry_unified_whipsaw_analysis.py
+      - name: Analyze persistence variants in shadow
+        run: python tools/reentry_unified_persistence_shadow.py
+      - name: Update prospective forward outcomes
+        run: python tools/reentry_unified_forward_outcomes.py
+      - name: Commit research reports when changed
+        run: |
+          files="research/reentry_unified_whipsaw_analysis.json research/reentry_unified_whipsaw_analysis.md research/reentry_unified_persistence_shadow.json research/reentry_unified_persistence_shadow.md research/reentry_unified_forward_outcomes.json research/reentry_unified_forward_outcomes.md"
+          if [ -z "$(git status --porcelain -- $files)" ]; then
+            echo "No unified-research change"
+            exit 0
+          fi
+          git config user.name "re-entry-research[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add $files
+          git commit -m "Update unified RE-ENTRY research [skip ci]"
+          git pull --rebase origin intraday-signal-research
+          git push origin HEAD:intraday-signal-research

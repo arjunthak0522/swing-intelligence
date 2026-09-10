@@ -1,4 +1,4 @@
-name: RE-ENTRY Exhaustion Live Snapshot
+name: RE-ENTRY Daily Context Capture
 
 on:
   workflow_dispatch:
@@ -7,11 +7,6 @@ on:
     paths:
       - 'tools/reentry_exhaustion_live_snapshot.py'
       - 'tools/reentry_exhaustion_persist.py'
-      - 'tools/reentry_washout_event_tracker.py'
-      - 'tools/reentry_washout_event_outcomes.py'
-      - 'tools/reentry_washout_vs_model.py'
-      - 'tools/reentry_exhaustion_shadow_outcomes.py'
-      - 'tools/reentry_exhaustion_reliability_audit.py'
       - '.github/workflows/reentry-exhaustion-live-snapshot.yml'
   schedule:
     - cron: '10 21 * * 1-5'
@@ -19,55 +14,42 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: reentry-daily-context-capture
+  cancel-in-progress: false
+
 jobs:
   snapshot:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
           ref: intraday-signal-research
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install prospective validation dependencies
-        run: pip install pandas numpy yfinance lxml
-      - name: Capture StockCharts selling exhaustion research snapshot
+      - name: Capture completed daily exhaustion context
         run: python tools/reentry_exhaustion_live_snapshot.py | tee reentry-exhaustion-live-snapshot.json
-      - name: Persist completed daily breadth history
+      - name: Persist daily context used by unified engine
         run: python tools/reentry_exhaustion_persist.py
-      - name: Track first washout as early go event
-        run: python tools/reentry_washout_event_tracker.py
-      - name: Update washout-event forward outcomes
-        run: python tools/reentry_washout_event_outcomes.py
-      - name: Compare first washout against existing model timing
-        run: python tools/reentry_washout_vs_model.py
-      - name: Update prospective daily-state 5D/10D/30D/60D outcomes
-        run: python tools/reentry_exhaustion_shadow_outcomes.py
-      - name: Run selling exhaustion reliability gates
-        run: python tools/reentry_exhaustion_reliability_audit.py
-      - name: Commit research history, events, paired timing, outcomes, and reliability status when changed
+      - name: Commit daily context only
         run: |
-          if [ -z "$(git status --porcelain -- data/reentry/exhaustion_history.csv data/reentry/washout_events.csv data/reentry/washout_event_outcomes.csv data/reentry/washout_vs_model.csv data/reentry/exhaustion_outcomes.csv data/reentry/exhaustion_reliability.json)" ]; then
-            echo "No research state change to commit"
+          if [ -z "$(git status --porcelain -- data/reentry/exhaustion_history.csv)" ]; then
+            echo "No daily context change"
             exit 0
           fi
-          git config user.name "github-actions[bot]"
+          git config user.name "re-entry-context[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/reentry/exhaustion_history.csv data/reentry/washout_events.csv data/reentry/washout_event_outcomes.csv data/reentry/washout_vs_model.csv data/reentry/exhaustion_outcomes.csv data/reentry/exhaustion_reliability.json
-          git commit -m "Record selling exhaustion research state"
+          git add data/reentry/exhaustion_history.csv
+          git commit -m "Record RE-ENTRY daily context [skip ci]"
           git pull --rebase origin intraday-signal-research
           git push origin HEAD:intraday-signal-research
       - uses: actions/upload-artifact@v4
         with:
-          name: reentry-exhaustion-live-snapshot
+          name: reentry-daily-context
           path: |
             reentry-exhaustion-live-snapshot.json
             data/reentry/exhaustion_history.csv
-            data/reentry/washout_events.csv
-            data/reentry/washout_event_outcomes.csv
-            data/reentry/washout_vs_model.csv
-            data/reentry/exhaustion_outcomes.csv
-            data/reentry/exhaustion_reliability.json
-            artifacts/selling_exhaustion_reliability/reliability_report.json
-            artifacts/selling_exhaustion_reliability/washout_vs_model.json
           retention-days: 30
