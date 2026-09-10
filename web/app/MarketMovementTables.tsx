@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
+import type { WashoutSnapshot } from "../lib/reentry";
 import { ChevronDown, ChevronRight, Radio } from "lucide-react";
 
 type SubsectorProxy = {
@@ -23,69 +24,6 @@ type Snapshot = {
 };
 
 type LiveSnapshot = { quotes: Record<string, { change_pct: number | null }> };
-
-type WashoutSnapshot = {
-  state?: string;
-  candidate_action?: string;
-  turn_family_count?: number;
-  generated_at_utc?: string;
-  daily_context_state?: string;
-  families?: Record<string, boolean>;
-  values?: {
-    timestamp_et?: string;
-    SPXA20R?: number | null;
-    MMFD?: number | null;
-    MMFD_STATE?: string | null;
-    VVIX?: number | null;
-    VVIX_STATE?: string | null;
-    VVIX_PERCENTILE_2Y?: number | null;
-    VVIX_DIRECTION?: string | null;
-    SKEW_LIVE_PROXY?: number | null;
-    SKEW_LIVE_PROXY_RATIO?: number | null;
-    SKEW_DIRECTION?: string | null;
-    SKEW_OFFICIAL_CLOSE?: number | null;
-    SKEW_OFFICIAL_PERCENTILE_2Y?: number | null;
-    NYMO?: number | null;
-    NAMO?: number | null;
-    NYUD?: number | null;
-    NAUD?: number | null;
-    nyse_down_up_ratio?: number | null;
-    nasdaq_down_up_ratio?: number | null;
-    NASI_RSI?: number | null;
-    NASI_EMA4?: number | null;
-    NASI_EMA10?: number | null;
-    NASI_DIRECTION?: string | null;
-  };
-  mmfd_live?: {
-    universe_size?: number;
-    valid_5d_observations?: number;
-    coverage_pct?: number;
-    above_5dma_count?: number;
-  };
-  vvix_live?: {
-    value?: number;
-    prior_close?: number;
-    change_points_vs_prior_close?: number;
-    direction_vs_prior_close?: string;
-    historical_percentile_2y?: number;
-    completed_history_sessions?: number;
-    state?: string;
-  };
-  unified_engine?: {
-    engine_version?: string;
-    primary_engine?: boolean;
-    oversold_gate?: boolean;
-    fast_family_count?: number;
-    context_support_count?: number;
-    context_support?: Record<string, boolean>;
-    state?: string;
-    decision?: string;
-    logic?: string;
-    market_phase?: string;
-    timestamp_et?: string;
-    market_date?: string;
-  };
-};
 
 const sectorNames: Record<string, string> = {
   XLC: "Communication Services", XLY: "Consumer Discretionary", XLP: "Consumer Staples",
@@ -279,31 +217,11 @@ function SortButton({ active, direction, children, onClick }: { active: boolean;
   return <button type="button" className={`sort-chip${active ? " active" : ""}`} onClick={onClick}>{children}{active ? <ChevronDown size={12} className={direction === "asc" ? "sort-up" : ""} /> : null}</button>;
 }
 
-export default function MarketMovementTables({ snapshot, live }: { snapshot: Snapshot; live: LiveSnapshot | null }) {
+export default function MarketMovementTables({ snapshot, live, washout }: { snapshot: Snapshot; live: LiveSnapshot | null; washout: WashoutSnapshot | null }) {
   const [sectorSort, setSectorSort] = useState<SectorSort>("today");
   const [sectorDirection, setSectorDirection] = useState<SortDirection>("desc");
   const [subsectorSort, setSubsectorSort] = useState<SubsectorSort>("today");
   const [subsectorDirection, setSubsectorDirection] = useState<SortDirection>("desc");
-  const [washout, setWashout] = useState<WashoutSnapshot | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    const load = async () => {
-      try {
-        const url = `https://raw.githubusercontent.com/arjunthak0522/swing-intelligence/intraday-signal-research/data/reentry/exhaustion_intraday_current.json?t=${Date.now()}`;
-        const response = await fetch(url, { cache: "no-store" });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
-        if (active) setWashout(data);
-      } catch {
-        if (active) setWashout(null);
-      }
-    };
-    load();
-    const timer = window.setInterval(load, 60_000);
-    return () => { active = false; window.clearInterval(timer); };
-  }, []);
-
   const toggleSectorSort = (next: SectorSort) => {
     if (next === sectorSort) setSectorDirection((d) => d === "desc" ? "asc" : "desc");
     else { setSectorSort(next); setSectorDirection(next === "drawdown" ? "asc" : "desc"); }

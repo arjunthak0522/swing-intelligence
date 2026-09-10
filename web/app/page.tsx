@@ -190,7 +190,7 @@ export default async function Home() {
       <UnifiedHero washout={washout} />
       {snapshot && episode ? <EpisodeSummary episode={episode} live={intraday} /> : null}
       <IntradayMonitor live={intraday} washout={washout} />
-      {snapshot ? <MarketMovementTables snapshot={snapshot} live={intraday} /> : null}
+      {snapshot ? <MarketMovementTables snapshot={snapshot} live={intraday} washout={washout} /> : null}
     </>}
     <footer>One RE-ENTRY engine. Live/provisional during market hours, final after the close. Historical analog research is supporting evidence only and cannot override the primary decision.</footer>
   </main>;
