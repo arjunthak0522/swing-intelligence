@@ -63,6 +63,35 @@ def load_existing() -> list[dict]:
         return list(csv.DictReader(f))
 
 
+def prior_market_row(rows: list[dict], current_date: str) -> dict | None:
+    earlier = [r for r in rows if r.get("market_date") and r["market_date"] < current_date]
+    if not earlier:
+        return None
+    return max(earlier, key=lambda r: r["market_date"])
+
+
+def apply_temporal_state(row: dict, rows: list[dict]) -> dict:
+    # The first observable turn after OVERSOLD is always WASHOUT. CONFIRMED is
+    # allowed only on a later market date when the turn persists or broadens.
+    if row.get("state") != "WASHOUT":
+        return row
+
+    prior = prior_market_row(rows, str(row.get("market_date", "")))
+    if not prior:
+        return row
+
+    prior_state = prior.get("state", "")
+    try:
+        turn_family_count = int(float(row.get("turn_family_count", 0) or 0))
+    except (TypeError, ValueError):
+        turn_family_count = 0
+
+    if prior_state in {"WASHOUT", "CONFIRMED"} and turn_family_count >= 2:
+        row["state"] = "CONFIRMED"
+        row["candidate_action"] = "GO_EARLY"
+    return row
+
+
 def main() -> None:
     if not SNAPSHOT.exists():
         raise SystemExit(f"missing snapshot: {SNAPSHOT}")
@@ -72,6 +101,8 @@ def main() -> None:
         raise SystemExit("could not determine market_date")
 
     rows = load_existing()
+    row = apply_temporal_state(row, rows)
+
     by_date = {r.get("market_date", ""): r for r in rows if r.get("market_date")}
     by_date[row["market_date"]] = {k: str(row.get(k, "")) for k in FIELDNAMES}
     ordered = [by_date[d] for d in sorted(by_date)]
@@ -82,7 +113,12 @@ def main() -> None:
         writer.writeheader()
         writer.writerows(ordered)
 
-    print(json.dumps({"persisted": row["market_date"], "rows": len(ordered), "path": str(OUT)}))
+    print(json.dumps({
+        "persisted": row["market_date"],
+        "state": row["state"],
+        "rows": len(ordered),
+        "path": str(OUT),
+    }))
 
 
 if __name__ == "__main__":
