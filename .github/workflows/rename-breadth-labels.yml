@@ -1,6 +1,5 @@
-name: Rename breadth labels
+name: Apply live VVIX dashboard context
 
-# One-time UI cleanup: plain-English names first, symbols second.
 on:
   push:
     branches: [main]
@@ -11,37 +10,45 @@ permissions:
   contents: write
 
 jobs:
-  rename:
+  update:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Replace ticker-first labels with plain-English names
+      - name: Add VVIX live context card
         run: |
           python - <<'PY'
           from pathlib import Path
           p = Path('web/app/MarketMovementTables.tsx')
           s = p.read_text()
-          replacements = {
-              'Fast breadth · SPXA20R': 'S&P 500 above 20-day average (SPXA20R)',
-              'Fast breadth · MMFD': 'U.S. stocks above 5-day average (MMFD)',
-              'Momentum · NYMO': 'NYSE breadth momentum (NYMO)',
-              'Momentum · NAMO': 'Nasdaq breadth momentum (NAMO)',
-              'NASI+ breadth RSI': 'Nasdaq breadth summation RSI (NASI+)',
-              'A/D volume · NYSE': 'NYSE advance/decline volume',
-              'A/D volume · Nasdaq': 'Nasdaq advance/decline volume',
-              'Selling intensity · NYSE': 'NYSE down/up volume ratio',
-              'Selling intensity · Nasdaq': 'Nasdaq down/up volume ratio',
-          }
-          for old, new in replacements.items():
-              if old not in s:
-                  raise SystemExit(f'Missing expected label: {old}')
-              s = s.replace(old, new)
+
+          s = s.replace(
+              '    MMFD_STATE?: string | null;\n',
+              '    MMFD_STATE?: string | null;\n    VVIX?: number | null;\n    VVIX_STATE?: string | null;\n    VVIX_PERCENTILE_2Y?: number | null;\n    VVIX_DIRECTION?: string | null;\n'
+          )
+
+          s = s.replace(
+              '  mmfd_live?: {\n    universe_size?: number;\n    valid_5d_observations?: number;\n    coverage_pct?: number;\n    above_5dma_count?: number;\n  };\n};',
+              '  mmfd_live?: {\n    universe_size?: number;\n    valid_5d_observations?: number;\n    coverage_pct?: number;\n    above_5dma_count?: number;\n  };\n  vvix_live?: {\n    value?: number;\n    prior_close?: number;\n    change_points_vs_prior_close?: number;\n    direction_vs_prior_close?: string;\n    historical_percentile_2y?: number;\n    completed_history_sessions?: number;\n    state?: string;\n  };\n};'
+          )
+
+          anchor = '''function momentumState(value?: number | null) {'''
+          vvix_fn = '''function vvixState(percentile?: number | null, direction?: string | null) {\n  if (!finite(percentile)) return { label: "UNAVAILABLE", cls: "muted", note: "Waiting for live volatility-of-volatility data." };\n  const dir = (direction || "").toUpperCase();\n  const suffix = dir === "RISING" ? " and rising" : dir === "FALLING" ? " and falling" : "";\n  if (Number(percentile) >= 95) return { label: "EXTREME STRESS", cls: "bad-text", note: `VVIX is above 95% of its last two years${suffix}.` };\n  if (Number(percentile) >= 80) return { label: "HIGH STRESS", cls: "bad-text", note: `VVIX is in the top 20% of its two-year range${suffix}.` };\n  if (Number(percentile) >= 60) return { label: "ELEVATED", cls: "warn", note: `Volatility stress is above normal${suffix}.` };\n  if (Number(percentile) >= 20) return { label: "NORMAL", cls: "muted", note: `Volatility-of-volatility is in a normal historical zone${suffix}.` };\n  return { label: "CALM", cls: "good-text", note: `Volatility-of-volatility is unusually subdued${suffix}.` };\n}\n\n'''
+          if anchor not in s:
+              raise SystemExit('Missing momentumState anchor')
+          s = s.replace(anchor, vvix_fn + anchor, 1)
+
+          card_anchor = '''          <MetricStat label="Nasdaq breadth summation RSI (NASI+)" value={plain(w?.NASI_RSI, 1)} state={nasiState(w?.NASI_RSI, w?.NASI_DIRECTION)} reference="<10 extreme · <30 oversold · 50 neutral · >70 strong" note={`${nasiState(w?.NASI_RSI, w?.NASI_DIRECTION).note}${finite(w?.NASI_EMA10) ? ` EMA10 ${plain(w?.NASI_EMA10, 1)}.` : ""}`} marker={position(w?.NASI_RSI, 0, 100)} />\n'''
+          vvix_card = '''          <MetricStat label="Volatility of VIX (VVIX)" value={plain(w?.VVIX, 1)} state={vvixState(w?.VVIX_PERCENTILE_2Y, w?.VVIX_DIRECTION)} reference="2Y percentile: <20 calm · 20-60 normal · 60-80 elevated · 80-95 high · 95+ extreme" note={`${vvixState(w?.VVIX_PERCENTILE_2Y, w?.VVIX_DIRECTION).note}${finite(w?.VVIX_PERCENTILE_2Y) ? ` ${plain(w?.VVIX_PERCENTILE_2Y, 0)}th percentile.` : ""}`} marker={position(w?.VVIX_PERCENTILE_2Y, 0, 100)} />\n'''
+          if card_anchor not in s:
+              raise SystemExit('Missing NASI card anchor')
+          s = s.replace(card_anchor, card_anchor + vvix_card, 1)
+
           p.write_text(s)
           PY
-      - name: Commit label cleanup
+      - name: Commit VVIX UI
         run: |
           git config user.name 're-entry-ui[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add web/app/MarketMovementTables.tsx
-          git commit -m 'Use plain-English breadth indicator names [skip ci]'
+          git commit -m 'Show live VVIX volatility stress context [skip ci]'
           git push
