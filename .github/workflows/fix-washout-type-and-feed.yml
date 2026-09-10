@@ -1,0 +1,56 @@
+name: Fix unified feed type mismatch
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-washout-type-and-feed.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reuse canonical WashoutSnapshot type and server snapshot
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('web/app/MarketMovementTables.tsx')
+          s = p.read_text()
+          s = s.replace('import { useEffect, useMemo, useState, type ReactNode } from "react";', 'import { useMemo, useState, type ReactNode } from "react";\nimport type { WashoutSnapshot } from "../lib/reentry";')
+          start = s.index('type WashoutSnapshot = {')
+          end_marker = '\n};\n\nconst sectorNames:'
+          end = s.index(end_marker, start)
+          s = s[:start] + 'const sectorNames:' + s[end + len('\n};\n\nconst sectorNames:'):]
+          old_start = 'export default function MarketMovementTables({ snapshot, live }: { snapshot: Snapshot; live: LiveSnapshot | null }) {'
+          if old_start not in s:
+              raise SystemExit('component signature not found')
+          s = s.replace(old_start, 'export default function MarketMovementTables({ snapshot, live, washout }: { snapshot: Snapshot; live: LiveSnapshot | null; washout: WashoutSnapshot | null }) {', 1)
+          state_start = s.index('  const [washout, setWashout] = useState<WashoutSnapshot | null>(null);')
+          after = s.index('\n\n  const toggleSectorSort', state_start)
+          s = s[:state_start] + s[after+2:]
+          p.write_text(s)
+
+          p = Path('web/app/page.tsx')
+          s = p.read_text()
+          old = '<MarketMovementTables snapshot={snapshot} live={intraday} />'
+          new = '<MarketMovementTables snapshot={snapshot} live={intraday} washout={washout} />'
+          if old not in s:
+              raise SystemExit('page component call not found')
+          p.write_text(s.replace(old, new, 1))
+          PY
+      - name: Build dashboard
+        working-directory: web
+        run: |
+          npm ci
+          npm run build
+      - name: Push verified fix
+        run: |
+          git config user.name 're-entry-ui[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add web/app/MarketMovementTables.tsx web/app/page.tsx
+          git commit -m 'Use one server-fetched unified snapshot across dashboard [skip ci]'
+          git push origin HEAD:main
