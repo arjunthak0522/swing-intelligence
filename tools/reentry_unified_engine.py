@@ -194,6 +194,59 @@ def classify_cash_context(values: dict, oversold_gate: bool, deploy: bool) -> di
     }
 
 
+def classify_recovery_stage(deploy: bool, current_fast: dict[str, bool], context: dict[str, bool]) -> dict:
+    current_fast_count = sum(current_fast.values())
+    context_count = sum(context.values())
+    breadth_confirmation = {
+        "FAST_BREADTH_CURRENT": bool(current_fast.get("FAST_BREADTH_TURN")),
+        "MOMENTUM_CURRENT": bool(current_fast.get("MOMENTUM_TURN")),
+        "MMFD_IMPROVING": bool(context.get("MMFD_IMPROVING")),
+        "NASI_TURNING_UP": bool(context.get("NASI_TURNING_UP")),
+    }
+    breadth_confirmation_count = sum(breadth_confirmation.values())
+    volume_confirmation = bool(current_fast.get("NET_VOLUME_TURN") or current_fast.get("DOWN_UP_RATIO_RELIEF"))
+    stress_relief_count = int(bool(context.get("VVIX_EASING"))) + int(bool(context.get("SKEW_NARROWING")))
+
+    components = {
+        "current_fast_family_count": current_fast_count,
+        "context_support_count": context_count,
+        "breadth_confirmation_count": breadth_confirmation_count,
+        "breadth_confirmation": breadth_confirmation,
+        "volume_confirmation": volume_confirmation,
+        "stress_relief_count": stress_relief_count,
+    }
+
+    if not deploy:
+        return {
+            "recovery_stage": "NOT_APPLICABLE",
+            "recovery_stage_reason": "Recovery-stage grading activates only after a DEPLOY signal has fired.",
+            "confirmation_strength": "NOT_APPLICABLE",
+            "confirmation_components": components,
+            "recovery_stage_is_decision_input": False,
+        }
+
+    if current_fast_count >= 2 and breadth_confirmation_count >= 2 and context_count >= 2:
+        stage = "BROAD_CONFIRMATION"
+        strength = "BROAD"
+        reason = "The recovery is broadly confirmed: multiple fast reversal families are active now, breadth momentum is improving across multiple measures, and independent context support is present."
+    elif breadth_confirmation_count >= 1 and (current_fast_count >= 1 or context_count >= 2):
+        stage = "DEVELOPING"
+        strength = "BUILDING"
+        reason = "The recovery is developing: at least one breadth or momentum confirmation is active now, but confirmation is not yet broad enough to call the recovery fully established."
+    else:
+        stage = "EARLY"
+        strength = "NARROW"
+        reason = "The recovery is still early, not fully confirmed. A qualifying reversal has fired, but current breadth and momentum confirmation remains narrow; this is an early re-entry environment rather than an all-clear rally."
+
+    return {
+        "recovery_stage": stage,
+        "recovery_stage_reason": reason,
+        "confirmation_strength": strength,
+        "confirmation_components": components,
+        "recovery_stage_is_decision_input": False,
+    }
+
+
 def evaluate(payload: dict, prior: dict | None, recent: list[dict], latched_go: dict | None) -> dict:
     values = payload.get("values", {})
     current_fast = current_fast_families(payload)
@@ -260,7 +313,7 @@ def evaluate(payload: dict, prior: dict | None, recent: list[dict], latched_go: 
     deploy = action == "GO_EARLY"
     if deploy:
         deployment_signal = "DEPLOY"
-        deployment_reason = "A qualifying reversal has fired after an oversold reset. Begin deploying spare cash; today\'s signal remains latched through the session."
+        deployment_reason = "A qualifying reversal has fired after an oversold reset. Begin deploying spare cash; today's signal remains latched through the session."
     elif oversold_gate:
         deployment_signal = "WATCH"
         deployment_reason = "The market is oversold enough to be interesting, but reversal confirmation has not yet reached the deployment threshold."
@@ -269,6 +322,7 @@ def evaluate(payload: dict, prior: dict | None, recent: list[dict], latched_go: 
         deployment_reason = "There is no qualifying oversold re-entry setup. Keep spare cash available rather than forcing an entry."
 
     cash_context = classify_cash_context(values, oversold_gate, deploy)
+    recovery_context = classify_recovery_stage(deploy, current_fast, context)
 
     return {
         "engine_version": "REENTRY_UNIFIED_v1",
@@ -276,6 +330,7 @@ def evaluate(payload: dict, prior: dict | None, recent: list[dict], latched_go: 
         "deployment_signal": deployment_signal,
         "deployment_reason": deployment_reason,
         **cash_context,
+        **recovery_context,
         "oversold_gate": oversold_gate,
         "fast_family_count": fast_count,
         "fast_families": fast_families,
@@ -289,7 +344,7 @@ def evaluate(payload: dict, prior: dict | None, recent: list[dict], latched_go: 
         "state": state,
         "decision": action,
         "decision_reason": reason,
-        "logic": "Cash action is HOLD CASH when no oversold setup is active, WATCH when the canonical oversold gate is active but no GO has fired, and DEPLOY once GO EARLY qualifies. GO EARLY requires either 2+ fast reversal families within the last 30 minutes, or 1 recent fast family plus 1 current context turn. Once GO EARLY fires, DEPLOY remains latched through that market session and resets on the next market date. Market-condition labels are descriptive context and do not modify the trigger.",
+        "logic": "Cash action is HOLD CASH when no oversold setup is active, WATCH when the canonical oversold gate is active but no GO has fired, and DEPLOY once GO EARLY qualifies. GO EARLY requires either 2+ fast reversal families within the last 30 minutes, or 1 recent fast family plus 1 current context turn. Once GO EARLY fires, DEPLOY remains latched through that market session and resets on the next market date. Market-condition labels and recovery-stage labels are descriptive context only and do not modify the trigger.",
     }
 
 
@@ -326,6 +381,8 @@ def main() -> None:
         "decision": result["decision"],
         "deployment_signal": result["deployment_signal"],
         "market_condition": result["market_condition"],
+        "recovery_stage": result["recovery_stage"],
+        "confirmation_strength": result["confirmation_strength"],
         "extension_signal_count": result["extension_signal_count"],
         "weak_signal_count": result["weak_signal_count"],
         "go_latched_for_session": int(result["go_latched_for_session"]),

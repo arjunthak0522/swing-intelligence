@@ -19,6 +19,9 @@ type ProductEngineFields = {
   deployment_reason?: string;
   market_condition?: "EXTENDED" | "BALANCED" | "PULLBACK" | "OVERSOLD" | "RECOVERING_FROM_OVERSOLD" | string;
   market_condition_reason?: string;
+  recovery_stage?: "EARLY" | "DEVELOPING" | "BROAD_CONFIRMATION" | "NOT_APPLICABLE" | string;
+  recovery_stage_reason?: string;
+  confirmation_strength?: "NARROW" | "BUILDING" | "BROAD" | "NOT_APPLICABLE" | string;
   extension_signal_count?: number;
   weak_signal_count?: number;
 };
@@ -34,6 +37,12 @@ function stateClass(value: string) {
 function conditionLabel(value?: string) {
   if (value === "RECOVERING_FROM_OVERSOLD") return "RECOVERING FROM OVERSOLD";
   if (value === "EXTENDED") return "EXTENDED / OVERBOUGHT";
+  return (value || "UNAVAILABLE").replaceAll("_", " ");
+}
+
+function recoveryLabel(value?: string) {
+  if (value === "BROAD_CONFIRMATION") return "BROAD CONFIRMATION";
+  if (value === "NOT_APPLICABLE") return "N/A";
   return (value || "UNAVAILABLE").replaceAll("_", " ");
 }
 
@@ -78,6 +87,7 @@ function UnifiedHero({ washout }: { washout: WashoutSnapshot }) {
   const deployment = product.deployment_signal || (u.decision === "GO_EARLY" ? "DEPLOY" : u.decision === "WATCH" ? "WATCH" : "HOLD_CASH");
   const label = deployment === "HOLD_CASH" ? "HOLD CASH" : deployment;
   const condition = conditionLabel(product.market_condition);
+  const recovery = recoveryLabel(product.recovery_stage);
   const fast = u.fast_family_count ?? 0;
   const context = u.context_support_count ?? 0;
   const stamp = u.timestamp_et || washout.snapshot_generated_at_et || washout.values?.timestamp_et;
@@ -85,7 +95,7 @@ function UnifiedHero({ washout }: { washout: WashoutSnapshot }) {
     <div className="eyebrow-row"><span className="eyebrow">SPARE CASH SIGNAL</span><span className="freshness"><Clock3 size={14} /> {phaseLabel(u.market_phase)}</span></div>
     <div className="hero-grid">
       <div><div className={`signal ${stateClass(deployment)}`}>{label}</div><div className="signal-subline">{product.deployment_reason || u.decision_reason || "Canonical cash-deployment reason unavailable."}</div></div>
-      <div className="decision-summary"><span className="summary-label">MARKET CONDITION</span><h3 style={{ margin: "4px 0 10px" }}>{condition}</h3><p>{product.market_condition_reason || "Market-condition context unavailable."}</p><div className="decision-tags"><span><small>Oversold setup</small><b>{u.oversold_gate ? "YES" : "NO"}</b></span><span><small>Fast reversal families</small><b>{fast}/4</b></span><span><small>Context support</small><b>{context}/4</b></span></div><p>Snapshot {formatTimestamp(stamp)}. Engine {u.engine_version || "REENTRY_UNIFIED_v1"}.</p></div>
+      <div className="decision-summary"><span className="summary-label">MARKET CONDITION</span><h3 style={{ margin: "4px 0 10px" }}>{condition}</h3><p>{product.market_condition_reason || "Market-condition context unavailable."}</p>{deployment === "DEPLOY" ? <><span className="summary-label">RECOVERY STAGE</span><h3 style={{ margin: "4px 0 8px" }}>{recovery}</h3><p>{product.recovery_stage_reason || "Recovery-stage interpretation unavailable."}</p></> : null}<div className="decision-tags"><span><small>Oversold setup</small><b>{u.oversold_gate ? "YES" : "NO"}</b></span><span><small>Fast reversal families</small><b>{fast}/4</b></span><span><small>Context support</small><b>{context}/4</b></span>{deployment === "DEPLOY" ? <span><small>Confirmation</small><b>{product.confirmation_strength || "UNAVAILABLE"}</b></span> : null}</div><p>Snapshot {formatTimestamp(stamp)}. Engine {u.engine_version || "REENTRY_UNIFIED_v1"}.</p></div>
     </div>
   </section>;
 }
@@ -123,6 +133,6 @@ export default async function Home() {
       {snapshot ? <MarketMovementTables snapshot={snapshot} live={intraday} /> : <section className="card section-card"><div className="notice"><CircleAlert size={16} /> Sector and subsector context unavailable.</div></section>}
       <AggregateHistoricalEvidence evidence={historical} cashPolicy={cashPolicy} currentAction={currentAction} currentCondition={currentCondition} />
     </>}
-    <footer>REENTRY_UNIFIED_v1 is the only operational decision source. HOLD CASH is the normal state when no oversold setup exists; WATCH means an oversold setup is developing; DEPLOY means the qualifying reversal has fired. Market-condition labels are descriptive context and never create a second decision engine.</footer>
+    <footer>REENTRY_UNIFIED_v1 is the only operational decision source. HOLD CASH is the normal state when no oversold setup exists; WATCH means an oversold setup is developing; DEPLOY means the qualifying reversal has fired. Market-condition and recovery-stage labels are descriptive context and never create a second decision engine.</footer>
   </main>;
 }
