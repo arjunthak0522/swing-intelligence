@@ -1,5 +1,5 @@
 name: Re-entry Walk-Forward Validation
-# validation rerun 2026-09-11
+# validation rerun 2026-09-11 after historical dependency repair
 
 on:
   workflow_dispatch:
