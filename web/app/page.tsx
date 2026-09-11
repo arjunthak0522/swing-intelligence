@@ -2,7 +2,7 @@ import { CircleAlert, Clock3, Radio } from "lucide-react";
 import MarketMovementTables from "./MarketMovementTables";
 import ReentryDecisionDetails from "./ReentryDecisionDetails";
 import AggregateHistoricalEvidence from "./AggregateHistoricalEvidence";
-import { getHistoricalEpisodeEvidence } from "../lib/historicalEvidence";
+import { getCashPolicyEvidence, getHistoricalEpisodeEvidence } from "../lib/historicalEvidence";
 import {
   getIntradaySnapshot,
   getLatestSnapshot,
@@ -96,9 +96,12 @@ function MarketContext({ live, washout }: { live: IntradaySnapshot | null; washo
 }
 
 export default async function Home() {
-  const [snapshot, intraday, washout, historical] = await Promise.all([getLatestSnapshot(), getIntradaySnapshot(), getWashoutSnapshot(), getHistoricalEpisodeEvidence()]);
+  const [snapshot, intraday, washout, historical, cashPolicy] = await Promise.all([getLatestSnapshot(), getIntradaySnapshot(), getWashoutSnapshot(), getHistoricalEpisodeEvidence(), getCashPolicyEvidence()]);
   const feed = getFeedState(washout);
   const unified = washout?.unified_engine;
+  const product = unified as (typeof unified & ProductEngineFields) | undefined;
+  const currentAction = product?.deployment_signal || (unified?.decision === "GO_EARLY" ? "DEPLOY" : unified?.decision === "WATCH" ? "WATCH" : unified ? "HOLD_CASH" : null);
+  const currentCondition = product?.market_condition || null;
 
   return <main className="shell">
     <header className="topbar"><div><span className="brand">RE-ENTRY</span><span className="tagline">Know when waiting stops helping.</span></div><div className="top-status">{unified ? phaseLabel(unified.market_phase) : "UNAVAILABLE"}</div></header>
@@ -108,7 +111,7 @@ export default async function Home() {
       <MarketContext live={intraday} washout={washout} />
       <ReentryDecisionDetails washout={washout} />
       {snapshot ? <MarketMovementTables snapshot={snapshot} live={intraday} /> : <section className="card section-card"><div className="notice"><CircleAlert size={16} /> Sector and subsector context unavailable.</div></section>}
-      <AggregateHistoricalEvidence evidence={historical} />
+      <AggregateHistoricalEvidence evidence={historical} cashPolicy={cashPolicy} currentAction={currentAction} currentCondition={currentCondition} />
     </>}
     <footer>REENTRY_UNIFIED_v1 is the only operational decision source. HOLD CASH is the normal state when no oversold setup exists; WATCH means an oversold setup is developing; DEPLOY means the qualifying reversal has fired. Market-condition labels are descriptive context and never create a second decision engine.</footer>
   </main>;
