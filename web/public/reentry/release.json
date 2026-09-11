@@ -1,0 +1,10 @@
+{
+  "release": "reentry-cash-policy-2026-09-11",
+  "engine": "REENTRY_UNIFIED_v1",
+  "decision_source": "main",
+  "cash_actions": ["HOLD_CASH", "WATCH", "DEPLOY"],
+  "market_conditions": ["EXTENDED", "BALANCED", "PULLBACK", "OVERSOLD", "RECOVERING_FROM_OVERSOLD"],
+  "same_session_deploy_latch": true,
+  "historical_proxy_validation": "SUPPORTED",
+  "production_runtime": "Vercel"
+}
