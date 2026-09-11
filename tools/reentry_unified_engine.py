@@ -4,7 +4,7 @@ from __future__ import annotations
 import csv
 import json
 import math
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -14,6 +14,13 @@ CURRENT = ROOT / "data/reentry/exhaustion_intraday_current.json"
 HISTORY = ROOT / "data/reentry/unified_engine_history.csv"
 FINAL_BUFFER_MINUTE = 16 * 60 + 15
 ACTIVE_END_MINUTE = 16 * 60 + 45
+FAST_FAMILY_MEMORY_MINUTES = 30
+FAST_FAMILY_KEYS = (
+    "FAST_BREADTH_TURN",
+    "MOMENTUM_TURN",
+    "NET_VOLUME_TURN",
+    "DOWN_UP_RATIO_RELIEF",
+)
 
 
 def finite(x) -> bool:
@@ -21,6 +28,14 @@ def finite(x) -> bool:
         return x is not None and math.isfinite(float(x))
     except Exception:
         return False
+
+
+def truthy(value) -> bool:
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return False
+    return str(value).strip().lower() in {"1", "true", "yes", "y"}
 
 
 def allowed_window(now: datetime) -> bool:
@@ -41,12 +56,32 @@ def market_phase(now: datetime) -> str:
     return "MARKET_CLOSED_FINAL"
 
 
-def load_prior(market_date: str) -> dict | None:
+def load_day_rows(market_date: str) -> list[dict]:
     if not HISTORY.exists():
-        return None
+        return []
     with HISTORY.open(newline="", encoding="utf-8") as f:
-        rows = [r for r in csv.DictReader(f) if r.get("market_date") == market_date]
+        return [r for r in csv.DictReader(f) if r.get("market_date") == market_date]
+
+
+def load_prior(market_date: str) -> dict | None:
+    rows = load_day_rows(market_date)
     return rows[-1] if rows else None
+
+
+def recent_rows(market_date: str, now: datetime, minutes: int) -> list[dict]:
+    cutoff = now.astimezone(ET) - timedelta(minutes=minutes)
+    out = []
+    for row in load_day_rows(market_date):
+        raw = row.get("timestamp_et")
+        if not raw:
+            continue
+        try:
+            ts = datetime.fromisoformat(raw).astimezone(ET)
+        except (TypeError, ValueError):
+            continue
+        if cutoff <= ts <= now.astimezone(ET):
+            out.append(row)
+    return out
 
 
 def num(row: dict | None, key: str) -> float | None:
@@ -79,9 +114,37 @@ def append(row: dict) -> None:
         writer.writerow(row)
 
 
-def evaluate(payload: dict, prior: dict | None) -> dict:
+def current_fast_families(payload: dict) -> dict[str, bool]:
+    source = payload.get("families") or {}
+    return {
+        "FAST_BREADTH_TURN": bool(source.get("fast_breadth_turn")),
+        "MOMENTUM_TURN": bool(source.get("momentum_turn")),
+        "NET_VOLUME_TURN": bool(source.get("net_volume_turn")),
+        "DOWN_UP_RATIO_RELIEF": bool(source.get("down_up_ratio_relief")),
+    }
+
+
+def active_fast_families(payload: dict, history: list[dict]) -> tuple[dict[str, bool], dict[str, str | None]]:
+    active = current_fast_families(payload)
+    last_seen: dict[str, str | None] = {key: None for key in FAST_FAMILY_KEYS}
+    current_ts = (payload.get("values") or {}).get("timestamp_et")
+    for key, on in active.items():
+        if on:
+            last_seen[key] = current_ts
+    for row in history:
+        timestamp = row.get("timestamp_et")
+        for key in FAST_FAMILY_KEYS:
+            if truthy(row.get(key)):
+                active[key] = True
+                last_seen[key] = timestamp
+    return active, last_seen
+
+
+def evaluate(payload: dict, prior: dict | None, recent: list[dict]) -> dict:
     values = payload.get("values", {})
-    fast_count = int(payload.get("turn_family_count") or 0)
+    current_fast = current_fast_families(payload)
+    fast_families, fast_last_seen = active_fast_families(payload, recent)
+    fast_count = sum(fast_families.values())
     sp20 = values.get("SPXA20R")
     mmfd = values.get("MMFD")
     nasi = values.get("NASI_RSI")
@@ -123,10 +186,10 @@ def evaluate(payload: dict, prior: dict | None) -> dict:
         reason = "Oversold setup gate is not active."
     elif fast_count >= 2:
         state, action = "GO_EARLY", "GO_EARLY"
-        reason = "Oversold setup is active and at least two independent fast reversal families are turning."
+        reason = "Oversold setup is active and at least two independent fast reversal families have turned within the recent confirmation window."
     elif fast_count >= 1 and context_count >= 1:
         state, action = "GO_EARLY", "GO_EARLY"
-        reason = "Oversold setup is active with at least one fast reversal family and at least one independent context turn."
+        reason = "Oversold setup is active with at least one recent fast reversal family and at least one independent context turn."
     elif fast_count >= 1 or context_count >= 2:
         state, action = "WATCH", "WATCH"
         reason = "Oversold setup is active and reversal evidence is developing, but the GO EARLY threshold is not met."
@@ -134,25 +197,21 @@ def evaluate(payload: dict, prior: dict | None) -> dict:
         state, action = "WAIT", "WAIT"
         reason = "Oversold setup is active, but reversal evidence has not reached WATCH or GO EARLY."
 
-    fast_families = {
-        "FAST_BREADTH_TURN": bool((payload.get("families") or {}).get("fast_breadth_turn")),
-        "MOMENTUM_TURN": bool((payload.get("families") or {}).get("momentum_turn")),
-        "NET_VOLUME_TURN": bool((payload.get("families") or {}).get("net_volume_turn")),
-        "DOWN_UP_RATIO_RELIEF": bool((payload.get("families") or {}).get("down_up_ratio_relief")),
-    }
-
     return {
         "engine_version": "REENTRY_UNIFIED_v1",
         "primary_engine": True,
         "oversold_gate": oversold_gate,
         "fast_family_count": fast_count,
         "fast_families": fast_families,
+        "fast_families_current_snapshot": current_fast,
+        "fast_family_memory_minutes": FAST_FAMILY_MEMORY_MINUTES,
+        "fast_family_last_seen_et": fast_last_seen,
         "context_support_count": context_count,
         "context_support": context,
         "state": state,
         "decision": action,
         "decision_reason": reason,
-        "logic": "Oversold setup required. GO EARLY when either 2+ fast reversal families turn, or 1 fast family turns with at least 1 independent context turn from MMFD, NASI+, VVIX, or SKEW.",
+        "logic": "Oversold setup required. GO EARLY when either 2+ fast reversal families have turned within the last 30 minutes, or 1 recent fast family is active with at least 1 current independent context turn from MMFD, NASI+, VVIX, or SKEW.",
     }
 
 
@@ -168,7 +227,8 @@ def main() -> None:
     values = payload.get("values", {})
     market_date = values.get("market_date") or now.date().isoformat()
     prior = load_prior(market_date)
-    result = evaluate(payload, prior)
+    recent = recent_rows(market_date, now, FAST_FAMILY_MEMORY_MINUTES)
+    result = evaluate(payload, prior, recent)
     result["market_phase"] = market_phase(now)
     result["timestamp_et"] = now.isoformat()
     result["market_date"] = market_date
@@ -189,6 +249,11 @@ def main() -> None:
         "MOMENTUM_TURN": int(result["fast_families"]["MOMENTUM_TURN"]),
         "NET_VOLUME_TURN": int(result["fast_families"]["NET_VOLUME_TURN"]),
         "DOWN_UP_RATIO_RELIEF": int(result["fast_families"]["DOWN_UP_RATIO_RELIEF"]),
+        "FAST_BREADTH_TURN_CURRENT": int(result["fast_families_current_snapshot"]["FAST_BREADTH_TURN"]),
+        "MOMENTUM_TURN_CURRENT": int(result["fast_families_current_snapshot"]["MOMENTUM_TURN"]),
+        "NET_VOLUME_TURN_CURRENT": int(result["fast_families_current_snapshot"]["NET_VOLUME_TURN"]),
+        "DOWN_UP_RATIO_RELIEF_CURRENT": int(result["fast_families_current_snapshot"]["DOWN_UP_RATIO_RELIEF"]),
+        "fast_family_memory_minutes": result["fast_family_memory_minutes"],
         "context_support_count": result["context_support_count"],
         "MMFD_IMPROVING": int(result["context_support"]["MMFD_IMPROVING"]),
         "NASI_TURNING_UP": int(result["context_support"]["NASI_TURNING_UP"]),
