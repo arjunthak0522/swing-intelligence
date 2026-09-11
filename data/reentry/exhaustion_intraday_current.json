@@ -1,9 +1,9 @@
 {
   "research_only": true,
   "official_completed_close_signal_modified": false,
-  "generated_at_utc": "2026-09-11T18:03:02.242028+00:00",
-  "state": "WASHOUT",
-  "candidate_action": "GO_EARLY_INTRADAY",
+  "generated_at_utc": "2026-09-11T18:10:48.651587+00:00",
+  "state": "WASHOUT_WATCH",
+  "candidate_action": "WATCH_EARLY_TURN",
   "semantics": {
     "OVERSOLD": "selling remains stretched with no intraday turn",
     "WASHOUT_WATCH": "one independent family has turned",
@@ -11,42 +11,42 @@
     "CONFIRMED": "reserved for later completed-session corroboration; never assigned by this intraday script"
   },
   "daily_context_state": "WASHOUT",
-  "turn_family_count": 2,
+  "turn_family_count": 1,
   "families": {
-    "fast_breadth_turn": true,
+    "fast_breadth_turn": false,
     "momentum_turn": false,
     "net_volume_turn": true,
     "down_up_ratio_relief": false
   },
   "values": {
     "market_date": "2026-09-11",
-    "timestamp_et": "2026-09-11T14:03:00.346426-04:00",
-    "state": "WASHOUT",
-    "candidate_action": "GO_EARLY_INTRADAY",
-    "turn_family_count": 2,
+    "timestamp_et": "2026-09-11T14:10:47.227463-04:00",
+    "state": "WASHOUT_WATCH",
+    "candidate_action": "WATCH_EARLY_TURN",
+    "turn_family_count": 1,
     "daily_context_state": "WASHOUT",
-    "SPXA20R": 26.4,
+    "SPXA20R": 25.8,
     "NYMO": -63.58,
     "NAMO": -50.49,
-    "NYUD": 707.4992880000001,
-    "NAUD": 2197.0679379999997,
-    "nyse_down_up_ratio": 0.5517173172761148,
-    "nasdaq_down_up_ratio": 0.30626270358851804,
-    "NAADV": 2865.0,
-    "NADEC": 1721.0,
-    "NASI_RSI": 25.318324163531187,
-    "NASI_EMA4": 29.429658906675908,
-    "NASI_EMA10": 36.6617371810582,
+    "NYUD": 740.333249,
+    "NAUD": 2193.9552299999996,
+    "nyse_down_up_ratio": 0.5441887994917013,
+    "nasdaq_down_up_ratio": 0.3132645830606936,
+    "NAADV": 2873.0,
+    "NADEC": 1728.0,
+    "NASI_RSI": 25.31512035780503,
+    "NASI_EMA4": 29.428377384385445,
+    "NASI_EMA10": 36.66115467092617,
     "NASI_DIRECTION": "FALLING",
-    "VVIX": 91.33999633789062,
+    "VVIX": 91.36000061035156,
     "VVIX_PRIOR_CLOSE": 102.66,
     "VVIX_DIRECTION": "FALLING",
-    "MMFD": 33.25919589392643,
+    "MMFD": 33.1965110312981,
     "MMFD_STATE": "NORMAL",
     "VVIX_STATE": "NORMAL",
     "VVIX_PERCENTILE_2Y": 20.55888223552894,
-    "SKEW_LIVE_PROXY": 2.556966007232664,
-    "SKEW_LIVE_PROXY_RATIO": 1.2348582355830884,
+    "SKEW_LIVE_PROXY": 2.616283956527715,
+    "SKEW_LIVE_PROXY_RATIO": 1.2411854730404084,
     "SKEW_DIRECTION": "FLAT",
     "SKEW_OFFICIAL_CLOSE": 147.02000427246094,
     "SKEW_OFFICIAL_PERCENTILE_2Y": 54.10821643286573
@@ -57,14 +57,14 @@
     "bootstrap_start_date": "2026-01-02",
     "bootstrap_end_date": "2026-09-09",
     "completed_daily_observations": 171,
-    "live_advances": 2865.0,
-    "live_declines": 1721.0,
-    "ratio_adjusted_net_advances": 249.4548626253816,
-    "mcclellan_oscillator": -16.909666125981516,
-    "summation_index": -2439.4265437285158,
-    "nasi_rsi": 25.318324163531187,
-    "nasi_ema4": 29.429658906675908,
-    "nasi_ema10": 36.6617371810582,
+    "live_advances": 2873.0,
+    "live_declines": 1728.0,
+    "ratio_adjusted_net_advances": 248.85894370788958,
+    "mcclellan_oscillator": -16.93946207185612,
+    "summation_index": -2439.4563396743906,
+    "nasi_rsi": 25.31512035780503,
+    "nasi_ema4": 29.428377384385445,
+    "nasi_ema10": 36.66115467092617,
     "prior_completed_rsi": 27.277476580740597,
     "direction_vs_prior_close": "FALLING",
     "oversold_below_30": true,
@@ -74,7 +74,7 @@
   },
   "stockcharts_quote_provenance": {
     "$SPXA20R": {
-      "vendor_timestamp": "2026-09-11 14:02:30",
+      "vendor_timestamp": "2026-09-11 14:10:30",
       "realtime": true,
       "cached": true,
       "available": true
@@ -92,55 +92,55 @@
       "available": true
     },
     "$NYUD": {
-      "vendor_timestamp": "2026-09-11 13:46:00",
+      "vendor_timestamp": "2026-09-11 13:55:00",
       "realtime": true,
       "cached": true,
       "available": true
     },
     "$NAUD": {
-      "vendor_timestamp": "2026-09-11 13:46:00",
+      "vendor_timestamp": "2026-09-11 13:55:00",
       "realtime": true,
       "cached": true,
       "available": true
     },
     "$NYUPV": {
-      "vendor_timestamp": "2026-09-11 13:46:00",
+      "vendor_timestamp": "2026-09-11 13:55:00",
       "realtime": true,
       "cached": true,
       "available": true
     },
     "$NYDNV": {
-      "vendor_timestamp": "2026-09-11 13:46:00",
+      "vendor_timestamp": "2026-09-11 13:55:00",
       "realtime": true,
       "cached": true,
       "available": true
     },
     "$NAUPV": {
-      "vendor_timestamp": "2026-09-11 13:46:00",
+      "vendor_timestamp": "2026-09-11 13:55:00",
       "realtime": true,
       "cached": true,
       "available": true
     },
     "$NADNV": {
-      "vendor_timestamp": "2026-09-11 13:46:00",
+      "vendor_timestamp": "2026-09-11 13:55:00",
       "realtime": true,
       "cached": true,
       "available": true
     },
     "$NAADV": {
-      "vendor_timestamp": "2026-09-11 13:46:00",
+      "vendor_timestamp": "2026-09-11 13:55:00",
       "realtime": true,
       "cached": true,
       "available": true
     },
     "$NADEC": {
-      "vendor_timestamp": "2026-09-11 13:46:00",
+      "vendor_timestamp": "2026-09-11 13:55:00",
       "realtime": true,
       "cached": true,
       "available": true
     },
     "$VVIX": {
-      "vendor_timestamp": "2026-09-11 14:02:46",
+      "vendor_timestamp": "2026-09-11 14:10:46",
       "realtime": true,
       "cached": true,
       "available": true
@@ -154,11 +154,11 @@
     "universe_source": "Nasdaq Trader nasdaqlisted + otherlisted",
     "universe_definition": "US listed non-ETF, non-test equities; obvious warrants/units/rights/preferreds excluded",
     "universe_size": 6073,
-    "current_day_bars": 5845,
-    "valid_5d_observations": 5845,
-    "above_5dma_count": 1944,
-    "coverage_pct": 96.24567758932983,
-    "mmfd_live": 33.25919589392643,
+    "current_day_bars": 5847,
+    "valid_5d_observations": 5847,
+    "above_5dma_count": 1941,
+    "coverage_pct": 96.278610242055,
+    "mmfd_live": 33.1965110312981,
     "reference_scale": {
       "extreme_oversold_below": 15.0,
       "oversold_below": 30.0,
@@ -168,48 +168,48 @@
     },
     "failed_symbol_slots": 0,
     "state": "NORMAL",
-    "timestamp_et": "2026-09-11T14:03:04.158651-04:00",
+    "timestamp_et": "2026-09-11T14:10:49.699053-04:00",
     "vendor_crosscheck": null
   },
   "vvix_live": {
     "symbol": "^VVIX",
     "name": "Volatility of VIX",
-    "value": 91.33999633789062,
+    "value": 91.36000061035156,
     "prior_close": 102.66000366210938,
-    "change_points_vs_prior_close": -11.32000732421875,
+    "change_points_vs_prior_close": -11.300003051757812,
     "direction_vs_prior_close": "FALLING",
     "historical_percentile_2y": 20.55888223552894,
     "completed_history_sessions": 501,
     "state": "NORMAL",
     "provisional_intraday": true,
     "source": "Yahoo Finance intraday VVIX quote and daily history",
-    "timestamp_et": "2026-09-11T14:03:04.158651-04:00"
+    "timestamp_et": "2026-09-11T14:10:49.699053-04:00"
   },
   "skew_live": {
     "name": "S&P 500 Tail-Risk Pricing",
     "official_symbol": "SKEW",
     "provisional_intraday": true,
     "live_metric": "25-delta SPX put IV minus 25-delta SPX call IV",
-    "live_proxy_vol_points": 2.556966007232664,
-    "live_proxy_ratio": 1.2348582355830884,
+    "live_proxy_vol_points": 2.616283956527715,
+    "live_proxy_ratio": 1.2411854730404084,
     "direction_vs_prior_snapshot": "FLAT",
-    "spot": 7671.5400390625,
+    "spot": 7671.35986328125,
     "expiry": "2026-10-12",
     "dte": 31,
     "risk_free_rate": 0.03913000106811523,
     "put_25_delta": {
       "strike": 7500.0,
-      "iv": 0.13444240200042723,
-      "delta": -0.247747424965709,
-      "bid": 53.2,
-      "ask": 53.6
+      "iv": 0.13463885694503788,
+      "delta": -0.24823340336697142,
+      "bid": 53.4,
+      "ask": 53.8
     },
     "call_25_delta": {
       "strike": 7875.0,
-      "iv": 0.10887274192810059,
-      "delta": 0.24059861339741584,
-      "bid": 29.1,
-      "ask": 29.5
+      "iv": 0.10847601737976073,
+      "delta": 0.2395306531749803,
+      "bid": 28.7,
+      "ask": 29.2
     },
     "official_skew_latest_close": 147.02000427246094,
     "official_skew_prior_close": 149.25,
@@ -220,7 +220,7 @@
     "source_mode": "LIVE_SPX_OPTIONS",
     "proxy_error": null,
     "source": "Yahoo Finance SPX option chain for live proxy; official SKEW daily close/history. If the post-close option chain is unavailable, the engine preserves the last valid same-session SPX skew proxy and its direction rather than substituting a stale official-close direction.",
-    "timestamp_et": "2026-09-11T14:10:20.712313-04:00"
+    "timestamp_et": "2026-09-11T14:16:37.065448-04:00"
   },
   "historical_context": {
     "version": "REENTRY_HISTORICAL_CONTEXT_v1",
@@ -255,7 +255,7 @@
         "methodology": "one completed-session observation per market day"
       },
       "NYUD": {
-        "current_value": 707.4992880000001,
+        "current_value": 740.333249,
         "percentile": null,
         "sample_percentile": 75.0,
         "state": "HISTORY BUILDING",
@@ -268,7 +268,7 @@
         "methodology": "one nearest intraday observation per market day within \u00b145 minutes"
       },
       "NAUD": {
-        "current_value": 2197.0679379999997,
+        "current_value": 2193.9552299999996,
         "percentile": null,
         "sample_percentile": 75.0,
         "state": "HISTORY BUILDING",
@@ -281,7 +281,7 @@
         "methodology": "one nearest intraday observation per market day within \u00b145 minutes"
       },
       "nyse_down_up_ratio": {
-        "current_value": 0.5517173172761148,
+        "current_value": 0.5441887994917013,
         "percentile": null,
         "sample_percentile": 25.0,
         "state": "HISTORY BUILDING",
@@ -294,7 +294,7 @@
         "methodology": "one nearest intraday observation per market day within \u00b145 minutes"
       },
       "nasdaq_down_up_ratio": {
-        "current_value": 0.30626270358851804,
+        "current_value": 0.3132645830606936,
         "percentile": null,
         "sample_percentile": 25.0,
         "state": "HISTORY BUILDING",
@@ -337,21 +337,21 @@
       "DOWN_UP_RATIO_RELIEF": false
     },
     "fast_families_current_snapshot": {
-      "FAST_BREADTH_TURN": true,
+      "FAST_BREADTH_TURN": false,
       "MOMENTUM_TURN": false,
       "NET_VOLUME_TURN": true,
       "DOWN_UP_RATIO_RELIEF": false
     },
     "fast_family_memory_minutes": 30,
     "fast_family_last_seen_et": {
-      "FAST_BREADTH_TURN": "2026-09-11T14:02:28.202000-04:00",
+      "FAST_BREADTH_TURN": "2026-09-11T14:10:22.534111-04:00",
       "MOMENTUM_TURN": null,
-      "NET_VOLUME_TURN": "2026-09-11T14:02:28.202000-04:00",
+      "NET_VOLUME_TURN": "2026-09-11T14:10:22.534111-04:00",
       "DOWN_UP_RATIO_RELIEF": null
     },
-    "context_support_count": 2,
+    "context_support_count": 1,
     "context_support": {
-      "MMFD_IMPROVING": true,
+      "MMFD_IMPROVING": false,
       "NASI_TURNING_UP": false,
       "VVIX_EASING": true,
       "SKEW_NARROWING": false
@@ -363,35 +363,35 @@
     "decision_reason": "GO EARLY already fired earlier this market session and remains latched through the close. Current evidence continues to update but cannot revoke the same-day decision.",
     "logic": "Cash action is HOLD CASH when no oversold setup is active, WATCH when the canonical oversold gate is active but no GO has fired, and DEPLOY once GO EARLY qualifies. GO EARLY requires either 2+ fast reversal families within the last 30 minutes, or 1 recent fast family plus 1 current context turn. Once GO EARLY fires, DEPLOY remains latched through that market session and resets on the next market date. Market-condition labels are descriptive context and do not modify the trigger.",
     "market_phase": "LIVE_PROVISIONAL",
-    "timestamp_et": "2026-09-11T14:10:22.534111-04:00",
+    "timestamp_et": "2026-09-11T14:16:38.318218-04:00",
     "market_date": "2026-09-11",
     "data_quality_status": "OK",
     "actionable": true
   },
   "snapshot_version": "REENTRY_UNIFIED_SNAPSHOT_v1",
-  "snapshot_generated_at_et": "2026-09-11T14:10:22.882872-04:00",
+  "snapshot_generated_at_et": "2026-09-11T14:16:38.832616-04:00",
   "market_prices": {
     "SPY": {
-      "price": 765.6434936523438,
+      "price": 765.5728759765625,
       "previous_close": 757.8300170898438,
-      "change_pct": 0.010310328683607262,
-      "timestamp_et": "2026-09-11T14:10:00-04:00",
+      "change_pct": 0.010217144626247787,
+      "timestamp_et": "2026-09-11T14:15:00-04:00",
       "source": "Yahoo Finance 5-minute quote context",
       "decision_input": false
     },
     "QQQ": {
-      "price": 716.260009765625,
+      "price": 716.1400146484375,
       "previous_close": 708.6900024414062,
-      "change_pct": 0.01068169058141133,
-      "timestamp_et": "2026-09-11T14:10:00-04:00",
+      "change_pct": 0.010512370968076779,
+      "timestamp_et": "2026-09-11T14:15:00-04:00",
       "source": "Yahoo Finance 5-minute quote context",
       "decision_input": false
     },
     "^VIX": {
-      "price": 15.630000114440918,
+      "price": 15.619999885559082,
       "previous_close": 17.84000015258789,
-      "change_pct": -0.12387892484554641,
-      "timestamp_et": "2026-09-11T13:55:00-04:00",
+      "change_pct": -0.12443947578704329,
+      "timestamp_et": "2026-09-11T14:00:00-04:00",
       "source": "Yahoo Finance 5-minute quote context",
       "decision_input": false
     }
@@ -400,28 +400,28 @@
   "sources": {
     "fast_breadth": {
       "provider": "StockCharts quote feed",
-      "timestamp": "2026-09-11T14:03:00.346426-04:00",
+      "timestamp": "2026-09-11T14:10:47.227463-04:00",
       "provisional": true
     },
     "NASI_PLUS": {
       "provider": "Nasdaq Trader daily market file for verified current-year history",
-      "timestamp": "2026-09-11T14:03:00.346426-04:00",
+      "timestamp": "2026-09-11T14:10:47.227463-04:00",
       "bootstrap_start_date": "2026-01-02",
       "completed_daily_observations": 171
     },
     "MMFD": {
       "provider": "Nasdaq Trader nasdaqlisted + otherlisted",
-      "timestamp": "2026-09-11T14:03:04.158651-04:00",
-      "coverage_pct": 96.24567758932983
+      "timestamp": "2026-09-11T14:10:49.699053-04:00",
+      "coverage_pct": 96.278610242055
     },
     "VVIX": {
       "provider": "Yahoo Finance intraday VVIX quote and daily history",
-      "timestamp": "2026-09-11T14:03:04.158651-04:00",
+      "timestamp": "2026-09-11T14:10:49.699053-04:00",
       "history_sessions": 501
     },
     "SKEW": {
       "provider": "Yahoo Finance SPX option chain for live proxy; official SKEW daily close/history. If the post-close option chain is unavailable, the engine preserves the last valid same-session SPX skew proxy and its direction rather than substituting a stale official-close direction.",
-      "timestamp": "2026-09-11T14:10:20.712313-04:00",
+      "timestamp": "2026-09-11T14:16:37.065448-04:00",
       "source_mode": "LIVE_SPX_OPTIONS",
       "official_date": "2026-09-10"
     }
@@ -443,14 +443,14 @@
       "VVIX": true,
       "SKEW_PROXY": true
     },
-    "mmfd_coverage_pct": 96.24567758932983,
+    "mmfd_coverage_pct": 96.278610242055,
     "note": "Data-quality status does not alter REENTRY_UNIFIED_v1 signal thresholds or state logic."
   },
   "prospective_history": {
-    "snapshot_count": 23,
+    "snapshot_count": 24,
     "market_days": 1,
     "state_transitions": 0,
-    "go_early_snapshots": 23,
+    "go_early_snapshots": 24,
     "watch_snapshots": 0
   }
 }
