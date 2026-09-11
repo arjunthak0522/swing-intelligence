@@ -1,0 +1,23 @@
+{
+  "test_status": "COMPLETE",
+  "date_range": ["2017-11-07", "2026-08-24"],
+  "n_sessions": 2209,
+  "overall_proxy_policy_verdict": "SUPPORTED",
+  "note": "Historically reconstructable proxy policy. Exact live SPXA20R/MMFD/NASI+/intraday-family rules continue accumulating point-in-time history.",
+  "actions": {
+    "HOLD_CASH": {"n":1691,"SPY":{"10":{"median":0.007303865995703652,"positive_rate":0.6410714285714286},"30":{"median":0.020227224607312633,"positive_rate":0.6620481927710843},"60":{"median":0.03679060593217853,"positive_rate":0.7316176470588235}},"QQQ":{"10":{"median":0.010829250996783668,"positive_rate":0.6279761904761905},"30":{"median":0.02385658936835433,"positive_rate":0.6518072289156627},"60":{"median":0.044905799327423,"positive_rate":0.7205882352941176}}},
+    "WATCH": {"n":51,"SPY":{"10":{"median":0.019030790525188634,"positive_rate":0.6666666666666666},"30":{"median":0.07144519599905974,"positive_rate":0.8627450980392157},"60":{"median":0.0867337713665709,"positive_rate":0.8235294117647058}},"QQQ":{"10":{"median":0.022995473710317405,"positive_rate":0.7058823529411765},"30":{"median":0.0748928571428572,"positive_rate":0.8823529411764706},"60":{"median":0.13167761506392484,"positive_rate":0.7647058823529411}}},
+    "DEPLOY": {"n":467,"SPY":{"10":{"median":0.0130175602185153,"positive_rate":0.6124197002141327},"30":{"median":0.035396647088388966,"positive_rate":0.6916488222698073},"60":{"median":0.04963427788242625,"positive_rate":0.7440860215053764}},"QQQ":{"10":{"median":0.018876137260331327,"positive_rate":0.6295503211991434},"30":{"median":0.043150970377263786,"positive_rate":0.6809421841541756},"60":{"median":0.07829550294388288,"positive_rate":0.7139784946236559}}}
+  },
+  "conditions": {
+    "EXTENDED": {"n":978,"SPY":{"10":{"median":0.006073914027952988},"30":{"median":0.01961816009317896},"60":{"median":0.03642227282985566}},"QQQ":{"10":{"median":0.009749255002128643},"30":{"median":0.025300861580319745},"60":{"median":0.04418562847793217}}},
+    "BALANCED": {"n":211,"SPY":{"10":{"median":0.0055947825973822205},"30":{"median":0.011413761755485807},"60":{"median":0.028588260793358855}},"QQQ":{"10":{"median":0.005747716940211146},"30":{"median":0.014626592383734871},"60":{"median":0.03344759206798875}}},
+    "PULLBACK": {"n":502,"SPY":{"10":{"median":0.012989636787948178},"30":{"median":0.024000836414388993},"60":{"median":0.0427591696499694}},"QQQ":{"10":{"median":0.01569935853257698},"30":{"median":0.02805357378187734},"60":{"median":0.05350425377033241}}},
+    "OVERSOLD": {"n":51,"SPY":{"10":{"median":0.019030790525188634},"30":{"median":0.07144519599905974},"60":{"median":0.0867337713665709}},"QQQ":{"10":{"median":0.022995473710317405},"30":{"median":0.0748928571428572},"60":{"median":0.13167761506392484}}},
+    "RECOVERING_FROM_OVERSOLD": {"n":467,"SPY":{"10":{"median":0.0130175602185153},"30":{"median":0.035396647088388966},"60":{"median":0.04963427788242625}},"QQQ":{"10":{"median":0.018876137260331327},"30":{"median":0.043150970377263786},"60":{"median":0.07829550294388288}}}
+  },
+  "hold_to_next_deploy": {"n":1398,"median_wait_sessions":18,"SPY":{"median_entry_advantage":0.010875775922716269,"cheaper_entry_rate":0.6366237482117311},"QQQ":{"median_entry_advantage":0.009392065526588889,"cheaper_entry_rate":0.5736766809728183}},
+  "watch_to_next_deploy": {"n":44,"median_wait_sessions":1},
+  "timing_supported": true,
+  "deploy_supported": true
+}
