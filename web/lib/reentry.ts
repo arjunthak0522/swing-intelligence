@@ -72,31 +72,12 @@ export interface ReentrySnapshot {
     vix_vix3m_ratio: number;
   };
   signal_snapshot?: {
-    sectors?: Record<string, {
-      drawdown_20d: number;
-      drawdown_60d: number;
-      relative_strength_20d_vs_spy: number;
-      relative_strength_60d_vs_spy: number;
-    }>;
-    factors?: Record<string, {
-      drawdown_20d: number;
-      drawdown_60d: number;
-      relative_strength_20d_vs_spy: number;
-      relative_strength_60d_vs_spy: number;
-    }>;
+    sectors?: Record<string, { drawdown_20d: number; drawdown_60d: number; relative_strength_20d_vs_spy: number; relative_strength_60d_vs_spy: number }>;
+    factors?: Record<string, { drawdown_20d: number; drawdown_60d: number; relative_strength_20d_vs_spy: number; relative_strength_60d_vs_spy: number }>;
   };
   subsector_intelligence?: {
-    aggregate?: {
-      damage_share_2pct?: number;
-      damage_share_3pct?: number;
-      repair_share?: number;
-    };
-    by_sector?: Record<string, {
-      damage_share_2pct?: number;
-      damage_share_3pct?: number;
-      repair_share?: number;
-      members?: Record<string, SubsectorProxy>;
-    }>;
+    aggregate?: { damage_share_2pct?: number; damage_share_3pct?: number; repair_share?: number };
+    by_sector?: Record<string, { damage_share_2pct?: number; damage_share_3pct?: number; repair_share?: number; members?: Record<string, SubsectorProxy> }>;
     proxies?: Record<string, SubsectorProxy>;
   };
   outperformance_intelligence?: OutperformanceIntelligence;
@@ -124,19 +105,6 @@ export interface ReentrySnapshot {
   forward_analog_outcomes?: Record<string, unknown>;
 }
 
-export interface ReentryEpisode {
-  episode_start: string;
-  favorable_through: string;
-  active: boolean;
-  ended_on?: string | null;
-  entry_closes: {
-    SPY: number;
-    QQQ: number;
-  };
-  definition?: string;
-  price_definition?: string;
-}
-
 export interface IntradayQuote {
   symbol: string;
   price: number | null;
@@ -162,11 +130,26 @@ export interface IntradaySnapshot {
   errors: string[];
 }
 
+export interface HistoricalContextMetric {
+  current_value?: number | null;
+  percentile?: number | null;
+  sample_percentile?: number | null;
+  state?: string | null;
+  status?: "RELIABLE" | "BUILDING_HISTORY" | string;
+  reliable?: boolean;
+  session_count?: number | null;
+  minimum_reliable_sessions?: number | null;
+  history_start_date?: string | null;
+  history_end_date?: string | null;
+  methodology?: string | null;
+}
+
 export interface WashoutSnapshot {
   state?: string;
   candidate_action?: string;
   turn_family_count?: number;
   generated_at_utc?: string;
+  snapshot_generated_at_et?: string;
   daily_context_state?: string;
   families?: Record<string, boolean>;
   values?: {
@@ -196,20 +179,72 @@ export interface WashoutSnapshot {
     SKEW_OFFICIAL_CLOSE?: number | null;
     SKEW_OFFICIAL_PERCENTILE_2Y?: number | null;
   };
-  mmfd_live?: { coverage_pct?: number | null };
+  mmfd_live?: {
+    universe_size?: number | null;
+    current_day_bars?: number | null;
+    valid_5d_observations?: number | null;
+    above_5dma_count?: number | null;
+    coverage_pct?: number | null;
+    state?: string | null;
+    timestamp_et?: string | null;
+  };
+  vvix_live?: {
+    value?: number | null;
+    prior_close?: number | null;
+    change_points_vs_prior_close?: number | null;
+    direction_vs_prior_close?: string | null;
+    historical_percentile_2y?: number | null;
+    completed_history_sessions?: number | null;
+    state?: string | null;
+    source?: string | null;
+    timestamp_et?: string | null;
+  };
+  skew_live?: {
+    live_metric?: string | null;
+    live_proxy_vol_points?: number | null;
+    live_proxy_ratio?: number | null;
+    direction_vs_prior_snapshot?: string | null;
+    official_skew_latest_close?: number | null;
+    official_skew_prior_close?: number | null;
+    official_skew_date?: string | null;
+    official_skew_direction?: string | null;
+    official_skew_percentile_2y?: number | null;
+    official_skew_history_sessions?: number | null;
+    source_mode?: string | null;
+    proxy_error?: string | null;
+    source?: string | null;
+    timestamp_et?: string | null;
+  };
+  historical_context?: {
+    version?: string | null;
+    decision_input?: boolean | null;
+    minimum_reliable_sessions?: number | null;
+    note?: string | null;
+    metrics?: Record<string, HistoricalContextMetric>;
+  };
+  data_quality?: {
+    status?: string | null;
+    actionable?: boolean | null;
+    issues?: string[];
+    warnings?: string[];
+  };
   unified_engine?: {
     engine_version?: string;
     primary_engine?: boolean;
     oversold_gate?: boolean;
     fast_family_count?: number;
+    fast_families?: Record<string, boolean>;
     context_support_count?: number;
     context_support?: Record<string, boolean>;
     state?: string;
     decision?: string;
+    decision_reason?: string;
     logic?: string;
     market_phase?: string;
     timestamp_et?: string;
     market_date?: string;
+    data_quality_status?: string;
+    actionable?: boolean;
   };
 }
 
@@ -232,9 +267,7 @@ function normalizeInsightList(value: unknown): string[] {
 }
 
 function parsePythonJson(raw: string): ReentrySnapshot {
-  const strictJson = raw
-    .replace(/\bNaN\b/g, "null")
-    .replace(/-?\bInfinity\b/g, "null");
+  const strictJson = raw.replace(/\bNaN\b/g, "null").replace(/-?\bInfinity\b/g, "null");
   const parsed = JSON.parse(strictJson) as ReentrySnapshot;
   const insights = parsed.market_insights as unknown;
   if (insights && typeof insights === "object") {
@@ -278,10 +311,6 @@ export async function getLatestSnapshot(): Promise<ReentrySnapshot | null> {
     }
   }
   return null;
-}
-
-export async function getLatestEpisode(): Promise<ReentryEpisode | null> {
-  return readPublicReentryFile<ReentryEpisode>("episode.json");
 }
 
 const INTRADAY_URL = "https://gexrdfzxmlnaawzmtlrk.supabase.co/functions/v1/reentry-intraday";

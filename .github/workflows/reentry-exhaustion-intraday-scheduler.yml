@@ -47,6 +47,159 @@ jobs:
         continue-on-error: true
         run: python tools/reentry_skew_intraday.py
 
+      - name: Add reliability-gated historical context
+        shell: bash
+        run: |
+          python - <<'PY'
+          import csv
+          import json
+          import math
+          from datetime import datetime
+          from pathlib import Path
+
+          current_path = Path('data/reentry/exhaustion_intraday_current.json')
+          intraday_path = Path('data/reentry/exhaustion_intraday_history.csv')
+          daily_path = Path('data/reentry/exhaustion_history.csv')
+          minimum_sessions = 20
+          max_time_delta_minutes = 45
+
+          def finite(value):
+              try:
+                  return value is not None and math.isfinite(float(value))
+              except Exception:
+                  return False
+
+          def read_csv(path):
+              if not path.exists():
+                  return []
+              with path.open(newline='', encoding='utf-8') as handle:
+                  return list(csv.DictReader(handle))
+
+          def as_float(value):
+              return float(value) if finite(value) else None
+
+          def empirical_percentile(values, current):
+              values = [float(value) for value in values if finite(value)]
+              if not values or not finite(current):
+                  return None
+              current = float(current)
+              less = sum(value < current for value in values)
+              equal = sum(value == current for value in values)
+              return 100.0 * (less + 0.5 * equal) / len(values)
+
+          def tail_state(percentile, mode):
+              if percentile is None:
+                  return 'HISTORY BUILDING'
+              if mode == 'selling_ratio':
+                  if percentile >= 95:
+                      return 'EXTREME SELLING'
+                  if percentile >= 80:
+                      return 'STRETCHED SELLING'
+                  if percentile <= 5:
+                      return 'EXTREME BUYING'
+                  if percentile <= 20:
+                      return 'BUYING DOMINANT'
+                  return 'NORMAL'
+              if percentile <= 5:
+                  return 'EXTREME NEGATIVE'
+              if percentile <= 20:
+                  return 'STRETCHED NEGATIVE'
+              if percentile >= 95:
+                  return 'EXTREME POSITIVE'
+              if percentile >= 80:
+                  return 'STRETCHED POSITIVE'
+              return 'NORMAL'
+
+          def parse_minute(timestamp):
+              if not timestamp:
+                  return None
+              try:
+                  dt = datetime.fromisoformat(timestamp)
+                  return dt.hour * 60 + dt.minute
+              except (TypeError, ValueError):
+                  return None
+
+          def daily_series(rows, key):
+              by_day = {}
+              for row in rows:
+                  day = row.get('market_date')
+                  value = as_float(row.get(key))
+                  if day and value is not None:
+                      by_day[day] = value
+              return by_day
+
+          def time_matched_series(rows, key, current_minute):
+              by_day = {}
+              for row in rows:
+                  day = row.get('market_date')
+                  value = as_float(row.get(key))
+                  minute = parse_minute(row.get('timestamp_et'))
+                  if not day or value is None or minute is None or current_minute is None:
+                      continue
+                  delta = abs(minute - current_minute)
+                  if delta > max_time_delta_minutes:
+                      continue
+                  prior = by_day.get(day)
+                  if prior is None or delta < prior[0]:
+                      by_day[day] = (delta, value)
+              return {day: item[1] for day, item in by_day.items()}
+
+          payload = json.loads(current_path.read_text(encoding='utf-8'))
+          values = payload.get('values') or {}
+          intraday_rows = read_csv(intraday_path)
+          daily_rows = read_csv(daily_path)
+          current_minute = parse_minute(values.get('timestamp_et'))
+
+          configs = {
+              'NYMO': ('daily', 'signed'),
+              'NAMO': ('daily', 'signed'),
+              'NYUD': ('time_matched', 'signed'),
+              'NAUD': ('time_matched', 'signed'),
+              'nyse_down_up_ratio': ('time_matched', 'selling_ratio'),
+              'nasdaq_down_up_ratio': ('time_matched', 'selling_ratio'),
+          }
+
+          metrics = {}
+          for key, (method, mode) in configs.items():
+              current = as_float(values.get(key))
+              if method == 'daily':
+                  series = daily_series(daily_rows, key)
+                  methodology = 'one completed-session observation per market day'
+              else:
+                  series = time_matched_series(intraday_rows, key, current_minute)
+                  methodology = f'one nearest intraday observation per market day within ±{max_time_delta_minutes} minutes'
+
+              days = sorted(series)
+              sample = [series[day] for day in days]
+              session_count = len(days)
+              reliable = session_count >= minimum_sessions
+              sample_percentile = empirical_percentile(sample, current)
+              published_percentile = sample_percentile if reliable else None
+              metrics[key] = {
+                  'current_value': current,
+                  'percentile': published_percentile,
+                  'sample_percentile': sample_percentile,
+                  'state': tail_state(published_percentile, mode),
+                  'status': 'RELIABLE' if reliable else 'BUILDING_HISTORY',
+                  'reliable': reliable,
+                  'session_count': session_count,
+                  'minimum_reliable_sessions': minimum_sessions,
+                  'history_start_date': days[0] if days else None,
+                  'history_end_date': days[-1] if days else None,
+                  'methodology': methodology,
+              }
+
+          payload['historical_context'] = {
+              'version': 'REENTRY_HISTORICAL_CONTEXT_v1',
+              'decision_input': False,
+              'minimum_reliable_sessions': minimum_sessions,
+              'note': 'Percentiles are display context only and do not alter REENTRY_UNIFIED_v1. A percentile is withheld until the captured sample reaches the reliability gate.',
+              'metrics': metrics,
+          }
+          current_path.write_text(json.dumps(payload, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps(payload['historical_context'], indent=2))
+          PY
+
       - name: Calculate the single RE-ENTRY decision
         run: python tools/reentry_unified_engine.py
 
