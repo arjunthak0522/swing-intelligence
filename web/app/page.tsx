@@ -44,6 +44,13 @@ function formatTimestamp(value?: string | null) {
   return d.toLocaleString("en-US", { timeZone: "America/New_York", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" });
 }
 
+function etDate(value?: string | null) {
+  if (!value) return null;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+}
+
 function getFeedState(washout: WashoutSnapshot | null) {
   const u = washout?.unified_engine;
   if (!washout || !u) return { kind: "UNAVAILABLE" as const, label: "RE-ENTRY ENGINE UNAVAILABLE" };
@@ -85,13 +92,16 @@ function UnifiedHero({ washout }: { washout: WashoutSnapshot }) {
 
 function MarketContext({ live, washout }: { live: IntradaySnapshot | null; washout: WashoutSnapshot }) {
   const phase = washout.unified_engine?.market_phase;
-  const regularSession = phase === "LIVE_PROVISIONAL";
   const spy = live?.quotes?.SPY;
   const qqq = live?.quotes?.QQQ;
   const last = spy?.timestamp ? formatTimestamp(spy.timestamp) : "UNAVAILABLE";
+  const canonicalDate = washout.unified_engine?.market_date || washout.values?.market_date || null;
+  const quoteDate = etDate(spy?.timestamp);
+  const quoteIsCurrentSession = Boolean(canonicalDate && quoteDate && canonicalDate === quoteDate);
+  const periodLabel = quoteIsCurrentSession && phase === "LIVE_PROVISIONAL" ? "today" : quoteIsCurrentSession ? "current session" : "last available session";
   return <section className="card section-card live-card">
     <div className="section-heading"><div><span className="kicker">MARKET PHASE</span><h2>{phaseLabel(phase)}</h2></div><span className="freshness"><Radio size={14} /> Price context {last}</span></div>
-    {live ? <div className="live-grid"><div className="live-stat"><small>SPY {regularSession ? "today" : "last session"}</small><strong>{pct(spy?.change_pct,2)}</strong><span>{spy?.price?.toFixed(2) ?? "-"}</span></div><div className="live-stat"><small>QQQ {regularSession ? "today" : "last session"}</small><strong>{pct(qqq?.change_pct,2)}</strong><span>{qqq?.price?.toFixed(2) ?? "-"}</span></div></div> : <div className="notice"><CircleAlert size={16} /> Price-context feed unavailable. The canonical RE-ENTRY decision is not replaced or recomputed.</div>}
+    {live ? <><div className="live-grid"><div className="live-stat"><small>SPY {periodLabel}</small><strong>{pct(spy?.change_pct,2)}</strong><span>{spy?.price?.toFixed(2) ?? "-"}</span></div><div className="live-stat"><small>QQQ {periodLabel}</small><strong>{pct(qqq?.change_pct,2)}</strong><span>{qqq?.price?.toFixed(2) ?? "-"}</span></div></div>{!quoteIsCurrentSession ? <div className="notice"><CircleAlert size={16} /> Price context is from the last available quoted session and is not used to compute or override the current RE-ENTRY decision.</div> : null}</> : <div className="notice"><CircleAlert size={16} /> Price-context feed unavailable. The canonical RE-ENTRY decision is not replaced or recomputed.</div>}
   </section>;
 }
 
