@@ -149,6 +149,51 @@ def active_fast_families(payload: dict, history: list[dict]) -> tuple[dict[str, 
     return active, last_seen
 
 
+def classify_cash_context(values: dict, oversold_gate: bool, deploy: bool) -> dict:
+    sp20 = values.get("SPXA20R")
+    mmfd = values.get("MMFD")
+    nasi = values.get("NASI_RSI")
+
+    extension_signals = {
+        "SPXA20R_STRONG": finite(sp20) and float(sp20) >= 70.0,
+        "MMFD_STRONG": finite(mmfd) and float(mmfd) >= 70.0,
+        "NASI_OVERBOUGHT": finite(nasi) and float(nasi) >= 70.0,
+    }
+    weak_signals = {
+        "SPXA20R_WEAK": finite(sp20) and 30.0 <= float(sp20) < 50.0,
+        "MMFD_WEAK": finite(mmfd) and 30.0 <= float(mmfd) < 50.0,
+        "NASI_WEAK": finite(nasi) and 30.0 <= float(nasi) < 50.0,
+    }
+    extension_count = sum(extension_signals.values())
+    weak_count = sum(weak_signals.values())
+
+    if deploy:
+        market_condition = "RECOVERING_FROM_OVERSOLD"
+        market_condition_reason = "A qualifying reversal has already fired after an oversold reset; current internals are being monitored as the recovery develops."
+    elif oversold_gate:
+        market_condition = "OVERSOLD"
+        market_condition_reason = "At least one canonical oversold gate is active, so spare-cash deployment is getting closer but still requires reversal confirmation."
+    elif extension_count >= 2:
+        market_condition = "EXTENDED"
+        market_condition_reason = "At least two independent breadth measures are in strong or overbought territory; this is not an attractive tactical entry for spare cash."
+    elif weak_count >= 2:
+        market_condition = "PULLBACK"
+        market_condition_reason = "Multiple breadth measures are below their neutral zones, but the market has not reached the canonical oversold gate."
+    else:
+        market_condition = "BALANCED"
+        market_condition_reason = "Breadth is neither meaningfully oversold nor broadly extended; there is no tactical cash-deployment edge."
+
+    return {
+        "market_condition": market_condition,
+        "market_condition_reason": market_condition_reason,
+        "extension_signal_count": extension_count,
+        "extension_signals": extension_signals,
+        "weak_signal_count": weak_count,
+        "weak_signals": weak_signals,
+        "regime_is_decision_input": False,
+    }
+
+
 def evaluate(payload: dict, prior: dict | None, recent: list[dict], latched_go: dict | None) -> dict:
     values = payload.get("values", {})
     current_fast = current_fast_families(payload)
@@ -212,9 +257,25 @@ def evaluate(payload: dict, prior: dict | None, recent: list[dict], latched_go: 
         state, action = "WAIT", "WAIT"
         reason = "Oversold setup is active, but reversal evidence has not reached WATCH or GO EARLY."
 
+    deploy = action == "GO_EARLY"
+    if deploy:
+        deployment_signal = "DEPLOY"
+        deployment_reason = "A qualifying reversal has fired after an oversold reset. Begin deploying spare cash; today\'s signal remains latched through the session."
+    elif oversold_gate:
+        deployment_signal = "WATCH"
+        deployment_reason = "The market is oversold enough to be interesting, but reversal confirmation has not yet reached the deployment threshold."
+    else:
+        deployment_signal = "HOLD_CASH"
+        deployment_reason = "There is no qualifying oversold re-entry setup. Keep spare cash available rather than forcing an entry."
+
+    cash_context = classify_cash_context(values, oversold_gate, deploy)
+
     return {
         "engine_version": "REENTRY_UNIFIED_v1",
         "primary_engine": True,
+        "deployment_signal": deployment_signal,
+        "deployment_reason": deployment_reason,
+        **cash_context,
         "oversold_gate": oversold_gate,
         "fast_family_count": fast_count,
         "fast_families": fast_families,
@@ -228,7 +289,7 @@ def evaluate(payload: dict, prior: dict | None, recent: list[dict], latched_go: 
         "state": state,
         "decision": action,
         "decision_reason": reason,
-        "logic": "Oversold setup required. Before GO fires, GO EARLY requires either 2+ fast reversal families within the last 30 minutes, or 1 recent fast family plus 1 current context turn. Once GO EARLY fires, it remains latched through that market session and resets on the next market date.",
+        "logic": "Cash action is HOLD CASH when no oversold setup is active, WATCH when the canonical oversold gate is active but no GO has fired, and DEPLOY once GO EARLY qualifies. GO EARLY requires either 2+ fast reversal families within the last 30 minutes, or 1 recent fast family plus 1 current context turn. Once GO EARLY fires, DEPLOY remains latched through that market session and resets on the next market date. Market-condition labels are descriptive context and do not modify the trigger.",
     }
 
 
@@ -263,6 +324,10 @@ def main() -> None:
         "market_phase": result["market_phase"],
         "state": result["state"],
         "decision": result["decision"],
+        "deployment_signal": result["deployment_signal"],
+        "market_condition": result["market_condition"],
+        "extension_signal_count": result["extension_signal_count"],
+        "weak_signal_count": result["weak_signal_count"],
         "go_latched_for_session": int(result["go_latched_for_session"]),
         "go_triggered_at_et": result["go_triggered_at_et"],
         "oversold_gate": int(result["oversold_gate"]),
