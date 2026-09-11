@@ -104,6 +104,36 @@ export interface CanonicalHistoricalEvidence {
   }>;
 }
 
+export interface CashPolicyForwardMetric {
+  median: number;
+  positive_rate?: number;
+}
+
+export interface CashPolicyStateEvidence {
+  n: number;
+  SPY: Record<string, CashPolicyForwardMetric>;
+  QQQ: Record<string, CashPolicyForwardMetric>;
+}
+
+export interface CashPolicyEvidence {
+  test_status: string;
+  date_range: [string, string];
+  n_sessions: number;
+  overall_proxy_policy_verdict: string;
+  note: string;
+  actions: Record<string, CashPolicyStateEvidence>;
+  conditions: Record<string, CashPolicyStateEvidence>;
+  hold_to_next_deploy: {
+    n: number;
+    median_wait_sessions: number;
+    SPY: { median_entry_advantage: number; cheaper_entry_rate: number };
+    QQQ: { median_entry_advantage: number; cheaper_entry_rate: number };
+  };
+  watch_to_next_deploy: { n: number; median_wait_sessions: number };
+  timing_supported: boolean;
+  deploy_supported: boolean;
+}
+
 async function readJson<T>(relative: string): Promise<T | null> {
   const candidates = [
     path.join(process.cwd(), "public", relative),
@@ -121,6 +151,10 @@ async function readJson<T>(relative: string): Promise<T | null> {
 
 export async function getHistoricalEpisodeEvidence(): Promise<CanonicalHistoricalEvidence | null> {
   return readJson<CanonicalHistoricalEvidence>(path.join("reentry", "validation", "canonical_historical_evidence_2026-09-04.json"));
+}
+
+export async function getCashPolicyEvidence(): Promise<CashPolicyEvidence | null> {
+  return readJson<CashPolicyEvidence>(path.join("reentry", "validation", "cash_policy_validation_2026-09-11.json"));
 }
 
 export async function getHistoricalEpisodeLedger(): Promise<HistoricalEpisodeLedger | null> {
