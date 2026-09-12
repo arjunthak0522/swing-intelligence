@@ -13,6 +13,8 @@ import yfinance as yf
 
 ET = ZoneInfo("America/New_York")
 CBOE_HISTORY = "https://cdn.cboe.com/api/global/us_indices/daily_prices/{symbol}_History.csv"
+OTHER_LISTED = "https://www.nasdaqtrader.com/dynamic/SymDir/otherlisted.txt"
+T2108_BATCH_SIZE = 180
 
 
 def finite(v):
@@ -92,6 +94,59 @@ def cboe_put_call(market_date):
     return {"name":"Options sentiment","state":state,"supportive":False,"equity_put_call":eq,"index_put_call":idx,"total_put_call":total,"benchmark":"Equity P/C <0.50 complacent · 0.50-0.70 normal · 0.70-0.90 fear · >=0.90 high fear (working display scale until percentiles mature)","retail_explanation":"This looks at how heavily traders are using puts versus calls. High put activity often means fear is elevated.","signal_behavior":"CONTRARIAN","behavior_explanation":"Unusually high fear can improve a re-entry setup, but fear alone is not a buy signal. Confirmation comes when fear retreats while breadth improves.","freshness_type":"DAILY_CLOSE","last_updated":market_date,"source":"Cboe U.S. Options Daily Market Statistics","validation_status":"RESEARCH_PENDING","validation_note":"Equity and index ratios remain separate; this family cannot veto DEPLOY."}
 
 
+def nyse_symbols() -> list[str]:
+    req=Request(OTHER_LISTED,headers={"User-Agent":"Mozilla/5.0 RE-ENTRY-T2108/1.0"})
+    with urlopen(req,timeout=30) as resp: raw=resp.read().decode("utf-8",errors="replace")
+    rows=[]
+    for row in csv.DictReader(StringIO(raw),delimiter="|"):
+        if not row or str(row.get("ACT Symbol","")).startswith("File Creation Time"): continue
+        if str(row.get("Exchange","")).strip().upper()!="N": continue
+        if str(row.get("ETF","N")).strip().upper()=="Y" or str(row.get("Test Issue","N")).strip().upper()=="Y": continue
+        symbol=str(row.get("ACT Symbol","")).strip(); name=str(row.get("Security Name","")).upper()
+        if not symbol or any(token in name for token in (" WARRANT"," WTS"," UNIT"," RIGHT"," PREFERRED")): continue
+        if not re.fullmatch(r"[A-Z0-9.\-]+",symbol): continue
+        rows.append(symbol.replace(".","-"))
+    return sorted(set(rows))
+
+
+def t2108_context(market_date: str|None):
+    symbols=nyse_symbols()
+    if len(symbols)<500: raise ValueError(f"NYSE universe unexpectedly small: {len(symbols)}")
+    current_above=prior_above=current_valid=prior_valid=0
+    latest_date=None
+    cutoff=pd.Timestamp(market_date) if market_date else None
+    for start in range(0,len(symbols),T2108_BATCH_SIZE):
+        batch=symbols[start:start+T2108_BATCH_SIZE]
+        try:
+            frame=yf.download(batch,period="3mo",interval="1d",group_by="ticker",auto_adjust=True,progress=False,threads=True,timeout=25)
+        except Exception:
+            continue
+        for ticker in batch:
+            closes=ticker_close(frame,ticker)
+            if closes.empty: continue
+            closes.index=pd.to_datetime(closes.index)
+            if cutoff is not None: closes=closes.loc[closes.index.normalize()<=cutoff.normalize()]
+            if len(closes)<40: continue
+            latest_date=max(latest_date,closes.index[-1]) if latest_date is not None else closes.index[-1]
+            cur=float(closes.iloc[-1]); ma40=float(closes.iloc[-40:].mean())
+            if finite(cur) and finite(ma40) and ma40>0:
+                current_valid+=1
+                if cur>ma40: current_above+=1
+            if len(closes)>=41:
+                prior=float(closes.iloc[-2]); prior_ma40=float(closes.iloc[-41:-1].mean())
+                if finite(prior) and finite(prior_ma40) and prior_ma40>0:
+                    prior_valid+=1
+                    if prior>prior_ma40: prior_above+=1
+    coverage=current_valid/len(symbols) if symbols else 0.0
+    if current_valid<600 or coverage<0.35: raise ValueError(f"Insufficient T2108-equivalent coverage: {current_valid}/{len(symbols)} ({coverage:.1%})")
+    value=100.0*current_above/current_valid
+    prior_value=100.0*prior_above/prior_valid if prior_valid else None
+    delta=value-prior_value if prior_value is not None else None
+    state="EXTREME_OVERSOLD" if value<10 else "OVERSOLD" if value<20 else "WEAK" if value<40 else "NORMAL" if value<70 else "STRONG" if value<80 else "VERY_EXTENDED"
+    direction="RISING" if delta is not None and delta>=1 else "FALLING" if delta is not None and delta<=-1 else "FLAT"
+    return {"name":"T2108 breadth context","symbol":"T2108-EQUIVALENT","value":value,"prior_value":prior_value,"change_points":delta,"state":state,"direction":direction,"decision_input":False,"supportive":False,"universe_size":len(symbols),"valid_count":current_valid,"coverage_pct":coverage*100.0,"above_40dma_count":current_above,"benchmark":"<10% extreme oversold · 10-20% oversold · 20-40% weak · 40-70% normal · 70-80% strong · >80% very extended","retail_explanation":"This shows the percentage of NYSE stocks trading above their 40-day moving average. It is an intermediate-speed breadth gauge between very short-term breadth and long-term market structure.","behavior_explanation":"When this falls to deeply oversold levels, it is a contrarian bullish setup for re-entry because weakness is widespread and may be exhausting. A turn higher is the stronger confirmation; the low reading alone does not trigger DEPLOY.","freshness_type":"DAILY_CLOSE","last_updated":pd.Timestamp(latest_date).date().isoformat() if latest_date is not None else market_date,"source":"RE-ENTRY calculated T2108-equivalent from current NYSE-listed non-ETF equities and 40-day adjusted closes","validation_status":"RESEARCH_PENDING","validation_note":"Context only. This is a calculated T2108-equivalent, not the proprietary TC2000 T2108 feed; incremental value versus SPXA20R/MMFD must be validated before any promotion."}
+
+
 def append_history(path,row):
     path.parent.mkdir(parents=True,exist_ok=True); fields=list(row); rows=[]
     if path.exists():
@@ -111,11 +166,18 @@ def main():
     for key,builder in builders.items():
         try: families[key]=builder()
         except Exception as exc: errors[key]=f"{type(exc).__name__}: {exc}"; families[key]={"name":key.replace("_"," ").title(),"state":"UNAVAILABLE","supportive":False,"retail_explanation":"This signal could not be calculated from the current data feed.","signal_behavior":"CONTEXTUAL","behavior_explanation":"No directional interpretation is assigned while unavailable.","freshness_type":"UNAVAILABLE","last_updated":None,"validation_status":"RESEARCH_PENDING","error":errors[key]}
-    support=sum(bool(v.get("supportive")) for v in families.values()); overlay={"version":"REENTRY_SECONDARY_CONFIRMATION_v1","timestamp_et":stamp,"market_date":date,"decision_input":False,"changes_deploy_trigger":False,"changes_recovery_stage":False,"supportive_family_count":support,"family_count":len(families),"families":families,"errors":errors,"interpretation":"Secondary confirmation describes whether participation, volatility structure, risk appetite, and options sentiment corroborate the existing RE-ENTRY signal. It does not create, block, delay, or revoke DEPLOY."}
+    try:
+        t2108=t2108_context(str(date) if date else None)
+    except Exception as exc:
+        errors["t2108"]=f"{type(exc).__name__}: {exc}"
+        t2108={"name":"T2108 breadth context","symbol":"T2108-EQUIVALENT","state":"UNAVAILABLE","direction":"UNAVAILABLE","decision_input":False,"retail_explanation":"The NYSE 40-day breadth context could not be calculated from the current data feed.","behavior_explanation":"No contrarian or confirming interpretation is assigned while unavailable.","freshness_type":"UNAVAILABLE","last_updated":None,"validation_status":"RESEARCH_PENDING","error":errors["t2108"]}
+    support=sum(bool(v.get("supportive")) for v in families.values()); overlay={"version":"REENTRY_SECONDARY_CONFIRMATION_v1","timestamp_et":stamp,"market_date":date,"decision_input":False,"changes_deploy_trigger":False,"changes_recovery_stage":False,"supportive_family_count":support,"family_count":len(families),"families":families,"breadth_context":{"t2108":t2108},"errors":errors,"interpretation":"Secondary confirmation describes whether participation, volatility structure, risk appetite, and options sentiment corroborate the existing RE-ENTRY signal. T2108 is separate breadth context and does not change the confirmation score. None of these signals create, block, delay, or revoke DEPLOY."}
     payload["secondary_confirmation"]=overlay
+    payload["t2108_context"]=t2108
+    payload.setdefault("values",{})["T2108"]=t2108.get("value")
     if unified: unified["secondary_confirmation"]=overlay; payload["unified_engine"]=unified
     snap.write_text(json.dumps(payload,indent=2)+"\n")
-    row={"market_date":date,"timestamp_et":stamp,"deployment_signal":unified.get("deployment_signal"),"market_condition":unified.get("market_condition"),"recovery_stage":unified.get("recovery_stage"),"supportive_family_count":support}
+    row={"market_date":date,"timestamp_et":stamp,"deployment_signal":unified.get("deployment_signal"),"market_condition":unified.get("market_condition"),"recovery_stage":unified.get("recovery_stage"),"supportive_family_count":support,"t2108_value":t2108.get("value"),"t2108_state":t2108.get("state"),"t2108_direction":t2108.get("direction"),"t2108_coverage_pct":t2108.get("coverage_pct")}
     for key,f in families.items(): row[f"{key}_state"]=f.get("state"); row[f"{key}_supportive"]=f.get("supportive"); row[f"{key}_last_updated"]=f.get("last_updated")
     append_history(hist,row); print(json.dumps(overlay,indent=2))
 

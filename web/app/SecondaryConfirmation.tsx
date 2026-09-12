@@ -20,6 +20,28 @@ type Family = {
   total_put_call?: number;
 };
 
+type T2108Context = {
+  name?: string;
+  symbol?: string;
+  value?: number;
+  prior_value?: number;
+  change_points?: number;
+  state?: string;
+  direction?: string;
+  decision_input?: boolean;
+  benchmark?: string;
+  retail_explanation?: string;
+  behavior_explanation?: string;
+  freshness_type?: "DAILY_CLOSE" | "UNAVAILABLE" | string;
+  last_updated?: string | null;
+  source?: string;
+  validation_status?: string;
+  validation_note?: string;
+  universe_size?: number;
+  valid_count?: number;
+  coverage_pct?: number;
+};
+
 type Overlay = {
   version?: string;
   decision_input?: boolean;
@@ -29,11 +51,13 @@ type Overlay = {
   family_count?: number;
   interpretation?: string;
   families?: Record<string, Family>;
+  breadth_context?: { t2108?: T2108Context };
 };
 
 const pct = (v?: number) => typeof v === "number" && Number.isFinite(v) ? `${(v * 100).toFixed(1)}%` : "UNAVAILABLE";
+const percentPoints = (v?: number) => typeof v === "number" && Number.isFinite(v) ? `${v.toFixed(1)}%` : "UNAVAILABLE";
 const num = (v?: number, d = 2) => typeof v === "number" && Number.isFinite(v) ? v.toFixed(d) : "UNAVAILABLE";
-const freshnessLabel = (family: Family) => {
+const freshnessLabel = (family: Family | T2108Context) => {
   const kind = (family.freshness_type || "UNAVAILABLE").replaceAll("_", " ");
   return family.last_updated ? `${kind} · updated ${family.last_updated}` : kind;
 };
@@ -54,19 +78,29 @@ function tone(state?: string, supportive?: boolean) {
   return "secondary-neutral";
 }
 
+function t2108Tone(state?: string) {
+  const s=(state||"").toUpperCase();
+  if(s.includes("EXTREME_OVERSOLD")||s==="OVERSOLD") return "secondary-warn";
+  if(s==="STRONG"||s.includes("VERY_EXTENDED")) return "secondary-good";
+  if(s==="WEAK") return "secondary-warn";
+  return "secondary-neutral";
+}
+
 export default function SecondaryConfirmation({ washout }: { washout: any }) {
   const overlay: Overlay | undefined = washout?.unified_engine?.secondary_confirmation || washout?.secondary_confirmation;
   if (!overlay?.families) return null;
   const entries = Object.entries(overlay.families);
+  const t2108 = overlay.breadth_context?.t2108 || washout?.t2108_context;
   return <section className="card section-card secondary-confirmation">
     <style>{`
       .secondary-confirmation{background:linear-gradient(145deg,#fbfaf7 0%,#f7faf8 52%,#f3f7f4 100%)}
       .secondary-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:16px}.secondary-score{font-size:11px;font-weight:900;border:1px solid rgba(47,118,80,.22);background:rgba(47,118,80,.07);padding:8px 10px;border-radius:999px;white-space:nowrap}
       .secondary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.secondary-card{position:relative;border:1px solid var(--line);border-radius:15px;padding:14px;background:rgba(255,255,255,.58);overflow:hidden}.secondary-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:#a8aaa4}.secondary-card.secondary-good:before{background:var(--green)}.secondary-card.secondary-warn:before{background:var(--amber)}.secondary-card.secondary-bad:before{background:var(--red)}
-      .secondary-title{font-size:10px;font-weight:850}.secondary-meta{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 9px}.secondary-state{display:inline-block;padding:4px 7px;border-radius:999px;border:1px solid currentColor;font-size:8px;font-weight:900;letter-spacing:.045em}.secondary-good .secondary-state{color:var(--green)}.secondary-warn .secondary-state{color:var(--amber)}.secondary-bad .secondary-state{color:var(--red)}
+      .secondary-title{font-size:10px;font-weight:850}.secondary-symbol{display:block;margin-top:2px;color:var(--muted);font-size:8px;font-weight:800;letter-spacing:.05em}.secondary-meta{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 9px}.secondary-state{display:inline-block;padding:4px 7px;border-radius:999px;border:1px solid currentColor;font-size:8px;font-weight:900;letter-spacing:.045em}.secondary-good .secondary-state{color:var(--green)}.secondary-warn .secondary-state{color:var(--amber)}.secondary-bad .secondary-state{color:var(--red)}
       .secondary-readout{font-size:12px;font-weight:800;line-height:1.35}.secondary-plain,.secondary-behavior-copy{margin:9px 0 0;font-size:10px;line-height:1.5;color:#3f443d}.secondary-plain b,.secondary-behavior-copy b{display:block;font-size:8px;letter-spacing:.08em;color:var(--muted);margin-bottom:2px}.secondary-freshness{margin-top:8px;font-size:8px;font-weight:850;letter-spacing:.04em;color:#565b54}.secondary-benchmark{margin-top:9px;padding:8px;border-radius:9px;background:#f0eee8;font-size:9px;line-height:1.45;color:#53574f}.secondary-validation{margin-top:8px;font-size:8px;font-weight:850;letter-spacing:.04em;color:var(--muted)}.secondary-note{margin:6px 0 0;font-size:9px;line-height:1.42;color:var(--muted)}
       .secondary-foot{margin:13px 0 0;font-size:10px;line-height:1.5;color:var(--muted)}
-      @media(max-width:900px){.secondary-grid{grid-template-columns:1fr 1fr}}@media(max-width:620px){.secondary-grid{grid-template-columns:1fr}.secondary-head{display:block}.secondary-score{display:inline-block;margin-top:10px}}
+      .breadth-context-wrap{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}.breadth-context-label{font-size:8px;font-weight:900;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}.breadth-context-card{display:grid;grid-template-columns:minmax(150px,.8fr) minmax(160px,.8fr) minmax(0,2fr);gap:14px;align-items:start}.breadth-context-card .secondary-card{height:100%}.breadth-context-summary{border:1px solid var(--line);border-radius:15px;padding:14px;background:rgba(255,255,255,.52)}.breadth-context-summary strong{display:block;font-size:28px;letter-spacing:-.04em;margin:5px 0}.breadth-context-summary small{display:block;color:var(--muted);font-size:8px;line-height:1.5}.breadth-context-copy{border:1px solid var(--line);border-radius:15px;padding:14px;background:linear-gradient(90deg,rgba(163,116,42,.055),rgba(255,255,255,.25));font-size:10px;line-height:1.55;color:#3f443d}.breadth-context-copy b{display:block;font-size:8px;letter-spacing:.08em;color:var(--muted);margin-bottom:3px}
+      @media(max-width:900px){.secondary-grid{grid-template-columns:1fr 1fr}.breadth-context-card{grid-template-columns:1fr 1fr}.breadth-context-copy{grid-column:1/-1}}@media(max-width:620px){.secondary-grid{grid-template-columns:1fr}.secondary-head{display:block}.secondary-score{display:inline-block;margin-top:10px}.breadth-context-card{grid-template-columns:1fr}.breadth-context-copy{grid-column:auto}}
     `}</style>
     <div className="secondary-head"><div><span className="kicker">SECONDARY CONFIRMATION</span><h2 style={{margin:"4px 0 0",fontSize:25,letterSpacing:"-.035em"}}>Is the recovery broadening?</h2></div><div className="secondary-score">{overlay.supportive_family_count ?? 0}/{overlay.family_count ?? entries.length} supportive</div></div>
     <div className="secondary-grid">{entries.map(([key,family]) => <div key={key} className={`secondary-card ${tone(family.state,family.supportive)}`}>
@@ -80,6 +114,11 @@ export default function SecondaryConfirmation({ washout }: { washout: any }) {
       <div className="secondary-validation">{(family.validation_status || "RESEARCH PENDING").replaceAll("_"," ")}</div>
       <p className="secondary-note">{family.validation_note}</p>
     </div>)}</div>
+    {t2108?<div className="breadth-context-wrap"><div className="breadth-context-label">ADDITIONAL BREADTH CONTEXT · DOES NOT CHANGE THE 4-FAMILY SCORE</div><div className="breadth-context-card">
+      <div className={`secondary-card ${t2108Tone(t2108.state)}`}><div className="secondary-title">NYSE stocks above their 40-day average<span className="secondary-symbol">T2108 · breadth reference</span></div><div className="secondary-meta"><span className="secondary-state">{(t2108.state||"UNAVAILABLE").replaceAll("_"," ")}</span><span className="secondary-state">{(t2108.direction||"UNAVAILABLE").replaceAll("_"," ")}</span></div><div className="secondary-readout">{percentPoints(t2108.value)} above 40D SMA · prior {percentPoints(t2108.prior_value)}</div><div className="secondary-freshness">{freshnessLabel(t2108)}</div><div className="secondary-benchmark">{t2108.benchmark||"Benchmark unavailable"}</div></div>
+      <div className="breadth-context-summary"><span className="secondary-title">Breadth coverage</span><strong>{typeof t2108.coverage_pct==="number"?`${t2108.coverage_pct.toFixed(1)}%`:"UNAVAILABLE"}</strong><small>{t2108.valid_count??"-"} valid NYSE stocks of {t2108.universe_size??"-"} tracked</small><small>{t2108.source||"Source unavailable"}</small></div>
+      <div className="breadth-context-copy"><b>WHAT THIS MEANS</b>{t2108.retail_explanation||"Plain-English interpretation unavailable."}<br/><br/><b>WHY IT MATTERS FOR RE-ENTRY</b>{t2108.behavior_explanation||"Interpretation unavailable."}<br/><br/><b>STATUS</b>{(t2108.validation_status||"RESEARCH_PENDING").replaceAll("_"," ")} · NON-DECISION CONTEXT</div>
+    </div></div>:null}
     <p className="secondary-foot">{overlay.interpretation} Some extreme readings can become useful contrarian setups, but that is part of the interpretation rather than a standalone signal category. These signals remain descriptive until their incremental historical value is proven.</p>
   </section>;
 }
