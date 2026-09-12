@@ -404,7 +404,7 @@
           "freshness_type": "UNAVAILABLE",
           "last_updated": null,
           "validation_status": "RESEARCH_PENDING",
-          "error": "TimeoutError: The read operation timed out"
+          "error": "ValueError: FRED series VIXCLS unavailable"
         },
         "breadth_thrust": {
           "name": "Breadth participation thrust",
@@ -424,16 +424,30 @@
           "validation_note": "61.5% is a classic Zweig breadth-thrust reference, but a true Zweig signal also requires a move from below 40% within 10 sessions. This live level is not labeled a classic Zweig confirmation until history proves the path condition."
         },
         "risk_appetite": {
-          "name": "Risk Appetite",
-          "state": "UNAVAILABLE",
+          "name": "Risk-appetite broadening",
+          "state": "MIXED",
           "supportive": false,
-          "retail_explanation": "This signal could not be calculated from the current data feed.",
-          "signal_behavior": "CONTEXTUAL",
-          "behavior_explanation": "No directional interpretation is assigned while the source is unavailable.",
-          "freshness_type": "UNAVAILABLE",
-          "last_updated": null,
+          "supportive_components": 1,
+          "components": {
+            "equal_weight_broadening": false,
+            "small_caps_confirming": false,
+            "credit_risk_appetite": true
+          },
+          "RSP_SPY": 0.28113674298304114,
+          "RSP_SPY_5d_change": -0.01219501134708778,
+          "IWM_SPY": 0.37798482637973563,
+          "IWM_SPY_5d_change": -0.009971478250425991,
+          "HYG_LQD": 0.7534509078226233,
+          "HYG_LQD_5d_change": 0.003523187653575066,
+          "benchmark": "0/3 defensive \u00b7 1/3 mixed \u00b7 2/3 broadening \u00b7 3/3 broad risk-on; each component requires positive 5-session relative momentum",
+          "retail_explanation": "This checks whether investors are moving beyond the safest and biggest stocks into equal-weight stocks, small caps, and lower-quality credit. That usually means confidence is returning more broadly.",
+          "signal_behavior": "CONFIRMING",
+          "behavior_explanation": "This is a confirming signal: broadening into small caps, equal-weight stocks, and credit suggests investors are becoming more willing to take risk.",
+          "freshness_type": "DAILY_CLOSE",
+          "last_updated": "2026-09-11",
+          "source": "Yahoo Finance daily adjusted closes: RSP/SPY, IWM/SPY, HYG/LQD",
           "validation_status": "RESEARCH_PENDING",
-          "error": "ValueError: Insufficient risk-appetite history"
+          "validation_note": "Composite is deliberately one family, not three votes. Historical conditional validation is required before it can affect recovery-stage grading."
         },
         "options_sentiment": {
           "name": "Options sentiment",
@@ -454,8 +468,7 @@
         }
       },
       "errors": {
-        "vol_structure": "TimeoutError: The read operation timed out",
-        "risk_appetite": "ValueError: Insufficient risk-appetite history"
+        "vol_structure": "ValueError: FRED series VIXCLS unavailable"
       },
       "interpretation": "Secondary confirmation describes whether participation, volatility structure, risk appetite, and options sentiment are corroborating the existing RE-ENTRY signal. It does not create, block, delay, or revoke DEPLOY."
     }
@@ -565,7 +578,7 @@
         "freshness_type": "UNAVAILABLE",
         "last_updated": null,
         "validation_status": "RESEARCH_PENDING",
-        "error": "TimeoutError: The read operation timed out"
+        "error": "ValueError: FRED series VIXCLS unavailable"
       },
       "breadth_thrust": {
         "name": "Breadth participation thrust",
@@ -585,16 +598,30 @@
         "validation_note": "61.5% is a classic Zweig breadth-thrust reference, but a true Zweig signal also requires a move from below 40% within 10 sessions. This live level is not labeled a classic Zweig confirmation until history proves the path condition."
       },
       "risk_appetite": {
-        "name": "Risk Appetite",
-        "state": "UNAVAILABLE",
+        "name": "Risk-appetite broadening",
+        "state": "MIXED",
         "supportive": false,
-        "retail_explanation": "This signal could not be calculated from the current data feed.",
-        "signal_behavior": "CONTEXTUAL",
-        "behavior_explanation": "No directional interpretation is assigned while the source is unavailable.",
-        "freshness_type": "UNAVAILABLE",
-        "last_updated": null,
+        "supportive_components": 1,
+        "components": {
+          "equal_weight_broadening": false,
+          "small_caps_confirming": false,
+          "credit_risk_appetite": true
+        },
+        "RSP_SPY": 0.28113674298304114,
+        "RSP_SPY_5d_change": -0.01219501134708778,
+        "IWM_SPY": 0.37798482637973563,
+        "IWM_SPY_5d_change": -0.009971478250425991,
+        "HYG_LQD": 0.7534509078226233,
+        "HYG_LQD_5d_change": 0.003523187653575066,
+        "benchmark": "0/3 defensive \u00b7 1/3 mixed \u00b7 2/3 broadening \u00b7 3/3 broad risk-on; each component requires positive 5-session relative momentum",
+        "retail_explanation": "This checks whether investors are moving beyond the safest and biggest stocks into equal-weight stocks, small caps, and lower-quality credit. That usually means confidence is returning more broadly.",
+        "signal_behavior": "CONFIRMING",
+        "behavior_explanation": "This is a confirming signal: broadening into small caps, equal-weight stocks, and credit suggests investors are becoming more willing to take risk.",
+        "freshness_type": "DAILY_CLOSE",
+        "last_updated": "2026-09-11",
+        "source": "Yahoo Finance daily adjusted closes: RSP/SPY, IWM/SPY, HYG/LQD",
         "validation_status": "RESEARCH_PENDING",
-        "error": "ValueError: Insufficient risk-appetite history"
+        "validation_note": "Composite is deliberately one family, not three votes. Historical conditional validation is required before it can affect recovery-stage grading."
       },
       "options_sentiment": {
         "name": "Options sentiment",
@@ -615,8 +642,7 @@
       }
     },
     "errors": {
-      "vol_structure": "TimeoutError: The read operation timed out",
-      "risk_appetite": "ValueError: Insufficient risk-appetite history"
+      "vol_structure": "ValueError: FRED series VIXCLS unavailable"
     },
     "interpretation": "Secondary confirmation describes whether participation, volatility structure, risk appetite, and options sentiment are corroborating the existing RE-ENTRY signal. It does not create, block, delay, or revoke DEPLOY."
   }
