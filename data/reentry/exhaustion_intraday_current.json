@@ -404,7 +404,7 @@
           "freshness_type": "UNAVAILABLE",
           "last_updated": null,
           "validation_status": "RESEARCH_PENDING",
-          "error": "ValueError: FRED series VIXCLS unavailable"
+          "error": "ValueError: Insufficient official VIX/VIX3M history"
         },
         "breadth_thrust": {
           "name": "Breadth participation thrust",
@@ -468,7 +468,7 @@
         }
       },
       "errors": {
-        "vol_structure": "ValueError: FRED series VIXCLS unavailable"
+        "vol_structure": "ValueError: Insufficient official VIX/VIX3M history"
       },
       "interpretation": "Secondary confirmation describes whether participation, volatility structure, risk appetite, and options sentiment are corroborating the existing RE-ENTRY signal. It does not create, block, delay, or revoke DEPLOY."
     }
@@ -578,7 +578,7 @@
         "freshness_type": "UNAVAILABLE",
         "last_updated": null,
         "validation_status": "RESEARCH_PENDING",
-        "error": "ValueError: FRED series VIXCLS unavailable"
+        "error": "ValueError: Insufficient official VIX/VIX3M history"
       },
       "breadth_thrust": {
         "name": "Breadth participation thrust",
@@ -642,7 +642,7 @@
       }
     },
     "errors": {
-      "vol_structure": "ValueError: FRED series VIXCLS unavailable"
+      "vol_structure": "ValueError: Insufficient official VIX/VIX3M history"
     },
     "interpretation": "Secondary confirmation describes whether participation, volatility structure, risk appetite, and options sentiment are corroborating the existing RE-ENTRY signal. It does not create, block, delay, or revoke DEPLOY."
   }
