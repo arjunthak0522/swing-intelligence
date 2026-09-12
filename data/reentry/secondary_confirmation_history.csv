@@ -1,0 +1,2 @@
+market_date,timestamp_et,deployment_signal,market_condition,recovery_stage,supportive_family_count,vol_structure_state,vol_structure_supportive,breadth_thrust_state,breadth_thrust_supportive,risk_appetite_state,risk_appetite_supportive,options_sentiment_state,options_sentiment_supportive
+2026-09-11,2026-09-11T16:41:39.667598-04:00,DEPLOY,RECOVERING_FROM_OVERSOLD,EARLY,1,UNAVAILABLE,False,BUILDING,True,MIXED,False,NORMAL,False

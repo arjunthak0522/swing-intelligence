@@ -383,7 +383,79 @@
     "timestamp_et": "2026-09-11T16:41:39.667598-04:00",
     "market_date": "2026-09-11",
     "data_quality_status": "OK",
-    "actionable": true
+    "actionable": true,
+    "secondary_confirmation": {
+      "version": "REENTRY_SECONDARY_CONFIRMATION_v1",
+      "timestamp_et": "2026-09-11T16:41:39.667598-04:00",
+      "market_date": "2026-09-11",
+      "decision_input": false,
+      "changes_deploy_trigger": false,
+      "changes_recovery_stage": false,
+      "supportive_family_count": 1,
+      "family_count": 4,
+      "families": {
+        "vol_structure": {
+          "name": "Vol Structure",
+          "state": "UNAVAILABLE",
+          "supportive": false,
+          "retail_explanation": "This signal could not be calculated from the current data feed.",
+          "validation_status": "RESEARCH_PENDING",
+          "error": "ValueError: Insufficient VIX/VIX3M history"
+        },
+        "breadth_thrust": {
+          "name": "Breadth participation thrust",
+          "state": "BUILDING",
+          "supportive": true,
+          "nasdaq_advance_share": 0.5954198473282443,
+          "advancing_issues": 2808.0,
+          "declining_issues": 1908.0,
+          "benchmark": "<45% defensive \u00b7 45-55% mixed \u00b7 55-61.5% building \u00b7 >=61.5% strong thrust-level participation",
+          "retail_explanation": "This checks whether the rebound is spreading across lots of stocks instead of being carried by just a few big names. More participation usually makes a recovery more convincing.",
+          "source": "Current Nasdaq advancing/declining issues already captured by RE-ENTRY",
+          "validation_status": "RESEARCH_PENDING",
+          "validation_note": "61.5% is a classic Zweig breadth-thrust reference, but a true Zweig signal also requires a move from below 40% within 10 sessions. This live level is not labeled a classic Zweig confirmation until history proves the path condition."
+        },
+        "risk_appetite": {
+          "name": "Risk-appetite broadening",
+          "state": "MIXED",
+          "supportive": false,
+          "supportive_components": 1,
+          "components": {
+            "equal_weight_broadening": false,
+            "small_caps_confirming": false,
+            "credit_risk_appetite": true
+          },
+          "RSP_SPY": 0.28113674298304114,
+          "RSP_SPY_5d_change": -0.01219501134708778,
+          "IWM_SPY": 0.37798482637973563,
+          "IWM_SPY_5d_change": -0.009971478250425991,
+          "HYG_LQD": 0.7534509078226233,
+          "HYG_LQD_5d_change": 0.003523187653575066,
+          "benchmark": "0/3 defensive \u00b7 1/3 mixed \u00b7 2/3 broadening \u00b7 3/3 broad risk-on; each component requires positive 5-session relative momentum",
+          "retail_explanation": "This checks whether investors are moving beyond the safest and biggest stocks into equal-weight stocks, small caps, and lower-quality credit. That usually means confidence is returning more broadly.",
+          "source": "Yahoo Finance daily adjusted closes: RSP/SPY, IWM/SPY, HYG/LQD",
+          "validation_status": "RESEARCH_PENDING",
+          "validation_note": "Composite is deliberately one family, not three votes. Historical conditional validation is required before it can affect recovery-stage grading."
+        },
+        "options_sentiment": {
+          "name": "Options sentiment",
+          "state": "NORMAL",
+          "supportive": false,
+          "equity_put_call": 0.58,
+          "index_put_call": 1.06,
+          "total_put_call": 0.86,
+          "benchmark": "Heuristic display scale only until rolling percentiles mature: equity P/C <0.50 complacent \u00b7 0.50-0.70 normal \u00b7 0.70-0.90 fear \u00b7 >=0.90 high fear",
+          "retail_explanation": "This looks at how heavily traders are using puts versus calls. High put activity often means fear is elevated; the useful part for RE-ENTRY is whether that fear later starts to unwind.",
+          "source": "Cboe U.S. Options Daily Market Statistics",
+          "validation_status": "RESEARCH_PENDING",
+          "validation_note": "Cboe cautions that put/call ratios can be distorted by product mix and exercise-related flow. Equity and index ratios are kept separate; this family is sentiment context only and cannot veto DEPLOY."
+        }
+      },
+      "errors": {
+        "vol_structure": "ValueError: Insufficient VIX/VIX3M history"
+      },
+      "interpretation": "Secondary confirmation describes whether participation, volatility structure, risk appetite, and options sentiment are corroborating the existing RE-ENTRY signal. It does not create, block, delay, or revoke DEPLOY."
+    }
   },
   "snapshot_version": "REENTRY_UNIFIED_SNAPSHOT_v1",
   "snapshot_generated_at_et": "2026-09-11T16:41:40.204728-04:00",
@@ -469,5 +541,77 @@
     "state_transitions": 0,
     "go_early_snapshots": 41,
     "watch_snapshots": 0
+  },
+  "secondary_confirmation": {
+    "version": "REENTRY_SECONDARY_CONFIRMATION_v1",
+    "timestamp_et": "2026-09-11T16:41:39.667598-04:00",
+    "market_date": "2026-09-11",
+    "decision_input": false,
+    "changes_deploy_trigger": false,
+    "changes_recovery_stage": false,
+    "supportive_family_count": 1,
+    "family_count": 4,
+    "families": {
+      "vol_structure": {
+        "name": "Vol Structure",
+        "state": "UNAVAILABLE",
+        "supportive": false,
+        "retail_explanation": "This signal could not be calculated from the current data feed.",
+        "validation_status": "RESEARCH_PENDING",
+        "error": "ValueError: Insufficient VIX/VIX3M history"
+      },
+      "breadth_thrust": {
+        "name": "Breadth participation thrust",
+        "state": "BUILDING",
+        "supportive": true,
+        "nasdaq_advance_share": 0.5954198473282443,
+        "advancing_issues": 2808.0,
+        "declining_issues": 1908.0,
+        "benchmark": "<45% defensive \u00b7 45-55% mixed \u00b7 55-61.5% building \u00b7 >=61.5% strong thrust-level participation",
+        "retail_explanation": "This checks whether the rebound is spreading across lots of stocks instead of being carried by just a few big names. More participation usually makes a recovery more convincing.",
+        "source": "Current Nasdaq advancing/declining issues already captured by RE-ENTRY",
+        "validation_status": "RESEARCH_PENDING",
+        "validation_note": "61.5% is a classic Zweig breadth-thrust reference, but a true Zweig signal also requires a move from below 40% within 10 sessions. This live level is not labeled a classic Zweig confirmation until history proves the path condition."
+      },
+      "risk_appetite": {
+        "name": "Risk-appetite broadening",
+        "state": "MIXED",
+        "supportive": false,
+        "supportive_components": 1,
+        "components": {
+          "equal_weight_broadening": false,
+          "small_caps_confirming": false,
+          "credit_risk_appetite": true
+        },
+        "RSP_SPY": 0.28113674298304114,
+        "RSP_SPY_5d_change": -0.01219501134708778,
+        "IWM_SPY": 0.37798482637973563,
+        "IWM_SPY_5d_change": -0.009971478250425991,
+        "HYG_LQD": 0.7534509078226233,
+        "HYG_LQD_5d_change": 0.003523187653575066,
+        "benchmark": "0/3 defensive \u00b7 1/3 mixed \u00b7 2/3 broadening \u00b7 3/3 broad risk-on; each component requires positive 5-session relative momentum",
+        "retail_explanation": "This checks whether investors are moving beyond the safest and biggest stocks into equal-weight stocks, small caps, and lower-quality credit. That usually means confidence is returning more broadly.",
+        "source": "Yahoo Finance daily adjusted closes: RSP/SPY, IWM/SPY, HYG/LQD",
+        "validation_status": "RESEARCH_PENDING",
+        "validation_note": "Composite is deliberately one family, not three votes. Historical conditional validation is required before it can affect recovery-stage grading."
+      },
+      "options_sentiment": {
+        "name": "Options sentiment",
+        "state": "NORMAL",
+        "supportive": false,
+        "equity_put_call": 0.58,
+        "index_put_call": 1.06,
+        "total_put_call": 0.86,
+        "benchmark": "Heuristic display scale only until rolling percentiles mature: equity P/C <0.50 complacent \u00b7 0.50-0.70 normal \u00b7 0.70-0.90 fear \u00b7 >=0.90 high fear",
+        "retail_explanation": "This looks at how heavily traders are using puts versus calls. High put activity often means fear is elevated; the useful part for RE-ENTRY is whether that fear later starts to unwind.",
+        "source": "Cboe U.S. Options Daily Market Statistics",
+        "validation_status": "RESEARCH_PENDING",
+        "validation_note": "Cboe cautions that put/call ratios can be distorted by product mix and exercise-related flow. Equity and index ratios are kept separate; this family is sentiment context only and cannot veto DEPLOY."
+      }
+    },
+    "errors": {
+      "vol_structure": "ValueError: Insufficient VIX/VIX3M history"
+    },
+    "interpretation": "Secondary confirmation describes whether participation, volatility structure, risk appetite, and options sentiment are corroborating the existing RE-ENTRY signal. It does not create, block, delay, or revoke DEPLOY."
   }
 }
