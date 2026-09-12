@@ -1,0 +1,36 @@
+name: RE-ENTRY T2108 Incremental Validation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/reentry_t2108_incremental_validation.py'
+      - '.github/workflows/reentry-t2108-incremental-validation.yml'
+
+concurrency:
+  group: swing-intelligence-t2108-validation
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install pandas numpy yfinance
+      - name: Run T2108 incremental validation
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/reentry_t2108_incremental_validation.py
+      - name: Upload T2108 validation artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reentry-t2108-incremental-validation
+          path: artifacts/reentry_t2108_incremental/**
+          retention-days: 21
