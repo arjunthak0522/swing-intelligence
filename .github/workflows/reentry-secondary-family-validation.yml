@@ -1,0 +1,55 @@
+name: RE-ENTRY Secondary Family Incremental Validation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/reentry_secondary_family_validation.py'
+      - '.github/workflows/reentry-secondary-family-validation.yml'
+
+concurrency:
+  group: reentry-secondary-family-validation
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install pandas numpy yfinance requests beautifulsoup4
+      - name: Repair legacy source parsing for validation
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('tools/reentry_secondary_family_validation.py')
+          s = p.read_text(encoding='utf-8')
+
+          helper = '''def parse_mixed_dates(values: pd.Series) -> pd.DatetimeIndex:\n    def one(value):\n        raw = str(value).strip()\n        if raw.endswith(".0") and raw[:-2].isdigit():\n            raw = raw[:-2]\n        if len(raw) == 8 and raw.isdigit():\n            return pd.to_datetime(raw, format="%Y%m%d", errors="coerce")\n        return pd.to_datetime(raw, errors="coerce")\n    return pd.DatetimeIndex([one(v) for v in values])\n\n\n'''
+          anchor = 'def parse_unicorn_series(text: str) -> pd.Series:\n'
+          if 'def parse_mixed_dates' not in s:
+              s = s.replace(anchor, helper + anchor)
+          s = s.replace('dates = pd.to_datetime(df.iloc[:, 0], errors="coerce")', 'dates = parse_mixed_dates(df.iloc[:, 0])')
+
+          start = s.index('def parse_archive_ratio(url: str) -> pd.Series:')
+          end = s.index('\ndef fetch_cboe_daily', start)
+          archive_func = '''def parse_archive_ratio(url: str) -> pd.Series:\n    r = requests.get(url, headers=HEADERS, timeout=30)\n    r.raise_for_status()\n    lines = r.text.splitlines()\n    header_idx = next((i for i, line in enumerate(lines) if "date" in line.lower() and ("p/c" in line.lower() or "ratio" in line.lower())), None)\n    if header_idx is None:\n        raise RuntimeError(f"Could not locate Cboe put/call CSV header in {url}")\n    df = pd.read_csv(StringIO("\\n".join(lines[header_idx:])))\n    date_col = next((c for c in df.columns if "date" in c.lower()), df.columns[0])\n    ratio_cols = [c for c in df.columns if ("p/c" in c.lower() or "put/call" in c.lower() or "ratio" in c.lower())]\n    if not ratio_cols:\n        raise RuntimeError(f"Could not locate put/call ratio column in {list(df.columns)}")\n    ratio_col = ratio_cols[-1]\n    dates = parse_mixed_dates(df[date_col])\n    vals = pd.to_numeric(df[ratio_col], errors="coerce")\n    s = pd.Series(vals.values, index=dates).dropna()\n    s = s[~s.index.isna()]\n    if s.empty:\n        raise RuntimeError(f"Cboe archive parsed no valid ratio rows from {url}")\n    return normalize_index(s)\n\n'''
+          s = s[:start] + archive_func + s[end:]
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Run secondary-family incremental validation
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python tools/reentry_secondary_family_validation.py
+      - name: Upload validation artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: reentry-secondary-family-validation
+          path: artifacts/reentry_secondary_family_validation/**
+          retention-days: 21
