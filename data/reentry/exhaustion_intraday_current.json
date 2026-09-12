@@ -49,7 +49,8 @@
     "SKEW_LIVE_PROXY_RATIO": 1.253713588684748,
     "SKEW_DIRECTION": "NARROWING",
     "SKEW_OFFICIAL_CLOSE": 147.02000427246094,
-    "SKEW_OFFICIAL_PERCENTILE_2Y": 54.01606425702811
+    "SKEW_OFFICIAL_PERCENTILE_2Y": 54.01606425702811,
+    "T2108": 34.92550394390885
   },
   "nasi_plus": {
     "formula_version": "NASI_PLUS_RSI14_RANA_19_39_EMA4_EMA10_v1",
@@ -473,8 +474,33 @@
           "validation_note": "Equity and index ratios remain separate; this family cannot veto DEPLOY."
         }
       },
+      "breadth_context": {
+        "t2108": {
+          "name": "T2108 breadth context",
+          "symbol": "T2108-EQUIVALENT",
+          "value": 34.92550394390885,
+          "prior_value": 33.01183691363437,
+          "change_points": 1.9136670302744818,
+          "state": "WEAK",
+          "direction": "RISING",
+          "decision_input": false,
+          "supportive": false,
+          "universe_size": 2295,
+          "valid_count": 2282,
+          "coverage_pct": 99.43355119825708,
+          "above_40dma_count": 797,
+          "benchmark": "<10% extreme oversold \u00b7 10-20% oversold \u00b7 20-40% weak \u00b7 40-70% normal \u00b7 70-80% strong \u00b7 >80% very extended",
+          "retail_explanation": "This shows the percentage of NYSE stocks trading above their 40-day moving average. It is an intermediate-speed breadth gauge between very short-term breadth and long-term market structure.",
+          "behavior_explanation": "When this falls to deeply oversold levels, it is a contrarian bullish setup for re-entry because weakness is widespread and may be exhausting. A turn higher is the stronger confirmation; the low reading alone does not trigger DEPLOY.",
+          "freshness_type": "DAILY_CLOSE",
+          "last_updated": "2026-09-11",
+          "source": "RE-ENTRY calculated T2108-equivalent from current NYSE-listed non-ETF equities and 40-day adjusted closes",
+          "validation_status": "RESEARCH_PENDING",
+          "validation_note": "Context only. This is a calculated T2108-equivalent, not the proprietary TC2000 T2108 feed; incremental value versus SPXA20R/MMFD must be validated before any promotion."
+        }
+      },
       "errors": {},
-      "interpretation": "Secondary confirmation describes whether participation, volatility structure, risk appetite, and options sentiment corroborate the existing RE-ENTRY signal. It does not create, block, delay, or revoke DEPLOY."
+      "interpretation": "Secondary confirmation describes whether participation, volatility structure, risk appetite, and options sentiment corroborate the existing RE-ENTRY signal. T2108 is separate breadth context and does not change the confirmation score. None of these signals create, block, delay, or revoke DEPLOY."
     }
   },
   "snapshot_version": "REENTRY_UNIFIED_SNAPSHOT_v1",
@@ -651,7 +677,55 @@
         "validation_note": "Equity and index ratios remain separate; this family cannot veto DEPLOY."
       }
     },
+    "breadth_context": {
+      "t2108": {
+        "name": "T2108 breadth context",
+        "symbol": "T2108-EQUIVALENT",
+        "value": 34.92550394390885,
+        "prior_value": 33.01183691363437,
+        "change_points": 1.9136670302744818,
+        "state": "WEAK",
+        "direction": "RISING",
+        "decision_input": false,
+        "supportive": false,
+        "universe_size": 2295,
+        "valid_count": 2282,
+        "coverage_pct": 99.43355119825708,
+        "above_40dma_count": 797,
+        "benchmark": "<10% extreme oversold \u00b7 10-20% oversold \u00b7 20-40% weak \u00b7 40-70% normal \u00b7 70-80% strong \u00b7 >80% very extended",
+        "retail_explanation": "This shows the percentage of NYSE stocks trading above their 40-day moving average. It is an intermediate-speed breadth gauge between very short-term breadth and long-term market structure.",
+        "behavior_explanation": "When this falls to deeply oversold levels, it is a contrarian bullish setup for re-entry because weakness is widespread and may be exhausting. A turn higher is the stronger confirmation; the low reading alone does not trigger DEPLOY.",
+        "freshness_type": "DAILY_CLOSE",
+        "last_updated": "2026-09-11",
+        "source": "RE-ENTRY calculated T2108-equivalent from current NYSE-listed non-ETF equities and 40-day adjusted closes",
+        "validation_status": "RESEARCH_PENDING",
+        "validation_note": "Context only. This is a calculated T2108-equivalent, not the proprietary TC2000 T2108 feed; incremental value versus SPXA20R/MMFD must be validated before any promotion."
+      }
+    },
     "errors": {},
-    "interpretation": "Secondary confirmation describes whether participation, volatility structure, risk appetite, and options sentiment corroborate the existing RE-ENTRY signal. It does not create, block, delay, or revoke DEPLOY."
+    "interpretation": "Secondary confirmation describes whether participation, volatility structure, risk appetite, and options sentiment corroborate the existing RE-ENTRY signal. T2108 is separate breadth context and does not change the confirmation score. None of these signals create, block, delay, or revoke DEPLOY."
+  },
+  "t2108_context": {
+    "name": "T2108 breadth context",
+    "symbol": "T2108-EQUIVALENT",
+    "value": 34.92550394390885,
+    "prior_value": 33.01183691363437,
+    "change_points": 1.9136670302744818,
+    "state": "WEAK",
+    "direction": "RISING",
+    "decision_input": false,
+    "supportive": false,
+    "universe_size": 2295,
+    "valid_count": 2282,
+    "coverage_pct": 99.43355119825708,
+    "above_40dma_count": 797,
+    "benchmark": "<10% extreme oversold \u00b7 10-20% oversold \u00b7 20-40% weak \u00b7 40-70% normal \u00b7 70-80% strong \u00b7 >80% very extended",
+    "retail_explanation": "This shows the percentage of NYSE stocks trading above their 40-day moving average. It is an intermediate-speed breadth gauge between very short-term breadth and long-term market structure.",
+    "behavior_explanation": "When this falls to deeply oversold levels, it is a contrarian bullish setup for re-entry because weakness is widespread and may be exhausting. A turn higher is the stronger confirmation; the low reading alone does not trigger DEPLOY.",
+    "freshness_type": "DAILY_CLOSE",
+    "last_updated": "2026-09-11",
+    "source": "RE-ENTRY calculated T2108-equivalent from current NYSE-listed non-ETF equities and 40-day adjusted closes",
+    "validation_status": "RESEARCH_PENDING",
+    "validation_note": "Context only. This is a calculated T2108-equivalent, not the proprietary TC2000 T2108 feed; incremental value versus SPXA20R/MMFD must be validated before any promotion."
   }
 }
