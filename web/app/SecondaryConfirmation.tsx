@@ -86,23 +86,83 @@ function t2108Tone(state?: string) {
   return "secondary-neutral";
 }
 
+function recoveryHeadline(stage?: string) {
+  const s=(stage||"NOT_APPLICABLE").toUpperCase();
+  if(s==="BROAD_CONFIRMATION") return "Broad confirmation — the rebound is being supported by a wider set of market evidence.";
+  if(s==="DEVELOPING") return "Developing recovery — confirmation is building, but the market is not fully broad yet.";
+  if(s==="EARLY") return "Early recovery — there is enough evidence to stop waiting, but confirmation is still incomplete.";
+  return "No active recovery stage — secondary signals are context only until a DEPLOY setup exists.";
+}
+
+function recoveryItems(families: Record<string, Family>, t2108?: T2108Context) {
+  const vol=families.vol_structure||{};
+  const breadth=families.breadth_thrust||{};
+  const risk=families.risk_appetite||{};
+  const options=families.options_sentiment||{};
+  const volState=(vol.state||"UNAVAILABLE").replaceAll("_"," ");
+  const breadthState=(breadth.state||"UNAVAILABLE").replaceAll("_"," ");
+  const riskState=(risk.state||"UNAVAILABLE").replaceAll("_"," ");
+  const optionState=(options.state||"UNAVAILABLE").replaceAll("_"," ");
+  const items=[
+    {
+      label:"Volatility stress",
+      state:volState,
+      tone:tone(vol.state,vol.supportive),
+      text:volState==="NORMALIZED"||volState==="NEAR NORMAL"?"Short-term volatility stress has largely normalized, which supports the rebound.":volState.includes("BACKWARDATION")||volState.includes("ACUTE")?"Near-term volatility stress is still elevated; the recovery has not fully normalized on this dimension.":"This signal is providing neutral context rather than a strong recovery confirmation."
+    },
+    {
+      label:"Participation",
+      state:breadthState,
+      tone:tone(breadth.state,breadth.supportive),
+      text:breadthState.includes("THRUST")?"A broad group of stocks is participating in the rebound.":breadthState.includes("BUILDING")?"Participation is improving, but the rebound is not yet broadly confirmed across the market.":breadthState.includes("DEFENSIVE")?"Participation remains weak, so the rebound is still narrow.":"Participation is mixed and is not adding a strong confirmation signal yet."
+    },
+    {
+      label:"Risk appetite",
+      state:riskState,
+      tone:tone(risk.state,risk.supportive),
+      text:riskState.includes("BROAD")?"Investors are moving back into smaller stocks and credit, which supports a healthier recovery.":riskState.includes("MIXED")?"Risk-taking is uneven; investors are not yet broadly rotating into smaller stocks and credit.":riskState.includes("DEFENSIVE")?"Investors are still favoring safer leadership, so risk appetite remains defensive.":"Risk appetite is not providing a strong directional message right now."
+    },
+    {
+      label:"Options sentiment",
+      state:optionState,
+      tone:tone(options.state,options.supportive),
+      text:optionState.includes("HIGH FEAR")||optionState==="FEAR"?"Fear is elevated, which can be a contrarian bullish setup for re-entry, but fear alone is not confirmation.":optionState==="NORMAL"?"Options sentiment is neutral; there is no unusually strong fear or complacency signal right now.":optionState.includes("COMPLACENT")?"Options traders are relatively complacent, so sentiment is not providing a contrarian bullish setup.":"Options sentiment is currently unavailable or neutral."
+    }
+  ];
+  if(t2108){
+    const state=(t2108.state||"UNAVAILABLE").replaceAll("_"," ");
+    const direction=(t2108.direction||"UNAVAILABLE").replaceAll("_"," ");
+    items.push({
+      label:"Intermediate breadth",
+      state:`${state} · ${direction}`,
+      tone:t2108Tone(t2108.state),
+      text:typeof t2108.value==="number"?`${t2108.value.toFixed(1)}% of NYSE stocks are above their 40-day average. ${direction==="RISING"?"Breadth is improving from a still-weak level.":direction==="FALLING"?"Breadth is weakening further.":"Breadth is roughly unchanged."}`:"Intermediate breadth context is currently unavailable."
+    });
+  }
+  return items;
+}
+
 export default function SecondaryConfirmation({ washout }: { washout: any }) {
   const overlay: Overlay | undefined = washout?.unified_engine?.secondary_confirmation || washout?.secondary_confirmation;
   if (!overlay?.families) return null;
   const entries = Object.entries(overlay.families);
   const t2108 = overlay.breadth_context?.t2108 || washout?.t2108_context;
+  const stage=washout?.unified_engine?.recovery_stage;
+  const readItems=recoveryItems(overlay.families,t2108);
   return <section className="card section-card secondary-confirmation">
     <style>{`
       .secondary-confirmation{background:linear-gradient(145deg,#fbfaf7 0%,#f7faf8 52%,#f3f7f4 100%)}
       .secondary-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:16px}.secondary-score{font-size:11px;font-weight:900;border:1px solid rgba(47,118,80,.22);background:rgba(47,118,80,.07);padding:8px 10px;border-radius:999px;white-space:nowrap}
+      .recovery-read{margin:0 0 16px;border:1px solid rgba(47,118,80,.20);border-radius:16px;padding:16px;background:linear-gradient(100deg,rgba(47,118,80,.07),rgba(255,255,255,.55))}.recovery-read-kicker{font-size:8px;font-weight:900;letter-spacing:.11em;color:var(--muted)}.recovery-read h3{margin:5px 0 12px;font-size:18px;line-height:1.3;letter-spacing:-.025em}.recovery-read-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.recovery-read-item{border:1px solid var(--line);border-radius:11px;padding:10px;background:rgba(255,255,255,.58)}.recovery-read-item span{display:block;font-size:8px;font-weight:900;letter-spacing:.07em;color:var(--muted)}.recovery-read-item b{display:block;margin:4px 0 5px;font-size:10px}.recovery-read-item p{margin:0;font-size:9px;line-height:1.45;color:#454a43}.recovery-read-note{margin:10px 0 0;font-size:9px;line-height:1.45;color:var(--muted)}
       .secondary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.secondary-card{position:relative;border:1px solid var(--line);border-radius:15px;padding:14px;background:rgba(255,255,255,.58);overflow:hidden}.secondary-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:#a8aaa4}.secondary-card.secondary-good:before{background:var(--green)}.secondary-card.secondary-warn:before{background:var(--amber)}.secondary-card.secondary-bad:before{background:var(--red)}
       .secondary-title{font-size:10px;font-weight:850}.secondary-symbol{display:block;margin-top:2px;color:var(--muted);font-size:8px;font-weight:800;letter-spacing:.05em}.secondary-meta{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 9px}.secondary-state{display:inline-block;padding:4px 7px;border-radius:999px;border:1px solid currentColor;font-size:8px;font-weight:900;letter-spacing:.045em}.secondary-good .secondary-state{color:var(--green)}.secondary-warn .secondary-state{color:var(--amber)}.secondary-bad .secondary-state{color:var(--red)}
       .secondary-readout{font-size:12px;font-weight:800;line-height:1.35}.secondary-plain,.secondary-behavior-copy{margin:9px 0 0;font-size:10px;line-height:1.5;color:#3f443d}.secondary-plain b,.secondary-behavior-copy b{display:block;font-size:8px;letter-spacing:.08em;color:var(--muted);margin-bottom:2px}.secondary-freshness{margin-top:8px;font-size:8px;font-weight:850;letter-spacing:.04em;color:#565b54}.secondary-benchmark{margin-top:9px;padding:8px;border-radius:9px;background:#f0eee8;font-size:9px;line-height:1.45;color:#53574f}.secondary-validation{margin-top:8px;font-size:8px;font-weight:850;letter-spacing:.04em;color:var(--muted)}.secondary-note{margin:6px 0 0;font-size:9px;line-height:1.42;color:var(--muted)}
       .secondary-foot{margin:13px 0 0;font-size:10px;line-height:1.5;color:var(--muted)}
       .breadth-context-wrap{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}.breadth-context-label{font-size:8px;font-weight:900;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}.breadth-context-card{display:grid;grid-template-columns:minmax(150px,.8fr) minmax(160px,.8fr) minmax(0,2fr);gap:14px;align-items:start}.breadth-context-card .secondary-card{height:100%}.breadth-context-summary{border:1px solid var(--line);border-radius:15px;padding:14px;background:rgba(255,255,255,.52)}.breadth-context-summary strong{display:block;font-size:28px;letter-spacing:-.04em;margin:5px 0}.breadth-context-summary small{display:block;color:var(--muted);font-size:8px;line-height:1.5}.breadth-context-copy{border:1px solid var(--line);border-radius:15px;padding:14px;background:linear-gradient(90deg,rgba(163,116,42,.055),rgba(255,255,255,.25));font-size:10px;line-height:1.55;color:#3f443d}.breadth-context-copy b{display:block;font-size:8px;letter-spacing:.08em;color:var(--muted);margin-bottom:3px}
-      @media(max-width:900px){.secondary-grid{grid-template-columns:1fr 1fr}.breadth-context-card{grid-template-columns:1fr 1fr}.breadth-context-copy{grid-column:1/-1}}@media(max-width:620px){.secondary-grid{grid-template-columns:1fr}.secondary-head{display:block}.secondary-score{display:inline-block;margin-top:10px}.breadth-context-card{grid-template-columns:1fr}.breadth-context-copy{grid-column:auto}}
+      @media(max-width:1050px){.recovery-read-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:900px){.secondary-grid{grid-template-columns:1fr 1fr}.breadth-context-card{grid-template-columns:1fr 1fr}.breadth-context-copy{grid-column:1/-1}}@media(max-width:620px){.recovery-read-grid,.secondary-grid{grid-template-columns:1fr}.secondary-head{display:block}.secondary-score{display:inline-block;margin-top:10px}.breadth-context-card{grid-template-columns:1fr}.breadth-context-copy{grid-column:auto}}
     `}</style>
     <div className="secondary-head"><div><span className="kicker">SECONDARY CONFIRMATION</span><h2 style={{margin:"4px 0 0",fontSize:25,letterSpacing:"-.035em"}}>Is the recovery broadening?</h2></div><div className="secondary-score">{overlay.supportive_family_count ?? 0}/{overlay.family_count ?? entries.length} supportive</div></div>
+    <div className="recovery-read"><div className="recovery-read-kicker">RECOVERY READ</div><h3>{recoveryHeadline(stage)}</h3><div className="recovery-read-grid">{readItems.map(item=><div key={item.label} className="recovery-read-item"><span>{item.label.toUpperCase()}</span><b className={item.tone.replace("secondary-","")}>{item.state}</b><p>{item.text}</p></div>)}</div><p className="recovery-read-note">This is a plain-English synthesis of existing indicators only. It does not create a new score, change the recovery stage, or alter DEPLOY.</p></div>
     <div className="secondary-grid">{entries.map(([key,family]) => <div key={key} className={`secondary-card ${tone(family.state,family.supportive)}`}>
       <div className="secondary-title">{family.name || key.replaceAll("_"," ").toUpperCase()}</div>
       <div className="secondary-meta"><span className="secondary-state">{(family.state || "UNAVAILABLE").replaceAll("_"," ")}</span></div>
