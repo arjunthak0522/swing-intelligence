@@ -9,11 +9,12 @@ on:
       - '.github/workflows/reentry-exhaustion-intraday-scheduler.yml'
       - 'tools/reentry_unified_engine.py'
   schedule:
-    # Default-branch scheduler. Collectors themselves enforce the 09:30-16:45 ET window.
+    # Broad UTC coverage handles DST. The workflow itself gates market-time mutation in ET.
     - cron: '*/5 13-22 * * 1-5'
 
 permissions:
   contents: write
+  id-token: write
 
 concurrency:
   group: reentry-unified-engine
@@ -30,25 +31,55 @@ jobs:
           ref: intraday-signal-research
           fetch-depth: 0
 
+      - name: Resolve RE-ENTRY mutation window
+        id: window
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+
+          now = datetime.now(ZoneInfo('America/New_York'))
+          minute = now.hour * 60 + now.minute
+          active = now.weekday() < 5 and 9 * 60 + 30 <= minute <= 16 * 60 + 45
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as handle:
+              handle.write(f"active={'true' if active else 'false'}\n")
+              handle.write(f"timestamp_et={now.isoformat()}\n")
+          print(f"RE-ENTRY mutation window active={active} at {now.isoformat()}")
+          PY
+
+      - name: Back up last valid canonical snapshot
+        if: steps.window.outputs.active == 'true'
+        shell: bash
+        run: |
+          cp data/reentry/exhaustion_intraday_current.json /tmp/reentry-canonical-before-run.json
+
       - name: Set up Python
+        if: steps.window.outputs.active == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
       - name: Install RE-ENTRY dependencies
+        if: steps.window.outputs.active == 'true'
         run: python -m pip install --quiet pandas yfinance
 
       - name: Calculate breadth and fast reversal families
+        if: steps.window.outputs.active == 'true'
         run: python tools/reentry_exhaustion_intraday.py
 
       - name: Calculate MMFD and VVIX
+        if: steps.window.outputs.active == 'true'
         run: python tools/reentry_mmfd_intraday.py
 
       - name: Calculate SPX downside skew
+        if: steps.window.outputs.active == 'true'
         continue-on-error: true
         run: python tools/reentry_skew_intraday.py
 
       - name: Add reliability-gated historical context
+        if: steps.window.outputs.active == 'true'
         shell: bash
         run: |
           python - <<'PY'
@@ -202,12 +233,92 @@ jobs:
           PY
 
       - name: Calculate the single RE-ENTRY decision
+        if: steps.window.outputs.active == 'true'
         run: python tools/reentry_unified_engine.py
 
+      - name: Validate unified decision or restore prior canonical snapshot
+        id: decision
+        if: steps.window.outputs.active == 'true'
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import shutil
+          from pathlib import Path
+
+          current = Path('data/reentry/exhaustion_intraday_current.json')
+          backup = Path('/tmp/reentry-canonical-before-run.json')
+          payload = json.loads(current.read_text(encoding='utf-8'))
+          unified = payload.get('unified_engine') or {}
+          valid = bool(unified.get('engine_version') and unified.get('deployment_signal') and unified.get('market_phase'))
+          if not valid:
+              shutil.copyfile(backup, current)
+              print('Unified engine did not produce a complete decision; restored the prior canonical snapshot.')
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as handle:
+              handle.write(f"valid={'true' if valid else 'false'}\n")
+          PY
+
       - name: Finalize canonical unified snapshot
+        if: steps.window.outputs.active == 'true' && steps.decision.outputs.valid == 'true'
         run: python tools/reentry_unified_snapshot_finalize.py
 
+      - name: Validate canonical snapshot for publication
+        id: publishable
+        if: steps.decision.outputs.valid == 'true' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          payload = json.loads(Path('data/reentry/exhaustion_intraday_current.json').read_text(encoding='utf-8'))
+          unified = payload.get('unified_engine') or {}
+          valid = bool(unified.get('engine_version') and unified.get('deployment_signal') and unified.get('market_phase'))
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as handle:
+              handle.write(f"valid={'true' if valid else 'false'}\n")
+          if not valid:
+              raise SystemExit('Current snapshot is not canonical; refusing to publish it.')
+          print(f"Canonical snapshot validated: {unified.get('deployment_signal')} / {unified.get('market_condition')} / {unified.get('recovery_stage')}")
+          PY
+
+      - name: Publish canonical snapshot to Supabase
+        if: steps.publishable.outputs.valid == 'true'
+        shell: bash
+        env:
+          SUPABASE_REENTRY_URL: https://gexrdfzxmlnaawzmtlrk.supabase.co/functions/v1/reentry-intraday
+        run: |
+          set -euo pipefail
+          TOKEN_JSON="$(curl -fsS -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=reentry-supabase")"
+          OIDC_TOKEN="$(printf '%s' "$TOKEN_JSON" | python -c 'import json,sys; print(json.load(sys.stdin)["value"])')"
+          python - <<'PY' > /tmp/reentry-publish.json
+          import json
+          from pathlib import Path
+          snapshot = json.loads(Path('data/reentry/exhaustion_intraday_current.json').read_text(encoding='utf-8'))
+          print(json.dumps({'snapshot': snapshot}))
+          PY
+          HTTP_CODE="$(curl -sS -o /tmp/reentry-publish-response.json -w '%{http_code}' -X POST \
+            -H "Authorization: Bearer ${OIDC_TOKEN}" \
+            -H 'Content-Type: application/json' \
+            --data-binary @/tmp/reentry-publish.json \
+            "$SUPABASE_REENTRY_URL")"
+          cat /tmp/reentry-publish-response.json
+          echo
+          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+            echo "Supabase publish failed with HTTP $HTTP_CODE" >&2
+            exit 1
+          fi
+          python - <<'PY'
+          import json
+          response = json.load(open('/tmp/reentry-publish-response.json', encoding='utf-8'))
+          if response.get('ok') is not True:
+              raise SystemExit(f"Supabase publish did not confirm success: {response}")
+          print('Supabase canonical snapshot publish confirmed.')
+          PY
+
       - name: Persist unified RE-ENTRY output
+        if: steps.window.outputs.active == 'true' && steps.decision.outputs.valid == 'true'
         run: |
           if [ -z "$(git status --porcelain -- data/reentry/exhaustion_intraday_history.csv data/reentry/exhaustion_intraday_current.json data/reentry/skew_intraday_history.csv data/reentry/unified_engine_history.csv data/reentry/unified_snapshot_ledger.csv)" ]; then
             echo 'No RE-ENTRY state change'
@@ -221,6 +332,7 @@ jobs:
           git push origin HEAD:intraday-signal-research
 
       - name: Upload unified RE-ENTRY snapshot
+        if: steps.window.outputs.active == 'true' && steps.decision.outputs.valid == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: reentry-unified-engine
