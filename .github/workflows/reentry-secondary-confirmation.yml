@@ -1,0 +1,103 @@
+name: RE-ENTRY Secondary Confirmation Enrichment
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/reentry_secondary_confirmation.py'
+      - 'web/app/SecondaryConfirmation.tsx'
+      - 'web/app/ReentryDecisionDetails.tsx'
+      - 'web/app/page.tsx'
+      - '.github/workflows/reentry-secondary-confirmation.yml'
+  workflow_run:
+    workflows: ["RE-ENTRY Unified Engine"]
+    types: [completed]
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: reentry-secondary-confirmation
+  cancel-in-progress: true
+
+jobs:
+  enrich:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout live data branch
+        uses: actions/checkout@v4
+        with:
+          ref: intraday-signal-research
+          fetch-depth: 0
+
+      - name: Checkout canonical main source
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: _main
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install confirmation dependencies
+        run: python -m pip install --quiet pandas yfinance
+
+      - name: Enrich canonical snapshot with secondary confirmations
+        run: |
+          python _main/tools/reentry_secondary_confirmation.py \
+            --snapshot data/reentry/exhaustion_intraday_current.json \
+            --history data/reentry/secondary_confirmation_history.csv
+
+      - name: Persist enriched canonical snapshot
+        run: |
+          if [ -z "$(git status --porcelain -- data/reentry/exhaustion_intraday_current.json data/reentry/secondary_confirmation_history.csv)" ]; then
+            echo 'No secondary-confirmation state change'
+            exit 0
+          fi
+          git config user.name 're-entry-engine[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/reentry/exhaustion_intraday_current.json data/reentry/secondary_confirmation_history.csv
+          git commit -m "Record RE-ENTRY secondary confirmation [skip ci]"
+          git pull --rebase origin intraday-signal-research
+          git push origin HEAD:intraday-signal-research
+
+      - name: Publish enriched canonical snapshot to Supabase
+        env:
+          SUPABASE_REENTRY_URL: https://gexrdfzxmlnaawzmtlrk.supabase.co/functions/v1/reentry-intraday
+        run: |
+          set -euo pipefail
+          TOKEN_JSON="$(curl -fsS -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=reentry-supabase")"
+          OIDC_TOKEN="$(printf '%s' "$TOKEN_JSON" | python -c 'import json,sys; print(json.load(sys.stdin)["value"])')"
+          python - <<'PY' > /tmp/reentry-publish.json
+          import json
+          from pathlib import Path
+          snapshot = json.loads(Path('data/reentry/exhaustion_intraday_current.json').read_text(encoding='utf-8'))
+          print(json.dumps({'snapshot': snapshot}))
+          PY
+          HTTP_CODE="$(curl -sS -o /tmp/reentry-publish-response.json -w '%{http_code}' -X POST \
+            -H "Authorization: Bearer ${OIDC_TOKEN}" \
+            -H 'Content-Type: application/json' \
+            --data-binary @/tmp/reentry-publish.json \
+            "$SUPABASE_REENTRY_URL")"
+          cat /tmp/reentry-publish-response.json
+          echo
+          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+            echo "Supabase publish failed with HTTP $HTTP_CODE" >&2
+            exit 1
+          fi
+
+      - name: Upload confirmation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: reentry-secondary-confirmation
+          path: |
+            data/reentry/exhaustion_intraday_current.json
+            data/reentry/secondary_confirmation_history.csv
+          retention-days: 30

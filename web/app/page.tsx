@@ -1,16 +1,10 @@
 import { CircleAlert, Clock3, Radio } from "lucide-react";
 import MarketMovementTables from "./MarketMovementTables";
 import ReentryDecisionDetails from "./ReentryDecisionDetails";
+import SecondaryConfirmation from "./SecondaryConfirmation";
 import AggregateHistoricalEvidence from "./AggregateHistoricalEvidence";
 import { getCashPolicyEvidence, getHistoricalEpisodeEvidence } from "../lib/historicalEvidence";
-import {
-  getIntradaySnapshot,
-  getLatestSnapshot,
-  getWashoutSnapshot,
-  pct,
-  type IntradaySnapshot,
-  type WashoutSnapshot,
-} from "../lib/reentry";
+import { getIntradaySnapshot, getLatestSnapshot, getWashoutSnapshot, pct, type IntradaySnapshot, type WashoutSnapshot } from "../lib/reentry";
 
 export const dynamic = "force-dynamic";
 
@@ -25,116 +19,15 @@ type ProductEngineFields = {
   extension_signal_count?: number;
   weak_signal_count?: number;
 };
+function stateClass(value:string){const v=value.toUpperCase();if(v.includes("DEPLOY")||v.includes("GO_EARLY")||v.includes("GO EARLY"))return"good";if(v.includes("WATCH"))return"warn";if(v.includes("HOLD")||v.includes("WAIT"))return"neutral";return"neutral";}
+function conditionLabel(value?:string){if(value==="RECOVERING_FROM_OVERSOLD")return"RECOVERING FROM OVERSOLD";if(value==="EXTENDED")return"EXTENDED / OVERBOUGHT";return(value||"UNAVAILABLE").replaceAll("_"," ");}
+function recoveryLabel(value?:string){if(value==="BROAD_CONFIRMATION")return"BROAD CONFIRMATION";if(value==="NOT_APPLICABLE")return"N/A";return(value||"UNAVAILABLE").replaceAll("_"," ");}
+function formatTimestamp(value?:string|null){if(!value)return"UNAVAILABLE";const d=new Date(value);if(Number.isNaN(d.getTime()))return value;return d.toLocaleString("en-US",{timeZone:"America/New_York",month:"short",day:"numeric",hour:"numeric",minute:"2-digit",timeZoneName:"short"});}
+function etDate(value?:string|null){if(!value)return null;const d=new Date(value);if(Number.isNaN(d.getTime()))return null;return new Intl.DateTimeFormat("en-CA",{timeZone:"America/New_York",year:"numeric",month:"2-digit",day:"2-digit"}).format(d);}
+function getFeedState(washout:WashoutSnapshot|null){const u=washout?.unified_engine;if(!washout||!u)return{kind:"UNAVAILABLE" as const,label:"RE-ENTRY ENGINE UNAVAILABLE"};if((u.data_quality_status||washout.data_quality?.status||"").toUpperCase()==="UNAVAILABLE")return{kind:"UNAVAILABLE" as const,label:"RE-ENTRY ENGINE UNAVAILABLE"};const phase=u.market_phase||"UNAVAILABLE";const stamp=u.timestamp_et||washout.snapshot_generated_at_et||washout.values?.timestamp_et;if((phase==="LIVE_PROVISIONAL"||phase==="CLOSE_SETTLING")&&stamp){const ageMs=Date.now()-new Date(stamp).getTime();if(!Number.isFinite(ageMs)||ageMs>30*60*1000)return{kind:"STALE" as const,label:"STALE DATA"};}if(!stamp)return{kind:"STALE" as const,label:"STALE DATA"};return{kind:"OK" as const,label:"OK"};}
+function phaseLabel(phase?:string){if(phase==="MARKET_CLOSED_FINAL")return"MARKET CLOSED - FINAL";if(phase==="CLOSE_SETTLING")return"CLOSE SETTLING";if(phase==="LIVE_PROVISIONAL")return"LIVE - PROVISIONAL";return"UNAVAILABLE";}
 
-function stateClass(value: string) {
-  const v = value.toUpperCase();
-  if (v.includes("DEPLOY") || v.includes("GO_EARLY") || v.includes("GO EARLY")) return "good";
-  if (v.includes("WATCH")) return "warn";
-  if (v.includes("HOLD") || v.includes("WAIT")) return "neutral";
-  return "neutral";
-}
+function UnifiedHero({washout}:{washout:WashoutSnapshot}){const u=washout.unified_engine!;const product=u as typeof u&ProductEngineFields;const deployment=product.deployment_signal||(u.decision==="GO_EARLY"?"DEPLOY":u.decision==="WATCH"?"WATCH":"HOLD_CASH");const label=deployment==="HOLD_CASH"?"HOLD CASH":deployment;const condition=conditionLabel(product.market_condition);const recovery=recoveryLabel(product.recovery_stage);const fast=u.fast_family_count??0;const context=u.context_support_count??0;const stamp=u.timestamp_et||washout.snapshot_generated_at_et||washout.values?.timestamp_et;return <section className="hero card"><div className="eyebrow-row"><span className="eyebrow">SPARE CASH SIGNAL</span><span className="freshness"><Clock3 size={14}/> {phaseLabel(u.market_phase)}</span></div><div className="hero-grid"><div><div className={`signal ${stateClass(deployment)}`}>{label}</div><div className="signal-subline">{product.deployment_reason||u.decision_reason||"Canonical cash-deployment reason unavailable."}</div></div><div className="decision-summary"><span className="summary-label">MARKET CONDITION</span><h3 style={{margin:"4px 0 10px"}}>{condition}</h3><p>{product.market_condition_reason||"Market-condition context unavailable."}</p>{deployment==="DEPLOY"?<><span className="summary-label">RECOVERY STAGE</span><h3 style={{margin:"4px 0 8px"}}>{recovery}</h3><p>{product.recovery_stage_reason||"Recovery-stage interpretation unavailable."}</p></>:null}<div className="decision-tags"><span><small>Oversold setup</small><b>{u.oversold_gate?"YES":"NO"}</b></span><span><small>Fast reversal families</small><b>{fast}/4</b></span><span><small>Context support</small><b>{context}/4</b></span>{deployment==="DEPLOY"?<span><small>Confirmation</small><b>{product.confirmation_strength||"UNAVAILABLE"}</b></span>:null}</div><p>Snapshot {formatTimestamp(stamp)}. Engine {u.engine_version||"REENTRY_UNIFIED_v1"}.</p></div></div></section>;}
+function MarketContext({live,washout}:{live:IntradaySnapshot|null;washout:WashoutSnapshot}){const phase=washout.unified_engine?.market_phase;const spy=live?.quotes?.SPY;const qqq=live?.quotes?.QQQ;const last=spy?.timestamp?formatTimestamp(spy.timestamp):"UNAVAILABLE";const canonicalDate=washout.unified_engine?.market_date||washout.values?.market_date||null;const quoteDate=etDate(spy?.timestamp);const quoteIsCurrentSession=Boolean(canonicalDate&&quoteDate&&canonicalDate===quoteDate);const periodLabel=quoteIsCurrentSession&&phase==="LIVE_PROVISIONAL"?"today":quoteIsCurrentSession?"current session":"last available session";return <section className="card section-card live-card"><div className="section-heading"><div><span className="kicker">MARKET PHASE</span><h2>{phaseLabel(phase)}</h2></div><span className="freshness"><Radio size={14}/> Price context {last}</span></div>{live?<><div className="live-grid"><div className="live-stat"><small>SPY {periodLabel}</small><strong>{pct(spy?.change_pct,2)}</strong><span>{spy?.price?.toFixed(2)??"-"}</span></div><div className="live-stat"><small>QQQ {periodLabel}</small><strong>{pct(qqq?.change_pct,2)}</strong><span>{qqq?.price?.toFixed(2)??"-"}</span></div></div>{!quoteIsCurrentSession?<div className="notice"><CircleAlert size={16}/> Price context is from the last available quoted session and is not used to compute or override the current RE-ENTRY decision.</div>:null}</>:<div className="notice"><CircleAlert size={16}/> Price-context feed unavailable. The canonical RE-ENTRY decision is not replaced or recomputed.</div>}</section>;}
 
-function conditionLabel(value?: string) {
-  if (value === "RECOVERING_FROM_OVERSOLD") return "RECOVERING FROM OVERSOLD";
-  if (value === "EXTENDED") return "EXTENDED / OVERBOUGHT";
-  return (value || "UNAVAILABLE").replaceAll("_", " ");
-}
-
-function recoveryLabel(value?: string) {
-  if (value === "BROAD_CONFIRMATION") return "BROAD CONFIRMATION";
-  if (value === "NOT_APPLICABLE") return "N/A";
-  return (value || "UNAVAILABLE").replaceAll("_", " ");
-}
-
-function formatTimestamp(value?: string | null) {
-  if (!value) return "UNAVAILABLE";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
-  return d.toLocaleString("en-US", { timeZone: "America/New_York", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" });
-}
-
-function etDate(value?: string | null) {
-  if (!value) return null;
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return null;
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
-}
-
-function getFeedState(washout: WashoutSnapshot | null) {
-  const u = washout?.unified_engine;
-  if (!washout || !u) return { kind: "UNAVAILABLE" as const, label: "RE-ENTRY ENGINE UNAVAILABLE" };
-  if ((u.data_quality_status || washout.data_quality?.status || "").toUpperCase() === "UNAVAILABLE") return { kind: "UNAVAILABLE" as const, label: "RE-ENTRY ENGINE UNAVAILABLE" };
-  const phase = u.market_phase || "UNAVAILABLE";
-  const stamp = u.timestamp_et || washout.snapshot_generated_at_et || washout.values?.timestamp_et;
-  if ((phase === "LIVE_PROVISIONAL" || phase === "CLOSE_SETTLING") && stamp) {
-    const ageMs = Date.now() - new Date(stamp).getTime();
-    if (!Number.isFinite(ageMs) || ageMs > 30 * 60 * 1000) return { kind: "STALE" as const, label: "STALE DATA" };
-  }
-  if (!stamp) return { kind: "STALE" as const, label: "STALE DATA" };
-  return { kind: "OK" as const, label: "OK" };
-}
-
-function phaseLabel(phase?: string) {
-  if (phase === "MARKET_CLOSED_FINAL") return "MARKET CLOSED - FINAL";
-  if (phase === "CLOSE_SETTLING") return "CLOSE SETTLING";
-  if (phase === "LIVE_PROVISIONAL") return "LIVE - PROVISIONAL";
-  return "UNAVAILABLE";
-}
-
-function UnifiedHero({ washout }: { washout: WashoutSnapshot }) {
-  const u = washout.unified_engine!;
-  const product = u as typeof u & ProductEngineFields;
-  const deployment = product.deployment_signal || (u.decision === "GO_EARLY" ? "DEPLOY" : u.decision === "WATCH" ? "WATCH" : "HOLD_CASH");
-  const label = deployment === "HOLD_CASH" ? "HOLD CASH" : deployment;
-  const condition = conditionLabel(product.market_condition);
-  const recovery = recoveryLabel(product.recovery_stage);
-  const fast = u.fast_family_count ?? 0;
-  const context = u.context_support_count ?? 0;
-  const stamp = u.timestamp_et || washout.snapshot_generated_at_et || washout.values?.timestamp_et;
-  return <section className="hero card">
-    <div className="eyebrow-row"><span className="eyebrow">SPARE CASH SIGNAL</span><span className="freshness"><Clock3 size={14} /> {phaseLabel(u.market_phase)}</span></div>
-    <div className="hero-grid">
-      <div><div className={`signal ${stateClass(deployment)}`}>{label}</div><div className="signal-subline">{product.deployment_reason || u.decision_reason || "Canonical cash-deployment reason unavailable."}</div></div>
-      <div className="decision-summary"><span className="summary-label">MARKET CONDITION</span><h3 style={{ margin: "4px 0 10px" }}>{condition}</h3><p>{product.market_condition_reason || "Market-condition context unavailable."}</p>{deployment === "DEPLOY" ? <><span className="summary-label">RECOVERY STAGE</span><h3 style={{ margin: "4px 0 8px" }}>{recovery}</h3><p>{product.recovery_stage_reason || "Recovery-stage interpretation unavailable."}</p></> : null}<div className="decision-tags"><span><small>Oversold setup</small><b>{u.oversold_gate ? "YES" : "NO"}</b></span><span><small>Fast reversal families</small><b>{fast}/4</b></span><span><small>Context support</small><b>{context}/4</b></span>{deployment === "DEPLOY" ? <span><small>Confirmation</small><b>{product.confirmation_strength || "UNAVAILABLE"}</b></span> : null}</div><p>Snapshot {formatTimestamp(stamp)}. Engine {u.engine_version || "REENTRY_UNIFIED_v1"}.</p></div>
-    </div>
-  </section>;
-}
-
-function MarketContext({ live, washout }: { live: IntradaySnapshot | null; washout: WashoutSnapshot }) {
-  const phase = washout.unified_engine?.market_phase;
-  const spy = live?.quotes?.SPY;
-  const qqq = live?.quotes?.QQQ;
-  const last = spy?.timestamp ? formatTimestamp(spy.timestamp) : "UNAVAILABLE";
-  const canonicalDate = washout.unified_engine?.market_date || washout.values?.market_date || null;
-  const quoteDate = etDate(spy?.timestamp);
-  const quoteIsCurrentSession = Boolean(canonicalDate && quoteDate && canonicalDate === quoteDate);
-  const periodLabel = quoteIsCurrentSession && phase === "LIVE_PROVISIONAL" ? "today" : quoteIsCurrentSession ? "current session" : "last available session";
-  return <section className="card section-card live-card">
-    <div className="section-heading"><div><span className="kicker">MARKET PHASE</span><h2>{phaseLabel(phase)}</h2></div><span className="freshness"><Radio size={14} /> Price context {last}</span></div>
-    {live ? <><div className="live-grid"><div className="live-stat"><small>SPY {periodLabel}</small><strong>{pct(spy?.change_pct,2)}</strong><span>{spy?.price?.toFixed(2) ?? "-"}</span></div><div className="live-stat"><small>QQQ {periodLabel}</small><strong>{pct(qqq?.change_pct,2)}</strong><span>{qqq?.price?.toFixed(2) ?? "-"}</span></div></div>{!quoteIsCurrentSession ? <div className="notice"><CircleAlert size={16} /> Price context is from the last available quoted session and is not used to compute or override the current RE-ENTRY decision.</div> : null}</> : <div className="notice"><CircleAlert size={16} /> Price-context feed unavailable. The canonical RE-ENTRY decision is not replaced or recomputed.</div>}
-  </section>;
-}
-
-export default async function Home() {
-  const [snapshot, intraday, washoutDirect, historical, cashPolicy] = await Promise.all([getLatestSnapshot(), getIntradaySnapshot(), getWashoutSnapshot(), getHistoricalEpisodeEvidence(), getCashPolicyEvidence()]);
-  const embeddedCanonical = (intraday as (IntradaySnapshot & { canonical_snapshot?: WashoutSnapshot | null }) | null)?.canonical_snapshot ?? null;
-  const washout = washoutDirect || embeddedCanonical;
-  const feed = getFeedState(washout);
-  const unified = washout?.unified_engine;
-  const product = unified as (typeof unified & ProductEngineFields) | undefined;
-  const currentAction = product?.deployment_signal || (unified?.decision === "GO_EARLY" ? "DEPLOY" : unified?.decision === "WATCH" ? "WATCH" : unified ? "HOLD_CASH" : null);
-  const currentCondition = product?.market_condition || null;
-
-  return <main className="shell">
-    <header className="topbar"><div><span className="brand">RE-ENTRY</span><span className="tagline">Know when waiting stops helping.</span></div><div className="top-status">{unified ? phaseLabel(unified.market_phase) : "UNAVAILABLE"}</div></header>
-    {feed.kind !== "OK" ? <section className="card data-blocked"><CircleAlert /> <div><b>{feed.label}</b><p>{feed.kind === "STALE" ? "The canonical unified snapshot is older than the allowed live-session freshness window. It is shown below for transparency but must not be treated as current." : "No fallback decision is shown when the unified engine cannot be loaded."}</p></div></section> : null}
-    {!washout || !unified ? null : <>
-      <UnifiedHero washout={washout} />
-      <MarketContext live={intraday} washout={washout} />
-      <ReentryDecisionDetails washout={washout} />
-      {snapshot ? <MarketMovementTables snapshot={snapshot} live={intraday} /> : <section className="card section-card"><div className="notice"><CircleAlert size={16} /> Sector and subsector context unavailable.</div></section>}
-      <AggregateHistoricalEvidence evidence={historical} cashPolicy={cashPolicy} currentAction={currentAction} currentCondition={currentCondition} />
-    </>}
-    <footer>REENTRY_UNIFIED_v1 is the only operational decision source. HOLD CASH is the normal state when no oversold setup exists; WATCH means an oversold setup is developing; DEPLOY means the qualifying reversal has fired. Market-condition and recovery-stage labels are descriptive context and never create a second decision engine.</footer>
-  </main>;
-}
+export default async function Home(){const[snapshot,intraday,washoutDirect,historical,cashPolicy]=await Promise.all([getLatestSnapshot(),getIntradaySnapshot(),getWashoutSnapshot(),getHistoricalEpisodeEvidence(),getCashPolicyEvidence()]);const embeddedCanonical=(intraday as(IntradaySnapshot&{canonical_snapshot?:WashoutSnapshot|null})|null)?.canonical_snapshot??null;const washout=washoutDirect||embeddedCanonical;const feed=getFeedState(washout);const unified=washout?.unified_engine;const product=unified as(typeof unified&ProductEngineFields)|undefined;const currentAction=product?.deployment_signal||(unified?.decision==="GO_EARLY"?"DEPLOY":unified?.decision==="WATCH"?"WATCH":unified?"HOLD_CASH":null);const currentCondition=product?.market_condition||null;return <main className="shell"><header className="topbar"><div><span className="brand">RE-ENTRY</span><span className="tagline">Know when waiting stops helping.</span></div><div className="top-status">{unified?phaseLabel(unified.market_phase):"UNAVAILABLE"}</div></header>{feed.kind!=="OK"?<section className="card data-blocked"><CircleAlert/><div><b>{feed.label}</b><p>{feed.kind==="STALE"?"The canonical unified snapshot is older than the allowed live-session freshness window. It is shown below for transparency but must not be treated as current.":"No fallback decision is shown when the unified engine cannot be loaded."}</p></div></section>:null}{!washout||!unified?null:<><UnifiedHero washout={washout}/><MarketContext live={intraday} washout={washout}/><ReentryDecisionDetails washout={washout}/><SecondaryConfirmation washout={washout}/>{snapshot?<MarketMovementTables snapshot={snapshot} live={intraday}/>:<section className="card section-card"><div className="notice"><CircleAlert size={16}/> Sector and subsector context unavailable.</div></section>}<AggregateHistoricalEvidence evidence={historical} cashPolicy={cashPolicy} currentAction={currentAction} currentCondition={currentCondition}/></>}<footer>REENTRY_UNIFIED_v1 is the only operational decision source. HOLD CASH is the normal state when no oversold setup exists; WATCH means an oversold setup is developing; DEPLOY means the qualifying reversal has fired. Market-condition, recovery-stage, and secondary-confirmation labels are descriptive context and never create a second decision engine.</footer></main>;}
