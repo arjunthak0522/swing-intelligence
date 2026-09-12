@@ -427,8 +427,8 @@
           "freshness_type": "INTRADAY_SNAPSHOT",
           "last_updated": "2026-09-11T16:41:39.667598-04:00",
           "source": "Current Nasdaq advancing/declining issues captured by RE-ENTRY",
-          "validation_status": "RESEARCH_PENDING",
-          "validation_note": "61.5% is a classic thrust reference; a true Zweig signal also requires a move from below 40% within 10 sessions."
+          "validation_status": "LIMITED_HISTORY_CONTEXT_ONLY",
+          "validation_note": "Exact Nasdaq advance/decline history through February 2020 covered 18 historical DEPLOY episodes. None had >=55% advance share at the DEPLOY start; waiting for that participation threshold took a median 1 session and cost a median +0.65% SPY / +0.58% QQQ. Keep as research/context only; exact history does not cover 2020-2026."
         },
         "risk_appetite": {
           "name": "Risk-appetite broadening",
@@ -453,8 +453,8 @@
           "freshness_type": "DAILY_CLOSE",
           "last_updated": "2026-09-11",
           "source": "Yahoo Finance daily adjusted closes: RSP/SPY, IWM/SPY, HYG/LQD",
-          "validation_status": "RESEARCH_PENDING",
-          "validation_note": "Composite is one family, not three votes; historical conditional validation is required before promotion."
+          "validation_status": "VALIDATED_CONTEXT_ONLY",
+          "validation_note": "Across 94 historical DEPLOY episodes, the 2-of-3 risk-appetite composite was supportive at 36 starts and failed every SPY/QQQ 10D/30D incremental quality gate versus all DEPLOY episodes. It is low-redundancy context (correlation with existing B50 proxy about 0.10), but it does not improve the entry rule or recovery-stage classification."
         },
         "options_sentiment": {
           "name": "Options sentiment",
@@ -470,8 +470,8 @@
           "freshness_type": "DAILY_CLOSE",
           "last_updated": "2026-09-11",
           "source": "Cboe U.S. Options Daily Market Statistics",
-          "validation_status": "RESEARCH_PENDING",
-          "validation_note": "Equity and index ratios remain separate; this family cannot veto DEPLOY."
+          "validation_status": "VALIDATED_SENTIMENT_OVERLAY",
+          "validation_note": "Across 94 historical DEPLOY episodes using Cboe archive plus daily statistics, equity fear (P/C >=0.70) appeared at 49 starts and was generally supportive over 30-90D, but missed the SPY 10D median gate. Fear-reversing occurred at only 14 starts, below the promotion sample threshold. Cboe also documents 2022 early-exercise distortion in raw equity P/C. Keep as a contrarian sentiment overlay, never a DEPLOY gate."
         }
       },
       "breadth_context": {
@@ -495,8 +495,8 @@
           "freshness_type": "DAILY_CLOSE",
           "last_updated": "2026-09-11",
           "source": "RE-ENTRY calculated T2108-equivalent from current NYSE-listed non-ETF equities and 40-day adjusted closes",
-          "validation_status": "RESEARCH_PENDING",
-          "validation_note": "Context only. This is a calculated T2108-equivalent, not the proprietary TC2000 T2108 feed; incremental value versus SPXA20R/MMFD must be validated before any promotion."
+          "validation_status": "VALIDATED_CONTEXT_ONLY",
+          "validation_note": "Incremental validation across 94 DEPLOY episodes found the NYSE 40-day breadth reconstruction highly redundant with existing breadth (correlation about 0.94). Requiring <40% and rising delayed entry by a median 2 sessions and cost median +0.17% SPY / +0.33% QQQ. Keep as breadth context only, not a vote or required confirmation."
         }
       },
       "errors": {},
@@ -630,8 +630,8 @@
         "freshness_type": "INTRADAY_SNAPSHOT",
         "last_updated": "2026-09-11T16:41:39.667598-04:00",
         "source": "Current Nasdaq advancing/declining issues captured by RE-ENTRY",
-        "validation_status": "RESEARCH_PENDING",
-        "validation_note": "61.5% is a classic thrust reference; a true Zweig signal also requires a move from below 40% within 10 sessions."
+        "validation_status": "LIMITED_HISTORY_CONTEXT_ONLY",
+        "validation_note": "Exact Nasdaq advance/decline history through February 2020 covered 18 historical DEPLOY episodes. None had >=55% advance share at the DEPLOY start; waiting for that participation threshold took a median 1 session and cost a median +0.65% SPY / +0.58% QQQ. Keep as research/context only; exact history does not cover 2020-2026."
       },
       "risk_appetite": {
         "name": "Risk-appetite broadening",
@@ -656,8 +656,8 @@
         "freshness_type": "DAILY_CLOSE",
         "last_updated": "2026-09-11",
         "source": "Yahoo Finance daily adjusted closes: RSP/SPY, IWM/SPY, HYG/LQD",
-        "validation_status": "RESEARCH_PENDING",
-        "validation_note": "Composite is one family, not three votes; historical conditional validation is required before promotion."
+        "validation_status": "VALIDATED_CONTEXT_ONLY",
+        "validation_note": "Across 94 historical DEPLOY episodes, the 2-of-3 risk-appetite composite was supportive at 36 starts and failed every SPY/QQQ 10D/30D incremental quality gate versus all DEPLOY episodes. It is low-redundancy context (correlation with existing B50 proxy about 0.10), but it does not improve the entry rule or recovery-stage classification."
       },
       "options_sentiment": {
         "name": "Options sentiment",
@@ -673,8 +673,8 @@
         "freshness_type": "DAILY_CLOSE",
         "last_updated": "2026-09-11",
         "source": "Cboe U.S. Options Daily Market Statistics",
-        "validation_status": "RESEARCH_PENDING",
-        "validation_note": "Equity and index ratios remain separate; this family cannot veto DEPLOY."
+        "validation_status": "VALIDATED_SENTIMENT_OVERLAY",
+        "validation_note": "Across 94 historical DEPLOY episodes using Cboe archive plus daily statistics, equity fear (P/C >=0.70) appeared at 49 starts and was generally supportive over 30-90D, but missed the SPY 10D median gate. Fear-reversing occurred at only 14 starts, below the promotion sample threshold. Cboe also documents 2022 early-exercise distortion in raw equity P/C. Keep as a contrarian sentiment overlay, never a DEPLOY gate."
       }
     },
     "breadth_context": {
@@ -698,8 +698,8 @@
         "freshness_type": "DAILY_CLOSE",
         "last_updated": "2026-09-11",
         "source": "RE-ENTRY calculated T2108-equivalent from current NYSE-listed non-ETF equities and 40-day adjusted closes",
-        "validation_status": "RESEARCH_PENDING",
-        "validation_note": "Context only. This is a calculated T2108-equivalent, not the proprietary TC2000 T2108 feed; incremental value versus SPXA20R/MMFD must be validated before any promotion."
+        "validation_status": "VALIDATED_CONTEXT_ONLY",
+        "validation_note": "Incremental validation across 94 DEPLOY episodes found the NYSE 40-day breadth reconstruction highly redundant with existing breadth (correlation about 0.94). Requiring <40% and rising delayed entry by a median 2 sessions and cost median +0.17% SPY / +0.33% QQQ. Keep as breadth context only, not a vote or required confirmation."
       }
     },
     "errors": {},
@@ -725,7 +725,7 @@
     "freshness_type": "DAILY_CLOSE",
     "last_updated": "2026-09-11",
     "source": "RE-ENTRY calculated T2108-equivalent from current NYSE-listed non-ETF equities and 40-day adjusted closes",
-    "validation_status": "RESEARCH_PENDING",
-    "validation_note": "Context only. This is a calculated T2108-equivalent, not the proprietary TC2000 T2108 feed; incremental value versus SPXA20R/MMFD must be validated before any promotion."
+    "validation_status": "VALIDATED_CONTEXT_ONLY",
+    "validation_note": "Incremental validation across 94 DEPLOY episodes found the NYSE 40-day breadth reconstruction highly redundant with existing breadth (correlation about 0.94). Requiring <40% and rising delayed entry by a median 2 sessions and cost median +0.17% SPY / +0.33% QQQ. Keep as breadth context only, not a vote or required confirmation."
   }
 }
