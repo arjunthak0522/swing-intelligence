@@ -1,9 +1,9 @@
 {
   "research_only": true,
   "official_completed_close_signal_modified": false,
-  "generated_at_utc": "2026-09-14T17:33:08.569795+00:00",
-  "state": "WASHOUT",
-  "candidate_action": "GO_EARLY_INTRADAY",
+  "generated_at_utc": "2026-09-14T17:45:06.817079+00:00",
+  "state": "WASHOUT_WATCH",
+  "candidate_action": "WATCH_EARLY_TURN",
   "semantics": {
     "OVERSOLD": "selling remains stretched with no intraday turn",
     "WASHOUT_WATCH": "one independent family has turned",
@@ -11,47 +11,46 @@
     "CONFIRMED": "reserved for later completed-session corroboration; never assigned by this intraday script"
   },
   "daily_context_state": "WASHOUT",
-  "turn_family_count": 2,
+  "turn_family_count": 1,
   "families": {
-    "fast_breadth_turn": true,
+    "fast_breadth_turn": false,
     "momentum_turn": false,
     "net_volume_turn": true,
     "down_up_ratio_relief": false
   },
   "values": {
     "market_date": "2026-09-14",
-    "timestamp_et": "2026-09-14T13:33:06.303882-04:00",
-    "state": "WASHOUT",
-    "candidate_action": "GO_EARLY_INTRADAY",
-    "turn_family_count": 2,
+    "timestamp_et": "2026-09-14T13:45:05.860773-04:00",
+    "state": "WASHOUT_WATCH",
+    "candidate_action": "WATCH_EARLY_TURN",
+    "turn_family_count": 1,
     "daily_context_state": "WASHOUT",
-    "SPXA20R": 25.8,
+    "SPXA20R": 24.8,
     "NYMO": -43.25,
     "NAMO": -34.82,
-    "NYUD": -127.64290299999993,
-    "NAUD": 535.8551020000002,
-    "nyse_down_up_ratio": 1.1147458971020043,
-    "nasdaq_down_up_ratio": 0.7727626683822454,
-    "NAADV": 2383.0,
-    "NADEC": 2286.0,
-    "NASI_RSI": 24.145681284785255,
-    "NASI_EMA4": 28.960601755177535,
-    "NASI_EMA10": 36.44852938492257,
+    "NYUD": -171.81360799999993,
+    "NAUD": 540.5100529999997,
+    "nyse_down_up_ratio": 1.1526780400611636,
+    "nasdaq_down_up_ratio": 0.7772969060299882,
+    "NAADV": 2391.0,
+    "NADEC": 2288.0,
+    "NASI_RSI": 24.15173672730664,
+    "NASI_EMA4": 28.96302393218609,
+    "NASI_EMA10": 36.449630374471916,
     "NASI_DIRECTION": "FALLING",
-    "VVIX": 94.7699966430664,
+    "VVIX": 94.30000305175781,
     "VVIX_PRIOR_CLOSE": 91.28,
     "VVIX_DIRECTION": "RISING",
-    "MMFD": 42.03691045796309,
+    "MMFD": 41.37931034482759,
     "MMFD_STATE": "NORMAL",
     "VVIX_STATE": "NORMAL",
-    "VVIX_PERCENTILE_2M": 75.0,
-    "VVIX_PERCENTILE_2Y": 33.86773547094188,
+    "VVIX_PERCENTILE_2M": 70.0,
+    "VVIX_PERCENTILE_2Y": 32.06412825651302,
     "SKEW_LIVE_PROXY": 3.138129323959353,
     "SKEW_LIVE_PROXY_RATIO": 1.2682120998741995,
     "SKEW_DIRECTION": "FLAT",
     "SKEW_OFFICIAL_CLOSE": 154.49000549316406,
-    "SKEW_OFFICIAL_PERCENTILE_2Y": 79.87927565392354,
-    "T2108": 32.57443082311734
+    "SKEW_OFFICIAL_PERCENTILE_2Y": 79.87927565392354
   },
   "nasi_plus": {
     "formula_version": "NASI_PLUS_RSI14_RANA_19_39_EMA4_EMA10_v1",
@@ -59,14 +58,14 @@
     "bootstrap_start_date": "2026-01-02",
     "bootstrap_end_date": "2026-09-09",
     "completed_daily_observations": 171,
-    "live_advances": 2383.0,
-    "live_declines": 2286.0,
-    "ratio_adjusted_net_advances": 20.775326622403085,
-    "mcclellan_oscillator": -28.343642926130443,
-    "summation_index": -2450.860520528665,
-    "nasi_rsi": 24.145681284785255,
-    "nasi_ema4": 28.960601755177535,
-    "nasi_ema10": 36.44852938492257,
+    "live_advances": 2391.0,
+    "live_declines": 2288.0,
+    "ratio_adjusted_net_advances": 22.013250694592863,
+    "mcclellan_oscillator": -28.281746722520957,
+    "summation_index": -2450.7986243250552,
+    "nasi_rsi": 24.15173672730664,
+    "nasi_ema4": 28.96302393218609,
+    "nasi_ema10": 36.449630374471916,
     "prior_completed_rsi": 27.277476580740597,
     "direction_vs_prior_close": "FALLING",
     "oversold_below_30": true,
@@ -76,7 +75,7 @@
   },
   "stockcharts_quote_provenance": {
     "$SPXA20R": {
-      "vendor_timestamp": "2026-09-14 13:33:00",
+      "vendor_timestamp": "2026-09-14 13:45:00",
       "realtime": true,
       "cached": true,
       "available": true
@@ -94,55 +93,55 @@
       "available": true
     },
     "$NYUD": {
-      "vendor_timestamp": "2026-09-14 13:16:00",
+      "vendor_timestamp": "2026-09-14 13:27:00",
       "realtime": true,
       "cached": true,
       "available": true
     },
     "$NAUD": {
-      "vendor_timestamp": "2026-09-14 13:16:00",
+      "vendor_timestamp": "2026-09-14 13:27:00",
       "realtime": true,
       "cached": true,
       "available": true
     },
     "$NYUPV": {
-      "vendor_timestamp": "2026-09-14 13:16:00",
+      "vendor_timestamp": "2026-09-14 13:27:00",
       "realtime": true,
       "cached": true,
       "available": true
     },
     "$NYDNV": {
-      "vendor_timestamp": "2026-09-14 13:16:00",
+      "vendor_timestamp": "2026-09-14 13:27:00",
       "realtime": true,
       "cached": true,
       "available": true
     },
     "$NAUPV": {
-      "vendor_timestamp": "2026-09-14 13:16:00",
+      "vendor_timestamp": "2026-09-14 13:27:00",
       "realtime": true,
       "cached": true,
       "available": true
     },
     "$NADNV": {
-      "vendor_timestamp": "2026-09-14 13:16:00",
+      "vendor_timestamp": "2026-09-14 13:27:00",
       "realtime": true,
       "cached": true,
       "available": true
     },
     "$NAADV": {
-      "vendor_timestamp": "2026-09-14 13:16:00",
+      "vendor_timestamp": "2026-09-14 13:27:00",
       "realtime": true,
       "cached": true,
       "available": true
     },
     "$NADEC": {
-      "vendor_timestamp": "2026-09-14 13:16:00",
+      "vendor_timestamp": "2026-09-14 13:27:00",
       "realtime": true,
       "cached": true,
       "available": true
     },
     "$VVIX": {
-      "vendor_timestamp": "2026-09-14 13:33:01",
+      "vendor_timestamp": "2026-09-14 13:45:01",
       "realtime": true,
       "cached": true,
       "available": true
@@ -156,11 +155,11 @@
     "universe_source": "Nasdaq Trader nasdaqlisted + otherlisted",
     "universe_definition": "US listed non-ETF, non-test equities; obvious warrants/units/rights/preferreds excluded",
     "universe_size": 6073,
-    "current_day_bars": 5852,
-    "valid_5d_observations": 5852,
-    "above_5dma_count": 2460,
-    "coverage_pct": 96.36094187386794,
-    "mmfd_live": 42.03691045796309,
+    "current_day_bars": 5858,
+    "valid_5d_observations": 5858,
+    "above_5dma_count": 2424,
+    "coverage_pct": 96.45973983204347,
+    "mmfd_live": 41.37931034482759,
     "reference_scale": {
       "extreme_oversold_below": 15.0,
       "oversold_below": 30.0,
@@ -172,29 +171,29 @@
     "batch_size": 180,
     "batch_workers": 8,
     "state": "NORMAL",
-    "timestamp_et": "2026-09-14T13:33:09.758962-04:00",
+    "timestamp_et": "2026-09-14T13:45:07.970584-04:00",
     "vendor_crosscheck": null
   },
   "vvix_live": {
     "symbol": "^VVIX",
     "name": "Volatility of VIX",
-    "value": 94.7699966430664,
+    "value": 94.30000305175781,
     "prior_close": 91.27999877929688,
-    "change_points_vs_prior_close": 3.4899978637695312,
+    "change_points_vs_prior_close": 3.0200042724609375,
     "direction_vs_prior_close": "RISING",
-    "historical_percentile_2m": 75.0,
+    "historical_percentile_2m": 70.0,
     "recent_percentile_sessions": 40,
-    "historical_percentile_2y": 33.86773547094188,
+    "historical_percentile_2y": 32.06412825651302,
     "completed_history_sessions": 499,
     "state": "NORMAL",
     "provisional_intraday": true,
     "source": "Yahoo Finance intraday VVIX quote and daily history",
-    "timestamp_et": "2026-09-14T13:33:09.758962-04:00"
+    "timestamp_et": "2026-09-14T13:45:07.970584-04:00"
   },
   "skew_live": {
     "name": "S&P 500 Tail-Risk Pricing",
     "official_symbol": "SKEW",
-    "provisional_intraday": true,
+    "provisional_intraday": false,
     "live_metric": "25-delta SPX put IV minus 25-delta SPX call IV",
     "live_proxy_vol_points": 3.138129323959353,
     "live_proxy_ratio": 1.2682120998741995,
@@ -202,31 +201,19 @@
     "spot": 7635.240234375,
     "expiry": "2026-10-14",
     "dte": 30,
-    "risk_free_rate": 0.03931999921798706,
-    "put_25_delta": {
-      "strike": 7450.0,
-      "iv": 0.14838307374954227,
-      "delta": -0.24996924798959141,
-      "bid": 57.4,
-      "ask": 57.9
-    },
-    "call_25_delta": {
-      "strike": 7850.0,
-      "iv": 0.11700178050994874,
-      "delta": 0.23766148065134896,
-      "bid": 30.6,
-      "ask": 31.0
-    },
+    "risk_free_rate": null,
+    "put_25_delta": null,
+    "call_25_delta": null,
     "official_skew_latest_close": 154.49000549316406,
     "official_skew_prior_close": 147.02000427246094,
     "official_skew_date": "2026-09-11",
     "official_skew_direction": "WIDENING",
     "official_skew_percentile_2y": 79.87927565392354,
     "official_skew_history_sessions": 497,
-    "source_mode": "LIVE_SPX_OPTIONS",
-    "proxy_error": null,
+    "source_mode": "FINAL_CLOSE_OFFICIAL_SKEW_WITH_LAST_VALID_INTRADAY_PROXY",
+    "proxy_error": "ValueError: No SPX expiry between 23 and 37 DTE",
     "source": "Yahoo Finance SPX option chain for live proxy; official SKEW daily close/history. If the post-close option chain is unavailable, the engine preserves the last valid same-session SPX skew proxy and its direction rather than substituting a stale official-close direction.",
-    "timestamp_et": "2026-09-14T13:41:10.575114-04:00"
+    "timestamp_et": "2026-09-14T13:50:56.939779-04:00"
   },
   "historical_context": {
     "version": "REENTRY_HISTORICAL_CONTEXT_v1",
@@ -261,7 +248,7 @@
         "methodology": "one completed-session observation per market day"
       },
       "NYUD": {
-        "current_value": -127.64290299999993,
+        "current_value": -171.81360799999993,
         "percentile": null,
         "sample_percentile": 50.0,
         "state": "HISTORY BUILDING",
@@ -274,7 +261,7 @@
         "methodology": "one nearest intraday observation per market day within \u00b145 minutes"
       },
       "NAUD": {
-        "current_value": 535.8551020000002,
+        "current_value": 540.5100529999997,
         "percentile": null,
         "sample_percentile": 50.0,
         "state": "HISTORY BUILDING",
@@ -287,7 +274,7 @@
         "methodology": "one nearest intraday observation per market day within \u00b145 minutes"
       },
       "nyse_down_up_ratio": {
-        "current_value": 1.1147458971020043,
+        "current_value": 1.1526780400611636,
         "percentile": null,
         "sample_percentile": 50.0,
         "state": "HISTORY BUILDING",
@@ -300,7 +287,7 @@
         "methodology": "one nearest intraday observation per market day within \u00b145 minutes"
       },
       "nasdaq_down_up_ratio": {
-        "current_value": 0.7727626683822454,
+        "current_value": 0.7772969060299882,
         "percentile": null,
         "sample_percentile": 50.0,
         "state": "HISTORY BUILDING",
@@ -338,14 +325,14 @@
     "recovery_stage_reason": "The recovery is developing: at least one breadth or momentum confirmation is active now, but confirmation is not yet broad enough to call the recovery fully established.",
     "confirmation_strength": "BUILDING",
     "confirmation_components": {
-      "current_fast_family_count": 2,
-      "context_support_count": 1,
+      "current_fast_family_count": 1,
+      "context_support_count": 2,
       "breadth_confirmation_count": 1,
       "breadth_confirmation": {
-        "FAST_BREADTH_CURRENT": true,
+        "FAST_BREADTH_CURRENT": false,
         "MOMENTUM_CURRENT": false,
         "MMFD_IMPROVING": false,
-        "NASI_TURNING_UP": false
+        "NASI_TURNING_UP": true
       },
       "volume_confirmation": true,
       "stress_relief_count": 1
@@ -360,24 +347,24 @@
       "DOWN_UP_RATIO_RELIEF": true
     },
     "fast_families_current_snapshot": {
-      "FAST_BREADTH_TURN": true,
+      "FAST_BREADTH_TURN": false,
       "MOMENTUM_TURN": false,
       "NET_VOLUME_TURN": true,
       "DOWN_UP_RATIO_RELIEF": false
     },
     "fast_family_memory_minutes": 30,
     "fast_family_last_seen_et": {
-      "FAST_BREADTH_TURN": "2026-09-14T13:32:38.158201-04:00",
-      "MOMENTUM_TURN": "2026-09-14T13:32:38.158201-04:00",
-      "NET_VOLUME_TURN": "2026-09-14T13:32:38.158201-04:00",
-      "DOWN_UP_RATIO_RELIEF": "2026-09-14T13:32:38.158201-04:00"
+      "FAST_BREADTH_TURN": "2026-09-14T13:41:12.566099-04:00",
+      "MOMENTUM_TURN": "2026-09-14T13:41:12.566099-04:00",
+      "NET_VOLUME_TURN": "2026-09-14T13:41:12.566099-04:00",
+      "DOWN_UP_RATIO_RELIEF": "2026-09-14T13:41:12.566099-04:00"
     },
-    "context_support_count": 1,
+    "context_support_count": 2,
     "context_support": {
       "MMFD_IMPROVING": false,
-      "NASI_TURNING_UP": false,
-      "VVIX_EASING": false,
-      "SKEW_NARROWING": true
+      "NASI_TURNING_UP": true,
+      "VVIX_EASING": true,
+      "SKEW_NARROWING": false
     },
     "go_latched_for_session": true,
     "go_triggered_at_et": "2026-09-14T09:43:30.624693-04:00",
@@ -386,151 +373,35 @@
     "decision_reason": "GO EARLY already fired earlier this market session and remains latched through the close. Current evidence continues to update but cannot revoke the same-day decision.",
     "logic": "Cash action is HOLD CASH when no oversold setup is active, WATCH when the canonical oversold gate is active but no GO has fired, and DEPLOY once GO EARLY qualifies. GO EARLY requires either 2+ fast reversal families within the last 30 minutes, or 1 recent fast family plus 1 current context turn. Once GO EARLY fires, DEPLOY remains latched through that market session and resets on the next market date. Market-condition labels and recovery-stage labels are descriptive context only and do not modify the trigger.",
     "market_phase": "LIVE_PROVISIONAL",
-    "timestamp_et": "2026-09-14T13:41:12.566099-04:00",
+    "timestamp_et": "2026-09-14T13:50:57.781001-04:00",
     "market_date": "2026-09-14",
     "data_quality_status": "OK",
-    "actionable": true,
-    "secondary_confirmation": {
-      "version": "REENTRY_SECONDARY_CONFIRMATION_v1",
-      "timestamp_et": "2026-09-14T13:41:12.566099-04:00",
-      "market_date": "2026-09-14",
-      "decision_input": false,
-      "changes_deploy_trigger": false,
-      "changes_recovery_stage": false,
-      "supportive_family_count": 1,
-      "family_count": 4,
-      "families": {
-        "vol_structure": {
-          "name": "VIX term-structure repair",
-          "state": "NORMALIZED",
-          "supportive": true,
-          "current_ratio": 0.8516129032258064,
-          "prior_ratio": 0.9042067916877851,
-          "change": -0.052593888461978655,
-          "normalization_cross": false,
-          "benchmark": ">1.10 acute inversion \u00b7 >1.00 backwardation/stress \u00b7 cross below 1.00 normalization \u00b7 <0.97 normalized contango",
-          "retail_explanation": "This asks whether near-term market fear is still unusually intense or starting to calm down. A move back below 1.00 is generally healthier for a rebound.",
-          "signal_behavior": "CONFIRMING",
-          "behavior_explanation": "This is mainly a confirmation signal: falling below 1.00 shows short-term volatility stress is normalizing. A high ratio itself is not bullish; the repair is what matters.",
-          "freshness_type": "DAILY_CLOSE",
-          "last_updated": "2026-09-11",
-          "source": "Cboe official daily VIX and VIX3M history",
-          "validation_status": "VALIDATED_EVENT_SUPPORT",
-          "validation_note": "Frozen 2007-2026 falsification: QQQ 10D after VIX/VIX3M normalization below 1.00, n=78, median +2.17%, positive 69.2%, matched excess +1.17%; workflow run 33811926596."
-        },
-        "breadth_thrust": {
-          "name": "Breadth participation thrust",
-          "state": "MIXED",
-          "supportive": false,
-          "nasdaq_advance_share": 0.5103876633112016,
-          "advancing_issues": 2383.0,
-          "declining_issues": 2286.0,
-          "benchmark": "<45% defensive \u00b7 45-55% mixed \u00b7 55-61.5% building \u00b7 >=61.5% strong thrust-level participation",
-          "retail_explanation": "This checks whether the rebound is spreading across lots of stocks instead of being carried by just a few big names.",
-          "signal_behavior": "CONFIRMING",
-          "behavior_explanation": "Higher participation confirms that a rebound is broad rather than narrow.",
-          "freshness_type": "INTRADAY_SNAPSHOT",
-          "last_updated": "2026-09-14T13:41:12.566099-04:00",
-          "source": "Current Nasdaq advancing/declining issues captured by RE-ENTRY",
-          "validation_status": "LIMITED_HISTORY_CONTEXT_ONLY",
-          "validation_note": "Exact Nasdaq advance/decline history through February 2020 covered 18 historical DEPLOY episodes. None had >=55% advance share at the DEPLOY start; waiting for that participation threshold took a median 1 session and cost a median +0.65% SPY / +0.58% QQQ. Keep as research/context only; exact history does not cover 2020-2026."
-        },
-        "risk_appetite": {
-          "name": "Risk-appetite broadening",
-          "state": "MIXED",
-          "supportive": false,
-          "supportive_components": 1,
-          "components": {
-            "equal_weight_broadening": false,
-            "small_caps_confirming": false,
-            "credit_risk_appetite": true
-          },
-          "RSP_SPY": 0.2820034008101313,
-          "RSP_SPY_5d_change": -0.008236529870137455,
-          "IWM_SPY": 0.3786599284304494,
-          "IWM_SPY_5d_change": -0.01476273916133608,
-          "HYG_LQD": 0.7520688779027556,
-          "HYG_LQD_5d_change": 0.002125114905711989,
-          "benchmark": "0/3 defensive \u00b7 1/3 mixed \u00b7 2/3 broadening \u00b7 3/3 broad risk-on; positive 5-session relative momentum required",
-          "retail_explanation": "This checks whether investors are moving beyond the biggest stocks into equal-weight stocks, small caps, and lower-quality credit.",
-          "signal_behavior": "CONFIRMING",
-          "behavior_explanation": "Broadening into smaller stocks and credit confirms that investors are becoming more willing to take risk.",
-          "freshness_type": "DAILY_CLOSE",
-          "last_updated": "2026-09-14",
-          "source": "Yahoo Finance daily adjusted closes: RSP/SPY, IWM/SPY, HYG/LQD",
-          "validation_status": "VALIDATED_CONTEXT_ONLY",
-          "validation_note": "Across 94 historical DEPLOY episodes, the 2-of-3 risk-appetite composite was supportive at 36 starts and failed every SPY/QQQ 10D/30D incremental quality gate versus all DEPLOY episodes. It is low-redundancy context (correlation with existing B50 proxy about 0.10), but it does not improve the entry rule or recovery-stage classification."
-        },
-        "options_sentiment": {
-          "name": "Options sentiment",
-          "state": "FEAR",
-          "supportive": false,
-          "equity_put_call": 0.76,
-          "index_put_call": 0.85,
-          "total_put_call": 0.81,
-          "benchmark": "Equity P/C <0.50 complacent \u00b7 0.50-0.70 normal \u00b7 0.70-0.90 fear \u00b7 >=0.90 high fear (working display scale until percentiles mature)",
-          "retail_explanation": "This looks at how heavily traders are using puts versus calls. High put activity often means fear is elevated.",
-          "signal_behavior": "CONTRARIAN",
-          "behavior_explanation": "Unusually high fear can improve a re-entry setup, but fear alone is not a buy signal. Confirmation comes when fear retreats while breadth improves.",
-          "freshness_type": "INTRADAY_DELAYED",
-          "last_updated": "2026-09-14 12:30 PM CT",
-          "source": "Cboe U.S. Options Current Market Statistics",
-          "validation_status": "VALIDATED_SENTIMENT_OVERLAY",
-          "validation_note": "Across 94 historical DEPLOY episodes using Cboe archive plus daily statistics, equity fear (P/C >=0.70) appeared at 49 starts and was generally supportive over 30-90D, but missed the SPY 10D median gate. Fear-reversing occurred at only 14 starts, below the promotion sample threshold. Cboe also documents 2022 early-exercise distortion in raw equity P/C. Keep as a contrarian sentiment overlay, never a DEPLOY gate."
-        }
-      },
-      "breadth_context": {
-        "t2108": {
-          "name": "T2108 breadth context",
-          "symbol": "T2108-EQUIVALENT",
-          "value": 32.57443082311734,
-          "prior_value": 34.88168273444347,
-          "change_points": -2.3072519113261336,
-          "state": "WEAK",
-          "direction": "FALLING",
-          "decision_input": false,
-          "supportive": false,
-          "universe_size": 2296,
-          "valid_count": 2284,
-          "coverage_pct": 99.4773519163763,
-          "above_40dma_count": 744,
-          "benchmark": "<10% extreme oversold \u00b7 10-20% oversold \u00b7 20-40% weak \u00b7 40-70% normal \u00b7 70-80% strong \u00b7 >80% very extended",
-          "retail_explanation": "This shows the percentage of NYSE stocks trading above their 40-day moving average. It is an intermediate-speed breadth gauge between very short-term breadth and long-term market structure.",
-          "behavior_explanation": "When this falls to deeply oversold levels, it is a contrarian bullish setup for re-entry because weakness is widespread and may be exhausting. A turn higher is the stronger confirmation; the low reading alone does not trigger DEPLOY.",
-          "freshness_type": "DAILY_CLOSE",
-          "last_updated": "2026-09-14",
-          "source": "RE-ENTRY calculated T2108-equivalent from current NYSE-listed non-ETF equities and 40-day adjusted closes",
-          "validation_status": "VALIDATED_CONTEXT_ONLY",
-          "validation_note": "Incremental validation across 94 DEPLOY episodes found the NYSE 40-day breadth reconstruction highly redundant with existing breadth (correlation about 0.94). Requiring <40% and rising delayed entry by a median 2 sessions and cost median +0.17% SPY / +0.33% QQQ. Keep as breadth context only, not a vote or required confirmation."
-        }
-      },
-      "interpretation": "Secondary confirmation describes whether participation, volatility structure, risk appetite, and options sentiment corroborate the existing RE-ENTRY signal. T2108 is separate breadth context and does not change the confirmation score. None of these signals create, block, delay, or revoke DEPLOY."
-    }
+    "actionable": true
   },
   "snapshot_version": "REENTRY_UNIFIED_SNAPSHOT_v1",
-  "snapshot_generated_at_et": "2026-09-14T13:41:13.086871-04:00",
+  "snapshot_generated_at_et": "2026-09-14T13:50:58.359965-04:00",
   "market_prices": {
     "SPY": {
-      "price": 762.72998046875,
+      "price": 762.5750122070312,
       "previous_close": 764.2899780273438,
-      "change_pct": -0.002041106914184798,
-      "timestamp_et": "2026-09-14T13:40:00-04:00",
+      "change_pct": -0.0022438679946306106,
+      "timestamp_et": "2026-09-14T13:50:00-04:00",
       "source": "Yahoo Finance 5-minute quote context",
       "decision_input": false
     },
     "QQQ": {
-      "price": 712.3900146484375,
+      "price": 712.5499877929688,
       "previous_close": 714.8800048828125,
-      "change_pct": -0.003483088374787058,
-      "timestamp_et": "2026-09-14T13:40:00-04:00",
+      "change_pct": -0.0032593121557872307,
+      "timestamp_et": "2026-09-14T13:50:00-04:00",
       "source": "Yahoo Finance 5-minute quote context",
       "decision_input": false
     },
     "^VIX": {
-      "price": 16.790000915527344,
+      "price": 16.729999542236328,
       "previous_close": 15.84000015258789,
-      "change_pct": 0.05997479506237546,
-      "timestamp_et": "2026-09-14T13:25:00-04:00",
+      "change_pct": 0.05618682961332122,
+      "timestamp_et": "2026-09-14T13:35:00-04:00",
       "source": "Yahoo Finance 5-minute quote context",
       "decision_input": false
     }
@@ -539,29 +410,29 @@
   "sources": {
     "fast_breadth": {
       "provider": "StockCharts quote feed",
-      "timestamp": "2026-09-14T13:33:06.303882-04:00",
+      "timestamp": "2026-09-14T13:45:05.860773-04:00",
       "provisional": true
     },
     "NASI_PLUS": {
       "provider": "Nasdaq Trader daily market file for verified current-year history",
-      "timestamp": "2026-09-14T13:33:06.303882-04:00",
+      "timestamp": "2026-09-14T13:45:05.860773-04:00",
       "bootstrap_start_date": "2026-01-02",
       "completed_daily_observations": 171
     },
     "MMFD": {
       "provider": "Nasdaq Trader nasdaqlisted + otherlisted",
-      "timestamp": "2026-09-14T13:33:09.758962-04:00",
-      "coverage_pct": 96.36094187386794
+      "timestamp": "2026-09-14T13:45:07.970584-04:00",
+      "coverage_pct": 96.45973983204347
     },
     "VVIX": {
       "provider": "Yahoo Finance intraday VVIX quote and daily history",
-      "timestamp": "2026-09-14T13:33:09.758962-04:00",
+      "timestamp": "2026-09-14T13:45:07.970584-04:00",
       "history_sessions": 499
     },
     "SKEW": {
       "provider": "Yahoo Finance SPX option chain for live proxy; official SKEW daily close/history. If the post-close option chain is unavailable, the engine preserves the last valid same-session SPX skew proxy and its direction rather than substituting a stale official-close direction.",
-      "timestamp": "2026-09-14T13:41:10.575114-04:00",
-      "source_mode": "LIVE_SPX_OPTIONS",
+      "timestamp": "2026-09-14T13:50:56.939779-04:00",
+      "source_mode": "FINAL_CLOSE_OFFICIAL_SKEW_WITH_LAST_VALID_INTRADAY_PROXY",
       "official_date": "2026-09-11"
     }
   },
@@ -582,153 +453,14 @@
       "VVIX": true,
       "SKEW_PROXY": true
     },
-    "mmfd_coverage_pct": 96.36094187386794,
+    "mmfd_coverage_pct": 96.45973983204347,
     "note": "Data-quality status does not alter REENTRY_UNIFIED_v1 signal thresholds or state logic."
   },
   "prospective_history": {
-    "snapshot_count": 62,
+    "snapshot_count": 63,
     "market_days": 2,
     "state_transitions": 0,
-    "go_early_snapshots": 62,
+    "go_early_snapshots": 63,
     "watch_snapshots": 0
-  },
-  "secondary_confirmation": {
-    "version": "REENTRY_SECONDARY_CONFIRMATION_v1",
-    "timestamp_et": "2026-09-14T13:41:12.566099-04:00",
-    "market_date": "2026-09-14",
-    "decision_input": false,
-    "changes_deploy_trigger": false,
-    "changes_recovery_stage": false,
-    "supportive_family_count": 1,
-    "family_count": 4,
-    "families": {
-      "vol_structure": {
-        "name": "VIX term-structure repair",
-        "state": "NORMALIZED",
-        "supportive": true,
-        "current_ratio": 0.8516129032258064,
-        "prior_ratio": 0.9042067916877851,
-        "change": -0.052593888461978655,
-        "normalization_cross": false,
-        "benchmark": ">1.10 acute inversion \u00b7 >1.00 backwardation/stress \u00b7 cross below 1.00 normalization \u00b7 <0.97 normalized contango",
-        "retail_explanation": "This asks whether near-term market fear is still unusually intense or starting to calm down. A move back below 1.00 is generally healthier for a rebound.",
-        "signal_behavior": "CONFIRMING",
-        "behavior_explanation": "This is mainly a confirmation signal: falling below 1.00 shows short-term volatility stress is normalizing. A high ratio itself is not bullish; the repair is what matters.",
-        "freshness_type": "DAILY_CLOSE",
-        "last_updated": "2026-09-11",
-        "source": "Cboe official daily VIX and VIX3M history",
-        "validation_status": "VALIDATED_EVENT_SUPPORT",
-        "validation_note": "Frozen 2007-2026 falsification: QQQ 10D after VIX/VIX3M normalization below 1.00, n=78, median +2.17%, positive 69.2%, matched excess +1.17%; workflow run 33811926596."
-      },
-      "breadth_thrust": {
-        "name": "Breadth participation thrust",
-        "state": "MIXED",
-        "supportive": false,
-        "nasdaq_advance_share": 0.5103876633112016,
-        "advancing_issues": 2383.0,
-        "declining_issues": 2286.0,
-        "benchmark": "<45% defensive \u00b7 45-55% mixed \u00b7 55-61.5% building \u00b7 >=61.5% strong thrust-level participation",
-        "retail_explanation": "This checks whether the rebound is spreading across lots of stocks instead of being carried by just a few big names.",
-        "signal_behavior": "CONFIRMING",
-        "behavior_explanation": "Higher participation confirms that a rebound is broad rather than narrow.",
-        "freshness_type": "INTRADAY_SNAPSHOT",
-        "last_updated": "2026-09-14T13:41:12.566099-04:00",
-        "source": "Current Nasdaq advancing/declining issues captured by RE-ENTRY",
-        "validation_status": "LIMITED_HISTORY_CONTEXT_ONLY",
-        "validation_note": "Exact Nasdaq advance/decline history through February 2020 covered 18 historical DEPLOY episodes. None had >=55% advance share at the DEPLOY start; waiting for that participation threshold took a median 1 session and cost a median +0.65% SPY / +0.58% QQQ. Keep as research/context only; exact history does not cover 2020-2026."
-      },
-      "risk_appetite": {
-        "name": "Risk-appetite broadening",
-        "state": "MIXED",
-        "supportive": false,
-        "supportive_components": 1,
-        "components": {
-          "equal_weight_broadening": false,
-          "small_caps_confirming": false,
-          "credit_risk_appetite": true
-        },
-        "RSP_SPY": 0.2820034008101313,
-        "RSP_SPY_5d_change": -0.008236529870137455,
-        "IWM_SPY": 0.3786599284304494,
-        "IWM_SPY_5d_change": -0.01476273916133608,
-        "HYG_LQD": 0.7520688779027556,
-        "HYG_LQD_5d_change": 0.002125114905711989,
-        "benchmark": "0/3 defensive \u00b7 1/3 mixed \u00b7 2/3 broadening \u00b7 3/3 broad risk-on; positive 5-session relative momentum required",
-        "retail_explanation": "This checks whether investors are moving beyond the biggest stocks into equal-weight stocks, small caps, and lower-quality credit.",
-        "signal_behavior": "CONFIRMING",
-        "behavior_explanation": "Broadening into smaller stocks and credit confirms that investors are becoming more willing to take risk.",
-        "freshness_type": "DAILY_CLOSE",
-        "last_updated": "2026-09-14",
-        "source": "Yahoo Finance daily adjusted closes: RSP/SPY, IWM/SPY, HYG/LQD",
-        "validation_status": "VALIDATED_CONTEXT_ONLY",
-        "validation_note": "Across 94 historical DEPLOY episodes, the 2-of-3 risk-appetite composite was supportive at 36 starts and failed every SPY/QQQ 10D/30D incremental quality gate versus all DEPLOY episodes. It is low-redundancy context (correlation with existing B50 proxy about 0.10), but it does not improve the entry rule or recovery-stage classification."
-      },
-      "options_sentiment": {
-        "name": "Options sentiment",
-        "state": "FEAR",
-        "supportive": false,
-        "equity_put_call": 0.76,
-        "index_put_call": 0.85,
-        "total_put_call": 0.81,
-        "benchmark": "Equity P/C <0.50 complacent \u00b7 0.50-0.70 normal \u00b7 0.70-0.90 fear \u00b7 >=0.90 high fear (working display scale until percentiles mature)",
-        "retail_explanation": "This looks at how heavily traders are using puts versus calls. High put activity often means fear is elevated.",
-        "signal_behavior": "CONTRARIAN",
-        "behavior_explanation": "Unusually high fear can improve a re-entry setup, but fear alone is not a buy signal. Confirmation comes when fear retreats while breadth improves.",
-        "freshness_type": "INTRADAY_DELAYED",
-        "last_updated": "2026-09-14 12:30 PM CT",
-        "source": "Cboe U.S. Options Current Market Statistics",
-        "validation_status": "VALIDATED_SENTIMENT_OVERLAY",
-        "validation_note": "Across 94 historical DEPLOY episodes using Cboe archive plus daily statistics, equity fear (P/C >=0.70) appeared at 49 starts and was generally supportive over 30-90D, but missed the SPY 10D median gate. Fear-reversing occurred at only 14 starts, below the promotion sample threshold. Cboe also documents 2022 early-exercise distortion in raw equity P/C. Keep as a contrarian sentiment overlay, never a DEPLOY gate."
-      }
-    },
-    "breadth_context": {
-      "t2108": {
-        "name": "T2108 breadth context",
-        "symbol": "T2108-EQUIVALENT",
-        "value": 32.57443082311734,
-        "prior_value": 34.88168273444347,
-        "change_points": -2.3072519113261336,
-        "state": "WEAK",
-        "direction": "FALLING",
-        "decision_input": false,
-        "supportive": false,
-        "universe_size": 2296,
-        "valid_count": 2284,
-        "coverage_pct": 99.4773519163763,
-        "above_40dma_count": 744,
-        "benchmark": "<10% extreme oversold \u00b7 10-20% oversold \u00b7 20-40% weak \u00b7 40-70% normal \u00b7 70-80% strong \u00b7 >80% very extended",
-        "retail_explanation": "This shows the percentage of NYSE stocks trading above their 40-day moving average. It is an intermediate-speed breadth gauge between very short-term breadth and long-term market structure.",
-        "behavior_explanation": "When this falls to deeply oversold levels, it is a contrarian bullish setup for re-entry because weakness is widespread and may be exhausting. A turn higher is the stronger confirmation; the low reading alone does not trigger DEPLOY.",
-        "freshness_type": "DAILY_CLOSE",
-        "last_updated": "2026-09-14",
-        "source": "RE-ENTRY calculated T2108-equivalent from current NYSE-listed non-ETF equities and 40-day adjusted closes",
-        "validation_status": "VALIDATED_CONTEXT_ONLY",
-        "validation_note": "Incremental validation across 94 DEPLOY episodes found the NYSE 40-day breadth reconstruction highly redundant with existing breadth (correlation about 0.94). Requiring <40% and rising delayed entry by a median 2 sessions and cost median +0.17% SPY / +0.33% QQQ. Keep as breadth context only, not a vote or required confirmation."
-      }
-    },
-    "interpretation": "Secondary confirmation describes whether participation, volatility structure, risk appetite, and options sentiment corroborate the existing RE-ENTRY signal. T2108 is separate breadth context and does not change the confirmation score. None of these signals create, block, delay, or revoke DEPLOY."
-  },
-  "t2108_context": {
-    "name": "T2108 breadth context",
-    "symbol": "T2108-EQUIVALENT",
-    "value": 32.57443082311734,
-    "prior_value": 34.88168273444347,
-    "change_points": -2.3072519113261336,
-    "state": "WEAK",
-    "direction": "FALLING",
-    "decision_input": false,
-    "supportive": false,
-    "universe_size": 2296,
-    "valid_count": 2284,
-    "coverage_pct": 99.4773519163763,
-    "above_40dma_count": 744,
-    "benchmark": "<10% extreme oversold \u00b7 10-20% oversold \u00b7 20-40% weak \u00b7 40-70% normal \u00b7 70-80% strong \u00b7 >80% very extended",
-    "retail_explanation": "This shows the percentage of NYSE stocks trading above their 40-day moving average. It is an intermediate-speed breadth gauge between very short-term breadth and long-term market structure.",
-    "behavior_explanation": "When this falls to deeply oversold levels, it is a contrarian bullish setup for re-entry because weakness is widespread and may be exhausting. A turn higher is the stronger confirmation; the low reading alone does not trigger DEPLOY.",
-    "freshness_type": "DAILY_CLOSE",
-    "last_updated": "2026-09-14",
-    "source": "RE-ENTRY calculated T2108-equivalent from current NYSE-listed non-ETF equities and 40-day adjusted closes",
-    "validation_status": "VALIDATED_CONTEXT_ONLY",
-    "validation_note": "Incremental validation across 94 DEPLOY episodes found the NYSE 40-day breadth reconstruction highly redundant with existing breadth (correlation about 0.94). Requiring <40% and rising delayed entry by a median 2 sessions and cost median +0.17% SPY / +0.33% QQQ. Keep as breadth context only, not a vote or required confirmation."
   }
 }
