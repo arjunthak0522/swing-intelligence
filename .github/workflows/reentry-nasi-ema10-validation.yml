@@ -41,7 +41,7 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
-          curl -L --compressed -fsS --max-time 30 https://unicorn.us.com/advdec/ -o /tmp/advdec.html
+          curl -k -L --compressed -fsS --max-time 30 https://unicorn.us.com/advdec/ -o /tmp/advdec.html
           python - <<'PY'
           import re
           from pathlib import Path
