@@ -17,6 +17,7 @@ NASDAQ_LISTED = "https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqlisted.txt"
 UNICORN_BASE = "https://unicorn.us.com/advdec"
 BATCH_SIZE = 180
 MIN_NASDAQ_VALID = 900
+MAX_DAILY_SOURCE_AGE_DAYS = 7
 
 
 def finite(value) -> bool:
@@ -156,12 +157,35 @@ def read_unicorn_series(filename: str) -> pd.Series:
     return s
 
 
-def zweig_breadth_thrust() -> dict:
+def zweig_breadth_thrust(market_date: str | None) -> dict:
     adv = read_unicorn_series("NYSE_advn.csv")
     dec = read_unicorn_series("NYSE_decln.csv")
     aligned = pd.concat([adv.rename("adv"), dec.rename("dec")], axis=1).dropna()
     if len(aligned) < 30:
         raise ValueError("Insufficient NYSE breadth history for Zweig Breadth Thrust")
+    last_date = aligned.index[-1].date()
+    target_date = pd.Timestamp(market_date).date() if market_date else pd.Timestamp.utcnow().date()
+    age_days = (target_date - last_date).days
+    common = {
+        "name": "Zweig Breadth Thrust",
+        "decision_input": False,
+        "role": "LEADING_CONTEXT",
+        "benchmark": "Classic setup watches for the 10-day breadth ratio to move from below 0.40 to above 0.615 within 10 sessions.",
+        "why_it_matters": "A rapid shift from washed-out breadth to broad participation can identify a powerful internal reversal before slower trend measures fully recover.",
+        "freshness_type": "DAILY_CLOSE",
+        "last_updated": last_date.isoformat(),
+        "source": "NYSE advancing/declining issues archive from Unicorn Research; RE-ENTRY computes the 10-day exponential breadth ratio",
+        "source_age_days": age_days,
+    }
+    if age_days > MAX_DAILY_SOURCE_AGE_DAYS:
+        return {
+            **common,
+            "state": "UNAVAILABLE_STALE_SOURCE",
+            "direction": "UNAVAILABLE",
+            "source_stale": True,
+            "validation_status": "STALE_SOURCE_RESEARCH_ONLY",
+            "freshness_note": f"Archive is {age_days} calendar days behind the snapshot date. No current Zweig reading is published.",
+        }
     breadth = aligned["adv"] / (aligned["adv"] + aligned["dec"])
     ratio10 = breadth.ewm(span=10, adjust=False).mean()
     current = float(ratio10.iloc[-1])
@@ -179,7 +203,7 @@ def zweig_breadth_thrust() -> dict:
     else:
         state = "NOT_ACTIVE"
     return {
-        "name": "Zweig Breadth Thrust",
+        **common,
         "state": state,
         "direction": "RISING" if current > prior else "FALLING" if current < prior else "FLAT",
         "breadth_ratio_10ema": current,
@@ -187,13 +211,7 @@ def zweig_breadth_thrust() -> dict:
         "recent_10_session_min": min10,
         "classic_thrust_triggered": thrust,
         "classic_setup_active": setup,
-        "decision_input": False,
-        "role": "LEADING_CONTEXT",
-        "benchmark": "Classic setup watches for the 10-day breadth ratio to move from below 0.40 to above 0.615 within 10 sessions.",
-        "why_it_matters": "A rapid shift from washed-out breadth to broad participation can identify a powerful internal reversal before slower trend measures fully recover.",
-        "freshness_type": "DAILY_CLOSE",
-        "last_updated": aligned.index[-1].date().isoformat(),
-        "source": "NYSE advancing/declining issues archive from Unicorn Research; RE-ENTRY computes the 10-day exponential breadth ratio",
+        "source_stale": False,
         "validation_status": "RESEARCH_ONLY",
     }
 
@@ -305,8 +323,9 @@ def main() -> None:
     output_path = Path(args.output) if args.output else snapshot_path
     payload = json.loads(snapshot_path.read_text(encoding="utf-8"))
     history_path = Path(args.history)
+    market_date = (payload.get("values") or {}).get("market_date") or (payload.get("unified_engine") or {}).get("market_date")
     builders = {
-        "zweig_breadth_thrust": zweig_breadth_thrust,
+        "zweig_breadth_thrust": lambda: zweig_breadth_thrust(market_date),
         "mcclellan_velocity": lambda: mcclellan_velocity(payload, history_path),
         "nasdaq_short_breadth": nasdaq_short_breadth,
         "credit_risk_turn": credit_turn,
