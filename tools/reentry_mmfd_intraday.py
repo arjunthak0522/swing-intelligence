@@ -28,6 +28,7 @@ BATCH_SIZE = 180
 MAX_BATCH_WORKERS = 8
 MIN_VALID = 1200
 MIN_COVERAGE = 0.55
+VVIX_RECENT_SESSIONS = 40
 
 
 def finite(value) -> bool:
@@ -204,6 +205,18 @@ def classify(value: float) -> str:
     return "EXTREME_OVERBOUGHT"
 
 
+def classify_vvix_level(value: float) -> str:
+    if value < 70:
+        return "EXTREME_COMPLACENCY"
+    if value < 80:
+        return "CALM"
+    if value <= 100:
+        return "NORMAL"
+    if value <= 120:
+        return "ELEVATED_STRESS"
+    return "EXTREME_STRESS"
+
+
 def calculate_vvix(now: datetime) -> dict:
     intraday = yf.download(tickers="^VVIX", period="1d", interval="5m", auto_adjust=False, progress=False, threads=False, timeout=20)
     intraday_close = extract_ticker_closes(intraday, "^VVIX")
@@ -220,15 +233,21 @@ def calculate_vvix(now: datetime) -> dict:
     completed = dated[dated.index.date < now.date()]
     if len(completed) < 100:
         raise ValueError(f"Insufficient VVIX history: {len(completed)} completed sessions")
+    recent = completed.tail(VVIX_RECENT_SESSIONS)
+    if len(recent) < 30:
+        raise ValueError(f"Insufficient recent VVIX history: {len(recent)} completed sessions")
+
     prior_close = float(completed.iloc[-1])
-    percentile = 100.0 * float((completed <= current).sum()) / float(len(completed))
+    percentile_2m = 100.0 * float((recent <= current).sum()) / float(len(recent))
+    percentile_2y = 100.0 * float((completed <= current).sum()) / float(len(completed))
     delta = current - prior_close
     direction = "RISING" if delta > 0.25 else "FALLING" if delta < -0.25 else "FLAT"
-    state = "EXTREME_STRESS" if percentile >= 95 else "HIGH_STRESS" if percentile >= 80 else "ELEVATED" if percentile >= 60 else "NORMAL" if percentile >= 20 else "CALM"
+    state = classify_vvix_level(current)
     return {
         "symbol": "^VVIX", "name": "Volatility of VIX", "value": current, "prior_close": prior_close,
         "change_points_vs_prior_close": delta, "direction_vs_prior_close": direction,
-        "historical_percentile_2y": percentile, "completed_history_sessions": int(len(completed)),
+        "historical_percentile_2m": percentile_2m, "recent_percentile_sessions": int(len(recent)),
+        "historical_percentile_2y": percentile_2y, "completed_history_sessions": int(len(completed)),
         "state": state, "provisional_intraday": True,
         "source": "Yahoo Finance intraday VVIX quote and daily history", "timestamp_et": now.isoformat(),
     }
@@ -266,6 +285,7 @@ def main() -> None:
         vvix = calculate_vvix(now)
         payload["values"]["VVIX"] = vvix["value"]
         payload["values"]["VVIX_STATE"] = vvix["state"]
+        payload["values"]["VVIX_PERCENTILE_2M"] = vvix["historical_percentile_2m"]
         payload["values"]["VVIX_PERCENTILE_2Y"] = vvix["historical_percentile_2y"]
         payload["values"]["VVIX_DIRECTION"] = vvix["direction_vs_prior_close"]
         payload["vvix_live"] = vvix
