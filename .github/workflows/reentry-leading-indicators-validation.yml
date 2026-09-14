@@ -38,11 +38,6 @@ jobs:
       - name: Install dependencies
         run: python -m pip install --quiet pandas yfinance
 
-      - name: Inspect Zweig archive date format
-        shell: bash
-        run: |
-          curl -k -L --compressed -fsS --max-time 30 https://unicorn.us.com/advdec/NYSE_advn.csv | head -n 6
-
       - name: Calculate research-only leading indicators
         run: |
           python tools/reentry_leading_indicators.py \
@@ -70,6 +65,9 @@ jobs:
           expected={'zweig_breadth_thrust','mcclellan_velocity','nasdaq_short_breadth','credit_risk_turn'}
           if set(indicators) != expected:
               raise SystemExit(f'Unexpected indicator set: {set(indicators)}')
+          bad_dates=[(k,v.get('last_updated')) for k,v in indicators.items() if v.get('last_updated') and str(v.get('last_updated')).startswith('1970-')]
+          if bad_dates:
+              raise SystemExit(f'Invalid freshness dates: {bad_dates}')
           print('PASS - leading indicators added without changing REENTRY_UNIFIED_v1')
           for key in sorted(indicators):
               row=indicators[key]
