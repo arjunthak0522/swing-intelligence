@@ -14,7 +14,7 @@ import pandas as pd
 import yfinance as yf
 
 NASDAQ_LISTED = "https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqlisted.txt"
-UNICON_BASE = "https://unicorn.us.com/advdec"
+UNICORN_BASE = "https://unicorn.us.com/advdec"
 BATCH_SIZE = 180
 MIN_NASDAQ_VALID = 900
 
@@ -145,14 +145,14 @@ def nasdaq_short_breadth() -> dict:
 
 
 def read_unicorn_series(filename: str) -> pd.Series:
-    text = curl_text(f"{UNICON_BASE}/{filename}", insecure=True)
-    df = pd.read_csv(io.StringIO(text))
-    if df.shape[1] < 2:
-        raise ValueError(f"Unexpected breadth archive format for {filename}")
-    dates = pd.to_datetime(df.iloc[:, 0], errors="coerce")
-    vals = pd.to_numeric(df.iloc[:, -1], errors="coerce")
+    text = curl_text(f"{UNICORN_BASE}/{filename}", insecure=True)
+    df = pd.read_csv(io.StringIO(text), header=None, names=["date", "value"], skipinitialspace=True)
+    dates = pd.to_datetime(df["date"].astype(str).str.strip(), format="%Y%m%d", errors="coerce")
+    vals = pd.to_numeric(df["value"], errors="coerce")
     s = pd.Series(vals.values, index=dates).dropna()
     s = s[~s.index.isna()].sort_index()
+    if s.empty:
+        raise ValueError(f"No valid breadth rows parsed for {filename}")
     return s
 
 
