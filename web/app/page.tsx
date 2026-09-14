@@ -2,6 +2,7 @@ import { CircleAlert, Clock3, Radio } from "lucide-react";
 import MarketMovementTables from "./MarketMovementTables";
 import ReentryDecisionDetails from "./ReentryDecisionDetails";
 import SecondaryConfirmation from "./SecondaryConfirmation";
+import LeadingIndicators from "./LeadingIndicators";
 import AggregateHistoricalEvidence from "./AggregateHistoricalEvidence";
 import { getCashPolicyEvidence, getHistoricalEpisodeEvidence } from "../lib/historicalEvidence";
 import { getIntradaySnapshot, getLatestSnapshot, getWashoutSnapshot, pct, type IntradaySnapshot, type WashoutSnapshot } from "../lib/reentry";
@@ -115,10 +116,11 @@ export default async function Home(){
       <UnifiedHero washout={washout}/>
       <MarketContext live={intraday} washout={washout}/>
       <SecondaryConfirmation washout={washout}/>
+      <LeadingIndicators washout={washout}/>
       <AggregateHistoricalEvidence evidence={historical} cashPolicy={cashPolicy} currentAction={currentAction} currentCondition={currentCondition}/>
       <ReentryDecisionDetails washout={washout}/>
       {snapshot?<MarketMovementTables snapshot={snapshot} live={intraday}/>:<section className="card section-card"><div className="notice"><CircleAlert size={16}/> Sector and subsector context unavailable.</div></section>}
     </>}
-    <footer>REENTRY_UNIFIED_v1 is the only operational decision source. HOLD CASH is the normal state when no oversold setup exists; WATCH means an oversold setup is developing; DEPLOY means the qualifying reversal has fired. Market-condition, recovery-stage, and secondary-confirmation labels are descriptive context and never create a second decision engine.</footer>
+    <footer>REENTRY_UNIFIED_v1 is the only operational decision source. HOLD CASH is the normal state when no oversold setup exists; WATCH means an oversold setup is developing; DEPLOY means the qualifying reversal has fired. Market-condition, recovery-stage, secondary-confirmation, and leading-indicator labels are descriptive context and never create a second decision engine.</footer>
   </main>;
 }
