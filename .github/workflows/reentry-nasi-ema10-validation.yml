@@ -1,0 +1,48 @@
+name: RE-ENTRY NASI EMA10 Validation
+
+on:
+  push:
+    branches:
+      - intraday-signal-research
+    paths:
+      - 'tools/reentry_nasi_ema10_validation.py'
+      - '.github/workflows/reentry-nasi-ema10-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout research branch
+        uses: actions/checkout@v4
+        with:
+          ref: intraday-signal-research
+          fetch-depth: 1
+
+      - name: Overlay canonical research source from main
+        shell: bash
+        run: |
+          git fetch origin main --depth=1
+          git checkout origin/main -- tools/reentry_cash_policy_validation.py tools/reentry_confidence.py tools/reentry_walkforward_validation.py src pyproject.toml
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: python -m pip install --quiet pandas numpy requests yfinance scikit-learn
+
+      - name: Run NASI EMA10 validation
+        run: PYTHONPATH=tools:src python tools/reentry_nasi_ema10_validation.py
+
+      - name: Upload research artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: reentry-nasi-ema10-validation
+          path: artifacts/reentry_nasi_ema10_validation/
+          if-no-files-found: error
