@@ -1,0 +1,85 @@
+name: RE-ENTRY Leading Indicators Validation
+
+on:
+  push:
+    branches:
+      - leading-indicators-research
+    paths:
+      - 'tools/reentry_leading_indicators.py'
+      - '.github/workflows/reentry-leading-indicators-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout research branch
+        uses: actions/checkout@v4
+        with:
+          ref: leading-indicators-research
+          fetch-depth: 1
+
+      - name: Pull latest canonical research snapshot only
+        shell: bash
+        run: |
+          git fetch origin intraday-signal-research --depth=1
+          git checkout origin/intraday-signal-research -- data/reentry/exhaustion_intraday_current.json data/reentry/exhaustion_intraday_history.csv
+          cp data/reentry/exhaustion_intraday_current.json /tmp/leading-input.json
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: python -m pip install --quiet pandas yfinance
+
+      - name: Calculate research-only leading indicators
+        run: |
+          python tools/reentry_leading_indicators.py \
+            --snapshot /tmp/leading-input.json \
+            --history data/reentry/exhaustion_intraday_history.csv \
+            --output /tmp/leading-output.json
+
+      - name: Assert core decision is unchanged
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          before=json.load(open('/tmp/leading-input.json'))
+          after=json.load(open('/tmp/leading-output.json'))
+          b=before.get('unified_engine') or {}
+          a=after.get('unified_engine') or {}
+          keys=['engine_version','deployment_signal','decision','market_condition','recovery_stage','go_latched_for_session','go_triggered_at_et']
+          changed={k:(b.get(k),a.get(k)) for k in keys if b.get(k)!=a.get(k)}
+          if changed:
+              raise SystemExit(f'Core decision changed: {changed}')
+          block=after.get('leading_indicators') or {}
+          if block.get('decision_input') is not False or block.get('changes_deploy_trigger') is not False:
+              raise SystemExit('Leading indicator block is not safely context-only')
+          indicators=block.get('indicators') or {}
+          expected={'zweig_breadth_thrust','mcclellan_velocity','nasdaq_short_breadth','credit_risk_turn'}
+          if set(indicators) != expected:
+              raise SystemExit(f'Unexpected indicator set: {set(indicators)}')
+          print('PASS - leading indicators added without changing REENTRY_UNIFIED_v1')
+          for key in sorted(indicators):
+              row=indicators[key]
+              print(key, row.get('state'), row.get('direction'), row.get('last_updated'))
+          PY
+
+      - name: Save research artifact
+        shell: bash
+        run: |
+          mkdir -p artifacts/reentry_leading_indicators
+          cp /tmp/leading-output.json artifacts/reentry_leading_indicators/leading-output.json
+
+      - name: Upload research artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: reentry-leading-indicators-validation
+          path: artifacts/reentry_leading_indicators/
+          if-no-files-found: error
