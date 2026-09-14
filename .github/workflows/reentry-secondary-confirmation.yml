@@ -18,9 +18,12 @@ permissions:
   contents: write
   id-token: write
 
+# The canonical engine and secondary enrichment both persist to
+# intraday-signal-research. Use the same concurrency group as the canonical
+# workflow so only one live-data writer can run at a time.
 concurrency:
-  group: reentry-secondary-confirmation
-  cancel-in-progress: true
+  group: reentry-unified-engine
+  cancel-in-progress: false
 
 jobs:
   enrich:
