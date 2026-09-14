@@ -4,7 +4,6 @@ from __future__ import annotations
 import csv
 import io
 import json
-import math
 import subprocess
 from pathlib import Path
 
@@ -16,86 +15,56 @@ from reentry_confidence import feature_frame
 from reentry_walkforward_validation import generate_decisions
 
 START_YEAR = 2017
-END_YEAR = 2026
 MAX_CONFIRM_WAIT = 20
 HORIZONS = (5, 10, 15, 30, 60)
 ROUND_TRIP_COST = 0.001
 OUT = Path("artifacts/reentry_nasi_ema10_validation")
+UNICORN_BASE = "https://unicorn.us.com/advdec"
 
 
-def normalize_header(value: str) -> str:
-    return "".join(ch.lower() for ch in (value or "") if ch.isalnum())
+def parse_date(value: str) -> pd.Timestamp | None:
+    parsed = pd.to_datetime((value or "").strip(), errors="coerce")
+    if pd.isna(parsed):
+        return None
+    return pd.Timestamp(parsed).normalize()
 
 
-def parse_date(value: str) -> str | None:
-    value = (value or "").strip()
-    for fmt in ("%m/%d/%Y %H:%M:%S", "%m/%d/%Y", "%Y-%m-%d", "%m/%d/%y"):
-        try:
-            return pd.Timestamp.strptime(value, fmt).date().isoformat()
-        except Exception:
-            pass
-    parsed = pd.to_datetime(value, errors="coerce")
-    return None if pd.isna(parsed) else parsed.date().isoformat()
+def fetch_archived_series(filename: str) -> pd.Series:
+    """Fetch Unicorn's archived breadth series.
 
-
-def fetch_nasdaq_daily_breadth(year: int) -> list[dict]:
-    url = f"https://www.nasdaqtrader.com/dynamic/dailyfiles/daily{year}.txt"
+    The archive's TLS certificate is expired, so curl uses --insecure only for this
+    research-only historical download. The source stopped updating in February 2020.
+    """
+    url = f"{UNICORN_BASE}/{filename}"
     result = subprocess.run(
         [
-            "curl", "--location", "--compressed", "--silent", "--show-error", "--fail",
+            "curl", "--insecure", "--location", "--compressed", "--silent", "--show-error", "--fail",
             "--max-time", "45", "--user-agent", "Mozilla/5.0 RE-ENTRY-nasi-validation/1.0", url,
         ],
         check=True, capture_output=True, text=True, timeout=50,
     )
-    text = result.stdout.lstrip("\ufeff")
-    reader = csv.DictReader(io.StringIO(text))
-    fields = reader.fieldnames or []
-    normalized = {name: normalize_header(name) for name in fields}
-
-    def choose_date() -> str:
-        for name, norm in normalized.items():
-            if norm == "date" or norm.endswith("tradedate"):
-                return name
-        raise ValueError(f"No date column in {year}: {fields}")
-
-    def choose(kind: str) -> str:
-        # Prefer explicitly Nasdaq-labeled breadth columns if the file contains multiple exchanges.
-        candidates = []
-        for name, norm in normalized.items():
-            if kind == "adv" and "advance" in norm and "decline" not in norm:
-                candidates.append((name, norm))
-            if kind == "dec" and "decline" in norm:
-                candidates.append((name, norm))
-        for name, norm in candidates:
-            if "nasdaq" in norm:
-                return name
-        exact = "advances" if kind == "adv" else "declines"
-        for name, norm in candidates:
-            if norm == exact:
-                return name
-        if len(candidates) == 1:
-            return candidates[0][0]
-        raise ValueError(f"Ambiguous {kind} column in {year}: {fields}")
-
-    date_field = choose_date()
-    adv_field = choose("adv")
-    dec_field = choose("dec")
-    rows = []
-    for row in reader:
-        market_date = parse_date(row.get(date_field, ""))
-        if not market_date:
+    rows: list[tuple[pd.Timestamp, float]] = []
+    for row in csv.reader(io.StringIO(result.stdout.lstrip("\ufeff"))):
+        if len(row) < 2:
             continue
-        try:
-            advances = float(str(row.get(adv_field, "")).replace(",", ""))
-            declines = float(str(row.get(dec_field, "")).replace(",", ""))
-        except (TypeError, ValueError):
+        dt = parse_date(row[0])
+        if dt is None:
             continue
-        if advances < 0 or declines < 0 or advances + declines <= 0:
+        value = None
+        for cell in reversed(row[1:]):
+            try:
+                value = float(str(cell).replace(",", "").strip())
+                break
+            except (TypeError, ValueError):
+                continue
+        if value is None or value < 0:
             continue
-        rows.append({"date": market_date, "advances": advances, "declines": declines})
+        rows.append((dt, value))
     if not rows:
-        raise ValueError(f"Parsed zero Nasdaq breadth rows for {year}")
-    return rows
+        raise ValueError(f"Parsed zero rows from {url}")
+    s = pd.Series({d: v for d, v in rows}, dtype=float).sort_index()
+    s.index = pd.DatetimeIndex(s.index)
+    return s
 
 
 def ema(values: pd.Series, length: int) -> pd.Series:
@@ -103,12 +72,12 @@ def ema(values: pd.Series, length: int) -> pd.Series:
 
 
 def build_nasi() -> pd.DataFrame:
-    rows: list[dict] = []
-    for year in range(START_YEAR, END_YEAR + 1):
-        rows.extend(fetch_nasdaq_daily_breadth(year))
-    df = pd.DataFrame(rows).drop_duplicates("date", keep="last")
-    df["date"] = pd.to_datetime(df["date"])
-    df = df.sort_values("date").set_index("date")
+    advances = fetch_archived_series("NASDAQ_advn.csv")
+    declines = fetch_archived_series("NASDAQ_decln.csv")
+    common = advances.index.intersection(declines.index)
+    df = pd.DataFrame({"advances": advances.reindex(common), "declines": declines.reindex(common)}).dropna()
+    df = df[(df["advances"] + df["declines"]) > 0].copy()
+
     total = df["advances"] + df["declines"]
     df["rana"] = 1000.0 * (df["advances"] - df["declines"]) / total
     df["ema19"] = ema(df["rana"], 19)
@@ -119,7 +88,7 @@ def build_nasi() -> pd.DataFrame:
     df["above_ema10"] = df["nasi"] > df["nasi_ema10"]
     df["rising"] = df["nasi"].diff() > 0
     df["bull_cross"] = df["above_ema10"] & ~df["above_ema10"].shift(1).fillna(False)
-    return df
+    return df[df.index.year >= START_YEAR].copy()
 
 
 def summarize(x: list[float] | pd.Series) -> dict:
@@ -156,6 +125,8 @@ def main() -> None:
     nasi = build_nasi()
 
     common = states.index.intersection(nasi.index)
+    if common.empty:
+        raise RuntimeError("No overlap between archived NASI breadth and historical RE-ENTRY states")
     states = states.loc[common].copy()
     nasi = nasi.loc[common].copy()
     frame = frame.reindex(common)
@@ -178,6 +149,8 @@ def main() -> None:
                 row[f"{sym}_{h}d"] = fwd_return(px, loc, h)
         episode_rows.append(row)
     episodes = pd.DataFrame(episode_rows)
+    if episodes.empty:
+        raise RuntimeError("No independent DEPLOY episode starts in archived NASI overlap")
 
     groups = {}
     masks = {
@@ -195,7 +168,6 @@ def main() -> None:
                 block[sym][str(h)] = summarize(episodes.loc[mask, f"{sym}_{h}d"])
         groups[name] = block
 
-    # Counterfactual: if NASI > 10EMA were required, how much later would entry occur?
     wait_rows = []
     positions = {d: i for i, d in enumerate(common)}
     for d in starts:
@@ -220,7 +192,6 @@ def main() -> None:
             base_entry = i + 1
             delayed_entry = j + 1
             if delayed_entry < len(px):
-                # Positive = waiting required paying a higher price.
                 rec[f"{sym}_entry_price_cost"] = float(px.iloc[delayed_entry] / px.iloc[base_entry] - 1.0)
             for h in HORIZONS:
                 base = fwd_return(px, i, h)
@@ -234,7 +205,7 @@ def main() -> None:
         "n_base_episodes": int(len(starts)),
         "n_not_confirmed_within_window": int(len(starts) - len(waits)),
         "median_wait_sessions": None if waits.empty else float(waits["wait_sessions"].median()),
-        "pct_already_confirmed_at_deploy": None if episodes.empty else float(episodes["above_ema10"].mean()),
+        "pct_already_confirmed_at_deploy": float(episodes["above_ema10"].mean()),
         "SPY_entry_price_cost": summarize(waits.get("SPY_entry_price_cost", pd.Series(dtype=float))),
         "QQQ_entry_price_cost": summarize(waits.get("QQQ_entry_price_cost", pd.Series(dtype=float))),
         "base_minus_delayed_forward_return": {"SPY": {}, "QQQ": {}},
@@ -246,28 +217,33 @@ def main() -> None:
                 waits.get(f"{sym}_{h}d_base_minus_delayed", pd.Series(dtype=float))
             )
 
-    # Simple research verdict. Never modifies signal logic.
-    already = wait_summary["pct_already_confirmed_at_deploy"] or 0.0
-    qqq_cost = (wait_summary["QQQ_entry_price_cost"].get("median") or 0.0)
+    n_episodes = int(len(starts))
+    already = wait_summary["pct_already_confirmed_at_deploy"]
+    qqq_cost = wait_summary["QQQ_entry_price_cost"].get("median")
     qqq_10 = wait_summary["base_minus_delayed_forward_return"]["QQQ"]["10"].get("median")
     qqq_30 = wait_summary["base_minus_delayed_forward_return"]["QQQ"]["30"].get("median")
-    if already >= 0.75 and qqq_cost >= 0 and (qqq_10 is None or qqq_10 >= 0) and (qqq_30 is None or qqq_30 >= 0):
+    enough_sample = n_episodes >= 25
+    if not enough_sample:
+        verdict = "INSUFFICIENT_SAMPLE_KEEP_RESEARCH_ONLY"
+    elif already >= 0.75 and (qqq_cost is None or qqq_cost >= 0) and (qqq_10 is None or qqq_10 >= 0) and (qqq_30 is None or qqq_30 >= 0):
         verdict = "KEEP_CONTEXT_ONLY_NO_GATE"
     else:
         verdict = "RESEARCH_ONLY_REVIEW_INCREMENTAL_EDGE"
 
     payload = {
-        "test_status": "COMPLETE",
+        "test_status": "COMPLETE_LIMITED_HISTORY",
         "research_only": True,
         "core_signal_logic_modified": False,
         "question": "Does Nasdaq McClellan Summation Index ($NASI) crossing/holding above its 10-day EMA add incremental value to RE-ENTRY, especially for QQQ, or mainly confirm after the existing DEPLOY signal?",
         "date_range": [str(common.min().date()), str(common.max().date())],
         "n_sessions": int(len(common)),
-        "n_independent_deploy_episode_starts": int(len(starts)),
+        "n_independent_deploy_episode_starts": n_episodes,
+        "sample_sufficient_for_primary_decision": enough_sample,
         "methodology": {
-            "nasi_definition": "ratio-adjusted Nasdaq McClellan Summation Index reconstructed from Nasdaq Trader daily advances/declines; McClellan oscillator = EMA19(RANA)-EMA39(RANA); NASI = cumulative oscillator",
+            "nasi_definition": "ratio-adjusted Nasdaq McClellan Summation Index reconstructed from archived Nasdaq advance/decline issues; McClellan oscillator = EMA19(RANA)-EMA39(RANA); NASI = cumulative oscillator",
+            "breadth_source": "Unicorn Research archived NASDAQ_advn/NASDAQ_decln series, which aggregate historical public breadth sources and stop in February 2020",
+            "source_limit": "This archive does not cover the full 2017-2026 RE-ENTRY validation window. Results are therefore a limited-history incremental test, not a full certification.",
             "tested_signal": "NASI > 10-day EMA, plus same-day bullish cross and rising-state slices",
-            "why_10_day_ema": "This matches the moving-average confirmation convention in the chart under review and StockCharts' documented use of a 10-day moving average to identify Summation Index turns.",
             "deploy_baseline": "independent DEPLOY episode starts from the already-validated historical proxy policy; exact live intraday engine is not backfilled where unavailable",
             "entry_assumption": "signal at close t, entry close t+1, 10 bps round-trip cost for forward-return comparisons",
             "confirmation_wait_cap_sessions": MAX_CONFIRM_WAIT,
@@ -290,6 +266,7 @@ def main() -> None:
         "date_range": payload["date_range"],
         "n_sessions": payload["n_sessions"],
         "n_independent_deploy_episode_starts": payload["n_independent_deploy_episode_starts"],
+        "sample_sufficient_for_primary_decision": enough_sample,
         "pct_already_confirmed_at_deploy": wait_summary["pct_already_confirmed_at_deploy"],
         "median_wait_sessions": wait_summary["median_wait_sessions"],
         "SPY_entry_price_cost_median": wait_summary["SPY_entry_price_cost"].get("median"),
