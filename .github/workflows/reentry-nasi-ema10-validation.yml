@@ -38,6 +38,8 @@ jobs:
         run: python -m pip install --quiet pandas numpy requests yfinance scikit-learn
 
       - name: Run NASI EMA10 validation
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: PYTHONPATH=tools:src python tools/reentry_nasi_ema10_validation.py
 
       - name: Upload research artifacts
