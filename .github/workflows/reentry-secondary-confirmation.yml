@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - 'tools/reentry_secondary_confirmation.py'
+      - 'tools/reentry_options_sentiment_live.py'
       - 'web/app/SecondaryConfirmation.tsx'
       - 'web/app/ReentryDecisionDetails.tsx'
       - 'web/app/page.tsx'
@@ -57,6 +58,11 @@ jobs:
           python _main/tools/reentry_secondary_confirmation.py \
             --snapshot data/reentry/exhaustion_intraday_current.json \
             --history data/reentry/secondary_confirmation_history.csv
+
+      - name: Refresh options sentiment from live Cboe statistics
+        run: |
+          python _main/tools/reentry_options_sentiment_live.py \
+            --snapshot data/reentry/exhaustion_intraday_current.json
 
       - name: Persist enriched canonical snapshot
         run: |
