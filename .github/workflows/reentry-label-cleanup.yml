@@ -1,0 +1,74 @@
+name: RE-ENTRY Indicator Label Cleanup
+
+on:
+  push:
+    branches: [leading-indicators-context]
+    paths:
+      - '.github/workflows/reentry-label-cleanup.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: leading-indicators-context
+          fetch-depth: 0
+      - name: Add technical codes as secondary references
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          replacements = {
+              'web/app/ReentryDecisionDetails.tsx': {
+                  '"U.S. stocks above 5-day MA improving"': '"U.S. Stocks Above 5-Day Moving Average ($MMFD) improving"',
+                  'name="U.S. Equity Breadth - Stocks Above 5-Day Moving Average" symbol="5-day U.S. equity breadth"': 'name="U.S. Equity Breadth - Stocks Above 5-Day Moving Average" symbol="$MMFD · 5-day U.S. equity breadth"',
+                  'name="Nasdaq Summation Index RSI" symbol="NASI RSI"': 'name="Nasdaq Summation Index RSI" symbol="NASI RSI · derived from $NASI"',
+                  'name="NYSE advance/decline volume" symbol="NYUD"': 'name="NYSE Advance/Decline Volume" symbol="$NYUD · NYSE A/D volume"',
+                  'name="Nasdaq advance/decline volume" symbol="NAUD"': 'name="Nasdaq Advance/Decline Volume" symbol="$NAUD · Nasdaq A/D volume"',
+                  'name="Volatility of VIX" symbol="VVIX"': 'name="Volatility of VIX" symbol="$VVIX · volatility of VIX"',
+                  'name="Official Cboe SKEW" symbol="SKEW"': 'name="Official Cboe SKEW" symbol="$SKEW · Cboe tail-risk index"',
+              },
+              'web/app/SecondaryConfirmation.tsx': {
+                  'NYSE Stocks Above 40-Day Moving Average<span className="secondary-symbol">40-day NYSE breadth</span>': 'NYSE Stocks Above 40-Day Moving Average<span className="secondary-symbol">T2108 reference · reconstructed breadth</span>',
+              },
+          }
+
+          for filename, mapping in replacements.items():
+              path = Path(filename)
+              text = path.read_text(encoding='utf-8')
+              original = text
+              for old, new in mapping.items():
+                  if old not in text:
+                      raise SystemExit(f'Missing expected label in {filename}: {old}')
+                  text = text.replace(old, new)
+              if text == original:
+                  raise SystemExit(f'No changes made to {filename}')
+              path.write_text(text, encoding='utf-8')
+          PY
+      - name: Verify plain-English first and technical codes second
+        shell: bash
+        run: |
+          grep -q 'U.S. Equity Breadth - Stocks Above 5-Day Moving Average" symbol="$MMFD' web/app/ReentryDecisionDetails.tsx
+          grep -q 'Nasdaq Summation Index RSI" symbol="NASI RSI · derived from $NASI' web/app/ReentryDecisionDetails.tsx
+          grep -q 'NYSE Advance/Decline Volume" symbol="$NYUD' web/app/ReentryDecisionDetails.tsx
+          grep -q 'Nasdaq Advance/Decline Volume" symbol="$NAUD' web/app/ReentryDecisionDetails.tsx
+          grep -q 'Volatility of VIX" symbol="$VVIX' web/app/ReentryDecisionDetails.tsx
+          grep -q 'Official Cboe SKEW" symbol="$SKEW' web/app/ReentryDecisionDetails.tsx
+          grep -q 'T2108 reference · reconstructed breadth' web/app/SecondaryConfirmation.tsx
+          ! grep -R -n -E 'NASI\+|T2108-equivalent' web/app
+      - name: Build web app
+        working-directory: web
+        run: npm ci && npm run build
+      - name: Commit secondary technical references to candidate branch
+        shell: bash
+        run: |
+          git config user.name 're-entry-engine[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add web/app/ReentryDecisionDetails.tsx web/app/SecondaryConfirmation.tsx
+          git commit -m 'Keep indicator codes as secondary references [skip ci]'
+          git push origin HEAD:leading-indicators-context

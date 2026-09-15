@@ -1,0 +1,93 @@
+name: RE-ENTRY Leading Indicators QA
+
+on:
+  push:
+    branches: [leading-indicators-context]
+    paths:
+      - 'tools/reentry_leading_indicators.py'
+      - 'web/app/LeadingIndicators.tsx'
+      - 'web/app/ReentryDecisionDetails.tsx'
+      - 'web/app/SecondaryConfirmation.tsx'
+      - 'web/app/page.tsx'
+      - 'web/lib/reentry.ts'
+      - '.github/workflows/reentry-leading-indicators-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout candidate branch
+        uses: actions/checkout@v4
+        with:
+          ref: leading-indicators-context
+          fetch-depth: 1
+
+      - name: Fetch live data fixtures without mutating production
+        shell: bash
+        run: |
+          git fetch origin intraday-signal-research --depth=1
+          git show origin/intraday-signal-research:data/reentry/exhaustion_intraday_current.json > /tmp/reentry-current.json
+          git show origin/intraday-signal-research:data/reentry/exhaustion_intraday_history.csv > /tmp/reentry-breadth-history.csv
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python dependencies
+        run: python -m pip install --quiet pandas yfinance
+
+      - name: Run context-only leading indicators
+        run: |
+          python tools/reentry_leading_indicators.py \
+            --snapshot /tmp/reentry-current.json \
+            --breadth-history /tmp/reentry-breadth-history.csv
+
+      - name: Verify contract and core decision immutability
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('/tmp/reentry-current.json').read_text())
+          block=p.get('leading_indicators') or {}
+          indicators=block.get('indicators') or {}
+          expected={'zweig_breadth_thrust','mcclellan_velocity','nasdaq_short_breadth','credit_risk_turn'}
+          missing=expected-set(indicators)
+          assert not missing, f'missing indicators: {sorted(missing)}'
+          assert block.get('decision_input') is False
+          assert block.get('changes_deploy_trigger') is False
+          assert block.get('changes_recovery_stage') is False
+          assert block.get('creates_new_score') is False
+          unified=p.get('unified_engine') or {}
+          assert unified.get('engine_version')=='REENTRY_UNIFIED_v1'
+          assert unified.get('deployment_signal') in {'HOLD_CASH','WATCH','DEPLOY'}
+          for key in expected:
+              assert indicators[key].get('decision_input') is False
+          print(json.dumps({
+              'deployment_signal': unified.get('deployment_signal'),
+              'market_condition': unified.get('market_condition'),
+              'recovery_stage': unified.get('recovery_stage'),
+              'leading_states': {k: indicators[k].get('state') for k in sorted(expected)}
+          }, indent=2))
+          PY
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install web dependencies
+        working-directory: web
+        run: npm ci
+
+      - name: Build web app
+        working-directory: web
+        run: npm run build
