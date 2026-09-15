@@ -2,11 +2,6 @@ name: RE-ENTRY Complete Indicator Snapshot
 
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows:
-      - RE-ENTRY Unified Engine
-    types:
-      - completed
 
 permissions:
   contents: write
@@ -18,7 +13,6 @@ concurrency:
 
 jobs:
   enrich:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -73,9 +67,6 @@ jobs:
           except Exception as exc:
               print(f'Prior enriched snapshot unavailable: {exc}')
 
-          # Preserve every context-only block from the most recent published snapshot.
-          # A delayed/prior-close value is valid context and must never disappear merely
-          # because the 5-minute core writer produced a fresher decision snapshot.
           for key in ('secondary_confirmation','leading_indicators'):
               if not isinstance(payload.get(key), dict) and isinstance(prior.get(key), dict):
                   payload[key] = copy.deepcopy(prior[key])
@@ -85,8 +76,6 @@ jobs:
                   if isinstance(engine, dict):
                       engine[key] = copy.deepcopy(payload[key])
 
-          # Official SKEW / live skew: prefer the current observation, otherwise retain
-          # the latest valid observation and label it explicitly rather than dropping it.
           current_skew = payload.get('skew_live') if isinstance(payload.get('skew_live'), dict) else {}
           prior_skew = prior.get('skew_live') if isinstance(prior.get('skew_live'), dict) else {}
           current_value = current_skew.get('ratio') or current_skew.get('value') or current_skew.get('official_skew')
