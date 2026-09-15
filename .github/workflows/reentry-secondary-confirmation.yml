@@ -148,7 +148,7 @@ jobs:
           if [ -f data/reentry/secondary_confirmation_history.csv ]; then
             git add data/reentry/secondary_confirmation_history.csv
           fi
-          if [ -z "$(git status --porcelain)" ]; then
+          if git diff --cached --quiet; then
             echo 'No indicator-enrichment state change'
             exit 0
           fi
