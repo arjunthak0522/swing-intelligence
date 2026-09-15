@@ -51,7 +51,7 @@
     "SKEW_DIRECTION": "UNAVAILABLE",
     "SKEW_OFFICIAL_CLOSE": 152.08999633789062,
     "SKEW_OFFICIAL_PERCENTILE_2Y": 72.08835341365462,
-    "T2108": 29.7723292469352
+    "T2108": 29.640980735551665
   },
   "nasi_plus": {
     "formula_version": "NASI_PLUS_RSI14_RANA_19_39_EMA4_EMA10_v1",
@@ -226,7 +226,11 @@
     "source_mode": "LIVE_SPX_OPTIONS",
     "proxy_error": null,
     "source": "Yahoo Finance SPX option chain for live proxy; official SKEW daily close/history. If the post-close option chain is unavailable, the engine preserves the last valid same-session SPX skew proxy and its direction rather than substituting a stale official-close direction.",
-    "timestamp_et": "2026-09-15T10:13:59.990353-04:00"
+    "timestamp_et": "2026-09-15T10:13:59.990353-04:00",
+    "official_freshness_state": "PRIOR_CLOSE",
+    "freshness_type": "INTRADAY_PROXY_PLUS_DAILY_CLOSE",
+    "freshness_state": "LIVE",
+    "last_updated": "2026-09-15T10:13:59.990353-04:00"
   },
   "historical_context": {
     "version": "REENTRY_HISTORICAL_CONTEXT_v1",
@@ -416,7 +420,8 @@
           "last_updated": "2026-09-14",
           "source": "Cboe official daily VIX and VIX3M history",
           "validation_status": "VALIDATED_EVENT_SUPPORT",
-          "validation_note": "Frozen 2007-2026 falsification: QQQ 10D after VIX/VIX3M normalization below 1.00, n=78, median +2.17%, positive 69.2%, matched excess +1.17%; workflow run 33811926596."
+          "validation_note": "Frozen 2007-2026 falsification: QQQ 10D after VIX/VIX3M normalization below 1.00, n=78, median +2.17%, positive 69.2%, matched excess +1.17%; workflow run 33811926596.",
+          "freshness_state": "PRIOR_CLOSE"
         },
         "breadth_thrust": {
           "name": "Breadth participation thrust",
@@ -433,7 +438,8 @@
           "last_updated": "2026-09-15T10:14:01.735759-04:00",
           "source": "Current Nasdaq advancing/declining issues captured by RE-ENTRY",
           "validation_status": "LIMITED_HISTORY_CONTEXT_ONLY",
-          "validation_note": "Exact Nasdaq advance/decline history through February 2020 covered 18 historical DEPLOY episodes. None had >=55% advance share at the DEPLOY start; waiting for that participation threshold took a median 1 session and cost a median +0.65% SPY / +0.58% QQQ. Keep as research/context only; exact history does not cover 2020-2026."
+          "validation_note": "Exact Nasdaq advance/decline history through February 2020 covered 18 historical DEPLOY episodes. None had >=55% advance share at the DEPLOY start; waiting for that participation threshold took a median 1 session and cost a median +0.65% SPY / +0.58% QQQ. Keep as research/context only; exact history does not cover 2020-2026.",
+          "freshness_state": "DELAYED"
         },
         "risk_appetite": {
           "name": "Risk-appetite broadening",
@@ -445,12 +451,12 @@
             "small_caps_confirming": false,
             "credit_risk_appetite": true
           },
-          "RSP_SPY": 0.28236930582453157,
-          "RSP_SPY_5d_change": -0.00205968736481843,
-          "IWM_SPY": 0.37651658207001804,
-          "IWM_SPY_5d_change": -0.021289454869667046,
-          "HYG_LQD": 0.7528666875358904,
-          "HYG_LQD_5d_change": 0.003695373759827092,
+          "RSP_SPY": 0.28238631301266426,
+          "RSP_SPY_5d_change": -0.0019995811199394753,
+          "IWM_SPY": 0.3766184808630845,
+          "IWM_SPY_5d_change": -0.02102458094894366,
+          "HYG_LQD": 0.7529637642768726,
+          "HYG_LQD_5d_change": 0.003824793054685749,
           "benchmark": "0/3 defensive \u00b7 1/3 mixed \u00b7 2/3 broadening \u00b7 3/3 broad risk-on; positive 5-session relative momentum required",
           "retail_explanation": "This checks whether investors are moving beyond the biggest stocks into equal-weight stocks, small caps, and lower-quality credit.",
           "signal_behavior": "CONFIRMING",
@@ -459,7 +465,8 @@
           "last_updated": "2026-09-15",
           "source": "Yahoo Finance daily adjusted closes: RSP/SPY, IWM/SPY, HYG/LQD",
           "validation_status": "VALIDATED_CONTEXT_ONLY",
-          "validation_note": "Across 94 historical DEPLOY episodes, the 2-of-3 risk-appetite composite was supportive at 36 starts and failed every SPY/QQQ 10D/30D incremental quality gate versus all DEPLOY episodes. It is low-redundancy context (correlation with existing B50 proxy about 0.10), but it does not improve the entry rule or recovery-stage classification."
+          "validation_note": "Across 94 historical DEPLOY episodes, the 2-of-3 risk-appetite composite was supportive at 36 starts and failed every SPY/QQQ 10D/30D incremental quality gate versus all DEPLOY episodes. It is low-redundancy context (correlation with existing B50 proxy about 0.10), but it does not improve the entry rule or recovery-stage classification.",
+          "freshness_state": "DELAYED"
         },
         "options_sentiment": {
           "name": "Options sentiment",
@@ -485,9 +492,9 @@
         "t2108": {
           "name": "NYSE Stocks Above 40-Day Moving Average",
           "symbol": "NYSE-ABOVE-40DMA",
-          "value": 29.7723292469352,
+          "value": 29.640980735551665,
           "prior_value": 32.749562171628725,
-          "change_points": -2.9772329246935243,
+          "change_points": -3.10858143607706,
           "state": "WEAK",
           "direction": "FALLING",
           "decision_input": false,
@@ -495,7 +502,7 @@
           "universe_size": 2296,
           "valid_count": 2284,
           "coverage_pct": 99.4773519163763,
-          "above_40dma_count": 680,
+          "above_40dma_count": 677,
           "benchmark": "<10% extreme oversold \u00b7 10-20% oversold \u00b7 20-40% weak \u00b7 40-70% normal \u00b7 70-80% strong \u00b7 >80% very extended",
           "retail_explanation": "This shows the percentage of NYSE stocks trading above their 40-day moving average. It is an intermediate-speed breadth gauge between very short-term breadth and long-term market structure.",
           "behavior_explanation": "When this falls to deeply oversold levels, it is a contrarian bullish setup for re-entry because weakness is widespread and may be exhausting. A turn higher is the stronger confirmation; the low reading alone does not trigger DEPLOY.",
@@ -503,7 +510,8 @@
           "last_updated": "2026-09-15",
           "source": "RE-ENTRY calculated T2108-equivalent from current NYSE-listed non-ETF equities and 40-day adjusted closes",
           "validation_status": "VALIDATED_CONTEXT_ONLY",
-          "validation_note": "Incremental validation across 94 DEPLOY episodes found the NYSE 40-day breadth reconstruction highly redundant with existing breadth (correlation about 0.94). Requiring <40% and rising delayed entry by a median 2 sessions and cost median +0.17% SPY / +0.33% QQQ. Keep as breadth context only, not a vote or required confirmation."
+          "validation_note": "Incremental validation across 94 DEPLOY episodes found the NYSE 40-day breadth reconstruction highly redundant with existing breadth (correlation about 0.94). Requiring <40% and rising delayed entry by a median 2 sessions and cost median +0.17% SPY / +0.33% QQQ. Keep as breadth context only, not a vote or required confirmation.",
+          "freshness_state": "DELAYED"
         }
       },
       "interpretation": "Secondary confirmation describes whether participation, volatility structure, risk appetite, and options sentiment corroborate the existing RE-ENTRY signal. T2108 is separate breadth context and does not change the confirmation score. None of these signals create, block, delay, or revoke DEPLOY."
@@ -535,7 +543,8 @@
           "freshness_type": "INTRADAY_SNAPSHOT_PLUS_CAPTURED_HISTORY",
           "last_updated": "2026-09-15T10:14:01.735759-04:00",
           "status": "BUILDING_HISTORY",
-          "source": "RE-ENTRY captured Nasdaq advancing/declining issues"
+          "source": "RE-ENTRY captured Nasdaq advancing/declining issues",
+          "freshness_state": "DELAYED"
         },
         "mcclellan_velocity": {
           "name": "Nasdaq McClellan Oscillator velocity",
@@ -555,19 +564,20 @@
           "freshness_type": "INTRADAY_SNAPSHOT_PLUS_CAPTURED_HISTORY",
           "last_updated": "2026-09-15T10:14:01.735759-04:00",
           "status": "BUILDING_HISTORY",
-          "source": "RE-ENTRY NAMO capture history"
+          "source": "RE-ENTRY NAMO capture history",
+          "freshness_state": "DELAYED"
         },
         "nasdaq_short_breadth": {
           "name": "Short-term Nasdaq breadth",
           "state": "MIXED",
           "direction": "FALLING",
-          "above_5dma_pct": 36.47599885024432,
-          "prior_above_5dma_pct": 41.11558366877516,
-          "change_5dma_points": -4.639584818530835,
+          "above_5dma_pct": 35.843633227939065,
+          "prior_above_5dma_pct": 41.259344450833815,
+          "change_5dma_points": -5.41571122289475,
           "valid_5dma": 3479,
-          "above_10dma_pct": 32.36395047509358,
-          "prior_above_10dma_pct": 36.54953917050691,
-          "change_10dma_points": -4.18558869541333,
+          "above_10dma_pct": 32.13360207313562,
+          "prior_above_10dma_pct": 36.63594470046083,
+          "change_10dma_points": -4.502342627325213,
           "valid_10dma": 3473,
           "universe_size": 3488,
           "coverage_5dma_pct": 99.74197247706422,
@@ -580,15 +590,16 @@
           "freshness_type": "CURRENT_DAILY_BAR",
           "last_updated": "2026-09-15",
           "status": "READY",
-          "source": "RE-ENTRY calculated from Nasdaq-listed non-ETF equities and 5/10-day adjusted closes"
+          "source": "RE-ENTRY calculated from Nasdaq-listed non-ETF equities and 5/10-day adjusted closes",
+          "freshness_state": "DELAYED"
         },
         "credit_risk_turn": {
           "name": "Credit-risk turn",
-          "state": "IMPROVING",
-          "direction": "RISING",
-          "hyg_lqd_ratio": 0.7529388964617856,
-          "change_1d": 1.9488341758799876e-05,
-          "change_5d": 0.0037916401587327897,
+          "state": "MIXED",
+          "direction": "FALLING",
+          "hyg_lqd_ratio": 0.7528434937523689,
+          "change_1d": -0.00010722123468309697,
+          "change_5d": 0.0036644526238465147,
           "benchmark": "Rising HYG/LQD means lower-quality credit is outperforming investment-grade credit. A 1-day turn before the 5-day trend improves can be an early risk-appetite clue.",
           "meaning": "Credit can begin calming before equities fully recover. This is displayed separately but is not double-counted in RE-ENTRY's existing risk-appetite family.",
           "role": "LEADING_CONTEXT_ONLY",
@@ -597,7 +608,8 @@
           "last_updated": "2026-09-15",
           "status": "READY",
           "source": "Yahoo Finance adjusted closes: HYG/LQD",
-          "double_counted_in_secondary_score": false
+          "double_counted_in_secondary_score": false,
+          "freshness_state": "DELAYED"
         }
       },
       "errors": {}
@@ -715,7 +727,8 @@
         "last_updated": "2026-09-14",
         "source": "Cboe official daily VIX and VIX3M history",
         "validation_status": "VALIDATED_EVENT_SUPPORT",
-        "validation_note": "Frozen 2007-2026 falsification: QQQ 10D after VIX/VIX3M normalization below 1.00, n=78, median +2.17%, positive 69.2%, matched excess +1.17%; workflow run 33811926596."
+        "validation_note": "Frozen 2007-2026 falsification: QQQ 10D after VIX/VIX3M normalization below 1.00, n=78, median +2.17%, positive 69.2%, matched excess +1.17%; workflow run 33811926596.",
+        "freshness_state": "PRIOR_CLOSE"
       },
       "breadth_thrust": {
         "name": "Breadth participation thrust",
@@ -732,7 +745,8 @@
         "last_updated": "2026-09-15T10:14:01.735759-04:00",
         "source": "Current Nasdaq advancing/declining issues captured by RE-ENTRY",
         "validation_status": "LIMITED_HISTORY_CONTEXT_ONLY",
-        "validation_note": "Exact Nasdaq advance/decline history through February 2020 covered 18 historical DEPLOY episodes. None had >=55% advance share at the DEPLOY start; waiting for that participation threshold took a median 1 session and cost a median +0.65% SPY / +0.58% QQQ. Keep as research/context only; exact history does not cover 2020-2026."
+        "validation_note": "Exact Nasdaq advance/decline history through February 2020 covered 18 historical DEPLOY episodes. None had >=55% advance share at the DEPLOY start; waiting for that participation threshold took a median 1 session and cost a median +0.65% SPY / +0.58% QQQ. Keep as research/context only; exact history does not cover 2020-2026.",
+        "freshness_state": "DELAYED"
       },
       "risk_appetite": {
         "name": "Risk-appetite broadening",
@@ -744,12 +758,12 @@
           "small_caps_confirming": false,
           "credit_risk_appetite": true
         },
-        "RSP_SPY": 0.28236930582453157,
-        "RSP_SPY_5d_change": -0.00205968736481843,
-        "IWM_SPY": 0.37651658207001804,
-        "IWM_SPY_5d_change": -0.021289454869667046,
-        "HYG_LQD": 0.7528666875358904,
-        "HYG_LQD_5d_change": 0.003695373759827092,
+        "RSP_SPY": 0.28238631301266426,
+        "RSP_SPY_5d_change": -0.0019995811199394753,
+        "IWM_SPY": 0.3766184808630845,
+        "IWM_SPY_5d_change": -0.02102458094894366,
+        "HYG_LQD": 0.7529637642768726,
+        "HYG_LQD_5d_change": 0.003824793054685749,
         "benchmark": "0/3 defensive \u00b7 1/3 mixed \u00b7 2/3 broadening \u00b7 3/3 broad risk-on; positive 5-session relative momentum required",
         "retail_explanation": "This checks whether investors are moving beyond the biggest stocks into equal-weight stocks, small caps, and lower-quality credit.",
         "signal_behavior": "CONFIRMING",
@@ -758,7 +772,8 @@
         "last_updated": "2026-09-15",
         "source": "Yahoo Finance daily adjusted closes: RSP/SPY, IWM/SPY, HYG/LQD",
         "validation_status": "VALIDATED_CONTEXT_ONLY",
-        "validation_note": "Across 94 historical DEPLOY episodes, the 2-of-3 risk-appetite composite was supportive at 36 starts and failed every SPY/QQQ 10D/30D incremental quality gate versus all DEPLOY episodes. It is low-redundancy context (correlation with existing B50 proxy about 0.10), but it does not improve the entry rule or recovery-stage classification."
+        "validation_note": "Across 94 historical DEPLOY episodes, the 2-of-3 risk-appetite composite was supportive at 36 starts and failed every SPY/QQQ 10D/30D incremental quality gate versus all DEPLOY episodes. It is low-redundancy context (correlation with existing B50 proxy about 0.10), but it does not improve the entry rule or recovery-stage classification.",
+        "freshness_state": "DELAYED"
       },
       "options_sentiment": {
         "name": "Options sentiment",
@@ -784,9 +799,9 @@
       "t2108": {
         "name": "NYSE Stocks Above 40-Day Moving Average",
         "symbol": "NYSE-ABOVE-40DMA",
-        "value": 29.7723292469352,
+        "value": 29.640980735551665,
         "prior_value": 32.749562171628725,
-        "change_points": -2.9772329246935243,
+        "change_points": -3.10858143607706,
         "state": "WEAK",
         "direction": "FALLING",
         "decision_input": false,
@@ -794,7 +809,7 @@
         "universe_size": 2296,
         "valid_count": 2284,
         "coverage_pct": 99.4773519163763,
-        "above_40dma_count": 680,
+        "above_40dma_count": 677,
         "benchmark": "<10% extreme oversold \u00b7 10-20% oversold \u00b7 20-40% weak \u00b7 40-70% normal \u00b7 70-80% strong \u00b7 >80% very extended",
         "retail_explanation": "This shows the percentage of NYSE stocks trading above their 40-day moving average. It is an intermediate-speed breadth gauge between very short-term breadth and long-term market structure.",
         "behavior_explanation": "When this falls to deeply oversold levels, it is a contrarian bullish setup for re-entry because weakness is widespread and may be exhausting. A turn higher is the stronger confirmation; the low reading alone does not trigger DEPLOY.",
@@ -802,7 +817,8 @@
         "last_updated": "2026-09-15",
         "source": "RE-ENTRY calculated T2108-equivalent from current NYSE-listed non-ETF equities and 40-day adjusted closes",
         "validation_status": "VALIDATED_CONTEXT_ONLY",
-        "validation_note": "Incremental validation across 94 DEPLOY episodes found the NYSE 40-day breadth reconstruction highly redundant with existing breadth (correlation about 0.94). Requiring <40% and rising delayed entry by a median 2 sessions and cost median +0.17% SPY / +0.33% QQQ. Keep as breadth context only, not a vote or required confirmation."
+        "validation_note": "Incremental validation across 94 DEPLOY episodes found the NYSE 40-day breadth reconstruction highly redundant with existing breadth (correlation about 0.94). Requiring <40% and rising delayed entry by a median 2 sessions and cost median +0.17% SPY / +0.33% QQQ. Keep as breadth context only, not a vote or required confirmation.",
+        "freshness_state": "DELAYED"
       }
     },
     "interpretation": "Secondary confirmation describes whether participation, volatility structure, risk appetite, and options sentiment corroborate the existing RE-ENTRY signal. T2108 is separate breadth context and does not change the confirmation score. None of these signals create, block, delay, or revoke DEPLOY."
@@ -810,9 +826,9 @@
   "t2108_context": {
     "name": "NYSE Stocks Above 40-Day Moving Average",
     "symbol": "NYSE-ABOVE-40DMA",
-    "value": 29.7723292469352,
+    "value": 29.640980735551665,
     "prior_value": 32.749562171628725,
-    "change_points": -2.9772329246935243,
+    "change_points": -3.10858143607706,
     "state": "WEAK",
     "direction": "FALLING",
     "decision_input": false,
@@ -820,7 +836,7 @@
     "universe_size": 2296,
     "valid_count": 2284,
     "coverage_pct": 99.4773519163763,
-    "above_40dma_count": 680,
+    "above_40dma_count": 677,
     "benchmark": "<10% extreme oversold \u00b7 10-20% oversold \u00b7 20-40% weak \u00b7 40-70% normal \u00b7 70-80% strong \u00b7 >80% very extended",
     "retail_explanation": "This shows the percentage of NYSE stocks trading above their 40-day moving average. It is an intermediate-speed breadth gauge between very short-term breadth and long-term market structure.",
     "behavior_explanation": "When this falls to deeply oversold levels, it is a contrarian bullish setup for re-entry because weakness is widespread and may be exhausting. A turn higher is the stronger confirmation; the low reading alone does not trigger DEPLOY.",
@@ -857,7 +873,8 @@
         "freshness_type": "INTRADAY_SNAPSHOT_PLUS_CAPTURED_HISTORY",
         "last_updated": "2026-09-15T10:14:01.735759-04:00",
         "status": "BUILDING_HISTORY",
-        "source": "RE-ENTRY captured Nasdaq advancing/declining issues"
+        "source": "RE-ENTRY captured Nasdaq advancing/declining issues",
+        "freshness_state": "DELAYED"
       },
       "mcclellan_velocity": {
         "name": "Nasdaq McClellan Oscillator velocity",
@@ -877,19 +894,20 @@
         "freshness_type": "INTRADAY_SNAPSHOT_PLUS_CAPTURED_HISTORY",
         "last_updated": "2026-09-15T10:14:01.735759-04:00",
         "status": "BUILDING_HISTORY",
-        "source": "RE-ENTRY NAMO capture history"
+        "source": "RE-ENTRY NAMO capture history",
+        "freshness_state": "DELAYED"
       },
       "nasdaq_short_breadth": {
         "name": "Short-term Nasdaq breadth",
         "state": "MIXED",
         "direction": "FALLING",
-        "above_5dma_pct": 36.47599885024432,
-        "prior_above_5dma_pct": 41.11558366877516,
-        "change_5dma_points": -4.639584818530835,
+        "above_5dma_pct": 35.843633227939065,
+        "prior_above_5dma_pct": 41.259344450833815,
+        "change_5dma_points": -5.41571122289475,
         "valid_5dma": 3479,
-        "above_10dma_pct": 32.36395047509358,
-        "prior_above_10dma_pct": 36.54953917050691,
-        "change_10dma_points": -4.18558869541333,
+        "above_10dma_pct": 32.13360207313562,
+        "prior_above_10dma_pct": 36.63594470046083,
+        "change_10dma_points": -4.502342627325213,
         "valid_10dma": 3473,
         "universe_size": 3488,
         "coverage_5dma_pct": 99.74197247706422,
@@ -902,15 +920,16 @@
         "freshness_type": "CURRENT_DAILY_BAR",
         "last_updated": "2026-09-15",
         "status": "READY",
-        "source": "RE-ENTRY calculated from Nasdaq-listed non-ETF equities and 5/10-day adjusted closes"
+        "source": "RE-ENTRY calculated from Nasdaq-listed non-ETF equities and 5/10-day adjusted closes",
+        "freshness_state": "DELAYED"
       },
       "credit_risk_turn": {
         "name": "Credit-risk turn",
-        "state": "IMPROVING",
-        "direction": "RISING",
-        "hyg_lqd_ratio": 0.7529388964617856,
-        "change_1d": 1.9488341758799876e-05,
-        "change_5d": 0.0037916401587327897,
+        "state": "MIXED",
+        "direction": "FALLING",
+        "hyg_lqd_ratio": 0.7528434937523689,
+        "change_1d": -0.00010722123468309697,
+        "change_5d": 0.0036644526238465147,
         "benchmark": "Rising HYG/LQD means lower-quality credit is outperforming investment-grade credit. A 1-day turn before the 5-day trend improves can be an early risk-appetite clue.",
         "meaning": "Credit can begin calming before equities fully recover. This is displayed separately but is not double-counted in RE-ENTRY's existing risk-appetite family.",
         "role": "LEADING_CONTEXT_ONLY",
@@ -919,7 +938,8 @@
         "last_updated": "2026-09-15",
         "status": "READY",
         "source": "Yahoo Finance adjusted closes: HYG/LQD",
-        "double_counted_in_secondary_score": false
+        "double_counted_in_secondary_score": false,
+        "freshness_state": "DELAYED"
       }
     },
     "errors": {}
