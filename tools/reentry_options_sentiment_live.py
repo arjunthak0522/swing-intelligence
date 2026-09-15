@@ -5,7 +5,7 @@ import argparse
 import html
 import json
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -15,6 +15,7 @@ ET = ZoneInfo("America/New_York")
 USER_AGENT = "Mozilla/5.0 RE-ENTRY-options-sentiment/1.0"
 DAILY_URL = "https://www.cboe.com/markets/us/options/market-statistics/daily"
 LIVE_URL = "https://www.cboe.com/us/options/market_statistics/market/"
+MAX_EOD_LOOKBACK_DAYS = 7
 
 
 def fetch_text(url: str) -> str:
@@ -56,6 +57,25 @@ def daily_ratios(market_date: str) -> dict | None:
         "last_updated": market_date,
         "source": "Cboe U.S. Options Daily Market Statistics",
     }
+
+
+def latest_completed_daily(target_date: str) -> dict | None:
+    """Return target-date EOD when published, otherwise the newest prior completed EOD."""
+    target = datetime.strptime(target_date, "%Y-%m-%d").date()
+    for offset in range(MAX_EOD_LOOKBACK_DAYS + 1):
+        candidate = target - timedelta(days=offset)
+        if candidate.weekday() >= 5:
+            continue
+        try:
+            ratios = daily_ratios(candidate.isoformat())
+        except Exception:
+            ratios = None
+        if ratios is None:
+            continue
+        ratios["freshness_state"] = "TODAY_CLOSE" if candidate == target else "PRIOR_CLOSE"
+        ratios["requested_market_date"] = target_date
+        return ratios
+    return None
 
 
 def _live_section_ratio(text: str, heading: str, next_heading: str | None) -> tuple[float | None, str | None]:
@@ -108,17 +128,29 @@ def live_ratios(market_date: str) -> dict | None:
         "index_put_call": idx,
         "total_put_call": total,
         "freshness_type": "INTRADAY_DELAYED",
+        "freshness_state": "LIVE",
         "last_updated": f"{market_date} {latest_time} CT" if latest_time else market_date,
+        "requested_market_date": market_date,
         "source": "Cboe U.S. Options Current Market Statistics",
     }
 
 
 def build_signal(market_date: str) -> dict:
-    ratios = daily_ratios(market_date)
-    if ratios is None and market_date == datetime.now(ET).date().isoformat():
-        ratios = live_ratios(market_date)
+    today = datetime.now(ET).date().isoformat()
+    ratios = None
+
+    # During the current session prefer a genuine live observation. If Cboe has
+    # not exposed one yet, use the latest completed official EOD observation.
+    if market_date == today:
+        try:
+            ratios = live_ratios(market_date)
+        except Exception:
+            ratios = None
+
     if ratios is None:
-        raise ValueError("Cboe did not expose completed-session or same-day live put/call ratios")
+        ratios = latest_completed_daily(market_date)
+    if ratios is None:
+        raise ValueError("Cboe did not expose a live or recent completed-session put/call observation")
 
     eq = ratios.get("equity_put_call")
     return {
@@ -133,7 +165,9 @@ def build_signal(market_date: str) -> dict:
         "signal_behavior": "CONTRARIAN",
         "behavior_explanation": "Unusually high fear can improve a re-entry setup, but fear alone is not a buy signal. Confirmation comes when fear retreats while breadth improves.",
         "freshness_type": ratios["freshness_type"],
+        "freshness_state": ratios.get("freshness_state"),
         "last_updated": ratios["last_updated"],
+        "requested_market_date": ratios.get("requested_market_date"),
         "source": ratios["source"],
         "validation_status": "VALIDATED_SENTIMENT_OVERLAY",
         "validation_note": "Across 94 historical DEPLOY episodes using Cboe archive plus daily statistics, equity fear (P/C >=0.70) appeared at 49 starts and was generally supportive over 30-90D, but missed the SPY 10D median gate. Fear-reversing occurred at only 14 starts, below the promotion sample threshold. Cboe also documents 2022 early-exercise distortion in raw equity P/C. Keep as a contrarian sentiment overlay, never a DEPLOY gate.",
