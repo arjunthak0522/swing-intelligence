@@ -37,7 +37,7 @@ jobs:
         run: python tools/apply_reentry_window_fintech.py
       - name: Run focused engine regression
         run: |
-          python -m pip install pytest
+          python -m pip install pytest pandas numpy
           pytest -q tests/test_reentry_window_state.py tests/test_reentry_engine_contract.py
       - name: Build web app
         working-directory: web
