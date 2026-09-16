@@ -4,6 +4,7 @@ import ReentryDecisionDetails from "./ReentryDecisionDetails";
 import SecondaryConfirmation from "./SecondaryConfirmation";
 import LeadingIndicators from "./LeadingIndicators";
 import AggregateHistoricalEvidence from "./AggregateHistoricalEvidence";
+import ReentryOpportunityWindow from "./ReentryOpportunityWindow";
 import { getCashPolicyEvidence, getHistoricalEpisodeEvidence } from "../lib/historicalEvidence";
 import { getIntradaySnapshot, getLatestSnapshot, getWashoutSnapshot, pct, type IntradaySnapshot, type WashoutSnapshot } from "../lib/reentry";
 
@@ -19,6 +20,11 @@ type ProductEngineFields = {
   confirmation_strength?: "NARROW" | "BUILDING" | "BROAD" | "NOT_APPLICABLE" | string;
   extension_signal_count?: number;
   weak_signal_count?: number;
+  reentry_window_active?: boolean;
+  reentry_window_trigger_date?: string|null;
+  reentry_window_age_sessions?: number|null;
+  reentry_window_research_status?: string|null;
+  reentry_window_reason?: string|null;
 };
 
 function stateClass(value:string){const v=value.toUpperCase();if(v.includes("DEPLOY")||v.includes("GO_EARLY")||v.includes("GO EARLY"))return"good";if(v.includes("WATCH"))return"warn";if(v.includes("HOLD")||v.includes("WAIT"))return"neutral";return"neutral";}
@@ -39,7 +45,7 @@ function UnifiedHero({washout}:{washout:WashoutSnapshot}){
   const fast=u.fast_family_count??0;
   const context=u.context_support_count??0;
   return <section className="hero card">
-    <div className="eyebrow-row"><span className="eyebrow">SPARE CASH SIGNAL</span><span className="freshness"><Clock3 size={14}/> {phaseLabel(u.market_phase)}</span></div>
+    <div className="eyebrow-row"><span className="eyebrow">TODAY'S CASH SIGNAL</span><span className="freshness"><Clock3 size={14}/> {phaseLabel(u.market_phase)}</span></div>
     <div className="hero-grid">
       <div><div className={`signal ${stateClass(deployment)}`}>{label}</div><div className="signal-subline">{product.deployment_reason||u.decision_reason||"Canonical cash-deployment reason unavailable."}</div></div>
       <div className="decision-summary">
@@ -113,14 +119,22 @@ export default async function Home(){
     <header className="topbar"><div><span className="brand">RE-ENTRY</span><span className="tagline">Know when waiting stops helping.</span></div><div className="top-status">{unified?phaseLabel(unified.market_phase):"UNAVAILABLE"}</div></header>
     {feed.kind!=="OK"?<section className="card data-blocked"><CircleAlert/><div><b>{feed.label}</b><p>{feed.kind==="STALE"?"The canonical unified snapshot is older than the allowed live-session freshness window. It is shown below for transparency but must not be treated as current.":"No fallback decision is shown when the unified engine cannot be loaded."}</p></div></section>:null}
     {!washout||!unified?null:<>
-      <UnifiedHero washout={washout}/>
+      <div className="priority-stack">
+        <UnifiedHero washout={washout}/>
+        <ReentryOpportunityWindow washout={washout}/>
+      </div>
+      <div className="tier-label"><span>HISTORICAL EDGE</span><p>What happened after comparable re-entry opportunities.</p></div>
+      <AggregateHistoricalEvidence evidence={historical} cashPolicy={cashPolicy} currentAction={currentAction} currentCondition={currentCondition}/>
+      <div className="tier-label"><span>CURRENT MARKET EVIDENCE</span><p>What today's internals say about the quality and maturity of the setup.</p></div>
       <MarketContext live={intraday} washout={washout}/>
       <SecondaryConfirmation washout={washout}/>
       <LeadingIndicators washout={washout}/>
-      <AggregateHistoricalEvidence evidence={historical} cashPolicy={cashPolicy} currentAction={currentAction} currentCondition={currentCondition}/>
-      <ReentryDecisionDetails washout={washout}/>
-      {snapshot?<MarketMovementTables snapshot={snapshot} live={intraday}/>:<section className="card section-card"><div className="notice"><CircleAlert size={16}/> Sector and subsector context unavailable.</div></section>}
+      <details className="diagnostics-shell">
+        <summary><span>DEEP DIAGNOSTICS</span><small>Engine inputs, reversal families, sectors and subsectors</small></summary>
+        <ReentryDecisionDetails washout={washout}/>
+        {snapshot?<MarketMovementTables snapshot={snapshot} live={intraday}/>:<section className="card section-card"><div className="notice"><CircleAlert size={16}/> Sector and subsector context unavailable.</div></section>}
+      </details>
     </>}
-    <footer>REENTRY_UNIFIED_v1 is the only operational decision source. HOLD CASH is the normal state when no oversold setup exists; WATCH means an oversold setup is developing; DEPLOY means the qualifying reversal has fired. Market-condition, recovery-stage, secondary-confirmation, and leading-indicator labels are descriptive context and never create a second decision engine.</footer>
+    <footer>REENTRY_UNIFIED_v1 is the only operational decision source. HOLD CASH is the normal state when no oversold setup exists; WATCH means an oversold setup is developing; DEPLOY means the qualifying reversal has fired. RE-ENTRY WINDOW is persistent opportunity context only and never creates or overrides a DEPLOY signal. Market-condition, recovery-stage, secondary-confirmation, and leading-indicator labels are descriptive context and never create a second decision engine.</footer>
   </main>;
 }

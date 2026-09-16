@@ -15,6 +15,7 @@ HISTORY = ROOT / "data/reentry/unified_engine_history.csv"
 FINAL_BUFFER_MINUTE = 16 * 60 + 15
 ACTIVE_END_MINUTE = 16 * 60 + 45
 FAST_FAMILY_MEMORY_MINUTES = 30
+REENTRY_WINDOW_RESEARCHED_SESSIONS = 30
 FAST_FAMILY_KEYS = (
     "FAST_BREADTH_TURN",
     "MOMENTUM_TURN",
@@ -68,6 +69,62 @@ def load_day_rows(market_date: str) -> list[dict]:
 def load_prior(market_date: str) -> dict | None:
     rows = load_day_rows(market_date)
     return rows[-1] if rows else None
+
+
+def load_history_rows() -> list[dict]:
+    if not HISTORY.exists():
+        return []
+    with HISTORY.open(newline="", encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    rows.sort(key=lambda r: (r.get("market_date") or "", r.get("timestamp_et") or ""))
+    return rows
+
+
+def reentry_window_state(market_date: str, deployment_signal: str) -> dict:
+    rows = load_history_rows()
+    deploy_rows = [
+        r for r in rows
+        if (r.get("deployment_signal") == "DEPLOY" or (r.get("decision") or r.get("state")) == "GO_EARLY")
+        and (r.get("market_date") or "") <= market_date
+    ]
+
+    fresh_trigger_today = deployment_signal == "DEPLOY"
+    trigger_date = market_date if fresh_trigger_today else (deploy_rows[-1].get("market_date") if deploy_rows else None)
+    active = bool(trigger_date)
+
+    if active:
+        observed_sessions = sorted({
+            r.get("market_date") for r in rows
+            if r.get("market_date") and trigger_date <= r.get("market_date") <= market_date
+        })
+        if market_date not in observed_sessions:
+            observed_sessions.append(market_date)
+            observed_sessions.sort()
+        age_sessions = max(0, len(observed_sessions) - 1)
+        research_status = (
+            "SUPPORTED_WITHIN_RESEARCH_HORIZON"
+            if age_sessions <= REENTRY_WINDOW_RESEARCHED_SESSIONS
+            else "BEYOND_RESEARCHED_HORIZON"
+        )
+        if fresh_trigger_today:
+            reason = "A qualifying DEPLOY fired today, opening a favorable re-entry opportunity. The canonical signal remains the decision source; this window is persistent context only."
+        else:
+            reason = "A prior DEPLOY opened a favorable re-entry opportunity. Historical research found persistence through at least 30 sessions and did not validate a normalization-based automatic exit, so the window remains active."
+    else:
+        age_sessions = None
+        research_status = "NOT_STARTED"
+        reason = "No prior DEPLOY has opened a persistent re-entry opportunity in the available canonical history."
+
+    return {
+        "reentry_window_active": active,
+        "reentry_window_trigger_date": trigger_date,
+        "reentry_window_age_sessions": age_sessions,
+        "reentry_window_researched_sessions": REENTRY_WINDOW_RESEARCHED_SESSIONS,
+        "reentry_window_research_status": research_status,
+        "reentry_window_fresh_trigger_today": fresh_trigger_today,
+        "reentry_window_reason": reason,
+        "reentry_window_is_decision_input": False,
+    }
 
 
 def first_latched_go(market_date: str) -> dict | None:
@@ -363,6 +420,7 @@ def main() -> None:
     recent = recent_rows(market_date, now, FAST_FAMILY_MEMORY_MINUTES)
     latched_go = first_latched_go(market_date)
     result = evaluate(payload, prior, recent, latched_go)
+    result.update(reentry_window_state(market_date, result["deployment_signal"]))
     result["market_phase"] = market_phase(now)
     result["timestamp_et"] = now.isoformat()
     result["market_date"] = market_date
@@ -387,6 +445,10 @@ def main() -> None:
         "weak_signal_count": result["weak_signal_count"],
         "go_latched_for_session": int(result["go_latched_for_session"]),
         "go_triggered_at_et": result["go_triggered_at_et"],
+        "reentry_window_active": int(result["reentry_window_active"]),
+        "reentry_window_trigger_date": result["reentry_window_trigger_date"],
+        "reentry_window_age_sessions": result["reentry_window_age_sessions"],
+        "reentry_window_research_status": result["reentry_window_research_status"],
         "oversold_gate": int(result["oversold_gate"]),
         "fast_family_count": result["fast_family_count"],
         "FAST_BREADTH_TURN": int(result["fast_families"]["FAST_BREADTH_TURN"]),

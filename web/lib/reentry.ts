@@ -245,6 +245,14 @@ export interface WashoutSnapshot {
     market_date?: string;
     data_quality_status?: string;
     actionable?: boolean;
+    reentry_window_active?: boolean;
+    reentry_window_trigger_date?: string | null;
+    reentry_window_age_sessions?: number | null;
+    reentry_window_researched_sessions?: number | null;
+    reentry_window_research_status?: string | null;
+    reentry_window_fresh_trigger_today?: boolean;
+    reentry_window_reason?: string | null;
+    reentry_window_is_decision_input?: boolean;
   };
 }
 
