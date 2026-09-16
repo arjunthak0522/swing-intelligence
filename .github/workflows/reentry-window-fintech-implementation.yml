@@ -1,0 +1,59 @@
+name: RE-ENTRY Window Fintech Implementation
+
+on:
+  push:
+    branches:
+      - feature/reentry-window-fintech-work
+    paths:
+      - 'tools/apply_reentry_window_fintech.py'
+      - '.github/workflows/reentry-window-fintech-implementation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: reentry-window-fintech-implementation
+  cancel-in-progress: false
+
+jobs:
+  implement-and-verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/reentry-window-fintech-work
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Apply implementation
+        run: python tools/apply_reentry_window_fintech.py
+      - name: Run focused engine regression
+        run: |
+          python -m pip install pytest
+          pytest -q tests/test_reentry_window_state.py tests/test_reentry_engine_contract.py
+      - name: Build web app
+        working-directory: web
+        run: |
+          npm ci
+          npm run build
+      - name: Inspect diff
+        run: git diff --check
+      - name: Commit verified implementation
+        run: |
+          if git diff --quiet && git diff --cached --quiet; then
+            echo 'No implementation changes to commit.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tools/reentry_unified_engine.py web/lib/reentry.ts web/app/page.tsx web/app/ReentryOpportunityWindow.tsx web/app/retail-overrides.css tests/test_reentry_window_state.py
+          git commit -m 'Implement persistent re-entry window and fintech hierarchy'
+          git push origin HEAD:feature/reentry-window-fintech-work
