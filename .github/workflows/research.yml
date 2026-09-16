@@ -2,14 +2,6 @@ name: Swing Intelligence Quant Research
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'pyproject.toml'
-      - 'run_research.py'
-      - 'src/**'
-      - 'tests/**'
-      - '.github/workflows/research.yml'
 
 concurrency:
   group: swing-intelligence-research
