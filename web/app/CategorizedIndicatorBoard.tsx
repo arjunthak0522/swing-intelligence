@@ -25,8 +25,8 @@ const pctPoint = (value: unknown, digits = 1) =>
   typeof value === "number" && Number.isFinite(value) ? `${value.toFixed(digits)}%` : "UNAVAILABLE";
 const pctChange = (value: unknown, digits = 2) =>
   typeof value === "number" && Number.isFinite(value) ? `${value >= 0 ? "+" : ""}${(value * 100).toFixed(digits)}%` : "UNAVAILABLE";
-const boolState = (value: unknown) => value === true ? "ON" : value === false ? "OFF" : "UNAVAILABLE";
-const boolDir = (value: unknown) => value === true ? "ACTIVE" : value === false ? "INACTIVE" : "UNAVAILABLE";
+const boolState = (value: unknown) => value === true ? "ACTIVE" : value === false ? "NOT ACTIVE" : "UNAVAILABLE";
+const boolDir = (_value: unknown) => "—";
 const clean = (value: unknown) => typeof value === "string" && value ? value.replaceAll("_", " ") : "UNAVAILABLE";
 
 function row(name: string, value: string, state: string, direction: string, freshness: string, role: string, reference?: string): IndicatorRow {
@@ -35,6 +35,7 @@ function row(name: string, value: string, state: string, direction: string, fres
 
 function stateClass(state: string) {
   const s = state.toUpperCase();
+  if (s.includes("NOT ACTIVE")) return "neutral";
   if (s.includes("ON") || s.includes("SUPPORT") || s.includes("NORMALIZED") || s.includes("RISING") || s.includes("BROADENING") || s.includes("ACTIVE") || s.includes("DEPLOY")) return "good";
   if (s.includes("OVERSOLD") || s.includes("WASH") || s.includes("FEAR") || s.includes("WEAK") || s.includes("DEFENSIVE") || s.includes("FALL") || s.includes("DOWN") || s.includes("WIDEN") || s.includes("SELLING") || s.includes("HEAVY")) return "warn";
   return "neutral";
@@ -252,10 +253,10 @@ export default function CategorizedIndicatorBoard({ washout }: { washout: Washou
     "Small Caps vs S&P 500": "Compares small caps with SPY. Improvement suggests investors are becoming more willing to own economically sensitive risk.",
     "High Yield vs Investment Grade": "Compares high-yield credit with investment-grade bonds. Improvement suggests credit investors are becoming more comfortable with risk.",
     "Credit-Risk Turn": credit.meaning || "Tracks whether high-yield credit is beginning to outperform investment grade, an early cross-asset sign of improving risk appetite.",
-    "MMFD Improving": "Turns on when MMFD breadth improves versus the prior snapshot. It is one of four context turns that can help qualify an early DEPLOY.",
-    "NASI Turning Up": "Turns on when Nasdaq breadth momentum starts rising. It is one of four engine context turns.",
-    "VVIX Easing": "Turns on when volatility-of-volatility falls, signaling that fear is beginning to calm. It can help qualify an early DEPLOY.",
-    "SKEW Narrowing": "Turns on when downside tail-risk pricing narrows, signaling less demand for crash protection. It can help qualify an early DEPLOY.",
+    "MMFD Improving": "Becomes active when MMFD breadth improves versus the prior snapshot. It is one of four context turns that can help qualify an early DEPLOY.",
+    "NASI Turning Up": "Becomes active when Nasdaq breadth momentum starts rising. It is one of four engine context turns.",
+    "VVIX Easing": "Becomes active when volatility-of-volatility falls, signaling that fear is beginning to calm. It can help qualify an early DEPLOY.",
+    "SKEW Narrowing": "Becomes active when downside tail-risk pricing narrows, signaling less demand for crash protection. It can help qualify an early DEPLOY.",
     "Supportive Context Signals": "Counts how many of the four engine context turns are currently supportive.",
     "MMFD Strong": "Flags broad short-term participation after a rebound. It describes extension and does not revoke or create a DEPLOY signal.",
     "SPXA20R Strong": "Flags broad S&P 500 participation above the 20-day average. It describes an extended recovery rather than a re-entry trigger.",
