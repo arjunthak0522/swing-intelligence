@@ -1,0 +1,56 @@
+name: RE-ENTRY PR19 Regression
+
+on:
+  push:
+    branches: [feature/cpce-t1-ndx-skew-context]
+    paths:
+      - '.github/workflows/reentry-pr19-regression.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/cpce-t1-ndx-skew-context
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Python test dependencies
+        run: python -m pip install --quiet pytest pandas numpy yfinance requests beautifulsoup4
+      - name: Compile changed Python modules
+        run: |
+          python -m py_compile \
+            tools/reentry_options_sentiment_live.py \
+            tools/reentry_secondary_confirmation.py \
+            tools/reentry_secondary_family_validation.py \
+            tools/reentry_indicator_completeness.py \
+            tools/reentry_ndx_single_stock_skew.py
+      - name: Run focused regression tests
+        run: |
+          python -m pytest -q \
+            tests/test_reentry_options_sentiment_t1.py \
+            tests/test_reentry_ndx_single_stock_skew.py \
+            tests/test_reentry_secondary_validation_t1.py \
+            tests/test_reentry_window_state.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Build web app
+        working-directory: web
+        run: |
+          npm ci
+          npm run build
+      - name: Verify engine logic file is unchanged from PR18 base
+        run: |
+          git diff --exit-code origin/feature/categorized-live-indicator-board -- tools/reentry_unified_engine.py tools/reentry_exhaustion_intraday.py
+      - name: Verify new context remains non-decisioning
+        run: |
+          grep -q '"decision_input": False' tools/reentry_ndx_single_stock_skew.py
+          grep -q 'T+1' tools/reentry_options_sentiment_live.py
