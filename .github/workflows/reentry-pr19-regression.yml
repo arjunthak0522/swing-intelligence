@@ -17,6 +17,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: feature/cpce-t1-ndx-skew-context
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -49,6 +50,7 @@ jobs:
           npm run build
       - name: Verify engine logic file is unchanged from PR18 base
         run: |
+          git fetch origin feature/categorized-live-indicator-board:refs/remotes/origin/feature/categorized-live-indicator-board
           git diff --exit-code origin/feature/categorized-live-indicator-board -- tools/reentry_unified_engine.py tools/reentry_exhaustion_intraday.py
       - name: Verify new context remains non-decisioning
         run: |
