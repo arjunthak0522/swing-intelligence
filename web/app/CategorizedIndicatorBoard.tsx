@@ -28,6 +28,7 @@ const pctChange = (value: unknown, digits = 2) =>
 const boolState = (value: unknown) => value === true ? "ACTIVE" : value === false ? "NOT ACTIVE" : "UNAVAILABLE";
 const boolDir = (_value: unknown) => "—";
 const clean = (value: unknown) => typeof value === "string" && value ? value.replaceAll("_", " ") : "UNAVAILABLE";
+const pcState = (value: unknown) => typeof value !== "number" || !Number.isFinite(value) ? "UNAVAILABLE" : value >= 0.90 ? "HIGH FEAR" : value >= 0.70 ? "FEAR" : value >= 0.50 ? "NORMAL" : "COMPLACENT";
 
 function row(name: string, value: string, state: string, direction: string, freshness: string, role: string, reference?: string): IndicatorRow {
   return { name, reference, value, state, direction, freshness, role };
@@ -68,10 +69,12 @@ export default function CategorizedIndicatorBoard({ washout }: { washout: Washou
   const mcVelocity = (lead.mcclellan_velocity || {}) as AnyRecord;
   const zweig = (lead.zweig_breadth_thrust || {}) as AnyRecord;
   const credit = (lead.credit_risk_turn || {}) as AnyRecord;
+  const ndxSkew = (lead.ndx_single_stock_skew || {}) as AnyRecord;
   const risk = (sf.risk_appetite || {}) as AnyRecord;
   const vol = (sf.vol_structure || {}) as AnyRecord;
   const thrust = (sf.breadth_thrust || {}) as AnyRecord;
   const options = (sf.options_sentiment || {}) as AnyRecord;
+  const equityPcName = options.reading_mode === "INTRADAY_CBOE" ? "Equity Put/Call — Intraday" : "Equity Put/Call — Prior Official Close";
 
   const advanceShare = typeof thrust.nasdaq_advance_share === "number"
     ? thrust.nasdaq_advance_share * 100
@@ -142,6 +145,7 @@ export default function CategorizedIndicatorBoard({ washout }: { washout: Washou
         row("Live Downside Skew Ratio", fmt(skew.live_proxy_ratio ?? v.SKEW_LIVE_PROXY_RATIO, 3), "TAIL RISK", clean(skew.direction_vs_prior_snapshot || v.SKEW_DIRECTION), clean(skew.freshness_state || skew.source_mode), "CONTEXT SUPPORT INPUT", "SKEW proxy"),
         row("Live Downside Skew Spread", fmt(skew.live_proxy_vol_points ?? v.SKEW_LIVE_PROXY), "TAIL RISK", clean(skew.direction_vs_prior_snapshot || v.SKEW_DIRECTION), clean(skew.freshness_state || skew.source_mode), "CONTEXT", "SKEW vol spread"),
         row("Official Cboe SKEW", fmt(skew.official_skew_latest_close ?? v.SKEW_OFFICIAL_CLOSE), "OFFICIAL CLOSE", clean(skew.official_skew_direction), "PRIOR CLOSE", "CONTEXT", "SKEW"),
+        row("Nasdaq-100 Single-Stock Downside Skew", fmt(ndxSkew.three_day_average ?? ndxSkew.raw_average, 3), clean(ndxSkew.state), clean(ndxSkew.direction), clean(ndxSkew.freshness_state || ndxSkew.freshness_type), "LEADING CONTEXT", "1M normalized put/call skew proxy · 3D avg"),
         row("VIX Term Structure", fmt(vol.current_ratio, 3), clean(vol.state), vol.supportive === true ? "SUPPORTIVE" : vol.supportive === false ? "NOT SUPPORTIVE" : "UNAVAILABLE", clean(vol.freshness_state || vol.freshness_type), "SECONDARY CONFIRMATION", "VIX / VIX3M"),
       ],
     },
@@ -149,9 +153,10 @@ export default function CategorizedIndicatorBoard({ washout }: { washout: Washou
       title: "OPTIONS SENTIMENT",
       description: "How much fear is showing up in options positioning?",
       rows: [
-        row("Equity Put/Call", fmt(options.equity_put_call), clean(options.state), clean(options.signal_behavior), clean(options.freshness_state || options.freshness_type), "SENTIMENT OVERLAY"),
+        row(equityPcName, fmt(options.equity_put_call), clean(options.state), clean(options.signal_behavior), clean(options.freshness_state || options.freshness_type), "SENTIMENT OVERLAY", options.reading_mode === "INTRADAY_CBOE" ? "Cboe current statistics" : "Final daily · T+1"),
         row("Total Put/Call", fmt(options.total_put_call), clean(options.state), clean(options.signal_behavior), clean(options.freshness_state || options.freshness_type), "SENTIMENT OVERLAY"),
         row("Index Put/Call", fmt(options.index_put_call), clean(options.state), clean(options.signal_behavior), clean(options.freshness_state || options.freshness_type), "SENTIMENT OVERLAY"),
+        ...(options.reading_mode === "INTRADAY_CBOE" && typeof options.official_daily_equity_put_call === "number" ? [row("Official Daily Equity Put/Call", fmt(options.official_daily_equity_put_call), pcState(options.official_daily_equity_put_call), "—", options.official_daily_observation_date ? `PRIOR CLOSE ${options.official_daily_observation_date} · T+1` : "PRIOR CLOSE · T+1", "SENTIMENT OVERLAY", "CPCE · finalized daily")] : []),
       ],
     },
     {
@@ -244,8 +249,11 @@ export default function CategorizedIndicatorBoard({ washout }: { washout: Washou
     "Live Downside Skew Ratio": "Measures how expensive downside SPX protection is relative to upside protection. Narrowing can become an engine context turn.",
     "Live Downside Skew Spread": "Shows the volatility-point premium investors are paying for downside SPX protection versus upside protection.",
     "Official Cboe SKEW": "Cboe's official tail-risk gauge. Higher readings imply more demand for protection against unusually large downside moves.",
+    "Nasdaq-100 Single-Stock Downside Skew": ndxSkew.meaning || "Measures the downside-versus-upside implied-volatility premium across individual Nasdaq-100 stocks. Lower readings mean flatter single-stock skew and less demand for downside hedging. This is a free-data proxy, not Goldman's proprietary series.",
     "VIX Term Structure": vol.meaning || "Compares near-term VIX with longer-dated volatility. A normalized curve suggests stress is less acute, but this does not change DEPLOY.",
-    "Equity Put/Call": options.meaning || "Compares equity put activity with call activity. Higher readings generally indicate more fear or defensive positioning.",
+    "Equity Put/Call — Intraday": options.meaning || "Current same-session Cboe equity put/call activity. It is intraday and delayed, not the finalized daily CPCE close.",
+    "Equity Put/Call — Prior Official Close": options.meaning || "The most recent finalized daily equity put/call reading that was actually available for this session. Final daily CPCE is enforced T+1.",
+    "Official Daily Equity Put/Call": "The finalized daily CPCE reading from the prior trading session. A close stamped D is intentionally not usable until D+1, preventing look-ahead.",
     "Total Put/Call": options.meaning || "Combines put and call activity across the options market to show the overall level of defensive positioning.",
     "Index Put/Call": options.meaning || "Shows defensive positioning in index options, which are often used by institutions for portfolio hedging.",
     "Risk-Appetite Broadening": risk.meaning || "Checks whether investors are moving beyond mega-cap leaders into equal-weight stocks, small caps and credit risk.",
