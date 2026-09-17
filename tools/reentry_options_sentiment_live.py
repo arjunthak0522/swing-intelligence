@@ -37,8 +37,8 @@ def classify(eq: float | None) -> str:
     return "COMPLACENT"
 
 
-def daily_ratios(market_date: str) -> dict | None:
-    text = fetch_text(f"{DAILY_URL}?{urlencode({'dt': market_date})}")
+def daily_ratios(observation_date: str) -> dict | None:
+    text = fetch_text(f"{DAILY_URL}?{urlencode({'dt': observation_date})}")
 
     def extract(label: str) -> float | None:
         match = re.search(re.escape(label) + r"\s*([0-9]+(?:\.[0-9]+)?)", text, re.I)
@@ -53,16 +53,24 @@ def daily_ratios(market_date: str) -> dict | None:
         "equity_put_call": eq,
         "index_put_call": idx,
         "total_put_call": total,
-        "freshness_type": "DAILY_CLOSE",
-        "last_updated": market_date,
+        "freshness_type": "DAILY_CLOSE_T_PLUS_ONE",
+        "freshness_state": "PRIOR_CLOSE",
+        "last_updated": observation_date,
+        "observation_market_date": observation_date,
         "source": "Cboe U.S. Options Daily Market Statistics",
+        "availability_rule": "Final daily put/call for session D is first usable on the next trading session, never during session D.",
     }
 
 
-def latest_completed_daily(target_date: str) -> dict | None:
-    """Return target-date EOD when published, otherwise the newest prior completed EOD."""
-    target = datetime.strptime(target_date, "%Y-%m-%d").date()
-    for offset in range(MAX_EOD_LOOKBACK_DAYS + 1):
+def latest_completed_daily(target_session_date: str) -> dict | None:
+    """Return the newest final daily observation that was knowable by target session.
+
+    A finalized daily CPCE/put-call observation dated D is treated as T+1 data.
+    Therefore this function intentionally never queries target_session_date itself.
+    Weekends/holidays are naturally skipped when the Cboe daily page has no row.
+    """
+    target = datetime.strptime(target_session_date, "%Y-%m-%d").date()
+    for offset in range(1, MAX_EOD_LOOKBACK_DAYS + 1):
         candidate = target - timedelta(days=offset)
         if candidate.weekday() >= 5:
             continue
@@ -72,8 +80,8 @@ def latest_completed_daily(target_date: str) -> dict | None:
             ratios = None
         if ratios is None:
             continue
-        ratios["freshness_state"] = "TODAY_CLOSE" if candidate == target else "PRIOR_CLOSE"
-        ratios["requested_market_date"] = target_date
+        ratios["requested_market_date"] = target_session_date
+        ratios["available_for_market_date"] = target_session_date
         return ratios
     return None
 
@@ -130,48 +138,64 @@ def live_ratios(market_date: str) -> dict | None:
         "freshness_type": "INTRADAY_DELAYED",
         "freshness_state": "LIVE",
         "last_updated": f"{market_date} {latest_time} CT" if latest_time else market_date,
+        "observation_market_date": market_date,
         "requested_market_date": market_date,
         "source": "Cboe U.S. Options Current Market Statistics",
+        "availability_rule": "Same-session Cboe current-statistics observations may be shown intraday; finalized daily CPCE remains T+1 only.",
     }
 
 
 def build_signal(market_date: str) -> dict:
     today = datetime.now(ET).date().isoformat()
-    ratios = None
+    live = None
 
-    # During the current session prefer a genuine live observation. If Cboe has
-    # not exposed one yet, use the latest completed official EOD observation.
     if market_date == today:
         try:
-            ratios = live_ratios(market_date)
+            live = live_ratios(market_date)
         except Exception:
-            ratios = None
+            live = None
 
+    official = latest_completed_daily(market_date)
+    ratios = live or official
     if ratios is None:
-        ratios = latest_completed_daily(market_date)
-    if ratios is None:
-        raise ValueError("Cboe did not expose a live or recent completed-session put/call observation")
+        raise ValueError("Cboe did not expose a same-session live observation or a prior completed-session put/call observation")
 
     eq = ratios.get("equity_put_call")
-    return {
+    signal = {
         "name": "Options sentiment",
         "state": classify(eq),
         "supportive": False,
+        "reading_mode": "INTRADAY_CBOE" if live is not None else "PRIOR_OFFICIAL_CLOSE",
         "equity_put_call": eq,
         "index_put_call": ratios.get("index_put_call"),
         "total_put_call": ratios.get("total_put_call"),
         "benchmark": "Equity P/C <0.50 complacent · 0.50-0.70 normal · 0.70-0.90 fear · >=0.90 high fear (working display scale until percentiles mature)",
-        "retail_explanation": "This looks at how heavily traders are using puts versus calls. High put activity often means fear is elevated.",
+        "retail_explanation": "This looks at how heavily traders are using puts versus calls. Same-day Cboe current statistics may be shown intraday; the finalized daily CPCE close is deliberately delayed until the next trading session.",
         "signal_behavior": "CONTRARIAN",
         "behavior_explanation": "Unusually high fear can improve a re-entry setup, but fear alone is not a buy signal. Confirmation comes when fear retreats while breadth improves.",
         "freshness_type": ratios["freshness_type"],
         "freshness_state": ratios.get("freshness_state"),
         "last_updated": ratios["last_updated"],
+        "observation_market_date": ratios.get("observation_market_date"),
         "requested_market_date": ratios.get("requested_market_date"),
         "source": ratios["source"],
-        "validation_status": "VALIDATED_SENTIMENT_OVERLAY",
-        "validation_note": "Across 94 historical DEPLOY episodes using Cboe archive plus daily statistics, equity fear (P/C >=0.70) appeared at 49 starts and was generally supportive over 30-90D, but missed the SPY 10D median gate. Fear-reversing occurred at only 14 starts, below the promotion sample threshold. Cboe also documents 2022 early-exercise distortion in raw equity P/C. Keep as a contrarian sentiment overlay, never a DEPLOY gate.",
+        "final_daily_t_plus_one_enforced": True,
+        "availability_rule": "Final daily CPCE for session D cannot be used for session D and first becomes eligible on the next trading session.",
+        "validation_status": "VALIDATED_SENTIMENT_OVERLAY_T_PLUS_ONE",
+        "validation_note": "Historical validation must align each finalized daily put/call observation to the following trading session to avoid look-ahead. Options sentiment remains context only and never creates, blocks, delays, or revokes DEPLOY.",
     }
+
+    if official is not None:
+        signal.update({
+            "official_daily_equity_put_call": official.get("equity_put_call"),
+            "official_daily_index_put_call": official.get("index_put_call"),
+            "official_daily_total_put_call": official.get("total_put_call"),
+            "official_daily_observation_date": official.get("observation_market_date"),
+            "official_daily_available_for_market_date": market_date,
+            "official_daily_freshness_state": "PRIOR_CLOSE",
+            "official_daily_source": official.get("source"),
+        })
+    return signal
 
 
 def patch_snapshot(path: Path) -> dict:

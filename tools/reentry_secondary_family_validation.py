@@ -249,6 +249,11 @@ def fetch_cboe_daily(date: pd.Timestamp) -> tuple[pd.Timestamp, float | None, fl
     return pd.Timestamp(date).normalize(), None, None
 
 
+def t_plus_one_available(series: pd.Series, index: pd.DatetimeIndex) -> pd.Series:
+    """Shift a finalized daily observation from market date D to usable date D+1."""
+    return series.reindex(index).shift(1)
+
+
 def build_options_sentiment(index: pd.DatetimeIndex, starts: pd.Series) -> tuple[pd.DataFrame, dict]:
     equity = parse_archive_ratio(CBOE_EQUITY_ARCHIVE)
     index_pc = parse_archive_ratio(CBOE_INDEX_ARCHIVE)
@@ -256,7 +261,9 @@ def build_options_sentiment(index: pd.DatetimeIndex, starts: pd.Series) -> tuple
     positions = np.flatnonzero(starts.to_numpy())
     needed = set()
     for pos in positions:
-        for k in range(-1, 4):
+        # Fetch observation dates around each episode. Availability is shifted
+        # one trading session below, so no daily close is used on its own D.
+        for k in range(-2, 4):
             j = pos + k
             if 0 <= j < len(index):
                 d = pd.Timestamp(index[j]).normalize()
@@ -274,8 +281,10 @@ def build_options_sentiment(index: pd.DatetimeIndex, starts: pd.Series) -> tuple
             index_pc.loc[d] = ix
     equity, index_pc = equity.sort_index(), index_pc.sort_index()
     out = pd.DataFrame(index=index)
-    out["equity_pc"] = equity.reindex(index)
-    out["index_pc"] = index_pc.reindex(index)
+    out["equity_pc_observation"] = equity.reindex(index)
+    out["index_pc_observation"] = index_pc.reindex(index)
+    out["equity_pc"] = t_plus_one_available(equity, index)
+    out["index_pc"] = t_plus_one_available(index_pc, index)
     out["equity_fear"] = out["equity_pc"] >= 0.70
     out["equity_high_fear"] = out["equity_pc"] >= 0.90
     out["equity_change1"] = out["equity_pc"].diff()
@@ -285,12 +294,13 @@ def build_options_sentiment(index: pd.DatetimeIndex, starts: pd.Series) -> tuple
     fetched_valid = sum(1 for _, eq, ix in fetched if eq is not None or ix is not None)
     return out, {
         "source": "Cboe equity/index put-call archive through 2019-10-04 plus Cboe Daily Market Statistics on required later episode-window dates",
+        "availability_rule": "Final daily put/call stamped D is shifted one trading session and first used on D+1; same-session use is prohibited to prevent look-ahead.",
         "archive_end": str(archive_end.date()),
         "requested_post_archive_dates": len(needed),
         "valid_post_archive_dates": fetched_valid,
         "equity_fear_definition": "equity put/call >=0.70",
         "high_fear_definition": "equity put/call >=0.90",
-        "reversal_definition": "prior equity put/call >=0.70 and current falls by at least 0.05; broad reversal also requires index put/call to fall",
+        "reversal_definition": "prior available equity put/call >=0.70 and current available value falls by at least 0.05; broad reversal also requires available index put/call to fall",
         "structural_break": "Cboe has documented that large early-exercise order flow distorted raw equity put/call readings in 2022; post-2022 raw ratios therefore receive an explicit stability penalty in the promotion decision.",
     }
 
@@ -420,6 +430,7 @@ def main() -> None:
             "round_trip_cost": ROUND_TRIP_COST,
             "episode_sampling": "first session of each contiguous historical proxy DEPLOY episode",
             "no_change_to_live_engine": True,
+            "options_daily_availability": "T+1: finalized daily put/call dated D is first knowable on next trading session",
             "promotion_scope": "At most recovery-confirmation or context. No test in this batch can alter the DEPLOY trigger automatically.",
         },
         "data_metadata": metadata,
