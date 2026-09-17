@@ -603,21 +603,21 @@
         },
         "credit_risk_turn": {
           "name": "Credit-risk turn",
-          "state": "MIXED",
+          "state": "DETERIORATING",
           "direction": "FALLING",
-          "hyg_lqd_ratio": 0.7507898560093262,
-          "change_1d": -0.0011180401674885099,
-          "change_5d": 0.001084762506761594,
+          "hyg_lqd_ratio": 0.7498563582842792,
+          "change_1d": -0.0012433542056745628,
+          "change_5d": -0.00464249205809808,
           "benchmark": "Rising HYG/LQD means lower-quality credit is outperforming investment-grade credit. A 1-day turn before the 5-day trend improves can be an early risk-appetite clue.",
           "meaning": "Credit can begin calming before equities fully recover. This is displayed separately but is not double-counted in RE-ENTRY's existing risk-appetite family.",
           "role": "LEADING_CONTEXT_ONLY",
           "decision_input": false,
           "freshness_type": "DAILY_CLOSE_OR_CURRENT_BAR",
-          "last_updated": "2026-09-16",
+          "last_updated": "2026-09-17",
           "status": "READY",
           "source": "Yahoo Finance adjusted closes: HYG/LQD",
           "double_counted_in_secondary_score": false,
-          "freshness_state": "TODAY_CLOSE"
+          "freshness_state": "STALE"
         }
       },
       "errors": {}
@@ -933,21 +933,21 @@
       },
       "credit_risk_turn": {
         "name": "Credit-risk turn",
-        "state": "MIXED",
+        "state": "DETERIORATING",
         "direction": "FALLING",
-        "hyg_lqd_ratio": 0.7507898560093262,
-        "change_1d": -0.0011180401674885099,
-        "change_5d": 0.001084762506761594,
+        "hyg_lqd_ratio": 0.7498563582842792,
+        "change_1d": -0.0012433542056745628,
+        "change_5d": -0.00464249205809808,
         "benchmark": "Rising HYG/LQD means lower-quality credit is outperforming investment-grade credit. A 1-day turn before the 5-day trend improves can be an early risk-appetite clue.",
         "meaning": "Credit can begin calming before equities fully recover. This is displayed separately but is not double-counted in RE-ENTRY's existing risk-appetite family.",
         "role": "LEADING_CONTEXT_ONLY",
         "decision_input": false,
         "freshness_type": "DAILY_CLOSE_OR_CURRENT_BAR",
-        "last_updated": "2026-09-16",
+        "last_updated": "2026-09-17",
         "status": "READY",
         "source": "Yahoo Finance adjusted closes: HYG/LQD",
         "double_counted_in_secondary_score": false,
-        "freshness_state": "TODAY_CLOSE"
+        "freshness_state": "STALE"
       }
     },
     "errors": {}
