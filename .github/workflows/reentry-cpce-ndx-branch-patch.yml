@@ -1,0 +1,189 @@
+name: RE-ENTRY CPCE NDX Branch Integration Patch
+
+on:
+  push:
+    branches: [feature/cpce-t1-ndx-skew-context]
+    paths:
+      - '.github/workflows/reentry-cpce-ndx-branch-patch.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/cpce-t1-ndx-skew-context
+          fetch-depth: 0
+
+      - name: Apply focused integration patches
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new, label):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              if old not in text:
+                  raise SystemExit(f'Patch anchor missing for {label} in {path}')
+              text = text.replace(old, new, 1)
+              p.write_text(text, encoding='utf-8')
+
+          # Historical validation: finalized daily put/call dated D is only
+          # usable on the next trading row (D+1), never on D.
+          validation = 'tools/reentry_secondary_family_validation.py'
+          replace_once(
+              validation,
+              'def build_options_sentiment(index: pd.DatetimeIndex, starts: pd.Series) -> tuple[pd.DataFrame, dict]:\n',
+              'def t_plus_one_available(series: pd.Series, index: pd.DatetimeIndex) -> pd.Series:\n'
+              '    """Align a finalized daily observation to the next trading session.\n\n'
+              '    The input series is stamped with observation date D, but the closing\n'
+              '    value is first knowable for RE-ENTRY on the next row/session.\n'
+              '    """\n'
+              '    return series.reindex(index).shift(1)\n\n\n'
+              'def build_options_sentiment(index: pd.DatetimeIndex, starts: pd.Series) -> tuple[pd.DataFrame, dict]:\n',
+              'validation helper',
+          )
+          replace_once(
+              validation,
+              '    out["equity_pc"] = equity.reindex(index)\n    out["index_pc"] = index_pc.reindex(index)\n',
+              '    out["equity_pc_observation"] = equity.reindex(index)\n'
+              '    out["index_pc_observation"] = index_pc.reindex(index)\n'
+              '    out["equity_pc"] = t_plus_one_available(equity, index)\n'
+              '    out["index_pc"] = t_plus_one_available(index_pc, index)\n',
+              'validation shift',
+          )
+          replace_once(
+              validation,
+              '        "source": "Cboe equity/index put-call archive through 2019-10-04 plus Cboe Daily Market Statistics on required later episode-window dates",\n',
+              '        "source": "Cboe equity/index put-call archive through 2019-10-04 plus Cboe Daily Market Statistics on required later episode-window dates",\n'
+              '        "availability_rule": "Final daily put/call stamped D is shifted one trading session and first used on D+1; same-session use is prohibited to prevent look-ahead.",\n',
+              'validation metadata',
+          )
+          replace_once(
+              validation,
+              '            "no_change_to_live_engine": True,\n',
+              '            "no_change_to_live_engine": True,\n'
+              '            "options_daily_availability": "T+1: finalized daily put/call dated D is first knowable on next trading session",\n',
+              'validation methodology',
+          )
+
+          # Completeness layer: NDX skew must remain visible even if its free
+          # source fails, and old same-session DAILY_CLOSE options rows are blocked.
+          completeness = 'tools/reentry_indicator_completeness.py'
+          replace_once(
+              completeness,
+              '    if explicit in {"LIVE", "DELAYED", "TODAY_CLOSE", "PRIOR_CLOSE", "STALE", "UNAVAILABLE"}:\n',
+              '    if explicit in {"LIVE", "DELAYED", "CACHED_INTRADAY", "TODAY_CLOSE", "PRIOR_CLOSE", "STALE", "UNAVAILABLE"}:\n',
+              'freshness vocabulary',
+          )
+          replace_once(
+              completeness,
+              '        "credit_risk_turn": ("Credit-risk turn - HYG/LQD", "DAILY_CLOSE_OR_CURRENT_BAR"),\n',
+              '        "credit_risk_turn": ("Credit-risk turn - HYG/LQD", "DAILY_CLOSE_OR_CURRENT_BAR"),\n'
+              '        "ndx_single_stock_skew": ("Nasdaq-100 single-stock normalized put/call skew proxy", "FREE_OPTION_CHAIN_SNAPSHOT_OR_UNAVAILABLE"),\n',
+              'NDX completeness',
+          )
+          anchor = '    breadth_context = secondary.setdefault("breadth_context", {})\n'
+          guard = '''    options_row = families.get("options_sentiment") or {}
+    options_type = str(options_row.get("freshness_type") or "").upper()
+    options_date = date_prefix(options_row.get("observation_market_date") or options_row.get("last_updated"))
+    if options_type.startswith("DAILY_CLOSE") and target_date and options_date == target_date:
+        blocked = unavailable_card("Options sentiment", "PRIOR_CLOSE_T_PLUS_ONE", "SECONDARY_CONTEXT_ONLY")
+        blocked.update({
+            "status": "SAME_DAY_FINAL_CLOSE_BLOCKED",
+            "availability_rule": "Final daily CPCE dated D cannot be used during D and first becomes eligible on the next trading session.",
+            "blocked_observation_date": options_date,
+        })
+        families["options_sentiment"] = blocked
+
+'''
+          replace_once(completeness, anchor, guard + anchor, 'same-day CPCE guard')
+
+          # Retail board: show the new NDX skew proxy and distinguish current
+          # intraday put/call from prior available finalized daily CPCE.
+          ui = 'web/app/CategorizedIndicatorBoard.tsx'
+          replace_once(
+              ui,
+              'const clean = (value: unknown) => typeof value === "string" && value ? value.replaceAll("_", " ") : "UNAVAILABLE";\n',
+              'const clean = (value: unknown) => typeof value === "string" && value ? value.replaceAll("_", " ") : "UNAVAILABLE";\n'
+              'const pcState = (value: unknown) => typeof value !== "number" || !Number.isFinite(value) ? "UNAVAILABLE" : value >= 0.90 ? "HIGH FEAR" : value >= 0.70 ? "FEAR" : value >= 0.50 ? "NORMAL" : "COMPLACENT";\n',
+              'put-call state helper',
+          )
+          replace_once(
+              ui,
+              '  const credit = (lead.credit_risk_turn || {}) as AnyRecord;\n',
+              '  const credit = (lead.credit_risk_turn || {}) as AnyRecord;\n'
+              '  const ndxSkew = (lead.ndx_single_stock_skew || {}) as AnyRecord;\n',
+              'NDX row source',
+          )
+          replace_once(
+              ui,
+              '  const options = (sf.options_sentiment || {}) as AnyRecord;\n',
+              '  const options = (sf.options_sentiment || {}) as AnyRecord;\n'
+              '  const equityPcName = options.reading_mode === "INTRADAY_CBOE" ? "Equity Put/Call — Intraday" : "Equity Put/Call — Prior Official Close";\n',
+              'options display mode',
+          )
+          replace_once(
+              ui,
+              '        row("Official Cboe SKEW", fmt(skew.official_skew_latest_close ?? v.SKEW_OFFICIAL_CLOSE), "OFFICIAL CLOSE", clean(skew.official_skew_direction), "PRIOR CLOSE", "CONTEXT", "SKEW"),\n        row("VIX Term Structure", fmt(vol.current_ratio, 3), clean(vol.state), vol.supportive === true ? "SUPPORTIVE" : vol.supportive === false ? "NOT SUPPORTIVE" : "UNAVAILABLE", clean(vol.freshness_state || vol.freshness_type), "SECONDARY CONFIRMATION", "VIX / VIX3M"),\n',
+              '        row("Official Cboe SKEW", fmt(skew.official_skew_latest_close ?? v.SKEW_OFFICIAL_CLOSE), "OFFICIAL CLOSE", clean(skew.official_skew_direction), "PRIOR CLOSE", "CONTEXT", "SKEW"),\n'
+              '        row("Nasdaq-100 Single-Stock Downside Skew", fmt(ndxSkew.three_day_average ?? ndxSkew.raw_average, 3), clean(ndxSkew.state), clean(ndxSkew.direction), clean(ndxSkew.freshness_state || ndxSkew.freshness_type), "LEADING CONTEXT", "1M normalized put/call skew proxy · 3D avg"),\n'
+              '        row("VIX Term Structure", fmt(vol.current_ratio, 3), clean(vol.state), vol.supportive === true ? "SUPPORTIVE" : vol.supportive === false ? "NOT SUPPORTIVE" : "UNAVAILABLE", clean(vol.freshness_state || vol.freshness_type), "SECONDARY CONFIRMATION", "VIX / VIX3M"),\n',
+              'NDX volatility card',
+          )
+          replace_once(
+              ui,
+              '        row("Equity Put/Call", fmt(options.equity_put_call), clean(options.state), clean(options.signal_behavior), clean(options.freshness_state || options.freshness_type), "SENTIMENT OVERLAY"),\n        row("Total Put/Call", fmt(options.total_put_call), clean(options.state), clean(options.signal_behavior), clean(options.freshness_state || options.freshness_type), "SENTIMENT OVERLAY"),\n        row("Index Put/Call", fmt(options.index_put_call), clean(options.state), clean(options.signal_behavior), clean(options.freshness_state || options.freshness_type), "SENTIMENT OVERLAY"),\n',
+              '        row(equityPcName, fmt(options.equity_put_call), clean(options.state), clean(options.signal_behavior), clean(options.freshness_state || options.freshness_type), "SENTIMENT OVERLAY", options.reading_mode === "INTRADAY_CBOE" ? "Cboe current statistics" : "Final daily · T+1"),\n'
+              '        row("Total Put/Call", fmt(options.total_put_call), clean(options.state), clean(options.signal_behavior), clean(options.freshness_state || options.freshness_type), "SENTIMENT OVERLAY"),\n'
+              '        row("Index Put/Call", fmt(options.index_put_call), clean(options.state), clean(options.signal_behavior), clean(options.freshness_state || options.freshness_type), "SENTIMENT OVERLAY"),\n'
+              '        ...(options.reading_mode === "INTRADAY_CBOE" && typeof options.official_daily_equity_put_call === "number" ? [row("Official Daily Equity Put/Call", fmt(options.official_daily_equity_put_call), pcState(options.official_daily_equity_put_call), "—", options.official_daily_observation_date ? `PRIOR CLOSE ${options.official_daily_observation_date} · T+1` : "PRIOR CLOSE · T+1", "SENTIMENT OVERLAY", "CPCE · finalized daily") ] : []),\n',
+              'options rows',
+          )
+          replace_once(
+              ui,
+              '    "Official Cboe SKEW": "Cboe\'s official tail-risk gauge. Higher readings imply more demand for protection against unusually large downside moves.",\n',
+              '    "Official Cboe SKEW": "Cboe\'s official tail-risk gauge. Higher readings imply more demand for protection against unusually large downside moves.",\n'
+              '    "Nasdaq-100 Single-Stock Downside Skew": ndxSkew.meaning || "Measures the downside-versus-upside implied-volatility premium across individual Nasdaq-100 stocks. Lower readings mean flatter single-stock skew and less demand for downside hedging. This is a free-data proxy, not Goldman\'s proprietary series.",\n',
+              'NDX meaning',
+          )
+          replace_once(
+              ui,
+              '    "Equity Put/Call": options.meaning || "Compares equity put activity with call activity. Higher readings generally indicate more fear or defensive positioning.",\n',
+              '    "Equity Put/Call — Intraday": options.meaning || "Current same-session Cboe equity put/call activity. It is intraday and delayed, not the finalized daily CPCE close.",\n'
+              '    "Equity Put/Call — Prior Official Close": options.meaning || "The most recent finalized daily equity put/call reading that was actually available for this session. Final daily CPCE is enforced T+1.",\n'
+              '    "Official Daily Equity Put/Call": "The finalized daily CPCE reading from the prior trading session. A close stamped D is intentionally not usable until D+1, preventing look-ahead.",\n',
+              'options meanings',
+          )
+
+          # Complete-indicator contract must know about the new context card.
+          complete_workflow = '.github/workflows/reentry-complete-indicator-snapshot.yml'
+          replace_once(
+              complete_workflow,
+              "          expected_lead = {'zweig_breadth_thrust','mcclellan_velocity','nasdaq_short_breadth','credit_risk_turn'}\n",
+              "          expected_lead = {'zweig_breadth_thrust','mcclellan_velocity','nasdaq_short_breadth','credit_risk_turn','ndx_single_stock_skew'}\n",
+              'complete workflow expected lead',
+          )
+
+          # Remove this one-shot patch workflow from the resulting branch.
+          Path('.github/workflows/reentry-cpce-ndx-branch-patch.yml').unlink()
+          PY
+
+      - name: Verify focused patches compile
+        run: |
+          python -m py_compile tools/reentry_options_sentiment_live.py tools/reentry_secondary_confirmation.py tools/reentry_secondary_family_validation.py tools/reentry_indicator_completeness.py tools/reentry_ndx_single_stock_skew.py
+          grep -q 'ndx_single_stock_skew' web/app/CategorizedIndicatorBoard.tsx
+          grep -q 't_plus_one_available' tools/reentry_secondary_family_validation.py
+          grep -q 'SAME_DAY_FINAL_CLOSE_BLOCKED' tools/reentry_indicator_completeness.py
+
+      - name: Commit branch integration patch
+        run: |
+          git config user.name 're-entry-research[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tools/reentry_secondary_family_validation.py tools/reentry_indicator_completeness.py web/app/CategorizedIndicatorBoard.tsx .github/workflows/reentry-complete-indicator-snapshot.yml .github/workflows/reentry-cpce-ndx-branch-patch.yml
+          git commit -m 'Integrate CPCE T+1 guard and NDX skew context'
+          git push origin HEAD:feature/cpce-t1-ndx-skew-context
