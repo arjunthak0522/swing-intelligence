@@ -161,7 +161,7 @@ def populate_official_skew(payload: dict) -> None:
     values["SKEW_OFFICIAL_PERCENTILE_2Y"] = percentile
     result = dict(existing)
     result.update({
-        "name": "Official Cboe SKEW",
+        "name": "Official Cboe Tail-Risk Index",
         "official_symbol": "SKEW",
         "official_skew_latest_close": current,
         "official_skew_prior_close": prior,
