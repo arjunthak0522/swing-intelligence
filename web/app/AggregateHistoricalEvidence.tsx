@@ -16,7 +16,7 @@ function StateTable({ title, data }: { title: string; data: CashPolicyStateEvide
   const horizons = ["5", "10", "15", "30", "60", "90"];
   return <div className="aggregate-history-card">
     <div className="aggregate-history-title">{title}<small>{data.n} historical observations</small></div>
-    <div className="aggregate-history-head"><span>Horizon</span><span>SPY median</span><span>QQQ median</span><span>Positive</span></div>
+    <div className="aggregate-history-head"><span>Horizon</span><span>S&P 500 ETF median</span><span>Nasdaq-100 ETF median</span><span>Positive</span></div>
     {horizons.map(h => {
       const spy = data.SPY[h];
       const qqq = data.QQQ[h];
@@ -29,6 +29,8 @@ function StateTable({ title, data }: { title: string; data: CashPolicyStateEvide
     })}
   </div>;
 }
+
+const assetName = (asset: "SPY" | "QQQ") => asset === "SPY" ? "S&P 500 ETF" : "Nasdaq-100 ETF";
 
 export default function AggregateHistoricalEvidence({ evidence, cashPolicy, currentAction, currentCondition }: {
   evidence: CanonicalHistoricalEvidence | null;
@@ -53,9 +55,9 @@ export default function AggregateHistoricalEvidence({ evidence, cashPolicy, curr
       `}</style>
       <div className="section-heading"><div><span className="kicker">HISTORICAL PERFORMANCE</span><h2>How has this setup behaved historically?</h2></div><span className="pill">{cashPolicy.n_sessions.toLocaleString()} sessions</span></div>
       <p className="section-intro">Same reconstructed spare-cash policy, now shown across 5, 10, 15, 30, 60 and 90 trading days. The table follows today&apos;s action and market condition.</p>
-      {actionKey === "HOLD_CASH" ? <div className="policy-note"><b>HOLD CASH historically:</b> among {cashPolicy.hold_to_next_deploy.n.toLocaleString()} measurable cases, the next DEPLOY arrived after a median {cashPolicy.hold_to_next_deploy.median_wait_sessions} sessions. Waiting produced a cheaper eventual entry {pct(cashPolicy.hold_to_next_deploy.SPY.cheaper_entry_rate,0)} of the time for SPY and {pct(cashPolicy.hold_to_next_deploy.QQQ.cheaper_entry_rate,0)} for QQQ. This is not a bearish or sell signal.</div> : null}
+      {actionKey === "HOLD_CASH" ? <div className="policy-note"><b>HOLD CASH historically:</b> among {cashPolicy.hold_to_next_deploy.n.toLocaleString()} measurable cases, the next DEPLOY arrived after a median {cashPolicy.hold_to_next_deploy.median_wait_sessions} sessions. Waiting produced a cheaper eventual entry {pct(cashPolicy.hold_to_next_deploy.SPY.cheaper_entry_rate,0)} of the time for the S&P 500 ETF and {pct(cashPolicy.hold_to_next_deploy.QQQ.cheaper_entry_rate,0)} for the Nasdaq-100 ETF. This is not a bearish or sell signal.</div> : null}
       {actionKey === "WATCH" ? <div className="policy-note"><b>WATCH historically:</b> the next DEPLOY arrived after a median {cashPolicy.watch_to_next_deploy.median_wait_sessions} trading session in the measurable sample. WATCH means the setup is close, not that deployment has already qualified.</div> : null}
-      {actionKey === "DEPLOY" ? <div className="policy-note"><b>DEPLOY historically:</b> the reconstructed policy passed the primary SPY/QQQ forward-quality gates and the tested 3/5-session delayed-entry comparisons. The additional 5D, 15D and 90D rows are reported from the same state ledger, not a separate backtest.</div> : null}
+      {actionKey === "DEPLOY" ? <div className="policy-note"><b>DEPLOY historically:</b> the reconstructed policy passed the primary S&P 500 ETF / Nasdaq-100 ETF forward-quality gates and the tested 3/5-session delayed-entry comparisons. The additional 5D, 15D and 90D rows are reported from the same state ledger, not a separate backtest.</div> : null}
       <div className="aggregate-history-grid">
         <StateTable title={`Action · ${label(actionKey)}`} data={actionEvidence} />
         {conditionEvidence ? <StateTable title={`Condition · ${label(conditionKey)}`} data={conditionEvidence} /> : null}
@@ -71,7 +73,7 @@ export default function AggregateHistoricalEvidence({ evidence, cashPolicy, curr
     <div className="section-heading"><div><span className="kicker">HISTORICAL EVIDENCE</span><h2>What happened after favorable RE-ENTRY signals?</h2></div><span className="pill">{count} episodes</span></div>
     <p className="section-intro">Archived aggregate evidence is shown only because the current cash-policy evidence could not be loaded.</p>
     <div className="aggregate-history-grid">
-      {(["SPY","QQQ"] as const).map(asset => <div className="aggregate-history-card" key={asset}><div className="aggregate-history-title">{asset}</div><div className="aggregate-history-head"><span>Horizon</span><span>Average</span><span>Median</span><span>Positive</span></div>{horizons.map(h => { const x = evidence.final_policy_validation[asset][h]; if (!x) return null; return <div className="aggregate-history-row" key={`${asset}-${h}`}><b>{h}D</b><span>{pct(x.mean_return,2)}</span><span>{pct(x.median_return,2)}</span><span>{pct(x.positive_rate,0)}</span></div>; })}</div>)}
+      {(["SPY","QQQ"] as const).map(asset => <div className="aggregate-history-card" key={asset}><div className="aggregate-history-title">{assetName(asset)} <small>({asset})</small></div><div className="aggregate-history-head"><span>Horizon</span><span>Average</span><span>Median</span><span>Positive</span></div>{horizons.map(h => { const x = evidence.final_policy_validation[asset][h]; if (!x) return null; return <div className="aggregate-history-row" key={`${asset}-${h}`}><b>{h}D</b><span>{pct(x.mean_return,2)}</span><span>{pct(x.median_return,2)}</span><span>{pct(x.positive_rate,0)}</span></div>; })}</div>)}
     </div>
     <div className="archive-note">Archived sample {evidence.provenance.sample_start} through {evidence.provenance.sample_end}. No row-by-row historical episode ledger is rendered.</div>
   </section>;
