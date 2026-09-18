@@ -1,6 +1,7 @@
 name: RE-ENTRY Secondary Confirmation Enrichment
 
 # Production merges refresh the live enrichment contract.
+# Plain-English retail copy changes require a fresh enrichment publish.
 
 on:
   workflow_dispatch:
