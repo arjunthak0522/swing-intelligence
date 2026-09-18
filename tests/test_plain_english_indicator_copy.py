@@ -116,5 +116,5 @@ def test_market_and_history_surfaces_use_descriptive_asset_names_first() -> None
 def test_internal_role_codes_are_not_exposed_as_explanatory_copy() -> None:
     board = (ROOT / "web/app/CategorizedIndicatorBoard.tsx").read_text(encoding="utf-8")
     assert '<span className="indicator-technical-role">{item.role}</span>' not in board
-    assert "ENGINE INPUT" in board
+    # Stale payload wording must never override audited retail copy.\n    assert ".meaning ||" not in board, "payload-provided meanings must not override audited plain-English copy"\n    assert "ENGINE INPUT" in board
     assert "CONTEXT ONLY" in board
