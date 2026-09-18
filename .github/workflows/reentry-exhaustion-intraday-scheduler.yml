@@ -1,5 +1,7 @@
 name: RE-ENTRY Unified Engine
 
+# Live refreshes preserve same-session indicator context before publication.
+
 on:
   workflow_dispatch:
   push:
