@@ -251,7 +251,7 @@ export default function CategorizedIndicatorBoard({ washout }: { washout: Washou
     "Official Cboe Tail-Risk Index": "Cboe's official measure of unusually large downside-risk pricing. Higher readings mean investors are paying more for protection against extreme market drops.",
     "Nasdaq-100 Single-Stock Downside Protection Premium": ndxSkew.meaning || "Measures how much extra option premium investors are paying for downside protection across individual Nasdaq-100 stocks. Lower readings mean less single-stock hedging demand. This is a free-data proxy, not Goldman's proprietary series.",
     "Volatility Curve Shape": vol.meaning || "Compares near-term market volatility with three-month volatility. A normal upward-sloping curve suggests immediate stress is less acute, but this does not change DEPLOY.",
-    "Equity Put/Call — Intraday": options.meaning || "Current same-session Cboe equity put/call activity. It is intraday and delayed, not the finalized daily CPCE close.",
+    "Equity Put/Call — Intraday": options.meaning || "Current same-session Cboe equity put/call activity. It is intraday and delayed, not the finalized daily equity put/call close.",
     "Equity Put/Call — Prior Official Close": options.meaning || "The most recent finalized daily equity put/call reading that was actually available before this session. A same-day finalized reading is never used.",
     "Official Daily Equity Put/Call": "The finalized daily equity put/call reading from the prior trading session. Today's final close is intentionally unavailable until the next trading session, preventing look-ahead.",
     "Total Put/Call": options.meaning || "Combines put and call activity across the options market to show the overall level of defensive positioning.",
