@@ -273,6 +273,50 @@ jobs:
         if: steps.window.outputs.active == 'true' && steps.decision.outputs.valid == 'true'
         run: python tools/reentry_unified_snapshot_finalize.py
 
+      - name: Carry forward same-session indicator context
+        if: steps.window.outputs.active == 'true' && steps.decision.outputs.valid == 'true'
+        shell: bash
+        run: |
+          python - <<'PY'
+          import copy
+          import json
+          from pathlib import Path
+
+          current_path = Path('data/reentry/exhaustion_intraday_current.json')
+          prior_path = Path('/tmp/reentry-canonical-before-run.json')
+          if not prior_path.exists():
+              print('No prior canonical snapshot available for context carry-forward.')
+              raise SystemExit(0)
+
+          payload = json.loads(current_path.read_text(encoding='utf-8'))
+          prior = json.loads(prior_path.read_text(encoding='utf-8'))
+          engine = payload.get('unified_engine') or {}
+          current_date = engine.get('market_date') or (payload.get('values') or {}).get('market_date')
+          prior_engine = prior.get('unified_engine') or {}
+          prior_date = prior_engine.get('market_date') or (prior.get('values') or {}).get('market_date')
+
+          if not current_date or current_date != prior_date:
+              print(f'Not carrying indicator context across market dates: prior={prior_date} current={current_date}')
+              raise SystemExit(0)
+
+          stamp = engine.get('timestamp_et') or (payload.get('values') or {}).get('timestamp_et')
+          carried = []
+          for key in ('secondary_confirmation', 'leading_indicators', 'indicator_completeness', 'complete_indicator_snapshot'):
+              if not isinstance(payload.get(key), dict) and isinstance(prior.get(key), dict):
+                  payload[key] = copy.deepcopy(prior[key])
+                  carried.append(key)
+
+          for key in ('secondary_confirmation', 'leading_indicators'):
+              if isinstance(payload.get(key), dict):
+                  payload[key]['carried_forward_at_et'] = stamp
+                  payload[key]['carry_forward_reason'] = 'Latest valid same-session context retained while core intraday feeds refresh.'
+                  engine[key] = copy.deepcopy(payload[key])
+
+          payload['unified_engine'] = engine
+          current_path.write_text(json.dumps(payload, indent=2) + '\n', encoding='utf-8')
+          print('Carried same-session indicator context:', ', '.join(carried) if carried else 'none')
+          PY
+
       - name: Validate canonical snapshot for publication
         id: publishable
         if: steps.decision.outputs.valid == 'true' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'

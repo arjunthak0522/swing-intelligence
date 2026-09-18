@@ -116,7 +116,7 @@ jobs:
               raise SystemExit(f'Indicator enrichment modified canonical decision fields. before={before} after={after}')
           leading = payload.get('leading_indicators') or {}
           lead_keys = set((leading.get('indicators') or {}).keys())
-          expected_lead = {'zweig_breadth_thrust','mcclellan_velocity','nasdaq_short_breadth','credit_risk_turn'}
+          expected_lead = {'zweig_breadth_thrust','mcclellan_velocity','nasdaq_short_breadth','credit_risk_turn','ndx_single_stock_skew'}
           secondary = payload.get('secondary_confirmation') or {}
           family_keys = set((secondary.get('families') or {}).keys())
           expected_secondary = {'vol_structure','breadth_thrust','risk_appetite','options_sentiment'}

@@ -41,7 +41,7 @@ def date_prefix(value) -> str | None:
 
 def infer_freshness_state(row: dict, target_date: str, phase: str) -> str:
     explicit = str(row.get("freshness_state") or "").strip().upper()
-    if explicit in {"LIVE", "DELAYED", "TODAY_CLOSE", "PRIOR_CLOSE", "STALE", "UNAVAILABLE"}:
+    if explicit in {"LIVE", "DELAYED", "CACHED_INTRADAY", "TODAY_CLOSE", "PRIOR_CLOSE", "STALE", "UNAVAILABLE"}:
         return explicit
     if str(row.get("state") or "").upper() == "UNAVAILABLE" or str(row.get("status") or "").upper() == "UNAVAILABLE":
         return "UNAVAILABLE"
@@ -203,6 +203,7 @@ def ensure_indicator_blocks(payload: dict) -> None:
         "mcclellan_velocity": ("Nasdaq McClellan Oscillator velocity", "PRIOR_CLOSE_OR_CAPTURED_HISTORY"),
         "nasdaq_short_breadth": ("Short-term Nasdaq breadth", "CURRENT_DAILY_BAR_OR_PRIOR_CLOSE"),
         "credit_risk_turn": ("Credit-risk turn - HYG/LQD", "DAILY_CLOSE_OR_CURRENT_BAR"),
+        "ndx_single_stock_skew": ("Nasdaq-100 single-stock normalized put/call skew proxy", "FREE_OPTION_CHAIN_SNAPSHOT_OR_UNAVAILABLE"),
     }
     block = payload.get("leading_indicators")
     if not isinstance(block, dict):
@@ -225,7 +226,7 @@ def ensure_indicator_blocks(payload: dict) -> None:
         "vol_structure": ("VIX term-structure repair", "DAILY_CLOSE_OR_PRIOR_CLOSE"),
         "breadth_thrust": ("Breadth participation thrust", "INTRADAY_OR_DELAYED"),
         "risk_appetite": ("Risk-appetite broadening", "DAILY_CLOSE_OR_PRIOR_CLOSE"),
-        "options_sentiment": ("Options sentiment", "LIVE_OR_DAILY_CLOSE_OR_PRIOR_CLOSE"),
+        "options_sentiment": ("Options sentiment", "INTRADAY_DELAYED_OR_PRIOR_CLOSE_T_PLUS_ONE"),
     }
     secondary = payload.get("secondary_confirmation")
     if not isinstance(secondary, dict):
@@ -243,6 +244,20 @@ def ensure_indicator_blocks(payload: dict) -> None:
     for key, (name, cadence) in secondary_names.items():
         families.setdefault(key, unavailable_card(name, cadence, "SECONDARY_CONTEXT_ONLY"))
         normalize_row_freshness(families[key], target_date, phase)
+
+    options_row = families.get("options_sentiment") or {}
+    options_type = str(options_row.get("freshness_type") or "").upper()
+    options_date = date_prefix(options_row.get("observation_market_date") or options_row.get("last_updated"))
+    if options_type.startswith("DAILY_CLOSE") and target_date and options_date == target_date:
+        blocked = unavailable_card("Options sentiment", "PRIOR_CLOSE_T_PLUS_ONE", "SECONDARY_CONTEXT_ONLY")
+        blocked.update({
+            "status": "SAME_DAY_FINAL_CLOSE_BLOCKED",
+            "availability_rule": "Final daily CPCE dated D cannot be used during D and first becomes eligible on the next trading session.",
+            "blocked_observation_date": options_date,
+            "final_daily_t_plus_one_enforced": True,
+        })
+        families["options_sentiment"] = blocked
+
     breadth_context = secondary.setdefault("breadth_context", {})
     breadth_context.setdefault("t2108", unavailable_card("NYSE Stocks Above 40-Day Moving Average", "DAILY_CLOSE_OR_PRIOR_CLOSE", "BREADTH_CONTEXT_ONLY"))
     normalize_row_freshness(breadth_context["t2108"], target_date, phase)
@@ -302,8 +317,9 @@ def main() -> None:
     ensure_indicator_blocks(payload)
     repair_quality(payload)
     payload["indicator_completeness"] = {
-        "contract": "Every defined indicator is present on every published snapshot. Freshness may be LIVE, DELAYED, TODAY_CLOSE, PRIOR_CLOSE, STALE, or UNAVAILABLE.",
+        "contract": "Every defined indicator is present on every published snapshot. Freshness may be LIVE, DELAYED, CACHED_INTRADAY, TODAY_CLOSE, PRIOR_CLOSE, STALE, or UNAVAILABLE.",
         "official_skew_fallback_error": skew_error,
+        "cpce_final_daily_availability": "T+1 only; same-session finalized daily CPCE is blocked.",
     }
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(payload["indicator_completeness"], indent=2))
