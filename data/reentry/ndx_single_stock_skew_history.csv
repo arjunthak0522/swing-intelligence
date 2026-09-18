@@ -1,0 +1,2 @@
+market_date,timestamp_et,raw_average,three_day_average,universe_size,valid_count,coverage_pct,median_dte,risk_free_rate,error_count
+2026-09-18,2026-09-18T13:48:59.704583-04:00,-0.01601132086762685,-0.01601132086762685,101,70,69.3069306930693,28.0,0.0398199987411499,31
