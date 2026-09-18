@@ -289,7 +289,7 @@ def card_from_row(row: dict, rows: list[dict], cached: bool = False) -> dict:
     prior = historical[-1] if historical else None
     direction = "RISING" if prior is not None and current > prior else "FALLING" if prior is not None and current < prior else "FLAT" if prior is not None else "UNAVAILABLE"
     return {
-        "name": "Nasdaq-100 single-stock normalized put/call skew proxy",
+        "name": "Nasdaq-100 single-stock downside protection premium",
         "state": state,
         "direction": direction,
         "raw_average": current,
@@ -304,8 +304,8 @@ def card_from_row(row: dict, rows: list[dict], cached: bool = False) -> dict:
         "median_dte": float(row["median_dte"]),
         "target_dte": TARGET_DTE,
         "formula": "equal-weight mean across valid NDX securities of (25-delta put IV - 25-delta call IV) / 50-delta call IV; display uses 3-session average",
-        "benchmark": "Lower values mean flatter single-stock downside-vs-upside implied-volatility skew. Percentile labels are withheld until at least 20 captured sessions; no proprietary Goldman threshold is assumed.",
-        "meaning": "Measures how much extra implied volatility investors are paying for downside protection across individual Nasdaq-100 stocks. Very flat skew can indicate unusually little single-stock hedging demand even when index-level crash protection remains expensive.",
+        "benchmark": "Lower values mean investors are paying less extra premium for downside protection versus comparable upside options across Nasdaq-100 stocks. Percentile labels are withheld until at least 20 captured sessions; no proprietary threshold is assumed.",
+        "meaning": "Measures how much extra option premium investors are paying for downside protection across individual Nasdaq-100 stocks. A very flat reading can indicate unusually little single-stock hedging demand even when broad index crash protection remains expensive.",
         "role": "LEADING_CONTEXT_ONLY",
         "decision_input": False,
         "creates_new_score": False,
@@ -375,7 +375,7 @@ def calculate(market_date: str, stamp: str, history_path: Path) -> dict:
 
 def unavailable(error: Exception) -> dict:
     return {
-        "name": "Nasdaq-100 single-stock normalized put/call skew proxy",
+        "name": "Nasdaq-100 single-stock downside protection premium",
         "state": "UNAVAILABLE",
         "direction": "UNAVAILABLE",
         "role": "LEADING_CONTEXT_ONLY",
@@ -387,7 +387,7 @@ def unavailable(error: Exception) -> dict:
         "freshness_state": "UNAVAILABLE",
         "last_updated": None,
         "status": "UNAVAILABLE",
-        "meaning": "Measures normalized downside-versus-upside implied-volatility skew across Nasdaq-100 constituent options when sufficient free option-chain coverage is available.",
+        "meaning": "Measures the downside-protection premium versus comparable upside options across Nasdaq-100 stocks when sufficient free option-chain coverage is available.",
         "source": "Nasdaq current Nasdaq-100 constituent feed + Yahoo Finance constituent option chains",
         "replication_status": "FREE_DATA_PROXY_NOT_GOLDMAN_EXACT",
         "validation_status": "LIVE_CONTEXT_ONLY_NO_FREE_HISTORICAL_OPTION_SURFACE",
