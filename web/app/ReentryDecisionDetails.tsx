@@ -77,10 +77,10 @@ function vvixState(v?:number|null){
 function liveSkewState(r?:number|null){
   if(!finite(r))return"UNAVAILABLE";
   const x=Number(r);
-  if(x>=1.20)return"EXTREME DOWNSIDE SKEW";
-  if(x>=1.10)return"STRETCHED DOWNSIDE SKEW";
-  if(x>1.05)return"ELEVATED DOWNSIDE SKEW";
-  if(x<.95)return"UPSIDE SKEW";
+  if(x>=1.20)return"EXTREME DOWNSIDE PROTECTION";
+  if(x>=1.10)return"STRETCHED DOWNSIDE PROTECTION";
+  if(x>1.05)return"ELEVATED DOWNSIDE PROTECTION";
+  if(x<.95)return"UPSIDE-LEANING OPTIONS";
   return"NORMAL / BALANCED";
 }
 function officialSkewState(v?:number|null,p?:number|null){
