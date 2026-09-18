@@ -1,5 +1,7 @@
 name: RE-ENTRY Secondary Confirmation Enrichment
 
+# Production merges refresh the live enrichment contract.
+
 on:
   workflow_dispatch:
   push:
