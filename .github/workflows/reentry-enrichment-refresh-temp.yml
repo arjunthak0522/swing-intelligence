@@ -1,0 +1,129 @@
+name: RE-ENTRY Enrichment Refresh Temp
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: reentry-unified-engine
+  cancel-in-progress: false
+
+jobs:
+  enrich:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout live data branch
+        uses: actions/checkout@v4
+        with:
+          ref: intraday-signal-research
+          fetch-depth: 0
+
+      - name: Checkout canonical main source
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: _main
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install indicator dependencies
+        run: python -m pip install --quiet pandas yfinance
+
+      - name: Capture canonical decision before enrichment
+        run: |
+          python - <<'PY' > /tmp/reentry-decision-before.json
+          import json
+          from pathlib import Path
+          payload=json.loads(Path('data/reentry/exhaustion_intraday_current.json').read_text())
+          engine=payload.get('unified_engine') or {}
+          keys=['engine_version','deployment_signal','market_condition','recovery_stage','confirmation_strength','oversold_gate','fast_family_count','context_support_count','state','decision','go_triggered_at_et']
+          print(json.dumps({k:engine.get(k) for k in keys},sort_keys=True))
+          PY
+
+      - name: Enrich canonical snapshot
+        continue-on-error: true
+        run: |
+          python _main/tools/reentry_secondary_confirmation.py --snapshot data/reentry/exhaustion_intraday_current.json --history data/reentry/secondary_confirmation_history.csv
+          python _main/tools/reentry_options_sentiment_live.py --snapshot data/reentry/exhaustion_intraday_current.json
+          python _main/tools/reentry_leading_indicators.py --snapshot data/reentry/exhaustion_intraday_current.json --breadth-history data/reentry/exhaustion_intraday_history.csv
+          python _main/tools/reentry_ndx_single_stock_skew.py --snapshot data/reentry/exhaustion_intraday_current.json --history data/reentry/ndx_single_stock_skew_history.csv
+
+      - name: Enforce complete indicator contract
+        run: python _main/tools/reentry_indicator_completeness.py --snapshot data/reentry/exhaustion_intraday_current.json
+
+      - name: Verify immutable decision and complete contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          before=json.loads(Path('/tmp/reentry-decision-before.json').read_text())
+          payload=json.loads(Path('data/reentry/exhaustion_intraday_current.json').read_text())
+          engine=payload.get('unified_engine') or {}
+          after={k:engine.get(k) for k in before}
+          assert before==after,(before,after)
+          leading=payload.get('leading_indicators') or {}
+          inds=(leading.get('indicators') or {})
+          required={'zweig_breadth_thrust','mcclellan_velocity','nasdaq_short_breadth','credit_risk_turn','ndx_single_stock_skew'}
+          assert required.issubset(set(inds)), required-set(inds)
+          secondary=payload.get('secondary_confirmation') or {}
+          options=(secondary.get('families') or {}).get('options_sentiment') or {}
+          assert options.get('final_daily_t_plus_one_enforced') is True, options
+          obs=options.get('official_daily_observation_date')
+          requested=options.get('requested_market_date')
+          if obs and requested:
+              assert obs < requested,(obs,requested)
+          assert isinstance(payload.get('indicator_completeness'),dict)
+          print(json.dumps({
+            'deployment_signal':engine.get('deployment_signal'),
+            'decision':engine.get('decision'),
+            'ndx_status':(inds.get('ndx_single_stock_skew') or {}).get('status'),
+            'cpce_t1':options.get('final_daily_t_plus_one_enforced'),
+            'cpce_observation':obs,
+            'cpce_requested':requested
+          },indent=2))
+          PY
+
+      - name: Persist enriched snapshot
+        run: |
+          git config user.name 're-entry-engine[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/reentry/exhaustion_intraday_current.json
+          [ -f data/reentry/secondary_confirmation_history.csv ] && git add data/reentry/secondary_confirmation_history.csv || true
+          [ -f data/reentry/ndx_single_stock_skew_history.csv ] && git add data/reentry/ndx_single_stock_skew_history.csv || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Record complete RE-ENTRY indicator context [skip ci]"
+            git pull --rebase origin intraday-signal-research
+            git push origin HEAD:intraday-signal-research
+          fi
+
+      - name: Publish enriched canonical snapshot to Supabase
+        env:
+          SUPABASE_REENTRY_URL: https://gexrdfzxmlnaawzmtlrk.supabase.co/functions/v1/reentry-intraday
+        run: |
+          set -euo pipefail
+          TOKEN_JSON="$(curl -fsS -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=reentry-supabase")"
+          OIDC_TOKEN="$(printf '%s' "$TOKEN_JSON" | python -c 'import json,sys; print(json.load(sys.stdin)["value"])')"
+          python - <<'PY' > /tmp/reentry-publish.json
+          import json
+          from pathlib import Path
+          print(json.dumps({'snapshot':json.loads(Path('data/reentry/exhaustion_intraday_current.json').read_text())}))
+          PY
+          HTTP_CODE="$(curl -sS -o /tmp/reentry-publish-response.json -w '%{http_code}' -X POST -H "Authorization: Bearer ${OIDC_TOKEN}" -H 'Content-Type: application/json' --data-binary @/tmp/reentry-publish.json "$SUPABASE_REENTRY_URL")"
+          cat /tmp/reentry-publish-response.json
+          echo
+          test "$HTTP_CODE" -ge 200 -a "$HTTP_CODE" -lt 300
+          python - <<'PY'
+          import json
+          response=json.load(open('/tmp/reentry-publish-response.json'))
+          assert response.get('ok') is True,response
+          print('Supabase publish confirmed')
+          PY
