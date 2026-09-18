@@ -1,0 +1,42 @@
+name: PR18 Secondary Research Temp
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install research dependencies
+        run: python -m pip install --quiet pandas numpy yfinance requests beautifulsoup4
+
+      - name: Run existing secondary-family incremental validation
+        run: python tools/reentry_secondary_family_validation.py
+
+      - name: Print research verdicts
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('artifacts/reentry_secondary_family_validation/secondary_family_incremental_validation.json')
+          data=json.loads(p.read_text())
+          print(json.dumps(data.get('overall'), indent=2))
+          print(json.dumps({
+            'risk_appetite': ((data.get('families') or {}).get('risk_appetite') or {}).get('verdict'),
+            'breadth_thrust': ((data.get('families') or {}).get('breadth_thrust') or {}).get('verdict'),
+            'options_sentiment': ((data.get('families') or {}).get('options_sentiment') or {}).get('verdict'),
+          }, indent=2))
+          PY
