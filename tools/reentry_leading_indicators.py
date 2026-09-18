@@ -109,7 +109,7 @@ def zweig_breadth_thrust(rows: list[dict], values: dict, market_date: str | None
     else:
         state = "NEUTRAL"
     return {
-        "name": "Zweig Breadth Thrust",
+        "name": "Rapid breadth participation surge",
         "state": state,
         "current_10d_ema": current,
         "current_raw_advance_share": float(raw.iloc[-1]),
@@ -118,7 +118,7 @@ def zweig_breadth_thrust(rows: list[dict], values: dict, market_date: str | None
         "minimum_sessions": MIN_ZBT_SESSIONS,
         "triggered": triggered,
         "direction": "RISING" if len(ema10) >= 2 and ema10.iloc[-1] > ema10.iloc[-2] else "FALLING" if len(ema10) >= 2 and ema10.iloc[-1] < ema10.iloc[-2] else "FLAT",
-        "benchmark": "Classic watch: 10-day EMA of advancing share moves from <=40% to >=61.5% within 10 trading sessions.",
+        "benchmark": "Classic breadth-thrust watch: the 10-day average of advancing-stock share moves from 40% or less to 61.5% or more within 10 trading sessions.",
         "meaning": "Looks for a rapid shift from broad selling to broad participation. It can turn before price-based trend confirmation.",
         "role": "LEADING_CONTEXT_ONLY",
         "decision_input": False,
@@ -168,7 +168,7 @@ def mcclellan_velocity(rows: list[dict], values: dict, market_date: str | None, 
         state = "FLAT"
         direction = "FLAT"
     return {
-        "name": "Nasdaq McClellan Oscillator velocity",
+        "name": "Nasdaq breadth momentum speed",
         "state": state,
         "current_namo": vals[-1],
         "change_1_session": delta1,
@@ -178,8 +178,8 @@ def mcclellan_velocity(rows: list[dict], values: dict, market_date: str | None, 
         "history_sessions": len(vals),
         "minimum_reliable_velocity_sessions": MIN_VELOCITY_HISTORY,
         "direction": direction,
-        "benchmark": "Positive velocity means breadth momentum is improving. A historical velocity percentile is shown only after 20 captured changes.",
-        "meaning": "Measures how quickly Nasdaq breadth momentum is repairing, rather than waiting for a slower Summation Index confirmation.",
+        "benchmark": "A positive change means Nasdaq breadth momentum is improving. A reliable historical percentile is shown only after 20 captured changes.",
+        "meaning": "Measures how quickly Nasdaq participation momentum is repairing instead of waiting for a slower cumulative breadth trend to confirm.",
         "role": "LEADING_CONTEXT_ONLY",
         "decision_input": False,
         "freshness_type": "INTRADAY_SNAPSHOT_PLUS_CAPTURED_HISTORY",
@@ -294,7 +294,7 @@ def nasdaq_short_breadth(market_date: str | None) -> dict:
     direction_score = sum(1 if finite(v) and float(v) > 1 else -1 if finite(v) and float(v) < -1 else 0 for v in (five_change, ten_change))
     direction = "RISING" if direction_score > 0 else "FALLING" if direction_score < 0 else "FLAT"
     return {
-        "name": "Short-term Nasdaq breadth",
+        "name": "Short-term Nasdaq participation",
         "state": state,
         "direction": direction,
         **out,
@@ -302,8 +302,8 @@ def nasdaq_short_breadth(market_date: str | None) -> dict:
         "coverage_5dma_pct": 100.0 * totals[5]["valid"] / len(symbols),
         "coverage_10dma_pct": 100.0 * totals[10]["valid"] / len(symbols),
         "batch_workers": MAX_BATCH_WORKERS,
-        "benchmark": "5DMA reacts fastest; 10DMA is steadier. Rising percentages after a washout indicate participation is repairing before slower breadth measures confirm.",
-        "meaning": "Shows how many Nasdaq stocks are reclaiming very short moving averages, which can expose an early internal turn in QQQ before the index looks fully recovered.",
+        "benchmark": "The 5-day average reacts fastest; the 10-day average is steadier. Rising percentages after a washout mean more Nasdaq stocks are participating in the recovery.",
+        "meaning": "Shows how many Nasdaq stocks are reclaiming very short-term trends, which can expose an early internal turn before the Nasdaq-100 index looks fully recovered.",
         "role": "LEADING_CONTEXT_ONLY",
         "decision_input": False,
         "freshness_type": "CURRENT_DAILY_BAR",
@@ -338,14 +338,14 @@ def credit_risk_turn() -> dict:
         state = "MIXED"
     direction = "RISING" if finite(one) and one > 0 else "FALLING" if finite(one) and one < 0 else "FLAT"
     return {
-        "name": "Credit-risk turn",
+        "name": "Credit risk improvement",
         "state": state,
         "direction": direction,
         "hyg_lqd_ratio": current,
         "change_1d": one,
         "change_5d": five,
-        "benchmark": "Rising HYG/LQD means lower-quality credit is outperforming investment-grade credit. A 1-day turn before the 5-day trend improves can be an early risk-appetite clue.",
-        "meaning": "Credit can begin calming before equities fully recover. This is displayed separately but is not double-counted in RE-ENTRY's existing risk-appetite family.",
+        "benchmark": "When high-yield bonds begin outperforming investment-grade bonds, investors are showing more willingness to take credit risk. A one-day improvement before the five-day trend turns can be an early clue.",
+        "meaning": "Credit markets can begin calming before stocks fully recover. This provides an early cross-asset clue without being counted twice in the RE-ENTRY decision.",
         "role": "LEADING_CONTEXT_ONLY",
         "decision_input": False,
         "freshness_type": "DAILY_CLOSE_OR_CURRENT_BAR",
