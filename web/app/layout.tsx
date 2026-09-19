@@ -1,13 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import "./retail-overrides.css";
+import "./commercial.css";
 
 export const metadata: Metadata = {
-  title: "RE-ENTRY",
-  description: "Know when waiting stops helping.",
+  title: "BTFD",
+  description: "Know when the dip is worth buying.",
   appleWebApp: {
     capable: true,
-    title: "RE-ENTRY",
+    title: "BTFD",
     statusBarStyle: "default",
   },
   formatDetection: {
@@ -19,16 +20,14 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#f8fafc",
+  themeColor: "#f7f6f2",
 };
 
-// The unified dashboard owns decision freshness and market-phase labeling.
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
       <body>
         <style>{`
-          /* Fintech design-panel density pass: preserve hierarchy, remove dead masthead space. */
           .shell { padding-top: 10px; }
           .topbar { min-height: 46px; padding: 2px 2px 10px; }
           .hero { padding: 24px 28px 24px; }

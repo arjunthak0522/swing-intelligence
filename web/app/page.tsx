@@ -1,140 +1,142 @@
-import { CircleAlert, Clock3, Radio } from "lucide-react";
-import MarketMovementTables from "./MarketMovementTables";
-import ReentryDecisionDetails from "./ReentryDecisionDetails";
-import SecondaryConfirmation from "./SecondaryConfirmation";
-import LeadingIndicators from "./LeadingIndicators";
-import AggregateHistoricalEvidence from "./AggregateHistoricalEvidence";
-import ReentryOpportunityWindow from "./ReentryOpportunityWindow";
-import { getCashPolicyEvidence, getHistoricalEpisodeEvidence } from "../lib/historicalEvidence";
-import { getIntradaySnapshot, getLatestSnapshot, getWashoutSnapshot, pct, type IntradaySnapshot, type WashoutSnapshot } from "../lib/reentry";
+import Link from "next/link";
+import { ArrowRight, Check, ShieldCheck } from "lucide-react";
+import { getHistoricalEpisodeEvidence } from "../lib/historicalEvidence";
+import { deriveCommercialState, getCanonicalCommercialSnapshot } from "../lib/commercial";
 
 export const dynamic = "force-dynamic";
 
-type ProductEngineFields = {
-  deployment_signal?: "HOLD_CASH" | "WATCH" | "DEPLOY" | string;
-  deployment_reason?: string;
-  market_condition?: "EXTENDED" | "BALANCED" | "PULLBACK" | "OVERSOLD" | "RECOVERING_FROM_OVERSOLD" | string;
-  market_condition_reason?: string;
-  recovery_stage?: "EARLY" | "DEVELOPING" | "BROAD_CONFIRMATION" | "NOT_APPLICABLE" | string;
-  recovery_stage_reason?: string;
-  confirmation_strength?: "NARROW" | "BUILDING" | "BROAD" | "NOT_APPLICABLE" | string;
-  extension_signal_count?: number;
-  weak_signal_count?: number;
-  reentry_window_active?: boolean;
-  reentry_window_trigger_date?: string|null;
-  reentry_window_age_sessions?: number|null;
-  reentry_window_research_status?: string|null;
-  reentry_window_reason?: string|null;
-};
-
-function stateClass(value:string){const v=value.toUpperCase();if(v.includes("DEPLOY")||v.includes("GO_EARLY")||v.includes("GO EARLY"))return"good";if(v.includes("WATCH"))return"warn";if(v.includes("HOLD")||v.includes("WAIT"))return"neutral";return"neutral";}
-function conditionLabel(value?:string){if(value==="RECOVERING_FROM_OVERSOLD")return"RECOVERING FROM OVERSOLD";if(value==="EXTENDED")return"EXTENDED / OVERBOUGHT";return(value||"UNAVAILABLE").replaceAll("_"," ");}
-function recoveryLabel(value?:string){if(value==="BROAD_CONFIRMATION")return"BROAD CONFIRMATION";if(value==="NOT_APPLICABLE")return"N/A";return(value||"UNAVAILABLE").replaceAll("_"," ");}
-function formatTimestamp(value?:string|null){if(!value)return"UNAVAILABLE";const d=new Date(value);if(Number.isNaN(d.getTime()))return value;return d.toLocaleString("en-US",{timeZone:"America/New_York",month:"short",day:"numeric",hour:"numeric",minute:"2-digit",timeZoneName:"short"});}
-function etDate(value?:string|null){if(!value)return null;const d=new Date(value);if(Number.isNaN(d.getTime()))return null;return new Intl.DateTimeFormat("en-CA",{timeZone:"America/New_York",year:"numeric",month:"2-digit",day:"2-digit"}).format(d);}
-function getFeedState(washout:WashoutSnapshot|null){const u=washout?.unified_engine;if(!washout||!u)return{kind:"UNAVAILABLE" as const,label:"RE-ENTRY ENGINE UNAVAILABLE"};if((u.data_quality_status||washout.data_quality?.status||"").toUpperCase()==="UNAVAILABLE")return{kind:"UNAVAILABLE" as const,label:"RE-ENTRY ENGINE UNAVAILABLE"};const phase=u.market_phase||"UNAVAILABLE";const stamp=u.timestamp_et||washout.snapshot_generated_at_et||washout.values?.timestamp_et;if((phase==="LIVE_PROVISIONAL"||phase==="CLOSE_SETTLING")&&stamp){const ageMs=Date.now()-new Date(stamp).getTime();if(!Number.isFinite(ageMs)||ageMs>30*60*1000)return{kind:"STALE" as const,label:"STALE DATA"};}if(!stamp)return{kind:"STALE" as const,label:"STALE DATA"};return{kind:"OK" as const,label:"OK"};}
-function phaseLabel(phase?:string){if(phase==="MARKET_CLOSED_FINAL")return"MARKET CLOSED - FINAL";if(phase==="CLOSE_SETTLING")return"CLOSE SETTLING";if(phase==="LIVE_PROVISIONAL")return"LIVE - PROVISIONAL";return"UNAVAILABLE";}
-
-function UnifiedHero({washout}:{washout:WashoutSnapshot}){
-  const u=washout.unified_engine!;
-  const product=u as typeof u&ProductEngineFields;
-  const deployment=product.deployment_signal||(u.decision==="GO_EARLY"?"DEPLOY":u.decision==="WATCH"?"WATCH":"HOLD_CASH");
-  const label=deployment==="HOLD_CASH"?"HOLD CASH":deployment;
-  const condition=conditionLabel(product.market_condition);
-  const recovery=recoveryLabel(product.recovery_stage);
-  const fast=u.fast_family_count??0;
-  const context=u.context_support_count??0;
-  return <section className="hero card">
-    <div className="eyebrow-row"><span className="eyebrow">TODAY'S CASH SIGNAL</span><span className="freshness"><Clock3 size={14}/> {phaseLabel(u.market_phase)}</span></div>
-    <div className="hero-grid">
-      <div><div className={`signal ${stateClass(deployment)}`}>{label}</div><div className="signal-subline">{product.deployment_reason||u.decision_reason||"Canonical cash-deployment reason unavailable."}</div></div>
-      <div className="decision-summary">
-        <span className="summary-label">MARKET CONDITION</span><h3 style={{margin:"4px 0 10px"}}>{condition}</h3><p>{product.market_condition_reason||"Market-condition context unavailable."}</p>
-        {deployment==="DEPLOY"?<><span className="summary-label">RECOVERY STAGE</span><h3 style={{margin:"4px 0 8px"}}>{recovery}</h3><p>{product.recovery_stage_reason||"Recovery-stage interpretation unavailable."}</p></>:null}
-        <div className="decision-tags"><span><small>Oversold setup</small><b>{u.oversold_gate?"YES":"NO"}</b></span><span><small>Fast reversal families</small><b>{fast}/4</b></span><span><small>Context support</small><b>{context}/4</b></span>{deployment==="DEPLOY"?<span><small>Confirmation</small><b>{product.confirmation_strength||"UNAVAILABLE"}</b></span>:null}</div>
-      </div>
-    </div>
-  </section>;
+function pct(value?: number | null) {
+  return typeof value === "number" && Number.isFinite(value) ? (value * 100).toFixed(1) + "%" : "Audit pending";
 }
 
-function MarketContext({live,washout}:{live:IntradaySnapshot|null;washout:WashoutSnapshot}){
-  const phase=washout.unified_engine?.market_phase;
-  const spy=live?.quotes?.SPY;
-  const qqq=live?.quotes?.QQQ;
-  const last=spy?.timestamp?formatTimestamp(spy.timestamp):"UNAVAILABLE";
-  const canonicalDate=washout.unified_engine?.market_date||washout.values?.market_date||null;
-  const quoteDate=etDate(spy?.timestamp);
-  const quoteIsCurrentSession=Boolean(canonicalDate&&quoteDate&&canonicalDate===quoteDate);
-  const periodLabel=quoteIsCurrentSession&&phase==="LIVE_PROVISIONAL"?"today":quoteIsCurrentSession?"current session":"last available session";
-  return <section className="card section-card live-card">
-    <div className="section-heading"><div><span className="kicker">MARKET PHASE</span><h2>{phaseLabel(phase)}</h2></div><span className="freshness"><Radio size={14}/> Price context {last}</span></div>
-    {live?<><div className="live-grid"><div className="live-stat"><small>S&P 500 ETF <span>(SPY)</span> {periodLabel}</small><strong>{pct(spy?.change_pct,2)}</strong><span>{spy?.price?.toFixed(2)??"-"}</span></div><div className="live-stat"><small>Nasdaq-100 ETF <span>(QQQ)</span> {periodLabel}</small><strong>{pct(qqq?.change_pct,2)}</strong><span>{qqq?.price?.toFixed(2)??"-"}</span></div></div>{!quoteIsCurrentSession?<div className="notice"><CircleAlert size={16}/> Price context is from the last available quoted session and is not used to compute or override the current RE-ENTRY decision.</div>:null}</>:<div className="notice"><CircleAlert size={16}/> Price-context feed unavailable. The canonical RE-ENTRY decision is not replaced or recomputed.</div>}
-  </section>;
-}
+export default async function LandingPage() {
+  const [snapshot, historical] = await Promise.all([
+    getCanonicalCommercialSnapshot(),
+    getHistoricalEpisodeEvidence(),
+  ]);
+  const state = deriveCommercialState(snapshot);
+  const trialUrl = process.env.NEXT_PUBLIC_WHOP_TRIAL_URL || "/app";
+  const validation = historical?.final_policy_validation?.SPY?.["30"];
+  const sampleCount = historical?.retail_validation_summary?.final_independent_reentry_episodes;
 
-export default async function Home(){
-  const[snapshot,intraday,washoutDirect,historical,cashPolicy]=await Promise.all([getLatestSnapshot(),getIntradaySnapshot(),getWashoutSnapshot(),getHistoricalEpisodeEvidence(),getCashPolicyEvidence()]);
-  const embeddedCanonical=(intraday as(IntradaySnapshot&{canonical_snapshot?:WashoutSnapshot|null})|null)?.canonical_snapshot??null;
-  const washout=washoutDirect||embeddedCanonical;
-  const feed=getFeedState(washout);
-  const unified=washout?.unified_engine;
-  const product=unified as(typeof unified&ProductEngineFields)|undefined;
-  const currentAction=product?.deployment_signal||(unified?.decision==="GO_EARLY"?"DEPLOY":unified?.decision==="WATCH"?"WATCH":unified?"HOLD_CASH":null);
-  const currentCondition=product?.market_condition||null;
-  return <main className="shell">
-    <style>{`
-      /* Fintech hierarchy pass: make the scan path decision -> recovery -> evidence -> diagnostics. */
-      .behavior-badge{display:none!important}
-      section:has(.indicator-grid) .section-intro{display:none}
-      .decision-summary>p:last-child{display:none}
+  return (
+    <main className="btfd-page">
+      <nav className="btfd-nav">
+        <Link href="/" className="btfd-wordmark">BTFD</Link>
+        <div className="btfd-nav-actions">
+          <Link href="/evidence" className="btfd-text-link">Evidence</Link>
+          <Link href={trialUrl} className="btfd-button small">Try free</Link>
+        </div>
+      </nav>
 
-      /* Detailed indicator cards: one explanation, then a quiet benchmark. */
-      .indicator-card .plain-explain:not(.behavior-copy){display:none}
-      .behavior-copy{background:transparent!important;padding:0!important;margin:9px 0 10px!important}
-      .behavior-copy b{font-size:0!important}
-      .behavior-copy b:after{content:"WHY IT MATTERS FOR RE-ENTRY";font-size:7px;letter-spacing:.1em}
-      .indicator-freshness{display:none!important}
-      .indicator-detail{display:none!important}
-      .indicator-reference{padding:7px 8px!important;background:rgba(240,238,232,.58)!important;color:var(--muted)!important}
-      .indicator-card{padding:14px!important}
-      .indicator-value{font-size:24px!important;margin:8px 0 7px!important}
-      .indicator-badges{margin-bottom:4px!important}
+      <section className="btfd-hero btfd-container">
+        <div className="btfd-hero-copy">
+          <span className="btfd-eyebrow">Market re-entry, simplified</span>
+          <h1>Should you buy the dip yet?</h1>
+          <p className="btfd-lede">
+            BTFD watches the recovery after a market pullback and reduces the decision to one actionable choice:
+            stay parked in SGOV, or move the sidelined allocation into VOO.
+          </p>
+          <div className="btfd-hero-actions">
+            <Link href={trialUrl} className="btfd-button">Try BTFD free <ArrowRight size={17} /></Link>
+            <Link href="/evidence" className="btfd-secondary-button">See the evidence</Link>
+          </div>
+          <p className="btfd-micro">Built for sidelined cash. Not a sell signal for an existing long-term portfolio.</p>
+        </div>
 
-      /* Secondary confirmation: Recovery Read leads; research plumbing recedes. */
-      .secondary-note,.secondary-validation,.secondary-freshness{display:none!important}
-      .secondary-benchmark{margin-top:7px!important;padding:7px 8px!important;background:rgba(240,238,232,.58)!important;color:var(--muted)!important}
-      .secondary-card{padding:12px!important}
-      .secondary-plain{display:none!important}
-      .secondary-behavior-copy{margin-top:8px!important}
-      .secondary-foot{font-size:9px!important;opacity:.82}
+        <div className="btfd-live-card">
+          <div className="btfd-live-top">
+            <span>Current BTFD state</span>
+            <span className="btfd-live-dot">LIVE MODEL</span>
+          </div>
+          <div className={"btfd-state " + (state.label === "BUY VOO" ? "buy" : state.label === "WATCH" ? "watch" : "hold")}>
+            {state.label}
+          </div>
+          <h2>{state.action}</h2>
+          <p>{state.summary}</p>
+          <div className="btfd-progress" aria-label="HOLD CASH to WATCH to BUY VOO progression">
+            <span className={state.label === "HOLD CASH" ? "active" : ""}>HOLD CASH</span>
+            <i />
+            <span className={state.label === "WATCH" ? "active" : ""}>WATCH</span>
+            <i />
+            <span className={state.label === "BUY VOO" ? "active" : ""}>BUY VOO</span>
+          </div>
+        </div>
+      </section>
 
-      /* Reversal evidence should scan as status first, explanation second. */
-      .family-row{padding:8px 0!important}
-      .family-copy{font-size:8.5px!important;line-height:1.35!important}
-      .engine-meta{opacity:.78}
+      <section className="btfd-container btfd-section">
+        <div className="btfd-section-heading">
+          <span className="btfd-eyebrow">The entire product</span>
+          <h2>Wait in SGOV until the evidence changes.</h2>
+        </div>
+        <div className="btfd-three">
+          <article>
+            <span className="btfd-step">01</span>
+            <h3>Market pulls back</h3>
+            <p>BTFD waits. The sidelined allocation stays in SGOV.</p>
+          </article>
+          <article>
+            <span className="btfd-step">02</span>
+            <h3>Recovery begins</h3>
+            <p>WATCH means conditions are improving, but the allocation still stays in SGOV.</p>
+          </article>
+          <article>
+            <span className="btfd-step">03</span>
+            <h3>Buy threshold fires</h3>
+            <p>BUY VOO means move the designated re-entry allocation from SGOV into VOO.</p>
+          </article>
+        </div>
+      </section>
 
-      /* Keep lower-priority market tables visually subordinate. */
-      footer{opacity:.72}
-    `}</style>
-    <header className="topbar"><div><span className="brand">RE-ENTRY</span><span className="tagline">Know when waiting stops helping.</span></div><div className="top-status">{unified?phaseLabel(unified.market_phase):"UNAVAILABLE"}</div></header>
-    {feed.kind!=="OK"?<section className="card data-blocked"><CircleAlert/><div><b>{feed.label}</b><p>{feed.kind==="STALE"?"The canonical unified snapshot is older than the allowed live-session freshness window. It is shown below for transparency but must not be treated as current.":"No fallback decision is shown when the unified engine cannot be loaded."}</p></div></section>:null}
-    {!washout||!unified?null:<>
-      <div className="priority-stack">
-        <UnifiedHero washout={washout}/>
-        <ReentryOpportunityWindow washout={washout}/>
-      </div>
-      <div className="tier-label"><span>HISTORICAL EDGE</span><p>What happened after comparable re-entry opportunities.</p></div>
-      <AggregateHistoricalEvidence evidence={historical} cashPolicy={cashPolicy} currentAction={currentAction} currentCondition={currentCondition}/>
-      <div className="tier-label"><span>CURRENT MARKET EVIDENCE</span><p>What today's internals say about the quality and maturity of the setup.</p></div>
-      <MarketContext live={intraday} washout={washout}/>
-      <SecondaryConfirmation washout={washout}/>
-      <LeadingIndicators washout={washout}/>
-      <details className="diagnostics-shell">
-        <summary><span>DEEP DIAGNOSTICS</span><small>Engine inputs, reversal families, sectors and subsectors</small></summary>
-        <ReentryDecisionDetails washout={washout}/>
-        {snapshot?<MarketMovementTables snapshot={snapshot} live={intraday}/>:<section className="card section-card"><div className="notice"><CircleAlert size={16}/> Sector and subsector context unavailable.</div></section>}
-      </details>
-    </>}
-    <footer>REENTRY_UNIFIED_v1 is the only operational decision source. HOLD CASH is the normal state when no oversold setup exists; WATCH means an oversold setup is developing; DEPLOY means the qualifying reversal has fired. RE-ENTRY WINDOW is persistent opportunity context only and never creates or overrides a DEPLOY signal. Market-condition, recovery-stage, secondary-confirmation, and leading-indicator labels are descriptive context and never create a second decision engine.</footer>
-  </main>;
+      <section className="btfd-proof-wrap">
+        <div className="btfd-container btfd-proof">
+          <div>
+            <span className="btfd-eyebrow">Historical evidence</span>
+            <h2>Every signal has to earn trust.</h2>
+            <p>
+              The commercial evidence layer will show all qualifying historical events, including weak outcomes and failed starts.
+              Public performance claims remain locked until the commercial backtest audit is complete.
+            </p>
+            <Link href="/evidence" className="btfd-inline-link">Inspect the research dataset <ArrowRight size={16} /></Link>
+          </div>
+          <div className="btfd-proof-stats">
+            <div><strong>{sampleCount ?? "Audit pending"}</strong><span>independent historical re-entry episodes in the current research archive</span></div>
+            <div><strong>{pct(validation?.median_return)}</strong><span>30-trading-day median S&P 500 proxy return in the current research archive</span></div>
+            <div><strong>{pct(validation?.positive_rate)}</strong><span>positive after 30 trading days in the current research archive</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section className="btfd-container btfd-trust">
+        <div>
+          <ShieldCheck size={23} />
+          <h3>One engine</h3>
+          <p>The customer experience reads the canonical REENTRY_UNIFIED_v1 snapshot. It does not create a second signal.</p>
+        </div>
+        <div>
+          <Check size={23} />
+          <h3>No indicator homework</h3>
+          <p>Market internals stay underneath the product. The primary decision stays SGOV or VOO.</p>
+        </div>
+        <div>
+          <Check size={23} />
+          <h3>No constant trading</h3>
+          <p>BTFD is only about putting sidelined cash back to work after pullbacks.</p>
+        </div>
+      </section>
+
+      <section className="btfd-final-cta">
+        <div className="btfd-container">
+          <span className="btfd-eyebrow">Stop guessing after the pullback</span>
+          <h2>Know when waiting has stopped helping.</h2>
+          <Link href={trialUrl} className="btfd-button light">Try BTFD free <ArrowRight size={17} /></Link>
+        </div>
+      </section>
+
+      <footer className="btfd-footer btfd-container">
+        <span>BTFD</span>
+        <p>Generalized market intelligence only. Historical and hypothetical results do not guarantee future performance.</p>
+      </footer>
+    </main>
+  );
 }
