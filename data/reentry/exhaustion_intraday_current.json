@@ -647,11 +647,11 @@
           "source": "Nasdaq current Nasdaq-100 constituent feed + Yahoo Finance constituent option chains",
           "replication_status": "FREE_DATA_PROXY_NOT_GOLDMAN_EXACT",
           "validation_status": "LIVE_CONTEXT_ONLY_NO_FREE_HISTORICAL_OPTION_SURFACE",
-          "error": "ValueError: Insufficient NDX single-stock option coverage: 0/101 (0.0%)"
+          "error": "ValueError: Insufficient NDX single-stock option coverage: 34/101 (33.7%)"
         }
       },
       "errors": {
-        "ndx_single_stock_skew": "ValueError: Insufficient NDX single-stock option coverage: 0/101 (0.0%)"
+        "ndx_single_stock_skew": "ValueError: Insufficient NDX single-stock option coverage: 34/101 (33.7%)"
       }
     }
   },
@@ -986,11 +986,11 @@
         "source": "Nasdaq current Nasdaq-100 constituent feed + Yahoo Finance constituent option chains",
         "replication_status": "FREE_DATA_PROXY_NOT_GOLDMAN_EXACT",
         "validation_status": "LIVE_CONTEXT_ONLY_NO_FREE_HISTORICAL_OPTION_SURFACE",
-        "error": "ValueError: Insufficient NDX single-stock option coverage: 0/101 (0.0%)"
+        "error": "ValueError: Insufficient NDX single-stock option coverage: 34/101 (33.7%)"
       }
     },
     "errors": {
-      "ndx_single_stock_skew": "ValueError: Insufficient NDX single-stock option coverage: 0/101 (0.0%)"
+      "ndx_single_stock_skew": "ValueError: Insufficient NDX single-stock option coverage: 34/101 (33.7%)"
     }
   },
   "indicator_completeness": {
