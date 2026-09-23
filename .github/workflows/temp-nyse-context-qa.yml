@@ -1,0 +1,73 @@
+name: Temporary NYSE Context QA
+
+on:
+  push:
+    branches:
+      - feature/nyse-context-indicators
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python QA dependencies
+        run: python -m pip install --quiet pytest pandas yfinance
+
+      - name: Python syntax and regression tests
+        run: |
+          python -m py_compile tools/reentry_nyse_context.py tools/reentry_indicator_completeness.py tools/reentry_leading_indicators.py
+          pytest -q tests/test_reentry_nyse_context.py tests/test_plain_english_indicator_copy.py
+
+      - name: Exercise live NYSE context fetch without changing engine decision
+        shell: bash
+        run: |
+          git fetch origin intraday-signal-research --depth=2
+          git show origin/intraday-signal-research:data/reentry/exhaustion_intraday_current.json > /tmp/reentry.json
+          python - <<'PY' > /tmp/before.json
+          import json
+          p=json.load(open('/tmp/reentry.json'))
+          e=p.get('unified_engine') or {}
+          keys=['engine_version','deployment_signal','state','decision','recovery_stage','confirmation_strength','oversold_gate','fast_family_count','context_support_count']
+          print(json.dumps({k:e.get(k) for k in keys},sort_keys=True))
+          PY
+          python tools/reentry_nyse_context.py --snapshot /tmp/reentry.json --history /tmp/nyse_context_history.csv
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/reentry.json'))
+          e=p.get('unified_engine') or {}
+          before=json.load(open('/tmp/before.json'))
+          after={k:e.get(k) for k in before}
+          assert before == after, (before, after)
+          i=(p.get('nyse_context') or {}).get('indicators') or {}
+          expected={'nyse_tick','nyse_new_highs_lows','classic_nyse_zweig_breadth_thrust'}
+          assert expected.issubset(i), i.keys()
+          assert all(i[k].get('decision_input') is False for k in expected)
+          assert i['nyse_tick'].get('status') in {'READY','UNAVAILABLE'}
+          assert i['nyse_new_highs_lows'].get('status') in {'READY','UNAVAILABLE'}
+          print(json.dumps(i,indent=2))
+          print('NYSE live fetch + decision immutability PASS')
+          PY
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Production web build
+        working-directory: web
+        run: |
+          npm ci
+          npm run build
