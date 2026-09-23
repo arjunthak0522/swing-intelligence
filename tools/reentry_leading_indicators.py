@@ -109,7 +109,7 @@ def zweig_breadth_thrust(rows: list[dict], values: dict, market_date: str | None
     else:
         state = "NEUTRAL"
     return {
-        "name": "Rapid breadth participation surge",
+        "name": "Nasdaq breadth participation surge",
         "state": state,
         "current_10d_ema": current,
         "current_raw_advance_share": float(raw.iloc[-1]),
@@ -119,13 +119,13 @@ def zweig_breadth_thrust(rows: list[dict], values: dict, market_date: str | None
         "triggered": triggered,
         "direction": "RISING" if len(ema10) >= 2 and ema10.iloc[-1] > ema10.iloc[-2] else "FALLING" if len(ema10) >= 2 and ema10.iloc[-1] < ema10.iloc[-2] else "FLAT",
         "benchmark": "Classic breadth-thrust watch: the 10-day average of advancing-stock share moves from 40% or less to 61.5% or more within 10 trading sessions.",
-        "meaning": "Looks for a rapid shift from broad selling to broad participation. It can turn before price-based trend confirmation.",
+        "meaning": "Uses Nasdaq advancing-stock participation to look for a rapid shift from broad selling to broad buying. This is a Nasdaq breadth-thrust proxy, not the classic NYSE Zweig series.",
         "role": "LEADING_CONTEXT_ONLY",
         "decision_input": False,
         "freshness_type": "INTRADAY_SNAPSHOT_PLUS_CAPTURED_HISTORY",
         "last_updated": stamp,
         "status": "READY" if enough else "BUILDING_HISTORY",
-        "source": "RE-ENTRY captured Nasdaq advancing/declining issues",
+        "source": "RE-ENTRY captured Nasdaq advancing/declining issues (Nasdaq breadth-thrust proxy)",
     }
 
 
@@ -392,7 +392,7 @@ def main() -> None:
         "credit_risk_turn": credit_risk_turn,
     }
     names = {
-        "zweig_breadth_thrust": "Zweig Breadth Thrust",
+        "zweig_breadth_thrust": "Nasdaq breadth participation surge",
         "mcclellan_velocity": "Nasdaq McClellan Oscillator velocity",
         "nasdaq_short_breadth": "Short-term Nasdaq breadth",
         "credit_risk_turn": "Credit-risk turn",
