@@ -534,7 +534,7 @@
       "purpose": "Detect early internal repair before the recovery becomes obvious. These indicators provide context only and cannot create, block, delay, or revoke DEPLOY.",
       "indicators": {
         "zweig_breadth_thrust": {
-          "name": "Rapid breadth participation surge",
+          "name": "Nasdaq breadth participation surge",
           "state": "NEUTRAL",
           "current_10d_ema": 0.4339608743733395,
           "current_raw_advance_share": 0.23025906735751295,
@@ -544,13 +544,13 @@
           "triggered": false,
           "direction": "FALLING",
           "benchmark": "Classic breadth-thrust watch: the 10-day average of advancing-stock share moves from 40% or less to 61.5% or more within 10 trading sessions.",
-          "meaning": "Looks for a rapid shift from broad selling to broad participation. It can turn before price-based trend confirmation.",
+          "meaning": "Uses Nasdaq advancing-stock participation to look for a rapid shift from broad selling to broad buying. This is a Nasdaq breadth-thrust proxy, not the classic NYSE Zweig series.",
           "role": "LEADING_CONTEXT_ONLY",
           "decision_input": false,
           "freshness_type": "INTRADAY_SNAPSHOT_PLUS_CAPTURED_HISTORY",
           "last_updated": "2026-09-23T16:37:06.273633-04:00",
           "status": "READY",
-          "source": "RE-ENTRY captured Nasdaq advancing/declining issues",
+          "source": "RE-ENTRY captured Nasdaq advancing/declining issues (Nasdaq breadth-thrust proxy)",
           "freshness_state": "DELAYED"
         },
         "mcclellan_velocity": {
@@ -635,11 +635,59 @@
           "source": "Nasdaq current Nasdaq-100 constituent feed + Yahoo Finance constituent option chains",
           "replication_status": "FREE_DATA_PROXY_NOT_GOLDMAN_EXACT",
           "validation_status": "LIVE_CONTEXT_ONLY_NO_FREE_HISTORICAL_OPTION_SURFACE",
-          "error": "ValueError: Insufficient NDX single-stock option coverage: 0/101 (0.0%)"
+          "error": "ValueError: Insufficient NDX single-stock option coverage: 37/101 (36.6%)"
         }
       },
       "errors": {
-        "ndx_single_stock_skew": "ValueError: Insufficient NDX single-stock option coverage: 0/101 (0.0%)"
+        "ndx_single_stock_skew": "ValueError: Insufficient NDX single-stock option coverage: 37/101 (36.6%)"
+      }
+    },
+    "nyse_context": {
+      "version": "REENTRY_NYSE_CONTEXT_v1",
+      "decision_input": false,
+      "changes_deploy_trigger": false,
+      "changes_recovery_stage": false,
+      "creates_new_score": false,
+      "indicators": {
+        "nyse_tick": {
+          "name": "NYSE buying vs selling ticks",
+          "state": "UNAVAILABLE",
+          "direction": "UNAVAILABLE",
+          "role": "LEADING_CONTEXT_ONLY",
+          "decision_input": false,
+          "freshness_type": "INTRADAY_OR_DELAYED",
+          "freshness_state": "UNAVAILABLE",
+          "last_updated": null,
+          "status": "UNAVAILABLE",
+          "meaning": "No current or recent valid observation was available. The indicator remains listed so missing data is explicit rather than silently omitted."
+        },
+        "nyse_new_highs_lows": {
+          "name": "NYSE new highs vs new lows",
+          "state": "UNAVAILABLE",
+          "direction": "UNAVAILABLE",
+          "role": "LEADING_CONTEXT_ONLY",
+          "decision_input": false,
+          "freshness_type": "INTRADAY_OR_DELAYED",
+          "freshness_state": "UNAVAILABLE",
+          "last_updated": null,
+          "status": "UNAVAILABLE",
+          "meaning": "No current or recent valid observation was available. The indicator remains listed so missing data is explicit rather than silently omitted."
+        },
+        "classic_nyse_zweig_breadth_thrust": {
+          "name": "Classic NYSE breadth thrust",
+          "state": "UNAVAILABLE",
+          "direction": "UNAVAILABLE",
+          "role": "LEADING_CONTEXT_ONLY",
+          "decision_input": false,
+          "freshness_type": "CAPTURED_DAILY_HISTORY_PLUS_CURRENT_INTRADAY",
+          "freshness_state": "UNAVAILABLE",
+          "last_updated": null,
+          "status": "UNAVAILABLE",
+          "meaning": "No current or recent valid observation was available. The indicator remains listed so missing data is explicit rather than silently omitted."
+        }
+      },
+      "errors": {
+        "block": "NYSE context builder did not complete"
       }
     }
   },
@@ -873,7 +921,7 @@
     "purpose": "Detect early internal repair before the recovery becomes obvious. These indicators provide context only and cannot create, block, delay, or revoke DEPLOY.",
     "indicators": {
       "zweig_breadth_thrust": {
-        "name": "Rapid breadth participation surge",
+        "name": "Nasdaq breadth participation surge",
         "state": "NEUTRAL",
         "current_10d_ema": 0.4339608743733395,
         "current_raw_advance_share": 0.23025906735751295,
@@ -883,13 +931,13 @@
         "triggered": false,
         "direction": "FALLING",
         "benchmark": "Classic breadth-thrust watch: the 10-day average of advancing-stock share moves from 40% or less to 61.5% or more within 10 trading sessions.",
-        "meaning": "Looks for a rapid shift from broad selling to broad participation. It can turn before price-based trend confirmation.",
+        "meaning": "Uses Nasdaq advancing-stock participation to look for a rapid shift from broad selling to broad buying. This is a Nasdaq breadth-thrust proxy, not the classic NYSE Zweig series.",
         "role": "LEADING_CONTEXT_ONLY",
         "decision_input": false,
         "freshness_type": "INTRADAY_SNAPSHOT_PLUS_CAPTURED_HISTORY",
         "last_updated": "2026-09-23T16:37:06.273633-04:00",
         "status": "READY",
-        "source": "RE-ENTRY captured Nasdaq advancing/declining issues",
+        "source": "RE-ENTRY captured Nasdaq advancing/declining issues (Nasdaq breadth-thrust proxy)",
         "freshness_state": "DELAYED"
       },
       "mcclellan_velocity": {
@@ -974,11 +1022,11 @@
         "source": "Nasdaq current Nasdaq-100 constituent feed + Yahoo Finance constituent option chains",
         "replication_status": "FREE_DATA_PROXY_NOT_GOLDMAN_EXACT",
         "validation_status": "LIVE_CONTEXT_ONLY_NO_FREE_HISTORICAL_OPTION_SURFACE",
-        "error": "ValueError: Insufficient NDX single-stock option coverage: 0/101 (0.0%)"
+        "error": "ValueError: Insufficient NDX single-stock option coverage: 37/101 (36.6%)"
       }
     },
     "errors": {
-      "ndx_single_stock_skew": "ValueError: Insufficient NDX single-stock option coverage: 0/101 (0.0%)"
+      "ndx_single_stock_skew": "ValueError: Insufficient NDX single-stock option coverage: 37/101 (36.6%)"
     }
   },
   "indicator_completeness": {
@@ -1008,5 +1056,53 @@
     "source": "RE-ENTRY calculated NYSE 40-day breadth; technical reference: T2108-style reconstruction",
     "validation_status": "VALIDATED_CONTEXT_ONLY",
     "validation_note": "Incremental validation across 94 DEPLOY episodes found the NYSE 40-day breadth reconstruction highly redundant with existing breadth (correlation about 0.94). Requiring below 40% and rising delayed entry by a median two sessions and cost median +0.17% for the S&P 500 ETF and +0.33% for the Nasdaq-100 ETF. Keep as breadth context only, not a vote or required confirmation."
+  },
+  "nyse_context": {
+    "version": "REENTRY_NYSE_CONTEXT_v1",
+    "decision_input": false,
+    "changes_deploy_trigger": false,
+    "changes_recovery_stage": false,
+    "creates_new_score": false,
+    "indicators": {
+      "nyse_tick": {
+        "name": "NYSE buying vs selling ticks",
+        "state": "UNAVAILABLE",
+        "direction": "UNAVAILABLE",
+        "role": "LEADING_CONTEXT_ONLY",
+        "decision_input": false,
+        "freshness_type": "INTRADAY_OR_DELAYED",
+        "freshness_state": "UNAVAILABLE",
+        "last_updated": null,
+        "status": "UNAVAILABLE",
+        "meaning": "No current or recent valid observation was available. The indicator remains listed so missing data is explicit rather than silently omitted."
+      },
+      "nyse_new_highs_lows": {
+        "name": "NYSE new highs vs new lows",
+        "state": "UNAVAILABLE",
+        "direction": "UNAVAILABLE",
+        "role": "LEADING_CONTEXT_ONLY",
+        "decision_input": false,
+        "freshness_type": "INTRADAY_OR_DELAYED",
+        "freshness_state": "UNAVAILABLE",
+        "last_updated": null,
+        "status": "UNAVAILABLE",
+        "meaning": "No current or recent valid observation was available. The indicator remains listed so missing data is explicit rather than silently omitted."
+      },
+      "classic_nyse_zweig_breadth_thrust": {
+        "name": "Classic NYSE breadth thrust",
+        "state": "UNAVAILABLE",
+        "direction": "UNAVAILABLE",
+        "role": "LEADING_CONTEXT_ONLY",
+        "decision_input": false,
+        "freshness_type": "CAPTURED_DAILY_HISTORY_PLUS_CURRENT_INTRADAY",
+        "freshness_state": "UNAVAILABLE",
+        "last_updated": null,
+        "status": "UNAVAILABLE",
+        "meaning": "No current or recent valid observation was available. The indicator remains listed so missing data is explicit rather than silently omitted."
+      }
+    },
+    "errors": {
+      "block": "NYSE context builder did not complete"
+    }
   }
 }
