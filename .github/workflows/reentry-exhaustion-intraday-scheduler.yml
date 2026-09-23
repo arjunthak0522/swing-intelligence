@@ -85,6 +85,11 @@ jobs:
           REENTRY_CURRENT_PATH: ${{ github.workspace }}/data/reentry/exhaustion_intraday_current.json
         run: python _main/tools/reentry_mmfd_intraday.py
 
+      - name: Calculate NYSE context indicators
+        if: steps.window.outputs.active == 'true'
+        continue-on-error: true
+        run: python _main/tools/reentry_nyse_context.py --snapshot data/reentry/exhaustion_intraday_current.json --history data/reentry/nyse_context_history.csv
+
       - name: Calculate SPX downside skew
         if: steps.window.outputs.active == 'true'
         continue-on-error: true
@@ -303,12 +308,12 @@ jobs:
 
           stamp = engine.get('timestamp_et') or (payload.get('values') or {}).get('timestamp_et')
           carried = []
-          for key in ('secondary_confirmation', 'leading_indicators', 'indicator_completeness', 'complete_indicator_snapshot'):
+          for key in ('secondary_confirmation', 'leading_indicators', 'nyse_context', 'indicator_completeness', 'complete_indicator_snapshot'):
               if not isinstance(payload.get(key), dict) and isinstance(prior.get(key), dict):
                   payload[key] = copy.deepcopy(prior[key])
                   carried.append(key)
 
-          for key in ('secondary_confirmation', 'leading_indicators'):
+          for key in ('secondary_confirmation', 'leading_indicators', 'nyse_context'):
               if isinstance(payload.get(key), dict):
                   payload[key]['carried_forward_at_et'] = stamp
                   payload[key]['carry_forward_reason'] = 'Latest valid same-session context retained while core intraday feeds refresh.'
@@ -342,7 +347,7 @@ jobs:
       - name: Persist unified RE-ENTRY output
         if: steps.window.outputs.active == 'true' && steps.decision.outputs.valid == 'true'
         run: |
-          if [ -z "$(git status --porcelain -- data/reentry/exhaustion_intraday_history.csv data/reentry/exhaustion_intraday_current.json data/reentry/skew_intraday_history.csv data/reentry/unified_engine_history.csv data/reentry/unified_snapshot_ledger.csv)" ]; then
+          if [ -z "$(git status --porcelain -- data/reentry/exhaustion_intraday_history.csv data/reentry/exhaustion_intraday_current.json data/reentry/skew_intraday_history.csv data/reentry/unified_engine_history.csv data/reentry/unified_snapshot_ledger.csv data/reentry/nyse_context_history.csv)" ]; then
             echo 'No RE-ENTRY state change'
             exit 0
           fi
@@ -398,4 +403,5 @@ jobs:
             data/reentry/skew_intraday_history.csv
             data/reentry/unified_engine_history.csv
             data/reentry/unified_snapshot_ledger.csv
+            data/reentry/nyse_context_history.csv
           retention-days: 30
