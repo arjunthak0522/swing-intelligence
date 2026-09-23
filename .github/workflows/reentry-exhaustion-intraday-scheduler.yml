@@ -308,12 +308,12 @@ jobs:
 
           stamp = engine.get('timestamp_et') or (payload.get('values') or {}).get('timestamp_et')
           carried = []
-          for key in ('secondary_confirmation', 'leading_indicators', 'indicator_completeness', 'complete_indicator_snapshot'):
+          for key in ('secondary_confirmation', 'leading_indicators', 'nyse_context', 'indicator_completeness', 'complete_indicator_snapshot'):
               if not isinstance(payload.get(key), dict) and isinstance(prior.get(key), dict):
                   payload[key] = copy.deepcopy(prior[key])
                   carried.append(key)
 
-          for key in ('secondary_confirmation', 'leading_indicators'):
+          for key in ('secondary_confirmation', 'leading_indicators', 'nyse_context'):
               if isinstance(payload.get(key), dict):
                   payload[key]['carried_forward_at_et'] = stamp
                   payload[key]['carry_forward_reason'] = 'Latest valid same-session context retained while core intraday feeds refresh.'
