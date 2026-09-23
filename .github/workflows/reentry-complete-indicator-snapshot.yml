@@ -70,7 +70,7 @@ jobs:
           except Exception as exc:
               print(f'Prior enriched snapshot unavailable: {exc}')
 
-          for key in ('secondary_confirmation','leading_indicators'):
+          for key in ('secondary_confirmation','leading_indicators','nyse_context'):
               if not isinstance(payload.get(key), dict) and isinstance(prior.get(key), dict):
                   payload[key] = copy.deepcopy(prior[key])
               if isinstance(payload.get(key), dict):
