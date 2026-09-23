@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - feature/nyse-context-indicators
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
