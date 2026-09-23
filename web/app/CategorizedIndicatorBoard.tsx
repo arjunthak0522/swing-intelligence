@@ -70,6 +70,11 @@ export default function CategorizedIndicatorBoard({ washout }: { washout: Washou
   const zweig = (lead.zweig_breadth_thrust || {}) as AnyRecord;
   const credit = (lead.credit_risk_turn || {}) as AnyRecord;
   const ndxSkew = (lead.ndx_single_stock_skew || {}) as AnyRecord;
+  const nyseContext = (w.nyse_context || u.nyse_context || {}) as AnyRecord;
+  const nyseIndicators = (nyseContext.indicators || {}) as AnyRecord;
+  const nyseTick = (nyseIndicators.nyse_tick || {}) as AnyRecord;
+  const nyseHighLow = (nyseIndicators.nyse_new_highs_lows || {}) as AnyRecord;
+  const classicNyseZweig = (nyseIndicators.classic_nyse_zweig_breadth_thrust || {}) as AnyRecord;
   const risk = (sf.risk_appetite || {}) as AnyRecord;
   const vol = (sf.vol_structure || {}) as AnyRecord;
   const thrust = (sf.breadth_thrust || {}) as AnyRecord;
@@ -116,13 +121,16 @@ export default function CategorizedIndicatorBoard({ washout }: { washout: Washou
         row("Nasdaq Advances", fmt(v.NAADV ?? nasi.live_advances, 0), "BREADTH", "—", "INTRADAY / DELAYED", "CONTEXT"),
         row("Nasdaq Declines", fmt(v.NADEC ?? nasi.live_declines, 0), "BREADTH", "—", "INTRADAY / DELAYED", "CONTEXT"),
         row("Nasdaq Advance Share", pctPoint(advanceShare), clean(thrust.state), "—", clean(thrust.freshness_state || thrust.freshness_type), "SECONDARY CONFIRMATION"),
+        row("NYSE Buying vs Selling Ticks", fmt(nyseTick.value, 0), clean(nyseTick.state), clean(nyseTick.direction), clean(nyseTick.freshness_state || nyseTick.freshness_type), "LEADING CONTEXT", "$TICK"),
+        row("NYSE New Highs vs New Lows", typeof nyseHighLow.new_highs === "number" && typeof nyseHighLow.new_lows === "number" ? `${nyseHighLow.new_highs.toFixed(0)} / ${nyseHighLow.new_lows.toFixed(0)}` : "UNAVAILABLE", clean(nyseHighLow.state), clean(nyseHighLow.direction), clean(nyseHighLow.freshness_state || nyseHighLow.freshness_type), "LEADING CONTEXT", "$NYHGH / $NYLOW"),
+        row("Classic NYSE Breadth Thrust", typeof classicNyseZweig.current_10d_ema === "number" ? `${(classicNyseZweig.current_10d_ema * 100).toFixed(1)}%` : "UNAVAILABLE", clean(classicNyseZweig.state), clean(classicNyseZweig.direction), clean(classicNyseZweig.freshness_state || classicNyseZweig.freshness_type), "LEADING CONTEXT", "Zweig · NYSE"),
         row("NYSE Breadth Momentum", fmt(v.NYMO), "MOMENTUM", "—", "PRIOR CLOSE WHEN LIVE FEED UNAVAILABLE", "FAST-FAMILY INPUT", "NYMO"),
         row("Nasdaq Breadth Momentum", fmt(v.NAMO), "MOMENTUM", "—", "PRIOR CLOSE WHEN LIVE FEED UNAVAILABLE", "FAST-FAMILY INPUT", "NAMO"),
         row("Nasdaq Breadth Momentum Oscillator", fmt(nasi.mcclellan_oscillator), "BREADTH MOMENTUM", clean(v.NASI_DIRECTION), "INTRADAY / PROVISIONAL", "CONTEXT", "McClellan Oscillator"),
         row("Longer-Term Nasdaq Breadth Trend", fmt(nasi.summation_index), "BREADTH TREND", clean(v.NASI_DIRECTION), "INTRADAY / PROVISIONAL", "CONTEXT", "Nasdaq Summation Index"),
         row("Nasdaq Breadth Momentum Speed", fmt(mcVelocity.change_1_session), clean(mcVelocity.state), clean(mcVelocity.direction), clean(mcVelocity.freshness_state || mcVelocity.freshness_type), "LEADING CONTEXT", "McClellan Velocity"),
         row("Breadth Participation Thrust", pctPoint(advanceShare), clean(thrust.state), "—", clean(thrust.freshness_state || thrust.freshness_type), "SECONDARY CONFIRMATION"),
-        row("Rapid Breadth Participation Surge", zweig.triggered === true ? "TRIGGERED" : zweig.triggered === false ? "NOT TRIGGERED" : "UNAVAILABLE", clean(zweig.state), clean(zweig.direction), clean(zweig.freshness_state || zweig.freshness_type), "LEADING CONTEXT", "Zweig Breadth Thrust"),
+        row("Nasdaq Breadth Participation Surge", zweig.triggered === true ? "TRIGGERED" : zweig.triggered === false ? "NOT TRIGGERED" : "UNAVAILABLE", clean(zweig.state), clean(zweig.direction), clean(zweig.freshness_state || zweig.freshness_type), "LEADING CONTEXT", "Nasdaq breadth-thrust proxy"),
       ],
     },
     {
@@ -232,13 +240,16 @@ export default function CategorizedIndicatorBoard({ washout }: { washout: Washou
     "Nasdaq Advances": "Number of Nasdaq stocks trading higher. More advances relative to declines means participation is broadening.",
     "Nasdaq Declines": "Number of Nasdaq stocks trading lower. A large decline count shows weakness is spread across the market.",
     "Nasdaq Advance Share": "The share of Nasdaq issues advancing. Higher participation makes a rebound healthier; low participation means the tape remains defensive.",
+    "NYSE Buying vs Selling Ticks": "Shows whether more NYSE stocks are trading on upticks or downticks right now. Large positive readings show broad immediate buying pressure; large negative readings show broad immediate selling pressure.",
+    "NYSE New Highs vs New Lows": "Compares NYSE stocks making new 52-week highs with those making new 52-week lows. More new lows means deterioration is spreading; more new highs means leadership is broadening.",
+    "Classic NYSE Breadth Thrust": "Uses the classic NYSE breadth-thrust formula to test whether participation has shifted rapidly from broad selling to broad buying. It is context only and cannot change DEPLOY.",
     "NYSE Breadth Momentum": "Measures whether advancing or declining NYSE stocks have the stronger momentum. The engine watches for this reading to turn higher after a selloff.",
     "Nasdaq Breadth Momentum": "Measures whether advancing or declining Nasdaq stocks have the stronger momentum. The engine watches for this reading to turn higher after a selloff.",
     "Nasdaq Breadth Momentum Oscillator": "Tracks the balance and momentum of advancing versus declining Nasdaq stocks. Negative readings show weak internal participation; improvement shows repair.",
     "Longer-Term Nasdaq Breadth Trend": "A slower cumulative view of Nasdaq participation. It helps show whether the internal market is broadly improving or deteriorating over time.",
     "Nasdaq Breadth Momentum Speed": "Measures how quickly Nasdaq breadth momentum is changing, helping expose an early turn before slower breadth measures confirm.",
     "Breadth Participation Thrust": "Checks whether advancing stocks are suddenly dominating enough to show broad participation in a rebound.",
-    "Rapid Breadth Participation Surge": "Looks for a rapid shift from broad selling to broad participation, a classic sign that market internals have changed character.",
+    "Nasdaq Breadth Participation Surge": "Uses Nasdaq participation as a separate breadth-thrust proxy. It is not the classic NYSE Zweig calculation.",
     "NYSE Buying vs Selling Volume": "Compares buying volume with selling volume on the NYSE. Improvement feeds the engine's Buying-Volume Improvement family.",
     "Nasdaq Buying vs Selling Volume": "Compares buying volume with selling volume on Nasdaq. Improvement feeds the engine's Buying-Volume Improvement family.",
     "NYSE Down/Up Volume Ratio": "Shows how strongly downside volume is dominating NYSE volume. A sharp drop from the prior reading can trigger Downside Volume Relief.",
