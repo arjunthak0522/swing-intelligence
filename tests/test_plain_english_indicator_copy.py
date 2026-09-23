@@ -18,6 +18,7 @@ PAYLOAD_FILES = [
     ROOT / "tools/reentry_ndx_single_stock_skew.py",
     ROOT / "tools/reentry_options_sentiment_live.py",
     ROOT / "tools/reentry_indicator_completeness.py",
+    ROOT / "tools/reentry_nyse_context.py",
 ]
 
 # These are allowed in secondary technical/reference fields, source fields and internal
