@@ -262,6 +262,28 @@ def ensure_indicator_blocks(payload: dict) -> None:
     breadth_context.setdefault("t2108", unavailable_card("NYSE Stocks Above 40-Day Moving Average", "DAILY_CLOSE_OR_PRIOR_CLOSE", "BREADTH_CONTEXT_ONLY"))
     normalize_row_freshness(breadth_context["t2108"], target_date, phase)
 
+    nyse = payload.get("nyse_context")
+    if not isinstance(nyse, dict):
+        nyse = {
+            "version": "REENTRY_NYSE_CONTEXT_v1",
+            "decision_input": False,
+            "changes_deploy_trigger": False,
+            "changes_recovery_stage": False,
+            "creates_new_score": False,
+            "indicators": {},
+            "errors": {"block": "NYSE context builder did not complete"},
+        }
+        payload["nyse_context"] = nyse
+    nyse_indicators = nyse.setdefault("indicators", {})
+    nyse_names = {
+        "nyse_tick": ("NYSE buying vs selling ticks", "INTRADAY_OR_DELAYED"),
+        "nyse_new_highs_lows": ("NYSE new highs vs new lows", "INTRADAY_OR_DELAYED"),
+        "classic_nyse_zweig_breadth_thrust": ("Classic NYSE breadth thrust", "CAPTURED_DAILY_HISTORY_PLUS_CURRENT_INTRADAY"),
+    }
+    for key, (name, cadence) in nyse_names.items():
+        nyse_indicators.setdefault(key, unavailable_card(name, cadence, "LEADING_CONTEXT_ONLY"))
+        normalize_row_freshness(nyse_indicators[key], target_date, phase)
+
     if isinstance(payload.get("skew_live"), dict):
         normalize_row_freshness(payload["skew_live"], target_date, phase)
 
@@ -269,6 +291,7 @@ def ensure_indicator_blocks(payload: dict) -> None:
     if isinstance(engine, dict):
         engine["leading_indicators"] = block
         engine["secondary_confirmation"] = secondary
+        engine["nyse_context"] = nyse
 
 
 def repair_quality(payload: dict) -> None:
