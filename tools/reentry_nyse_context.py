@@ -85,9 +85,18 @@ def read_history(path: Path) -> list[dict]:
 def upsert_daily_history(path: Path, row: dict) -> None:
     rows = read_history(path)
     by_day = {item.get("market_date"): item for item in rows if item.get("market_date")}
-    by_day[row["market_date"]] = {key: "" if value is None else value for key, value in row.items()}
+    existing = dict(by_day.get(row["market_date"], {}))
+    for key, value in row.items():
+        if value is not None and value != "":
+            existing[key] = value
+    existing["market_date"] = row["market_date"]
+    by_day[row["market_date"]] = existing
     path.parent.mkdir(parents=True, exist_ok=True)
-    fields = ["market_date", "nyse_advances", "nyse_declines", "advance_share", "source_timestamp"]
+    fields = [
+        "market_date", "nyse_advances", "nyse_declines", "advance_share",
+        "nyse_tick", "tick_session_high", "tick_session_low",
+        "new_highs", "new_lows", "source_timestamp",
+    ]
     with path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
@@ -220,17 +229,32 @@ def main() -> None:
     advances = adv_quote.get("value")
     declines = dec_quote.get("value")
 
-    if market_date and finite(advances) and finite(declines) and advances + declines > 0:
-        share = float(advances) / (float(advances) + float(declines))
+    if market_date:
+        share = (
+            float(advances) / (float(advances) + float(declines))
+            if finite(advances) and finite(declines) and advances + declines > 0
+            else None
+        )
         upsert_daily_history(history_path, {
             "market_date": market_date,
             "nyse_advances": advances,
             "nyse_declines": declines,
             "advance_share": share,
-            "source_timestamp": adv_quote.get("vendor_timestamp") or stamp,
+            "nyse_tick": tick_value,
+            "tick_session_high": tick_quote.get("session_high"),
+            "tick_session_low": tick_quote.get("session_low"),
+            "new_highs": highs,
+            "new_lows": lows,
+            "source_timestamp": (
+                tick_quote.get("vendor_timestamp")
+                or adv_quote.get("vendor_timestamp")
+                or highs_quote.get("vendor_timestamp")
+                or stamp
+            ),
         })
 
     history_rows = read_history(history_path)
+    current_history = next((row for row in reversed(history_rows) if row.get("market_date") == market_date), {})
     zbt = classic_nyse_zweig(history_rows)
     zbt["current_raw_advance_share"] = (
         float(advances) / (float(advances) + float(declines))
@@ -240,25 +264,30 @@ def main() -> None:
     zbt["last_updated"] = adv_quote.get("vendor_timestamp") or stamp
     zbt["freshness_state"] = "DELAYED" if zbt.get("current_raw_advance_share") is not None else "UNAVAILABLE"
 
-    if tick_value is None:
-        tick = unavailable("NYSE buying vs selling ticks", "$TICK", ValueError(errors.get("tick", "No valid observation")))
+    cached_tick = as_float(current_history.get("nyse_tick"))
+    cached_tick_high = as_float(current_history.get("tick_session_high"))
+    cached_tick_low = as_float(current_history.get("tick_session_low"))
+    effective_tick = tick_value if tick_value is not None else cached_tick
+    if effective_tick is None:
+        tick = unavailable("NYSE buying vs selling ticks", "$TICK", ValueError(errors.get("tick", "No valid same-session observation")))
     else:
+        using_cache = tick_value is None
         tick = {
             "name": "NYSE buying vs selling ticks",
             "reference": "$TICK",
-            "value": tick_value,
-            "session_high": tick_quote.get("session_high"),
-            "session_low": tick_quote.get("session_low"),
-            "state": tick_state(tick_value),
-            "direction": "POSITIVE" if tick_value > 0 else "NEGATIVE" if tick_value < 0 else "FLAT",
+            "value": effective_tick,
+            "session_high": tick_quote.get("session_high") if tick_quote.get("session_high") is not None else cached_tick_high,
+            "session_low": tick_quote.get("session_low") if tick_quote.get("session_low") is not None else cached_tick_low,
+            "state": tick_state(effective_tick),
+            "direction": "POSITIVE" if effective_tick > 0 else "NEGATIVE" if effective_tick < 0 else "FLAT",
             "meaning": "Shows whether more NYSE stocks are trading on upticks or downticks at this moment. Large positive readings show broad immediate buying pressure; large negative readings show broad immediate selling pressure.",
             "role": "LEADING_CONTEXT_ONLY",
             "decision_input": False,
             "changes_deploy_trigger": False,
             "changes_recovery_stage": False,
             "freshness_type": "INTRADAY",
-            "freshness_state": "LIVE" if tick_quote.get("realtime") else "DELAYED",
-            "last_updated": tick_quote.get("vendor_timestamp") or stamp,
+            "freshness_state": "CACHED_INTRADAY" if using_cache else "LIVE" if tick_quote.get("realtime") else "DELAYED",
+            "last_updated": tick_quote.get("vendor_timestamp") or current_history.get("source_timestamp") or stamp,
             "status": "READY",
             "source": "StockCharts NYSE TICK ($TICK)",
         }
