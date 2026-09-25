@@ -211,13 +211,3 @@ jobs:
               raise SystemExit(f"Supabase publish did not confirm success: {response}")
           print('Supabase complete canonical snapshot publish confirmed.')
           PY
-
-      - name: Upload confirmation artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: reentry-complete-indicator-context
-          path: |
-            data/reentry/exhaustion_intraday_current.json
-            data/reentry/secondary_confirmation_history.csv
-            data/reentry/ndx_single_stock_skew_history.csv
-          retention-days: 30
