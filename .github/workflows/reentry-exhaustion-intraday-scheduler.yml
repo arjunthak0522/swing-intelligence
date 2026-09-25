@@ -391,17 +391,3 @@ jobs:
               raise SystemExit(f"Supabase publish did not confirm success: {response}")
           print('Supabase canonical snapshot publish confirmed.')
           PY
-
-      - name: Upload unified RE-ENTRY snapshot
-        if: steps.window.outputs.active == 'true' && steps.decision.outputs.valid == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: reentry-unified-engine
-          path: |
-            data/reentry/exhaustion_intraday_history.csv
-            data/reentry/exhaustion_intraday_current.json
-            data/reentry/skew_intraday_history.csv
-            data/reentry/unified_engine_history.csv
-            data/reentry/unified_snapshot_ledger.csv
-            data/reentry/nyse_context_history.csv
-          retention-days: 30
