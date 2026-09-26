@@ -74,6 +74,7 @@ export default function CategorizedIndicatorBoard({ washout }: { washout: Washou
   const nyseIndicators = (nyseContext.indicators || {}) as AnyRecord;
   const nyseTick = (nyseIndicators.nyse_tick || {}) as AnyRecord;
   const nyseHighLow = (nyseIndicators.nyse_new_highs_lows || {}) as AnyRecord;
+  const nyseSummation = (nyseIndicators.nyse_mcclellan_summation_index || {}) as AnyRecord;
   const classicNyseZweig = (nyseIndicators.classic_nyse_zweig_breadth_thrust || {}) as AnyRecord;
   const risk = (sf.risk_appetite || {}) as AnyRecord;
   const vol = (sf.vol_structure || {}) as AnyRecord;
@@ -123,6 +124,7 @@ export default function CategorizedIndicatorBoard({ washout }: { washout: Washou
         row("Nasdaq Advance Share", pctPoint(advanceShare), clean(thrust.state), "—", clean(thrust.freshness_state || thrust.freshness_type), "SECONDARY CONFIRMATION"),
         row("NYSE Buying vs Selling Ticks", fmt(nyseTick.value, 0), clean(nyseTick.state), clean(nyseTick.direction), clean(nyseTick.freshness_state || nyseTick.freshness_type), "LEADING CONTEXT", "$TICK"),
         row("NYSE New Highs vs New Lows", typeof nyseHighLow.new_highs === "number" && typeof nyseHighLow.new_lows === "number" ? `${nyseHighLow.new_highs.toFixed(0)} / ${nyseHighLow.new_lows.toFixed(0)}` : "UNAVAILABLE", clean(nyseHighLow.state), clean(nyseHighLow.direction), clean(nyseHighLow.freshness_state || nyseHighLow.freshness_type), "LEADING CONTEXT", "$NYHGH / $NYLOW"),
+        row("Longer-Term NYSE Breadth Trend", fmt(nyseSummation.value), clean(nyseSummation.state), clean(nyseSummation.direction), clean(nyseSummation.freshness_state || nyseSummation.freshness_type), "LEADING CONTEXT", "$NYSI"),
         row("Classic NYSE Breadth Thrust", typeof classicNyseZweig.current_10d_ema === "number" ? `${(classicNyseZweig.current_10d_ema * 100).toFixed(1)}%` : "UNAVAILABLE", clean(classicNyseZweig.state), clean(classicNyseZweig.direction), clean(classicNyseZweig.freshness_state || classicNyseZweig.freshness_type), "LEADING CONTEXT", "Zweig · NYSE"),
         row("NYSE Breadth Momentum", fmt(v.NYMO), "MOMENTUM", "—", "PRIOR CLOSE WHEN LIVE FEED UNAVAILABLE", "FAST-FAMILY INPUT", "NYMO"),
         row("Nasdaq Breadth Momentum", fmt(v.NAMO), "MOMENTUM", "—", "PRIOR CLOSE WHEN LIVE FEED UNAVAILABLE", "FAST-FAMILY INPUT", "NAMO"),
@@ -242,6 +244,7 @@ export default function CategorizedIndicatorBoard({ washout }: { washout: Washou
     "Nasdaq Advance Share": "The share of Nasdaq issues advancing. Higher participation makes a rebound healthier; low participation means the tape remains defensive.",
     "NYSE Buying vs Selling Ticks": "Shows whether more NYSE stocks are trading on upticks or downticks right now. Large positive readings show broad immediate buying pressure; large negative readings show broad immediate selling pressure.",
     "NYSE New Highs vs New Lows": "Compares NYSE stocks making new 52-week highs with those making new 52-week lows. More new lows means deterioration is spreading; more new highs means leadership is broadening.",
+    "Longer-Term NYSE Breadth Trend": "A slower cumulative view of NYSE participation. Rising readings mean market breadth is improving over time; falling readings mean participation is deteriorating.",
     "Classic NYSE Breadth Thrust": "Uses the classic NYSE breadth-thrust formula to test whether participation has shifted rapidly from broad selling to broad buying. It is context only and cannot change DEPLOY.",
     "NYSE Breadth Momentum": "Measures whether advancing or declining NYSE stocks have the stronger momentum. The engine watches for this reading to turn higher after a selloff.",
     "Nasdaq Breadth Momentum": "Measures whether advancing or declining Nasdaq stocks have the stronger momentum. The engine watches for this reading to turn higher after a selloff.",
