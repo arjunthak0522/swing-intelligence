@@ -18,6 +18,7 @@ SYMBOLS = {
     "new_lows": "$NYLOW",
     "advances": "$NYADV",
     "declines": "$NYDEC",
+    "summation_index": "$NYSI",
 }
 
 
@@ -73,6 +74,16 @@ def high_low_state(highs: float | None, lows: float | None) -> str:
     if lows > highs:
         return "MORE NEW LOWS"
     return "BALANCED"
+
+
+def summation_state(value: float | None) -> str:
+    if value is None:
+        return "UNAVAILABLE"
+    if value > 0:
+        return "POSITIVE BREADTH"
+    if value < 0:
+        return "NEGATIVE BREADTH"
+    return "NEUTRAL"
 
 
 def read_history(path: Path) -> list[dict]:
@@ -222,12 +233,15 @@ def main() -> None:
     lows_quote = quotes.get("new_lows") or {}
     adv_quote = quotes.get("advances") or {}
     dec_quote = quotes.get("declines") or {}
+    summation_quote = quotes.get("summation_index") or {}
 
     tick_value = tick_quote.get("value")
     highs = highs_quote.get("value")
     lows = lows_quote.get("value")
     advances = adv_quote.get("value")
     declines = dec_quote.get("value")
+    summation_value = summation_quote.get("value")
+    summation_prior = summation_quote.get("prior_close")
 
     if market_date:
         share = (
@@ -317,6 +331,33 @@ def main() -> None:
             "source": "StockCharts NYSE New 52-Week Highs/Lows ($NYHGH / $NYLOW)",
         }
 
+    if summation_value is None:
+        nyse_summation = unavailable("NYSE longer-term breadth trend", "$NYSI", ValueError(errors.get("summation_index", "No valid NYSE Summation Index observation")))
+    else:
+        direction = "UNAVAILABLE"
+        if finite(summation_prior):
+            delta = float(summation_value) - float(summation_prior)
+            direction = "RISING" if delta > 0 else "FALLING" if delta < 0 else "FLAT"
+        nyse_summation = {
+            "name": "NYSE longer-term breadth trend",
+            "reference": "$NYSI",
+            "value": summation_value,
+            "prior_close": summation_prior,
+            "change_points": float(summation_value) - float(summation_prior) if finite(summation_prior) else None,
+            "state": summation_state(summation_value),
+            "direction": direction,
+            "meaning": "Tracks the longer-term cumulative direction of NYSE breadth. Rising readings mean participation is improving over time; falling readings mean breadth is deteriorating.",
+            "role": "LEADING_CONTEXT_ONLY",
+            "decision_input": False,
+            "changes_deploy_trigger": False,
+            "changes_recovery_stage": False,
+            "freshness_type": "INTRADAY_OR_DAILY_CLOSE",
+            "freshness_state": "LIVE" if summation_quote.get("realtime") else "DELAYED",
+            "last_updated": summation_quote.get("vendor_timestamp") or stamp,
+            "status": "READY",
+            "source": "StockCharts NYSE McClellan Summation Index ($NYSI)",
+        }
+
     block = {
         "version": "REENTRY_NYSE_CONTEXT_v1",
         "market_date": market_date,
@@ -329,6 +370,7 @@ def main() -> None:
         "indicators": {
             "nyse_tick": tick,
             "nyse_new_highs_lows": high_low,
+            "nyse_mcclellan_summation_index": nyse_summation,
             "classic_nyse_zweig_breadth_thrust": zbt,
         },
         "errors": errors,
