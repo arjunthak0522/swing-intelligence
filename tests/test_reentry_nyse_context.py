@@ -6,7 +6,7 @@ from pathlib import Path
 TOOLS = Path(__file__).resolve().parents[1] / "tools"
 sys.path.insert(0, str(TOOLS))
 
-from reentry_nyse_context import classic_nyse_zweig, high_low_state, tick_state  # noqa: E402
+from reentry_nyse_context import classic_nyse_zweig, high_low_state, summation_state, tick_state  # noqa: E402
 
 
 def test_classic_nyse_zweig_requires_history() -> None:
@@ -41,3 +41,6 @@ def test_context_states_are_descriptive_only() -> None:
     assert tick_state(-900) == "STRONG SELLING"
     assert high_low_state(100, 25) == "MORE NEW HIGHS"
     assert high_low_state(25, 100) == "MORE NEW LOWS"
+    assert summation_state(250) == "POSITIVE BREADTH"
+    assert summation_state(-250) == "NEGATIVE BREADTH"
+    assert summation_state(0) == "NEUTRAL"

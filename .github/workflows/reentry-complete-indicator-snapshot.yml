@@ -131,7 +131,7 @@ jobs:
           if 't2108' not in (secondary.get('breadth_context') or {}): missing.append('t2108')
           if not isinstance(payload.get('skew_live'), dict): missing.append('skew_live')
           nyse_keys = set(((payload.get('nyse_context') or {}).get('indicators') or {}).keys())
-          expected_nyse = {'nyse_tick','nyse_new_highs_lows','classic_nyse_zweig_breadth_thrust'}
+          expected_nyse = {'nyse_tick','nyse_new_highs_lows','nyse_mcclellan_summation_index','classic_nyse_zweig_breadth_thrust'}
           if not expected_nyse.issubset(nyse_keys): missing.append(f'nyse={sorted(expected_nyse-nyse_keys)}')
           if missing: raise SystemExit('Missing indicator cards: ' + ', '.join(missing))
           print('Fast complete indicator contract PASS')
