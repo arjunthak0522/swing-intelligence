@@ -278,6 +278,7 @@ def ensure_indicator_blocks(payload: dict) -> None:
     nyse_names = {
         "nyse_tick": ("NYSE buying vs selling ticks", "INTRADAY_OR_DELAYED"),
         "nyse_new_highs_lows": ("NYSE new highs vs new lows", "INTRADAY_OR_DELAYED"),
+        "nyse_mcclellan_summation_index": ("NYSE longer-term breadth trend", "INTRADAY_OR_DAILY_CLOSE"),
         "classic_nyse_zweig_breadth_thrust": ("Classic NYSE breadth thrust", "CAPTURED_DAILY_HISTORY_PLUS_CURRENT_INTRADAY"),
     }
     for key, (name, cadence) in nyse_names.items():
