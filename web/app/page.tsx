@@ -75,7 +75,7 @@ function MarketContext({live,washout}:{live:IntradaySnapshot|null;washout:Washou
 export default async function Home(){
   const[snapshot,intraday,washoutDirect,historical,cashPolicy]=await Promise.all([getLatestSnapshot(),getIntradaySnapshot(),getWashoutSnapshot(),getHistoricalEpisodeEvidence(),getCashPolicyEvidence()]);
   const embeddedCanonical=(intraday as(IntradaySnapshot&{canonical_snapshot?:WashoutSnapshot|null})|null)?.canonical_snapshot??null;
-  const washout=washoutDirect||embeddedCanonical;
+  const washout=embeddedCanonical||washoutDirect;
   const feed=getFeedState(washout);
   const unified=washout?.unified_engine;
   const product=unified as(typeof unified&ProductEngineFields)|undefined;
