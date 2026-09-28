@@ -1,6 +1,7 @@
 name: RE-ENTRY Unified Engine
 
 # Live refreshes preserve same-session indicator context before publication.
+# Direct MMFD retrieval keeps on-demand refreshes from blocking on full-universe reconstruction.
 
 on:
   workflow_dispatch:
