@@ -50,7 +50,8 @@
     "SKEW_LIVE_PROXY_RATIO": 1.1523730297348171,
     "SKEW_DIRECTION": "UNAVAILABLE",
     "SKEW_OFFICIAL_CLOSE": 144.91000366210938,
-    "SKEW_OFFICIAL_PERCENTILE_2Y": 43.975903614457835
+    "SKEW_OFFICIAL_PERCENTILE_2Y": 43.975903614457835,
+    "T2108": 20.42869641294838
   },
   "nasi_plus": {
     "formula_version": "NASI_PLUS_RSI14_RANA_19_39_EMA4_EMA10_v1",
@@ -304,7 +305,11 @@
     "source_mode": "FINAL_CLOSE_OFFICIAL_SKEW_WITH_LAST_VALID_INTRADAY_PROXY",
     "proxy_error": "ValueError: No SPX expiry between 23 and 37 DTE",
     "source": "Yahoo Finance SPX option chain for live proxy; official SKEW daily close/history. If the post-close option chain is unavailable, the engine preserves the last valid same-session SPX skew proxy and its direction rather than substituting a stale official-close direction.",
-    "timestamp_et": "2026-09-28T14:24:42.348244-04:00"
+    "timestamp_et": "2026-09-28T14:24:42.348244-04:00",
+    "official_freshness_state": "PRIOR_CLOSE",
+    "freshness_type": "INTRADAY_PROXY_PLUS_DAILY_CLOSE",
+    "freshness_state": "LIVE",
+    "last_updated": "2026-09-28T14:24:42.348244-04:00"
   },
   "historical_context": {
     "version": "REENTRY_HISTORICAL_CONTEXT_v1",
@@ -478,7 +483,7 @@
     "actionable": true,
     "secondary_confirmation": {
       "version": "REENTRY_SECONDARY_CONFIRMATION_v1",
-      "timestamp_et": "2026-09-28T14:13:12.927750-04:00",
+      "timestamp_et": "2026-09-28T14:24:43.221139-04:00",
       "market_date": "2026-09-28",
       "decision_input": false,
       "changes_deploy_trigger": false,
@@ -509,15 +514,15 @@
           "name": "Breadth participation thrust",
           "state": "DEFENSIVE",
           "supportive": false,
-          "nasdaq_advance_share": 0.31393109351594267,
-          "advancing_issues": 1467.0,
-          "declining_issues": 3206.0,
+          "nasdaq_advance_share": 0.3130081300813008,
+          "advancing_issues": 1463.0,
+          "declining_issues": 3211.0,
           "benchmark": "<45% defensive \u00b7 45-55% mixed \u00b7 55-61.5% building \u00b7 >=61.5% strong thrust-level participation",
           "retail_explanation": "This checks whether the rebound is spreading across lots of stocks instead of being carried by just a few big names.",
           "signal_behavior": "CONFIRMING",
           "behavior_explanation": "Higher participation confirms that a rebound is broad rather than narrow.",
           "freshness_type": "INTRADAY_SNAPSHOT",
-          "last_updated": "2026-09-28T14:13:12.927750-04:00",
+          "last_updated": "2026-09-28T14:24:43.221139-04:00",
           "source": "Current Nasdaq advancing/declining issues captured by RE-ENTRY",
           "validation_status": "LIMITED_HISTORY_CONTEXT_ONLY",
           "validation_note": "Exact Nasdaq advance/decline history through February 2020 covered 18 historical DEPLOY episodes. None had at least 55% advance share at the DEPLOY start; waiting for that participation threshold took a median one session and cost a median +0.65% for the S&P 500 ETF and +0.58% for the Nasdaq-100 ETF. Keep as research/context only; exact history does not cover 2020-2026.",
@@ -533,12 +538,12 @@
             "small_caps_confirming": false,
             "credit_risk_appetite": true
           },
-          "RSP_SPY": 0.2737433350813696,
-          "RSP_SPY_5d_change": -0.004417542894004645,
-          "IWM_SPY": 0.36589420806001705,
-          "IWM_SPY_5d_change": -0.008967073178268503,
-          "HYG_LQD": 0.7563033383223607,
-          "HYG_LQD_5d_change": 0.010166684625736444,
+          "RSP_SPY": 0.27375872712474975,
+          "RSP_SPY_5d_change": -0.00436156327220405,
+          "IWM_SPY": 0.3659438347313659,
+          "IWM_SPY_5d_change": -0.00883265819089818,
+          "HYG_LQD": 0.7562569819176985,
+          "HYG_LQD_5d_change": 0.010104768072898507,
           "benchmark": "0/3 defensive \u00b7 1/3 mixed \u00b7 2/3 broadening \u00b7 3/3 broad risk-on; positive 5-session relative momentum required",
           "retail_explanation": "This checks whether investors are moving beyond the biggest stocks into equal-weight stocks, small caps, and lower-quality credit.",
           "signal_behavior": "CONFIRMING",
@@ -585,9 +590,9 @@
         "t2108": {
           "name": "NYSE Stocks Above 40-Day Moving Average",
           "symbol": "NYSE-ABOVE-40DMA",
-          "value": 20.69116360454943,
+          "value": 20.42869641294838,
           "prior_value": 23.194748358862146,
-          "change_points": -2.5035847543127154,
+          "change_points": -2.766051945913766,
           "state": "WEAK",
           "direction": "FALLING",
           "decision_input": false,
@@ -595,7 +600,7 @@
           "universe_size": 2295,
           "valid_count": 2286,
           "coverage_pct": 99.6078431372549,
-          "above_40dma_count": 473,
+          "above_40dma_count": 467,
           "benchmark": "<10% extreme oversold \u00b7 10-20% oversold \u00b7 20-40% weak \u00b7 40-70% normal \u00b7 70-80% strong \u00b7 >80% very extended",
           "retail_explanation": "This shows the percentage of NYSE stocks trading above their 40-day moving average. It is an intermediate-speed breadth gauge between very short-term breadth and long-term market structure.",
           "behavior_explanation": "When this falls to deeply oversold levels, it is a contrarian bullish setup for re-entry because weakness is widespread and may be exhausting. A turn higher is the stronger confirmation; the low reading alone does not trigger DEPLOY.",
@@ -607,13 +612,11 @@
           "freshness_state": "DELAYED"
         }
       },
-      "interpretation": "Secondary confirmation describes whether participation, volatility structure, risk appetite, and options sentiment corroborate the existing RE-ENTRY signal. T2108 is separate breadth context and does not change the confirmation score. None of these signals create, block, delay, or revoke DEPLOY.",
-      "carried_forward_at_et": "2026-09-28T14:24:43.221139-04:00",
-      "carry_forward_reason": "Latest valid same-session context retained while core intraday feeds refresh."
+      "interpretation": "Secondary confirmation describes whether participation, volatility structure, risk appetite, and options sentiment corroborate the existing RE-ENTRY signal. T2108 is separate breadth context and does not change the confirmation score. None of these signals create, block, delay, or revoke DEPLOY."
     },
     "leading_indicators": {
       "version": "REENTRY_LEADING_INDICATORS_v1",
-      "timestamp_et": "2026-09-28T14:13:12.927750-04:00",
+      "timestamp_et": "2026-09-28T14:24:43.221139-04:00",
       "market_date": "2026-09-28",
       "decision_input": false,
       "changes_deploy_trigger": false,
@@ -624,8 +627,8 @@
         "zweig_breadth_thrust": {
           "name": "Nasdaq breadth participation surge",
           "state": "NEUTRAL",
-          "current_10d_ema": 0.42053608124011355,
-          "current_raw_advance_share": 0.31393109351594267,
+          "current_10d_ema": 0.4203682697065423,
+          "current_raw_advance_share": 0.3130081300813008,
           "recent_10_session_low_ema": 0.35211175245689663,
           "session_count": 13,
           "minimum_sessions": 10,
@@ -636,7 +639,7 @@
           "role": "LEADING_CONTEXT_ONLY",
           "decision_input": false,
           "freshness_type": "INTRADAY_SNAPSHOT_PLUS_CAPTURED_HISTORY",
-          "last_updated": "2026-09-28T14:13:12.927750-04:00",
+          "last_updated": "2026-09-28T14:24:43.221139-04:00",
           "status": "READY",
           "source": "RE-ENTRY captured Nasdaq advancing/declining issues (Nasdaq breadth-thrust proxy)",
           "freshness_state": "DELAYED"
@@ -657,7 +660,7 @@
           "role": "LEADING_CONTEXT_ONLY",
           "decision_input": false,
           "freshness_type": "INTRADAY_SNAPSHOT_PLUS_CAPTURED_HISTORY",
-          "last_updated": "2026-09-28T14:13:12.927750-04:00",
+          "last_updated": "2026-09-28T14:24:43.221139-04:00",
           "status": "BUILDING_HISTORY",
           "source": "RE-ENTRY NAMO capture history",
           "freshness_state": "DELAYED"
@@ -666,13 +669,13 @@
           "name": "Short-term Nasdaq participation",
           "state": "MIXED",
           "direction": "FALLING",
-          "above_5dma_pct": 32.9503016374605,
+          "above_5dma_pct": 32.318299339270325,
           "prior_above_5dma_pct": 36.368859523125536,
-          "change_5dma_points": -3.418557885665038,
+          "change_5dma_points": -4.050560183855211,
           "valid_5dma": 3481,
-          "above_10dma_pct": 34.21582733812949,
+          "above_10dma_pct": 34.18705035971223,
           "prior_above_10dma_pct": 36.989061600460566,
-          "change_10dma_points": -2.773234262331073,
+          "change_10dma_points": -2.8020112407483353,
           "valid_10dma": 3475,
           "universe_size": 3493,
           "coverage_5dma_pct": 99.65645576868022,
@@ -692,9 +695,9 @@
           "name": "Credit risk improvement",
           "state": "IMPROVING",
           "direction": "RISING",
-          "hyg_lqd_ratio": 0.7564021827191846,
-          "change_1d": 0.002674903338761414,
-          "change_5d": 0.010298707468389567,
+          "hyg_lqd_ratio": 0.7564415181140042,
+          "change_1d": 0.002727045722931809,
+          "change_5d": 0.010351246315383866,
           "benchmark": "When high-yield bonds begin outperforming investment-grade bonds, investors are showing more willingness to take credit risk. A one-day improvement before the five-day trend turns can be an early clue.",
           "meaning": "Credit markets can begin calming before stocks fully recover. This provides an early cross-asset clue without being counted twice in the RE-ENTRY decision.",
           "role": "LEADING_CONTEXT_ONLY",
@@ -723,14 +726,12 @@
           "source": "Nasdaq current Nasdaq-100 constituent feed + Yahoo Finance constituent option chains",
           "replication_status": "FREE_DATA_PROXY_NOT_GOLDMAN_EXACT",
           "validation_status": "LIVE_CONTEXT_ONLY_NO_FREE_HISTORICAL_OPTION_SURFACE",
-          "error": "ValueError: Insufficient NDX single-stock option coverage: 23/101 (22.8%)"
+          "error": "ValueError: Insufficient NDX single-stock option coverage: 0/101 (0.0%)"
         }
       },
       "errors": {
-        "ndx_single_stock_skew": "ValueError: Insufficient NDX single-stock option coverage: 23/101 (22.8%)"
-      },
-      "carried_forward_at_et": "2026-09-28T14:24:43.221139-04:00",
-      "carry_forward_reason": "Latest valid same-session context retained while core intraday feeds refresh."
+        "ndx_single_stock_skew": "ValueError: Insufficient NDX single-stock option coverage: 0/101 (0.0%)"
+      }
     },
     "nyse_context": {
       "version": "REENTRY_NYSE_CONTEXT_v1",
@@ -897,7 +898,8 @@
       "MMFD": true,
       "NASI_PLUS": true,
       "VVIX": true,
-      "SKEW_PROXY": true
+      "SKEW_PROXY": true,
+      "SKEW_OFFICIAL": true
     },
     "mmfd_coverage_pct": 96.13296034227415,
     "note": "Data-quality status does not alter REENTRY_UNIFIED_v1 signal thresholds or state logic."
@@ -911,7 +913,7 @@
   },
   "secondary_confirmation": {
     "version": "REENTRY_SECONDARY_CONFIRMATION_v1",
-    "timestamp_et": "2026-09-28T14:13:12.927750-04:00",
+    "timestamp_et": "2026-09-28T14:24:43.221139-04:00",
     "market_date": "2026-09-28",
     "decision_input": false,
     "changes_deploy_trigger": false,
@@ -942,15 +944,15 @@
         "name": "Breadth participation thrust",
         "state": "DEFENSIVE",
         "supportive": false,
-        "nasdaq_advance_share": 0.31393109351594267,
-        "advancing_issues": 1467.0,
-        "declining_issues": 3206.0,
+        "nasdaq_advance_share": 0.3130081300813008,
+        "advancing_issues": 1463.0,
+        "declining_issues": 3211.0,
         "benchmark": "<45% defensive \u00b7 45-55% mixed \u00b7 55-61.5% building \u00b7 >=61.5% strong thrust-level participation",
         "retail_explanation": "This checks whether the rebound is spreading across lots of stocks instead of being carried by just a few big names.",
         "signal_behavior": "CONFIRMING",
         "behavior_explanation": "Higher participation confirms that a rebound is broad rather than narrow.",
         "freshness_type": "INTRADAY_SNAPSHOT",
-        "last_updated": "2026-09-28T14:13:12.927750-04:00",
+        "last_updated": "2026-09-28T14:24:43.221139-04:00",
         "source": "Current Nasdaq advancing/declining issues captured by RE-ENTRY",
         "validation_status": "LIMITED_HISTORY_CONTEXT_ONLY",
         "validation_note": "Exact Nasdaq advance/decline history through February 2020 covered 18 historical DEPLOY episodes. None had at least 55% advance share at the DEPLOY start; waiting for that participation threshold took a median one session and cost a median +0.65% for the S&P 500 ETF and +0.58% for the Nasdaq-100 ETF. Keep as research/context only; exact history does not cover 2020-2026.",
@@ -966,12 +968,12 @@
           "small_caps_confirming": false,
           "credit_risk_appetite": true
         },
-        "RSP_SPY": 0.2737433350813696,
-        "RSP_SPY_5d_change": -0.004417542894004645,
-        "IWM_SPY": 0.36589420806001705,
-        "IWM_SPY_5d_change": -0.008967073178268503,
-        "HYG_LQD": 0.7563033383223607,
-        "HYG_LQD_5d_change": 0.010166684625736444,
+        "RSP_SPY": 0.27375872712474975,
+        "RSP_SPY_5d_change": -0.00436156327220405,
+        "IWM_SPY": 0.3659438347313659,
+        "IWM_SPY_5d_change": -0.00883265819089818,
+        "HYG_LQD": 0.7562569819176985,
+        "HYG_LQD_5d_change": 0.010104768072898507,
         "benchmark": "0/3 defensive \u00b7 1/3 mixed \u00b7 2/3 broadening \u00b7 3/3 broad risk-on; positive 5-session relative momentum required",
         "retail_explanation": "This checks whether investors are moving beyond the biggest stocks into equal-weight stocks, small caps, and lower-quality credit.",
         "signal_behavior": "CONFIRMING",
@@ -1018,9 +1020,9 @@
       "t2108": {
         "name": "NYSE Stocks Above 40-Day Moving Average",
         "symbol": "NYSE-ABOVE-40DMA",
-        "value": 20.69116360454943,
+        "value": 20.42869641294838,
         "prior_value": 23.194748358862146,
-        "change_points": -2.5035847543127154,
+        "change_points": -2.766051945913766,
         "state": "WEAK",
         "direction": "FALLING",
         "decision_input": false,
@@ -1028,7 +1030,7 @@
         "universe_size": 2295,
         "valid_count": 2286,
         "coverage_pct": 99.6078431372549,
-        "above_40dma_count": 473,
+        "above_40dma_count": 467,
         "benchmark": "<10% extreme oversold \u00b7 10-20% oversold \u00b7 20-40% weak \u00b7 40-70% normal \u00b7 70-80% strong \u00b7 >80% very extended",
         "retail_explanation": "This shows the percentage of NYSE stocks trading above their 40-day moving average. It is an intermediate-speed breadth gauge between very short-term breadth and long-term market structure.",
         "behavior_explanation": "When this falls to deeply oversold levels, it is a contrarian bullish setup for re-entry because weakness is widespread and may be exhausting. A turn higher is the stronger confirmation; the low reading alone does not trigger DEPLOY.",
@@ -1040,13 +1042,11 @@
         "freshness_state": "DELAYED"
       }
     },
-    "interpretation": "Secondary confirmation describes whether participation, volatility structure, risk appetite, and options sentiment corroborate the existing RE-ENTRY signal. T2108 is separate breadth context and does not change the confirmation score. None of these signals create, block, delay, or revoke DEPLOY.",
-    "carried_forward_at_et": "2026-09-28T14:24:43.221139-04:00",
-    "carry_forward_reason": "Latest valid same-session context retained while core intraday feeds refresh."
+    "interpretation": "Secondary confirmation describes whether participation, volatility structure, risk appetite, and options sentiment corroborate the existing RE-ENTRY signal. T2108 is separate breadth context and does not change the confirmation score. None of these signals create, block, delay, or revoke DEPLOY."
   },
   "leading_indicators": {
     "version": "REENTRY_LEADING_INDICATORS_v1",
-    "timestamp_et": "2026-09-28T14:13:12.927750-04:00",
+    "timestamp_et": "2026-09-28T14:24:43.221139-04:00",
     "market_date": "2026-09-28",
     "decision_input": false,
     "changes_deploy_trigger": false,
@@ -1057,8 +1057,8 @@
       "zweig_breadth_thrust": {
         "name": "Nasdaq breadth participation surge",
         "state": "NEUTRAL",
-        "current_10d_ema": 0.42053608124011355,
-        "current_raw_advance_share": 0.31393109351594267,
+        "current_10d_ema": 0.4203682697065423,
+        "current_raw_advance_share": 0.3130081300813008,
         "recent_10_session_low_ema": 0.35211175245689663,
         "session_count": 13,
         "minimum_sessions": 10,
@@ -1069,7 +1069,7 @@
         "role": "LEADING_CONTEXT_ONLY",
         "decision_input": false,
         "freshness_type": "INTRADAY_SNAPSHOT_PLUS_CAPTURED_HISTORY",
-        "last_updated": "2026-09-28T14:13:12.927750-04:00",
+        "last_updated": "2026-09-28T14:24:43.221139-04:00",
         "status": "READY",
         "source": "RE-ENTRY captured Nasdaq advancing/declining issues (Nasdaq breadth-thrust proxy)",
         "freshness_state": "DELAYED"
@@ -1090,7 +1090,7 @@
         "role": "LEADING_CONTEXT_ONLY",
         "decision_input": false,
         "freshness_type": "INTRADAY_SNAPSHOT_PLUS_CAPTURED_HISTORY",
-        "last_updated": "2026-09-28T14:13:12.927750-04:00",
+        "last_updated": "2026-09-28T14:24:43.221139-04:00",
         "status": "BUILDING_HISTORY",
         "source": "RE-ENTRY NAMO capture history",
         "freshness_state": "DELAYED"
@@ -1099,13 +1099,13 @@
         "name": "Short-term Nasdaq participation",
         "state": "MIXED",
         "direction": "FALLING",
-        "above_5dma_pct": 32.9503016374605,
+        "above_5dma_pct": 32.318299339270325,
         "prior_above_5dma_pct": 36.368859523125536,
-        "change_5dma_points": -3.418557885665038,
+        "change_5dma_points": -4.050560183855211,
         "valid_5dma": 3481,
-        "above_10dma_pct": 34.21582733812949,
+        "above_10dma_pct": 34.18705035971223,
         "prior_above_10dma_pct": 36.989061600460566,
-        "change_10dma_points": -2.773234262331073,
+        "change_10dma_points": -2.8020112407483353,
         "valid_10dma": 3475,
         "universe_size": 3493,
         "coverage_5dma_pct": 99.65645576868022,
@@ -1125,9 +1125,9 @@
         "name": "Credit risk improvement",
         "state": "IMPROVING",
         "direction": "RISING",
-        "hyg_lqd_ratio": 0.7564021827191846,
-        "change_1d": 0.002674903338761414,
-        "change_5d": 0.010298707468389567,
+        "hyg_lqd_ratio": 0.7564415181140042,
+        "change_1d": 0.002727045722931809,
+        "change_5d": 0.010351246315383866,
         "benchmark": "When high-yield bonds begin outperforming investment-grade bonds, investors are showing more willingness to take credit risk. A one-day improvement before the five-day trend turns can be an early clue.",
         "meaning": "Credit markets can begin calming before stocks fully recover. This provides an early cross-asset clue without being counted twice in the RE-ENTRY decision.",
         "role": "LEADING_CONTEXT_ONLY",
@@ -1156,18 +1156,39 @@
         "source": "Nasdaq current Nasdaq-100 constituent feed + Yahoo Finance constituent option chains",
         "replication_status": "FREE_DATA_PROXY_NOT_GOLDMAN_EXACT",
         "validation_status": "LIVE_CONTEXT_ONLY_NO_FREE_HISTORICAL_OPTION_SURFACE",
-        "error": "ValueError: Insufficient NDX single-stock option coverage: 23/101 (22.8%)"
+        "error": "ValueError: Insufficient NDX single-stock option coverage: 0/101 (0.0%)"
       }
     },
     "errors": {
-      "ndx_single_stock_skew": "ValueError: Insufficient NDX single-stock option coverage: 23/101 (22.8%)"
-    },
-    "carried_forward_at_et": "2026-09-28T14:24:43.221139-04:00",
-    "carry_forward_reason": "Latest valid same-session context retained while core intraday feeds refresh."
+      "ndx_single_stock_skew": "ValueError: Insufficient NDX single-stock option coverage: 0/101 (0.0%)"
+    }
   },
   "indicator_completeness": {
     "contract": "Every defined indicator is present on every published snapshot. Freshness may be LIVE, DELAYED, CACHED_INTRADAY, TODAY_CLOSE, PRIOR_CLOSE, STALE, or UNAVAILABLE.",
     "official_skew_fallback_error": null,
     "cpce_final_daily_availability": "T+1 only; same-session finalized daily CPCE is blocked."
+  },
+  "t2108_context": {
+    "name": "NYSE Stocks Above 40-Day Moving Average",
+    "symbol": "NYSE-ABOVE-40DMA",
+    "value": 20.42869641294838,
+    "prior_value": 23.194748358862146,
+    "change_points": -2.766051945913766,
+    "state": "WEAK",
+    "direction": "FALLING",
+    "decision_input": false,
+    "supportive": false,
+    "universe_size": 2295,
+    "valid_count": 2286,
+    "coverage_pct": 99.6078431372549,
+    "above_40dma_count": 467,
+    "benchmark": "<10% extreme oversold \u00b7 10-20% oversold \u00b7 20-40% weak \u00b7 40-70% normal \u00b7 70-80% strong \u00b7 >80% very extended",
+    "retail_explanation": "This shows the percentage of NYSE stocks trading above their 40-day moving average. It is an intermediate-speed breadth gauge between very short-term breadth and long-term market structure.",
+    "behavior_explanation": "When this falls to deeply oversold levels, it is a contrarian bullish setup for re-entry because weakness is widespread and may be exhausting. A turn higher is the stronger confirmation; the low reading alone does not trigger DEPLOY.",
+    "freshness_type": "DAILY_CLOSE",
+    "last_updated": "2026-09-28",
+    "source": "RE-ENTRY calculated NYSE 40-day breadth; technical reference: T2108-style reconstruction",
+    "validation_status": "VALIDATED_CONTEXT_ONLY",
+    "validation_note": "Incremental validation across 94 DEPLOY episodes found the NYSE 40-day breadth reconstruction highly redundant with existing breadth (correlation about 0.94). Requiring below 40% and rising delayed entry by a median two sessions and cost median +0.17% for the S&P 500 ETF and +0.33% for the Nasdaq-100 ETF. Keep as breadth context only, not a vote or required confirmation."
   }
 }
