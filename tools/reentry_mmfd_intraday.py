@@ -262,19 +262,35 @@ def main() -> None:
         raise SystemExit(f"Missing {CURRENT}")
 
     market_date = now.date().isoformat()
-    universe = load_us_equity_universe()
-    result = calculate_mmfd(universe, market_date)
-    value = float(result["mmfd_live"])
-    result["state"] = classify(value)
-    result["timestamp_et"] = now.isoformat()
 
+    # LIVE path: use the direct published $MMFD reading first. The full-universe
+    # reconstruction is retained only as a fallback so thousands of Yahoo
+    # downloads cannot block an on-demand RE-ENTRY refresh.
     try:
         vendor = fetch_vendor_mmfd()
     except Exception as exc:
         vendor = {"error": f"{type(exc).__name__}: {exc}"}
-    result["vendor_crosscheck"] = vendor
+
     if isinstance(vendor, dict) and finite(vendor.get("value")):
-        result["difference_vs_vendor_points"] = value - float(vendor["value"])
+        value = float(vendor["value"])
+        result = {
+            "formula_version": "STOCKCHARTS_MMFD_DIRECT_v1",
+            "provisional_intraday": True,
+            "primary_source": "StockCharts $MMFD",
+            "source_mode": "DIRECT_VENDOR",
+            "mmfd_live": value,
+            "vendor_crosscheck": vendor,
+            "reference_scale": {"extreme_oversold_below": 15.0, "oversold_below": 30.0, "neutral_center": 50.0, "strong_above": 70.0, "extreme_overbought_above": 85.0},
+        }
+    else:
+        universe = load_us_equity_universe()
+        result = calculate_mmfd(universe, market_date)
+        value = float(result["mmfd_live"])
+        result["source_mode"] = "FULL_UNIVERSE_FALLBACK"
+        result["vendor_crosscheck"] = vendor
+
+    result["state"] = classify(value)
+    result["timestamp_et"] = now.isoformat()
 
     payload = json.loads(CURRENT.read_text(encoding="utf-8"))
     payload.setdefault("values", {})["MMFD"] = value
