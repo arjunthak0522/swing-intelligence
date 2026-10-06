@@ -331,14 +331,13 @@ jobs:
           print('Carried same-session indicator context:', ', '.join(carried) if carried else 'none')
           PY
 
-      - name: Refresh complete indicator context before publication
+      - name: Refresh fast live context before publication
         if: steps.window.outputs.active == 'true' && steps.decision.outputs.valid == 'true'
         shell: bash
         run: |
           set -euo pipefail
-          python _main/tools/reentry_secondary_confirmation.py \
-            --snapshot data/reentry/exhaustion_intraday_current.json \
-            --history data/reentry/secondary_confirmation_history.csv
+          # Keep the on-demand path fast. Expensive full-universe NYSE 40-day
+          # reconstruction remains in the asynchronous enrichment workflow.
           python _main/tools/reentry_options_sentiment_live.py \
             --snapshot data/reentry/exhaustion_intraday_current.json
           python _main/tools/reentry_leading_indicators.py \
