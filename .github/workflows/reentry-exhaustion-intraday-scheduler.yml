@@ -1,6 +1,6 @@
 name: RE-ENTRY Unified Engine
 
-# Live refreshes preserve same-session indicator context before publication.
+# Live refreshes preserve same-session indicator context before publication. On-demand runs refresh the full board.
 # Direct MMFD retrieval keeps on-demand refreshes from blocking on full-universe reconstruction.
 
 on:
