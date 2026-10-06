@@ -207,7 +207,15 @@ def patch_snapshot(path: Path) -> dict:
 
     secondary = payload.get("secondary_confirmation")
     if not isinstance(secondary, dict):
-        raise ValueError("Snapshot does not contain secondary_confirmation")
+        secondary = {
+            "version": "REENTRY_SECONDARY_CONFIRMATION_v1",
+            "decision_input": False,
+            "changes_deploy_trigger": False,
+            "changes_recovery_stage": False,
+            "families": {},
+            "breadth_context": {},
+        }
+        payload["secondary_confirmation"] = secondary
     families = secondary.setdefault("families", {})
     families["options_sentiment"] = signal
     errors = secondary.get("errors")
@@ -216,14 +224,17 @@ def patch_snapshot(path: Path) -> dict:
         if not errors:
             secondary.pop("errors", None)
 
-    nested = (payload.get("unified_engine") or {}).get("secondary_confirmation")
-    if isinstance(nested, dict):
-        nested.setdefault("families", {})["options_sentiment"] = signal
-        nested_errors = nested.get("errors")
-        if isinstance(nested_errors, dict):
-            nested_errors.pop("options_sentiment", None)
-            if not nested_errors:
-                nested.pop("errors", None)
+    engine = payload.setdefault("unified_engine", {})
+    nested = engine.get("secondary_confirmation")
+    if not isinstance(nested, dict):
+        nested = secondary
+        engine["secondary_confirmation"] = nested
+    nested.setdefault("families", {})["options_sentiment"] = signal
+    nested_errors = nested.get("errors")
+    if isinstance(nested_errors, dict):
+        nested_errors.pop("options_sentiment", None)
+        if not nested_errors:
+            nested.pop("errors", None)
 
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     return signal
