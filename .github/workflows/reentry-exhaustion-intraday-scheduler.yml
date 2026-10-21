@@ -23,8 +23,8 @@ permissions:
   id-token: write
 
 concurrency:
-  group: reentry-unified-engine
-  cancel-in-progress: false
+  group: reentry-unified-engine-v2
+  cancel-in-progress: true
 
 jobs:
   snapshot:
