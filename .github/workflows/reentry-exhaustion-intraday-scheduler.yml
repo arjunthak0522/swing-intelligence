@@ -58,7 +58,12 @@ jobs:
           event = os.environ.get('GITHUB_EVENT_NAME', '')
           if event == 'schedule':
               active = now.weekday() < 5 and 16 * 60 + 15 <= minute <= 16 * 60 + 45
+          elif event == 'workflow_dispatch':
+              # Explicit LIVE requests are allowed at any time. Individual data
+              # sources preserve their own freshness/provisional metadata.
+              active = True
           else:
+              # Push-triggered validation remains constrained to regular/live market hours.
               active = now.weekday() < 5 and 9 * 60 + 30 <= minute <= 16 * 60 + 45
           with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as handle:
               handle.write(f"active={'true' if active else 'false'}\n")
