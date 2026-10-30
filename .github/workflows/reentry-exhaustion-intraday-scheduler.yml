@@ -351,9 +351,6 @@ jobs:
           python _main/tools/reentry_leading_indicators.py \
             --snapshot data/reentry/exhaustion_intraday_current.json \
             --breadth-history data/reentry/exhaustion_intraday_history.csv
-          python _main/tools/reentry_ndx_single_stock_skew.py \
-            --snapshot data/reentry/exhaustion_intraday_current.json \
-            --history data/reentry/ndx_single_stock_skew_history.csv || true
           python _main/tools/reentry_indicator_completeness.py \
             --snapshot data/reentry/exhaustion_intraday_current.json
           python - <<'PY'
