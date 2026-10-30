@@ -4,6 +4,7 @@ from __future__ import annotations
 import csv
 import io
 import json
+import os
 import math
 import subprocess
 import time
@@ -318,7 +319,8 @@ def quote_provenance(quotes: dict) -> dict:
 
 def main() -> None:
     now = datetime.now(timezone.utc).astimezone(ET)
-    if not market_is_open(now):
+    force_live = os.environ.get('REENTRY_FORCE_LIVE', '').lower() == 'true'
+    if not market_is_open(now) and not force_live:
         print(json.dumps({
             "research_only": True,
             "status": "SKIPPED_OUTSIDE_REFRESH_WINDOW",
