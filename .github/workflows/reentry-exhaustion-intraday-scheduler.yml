@@ -364,13 +364,13 @@ jobs:
           set -euo pipefail
           # Keep the on-demand path fast. Expensive full-universe NYSE 40-day
           # reconstruction remains in the asynchronous enrichment workflow.
-          python _main/tools/reentry_options_sentiment_live.py \
-            --snapshot data/reentry/exhaustion_intraday_current.json
-          python _main/tools/reentry_leading_indicators.py \
+          timeout 20s python _main/tools/reentry_options_sentiment_live.py \
+            --snapshot data/reentry/exhaustion_intraday_current.json || echo 'Options context unavailable within LIVE latency budget'
+          timeout 20s python _main/tools/reentry_leading_indicators.py \
             --snapshot data/reentry/exhaustion_intraday_current.json \
-            --breadth-history data/reentry/exhaustion_intraday_history.csv
-          python _main/tools/reentry_indicator_completeness.py \
-            --snapshot data/reentry/exhaustion_intraday_current.json
+            --breadth-history data/reentry/exhaustion_intraday_history.csv || echo 'Leading context unavailable within LIVE latency budget'
+          timeout 10s python _main/tools/reentry_indicator_completeness.py \
+            --snapshot data/reentry/exhaustion_intraday_current.json || echo 'Completeness display refresh unavailable within LIVE latency budget'
           python - <<'PY'
           import json
           from pathlib import Path
