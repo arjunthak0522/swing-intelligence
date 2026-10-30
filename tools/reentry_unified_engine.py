@@ -27,10 +27,13 @@ def load_engine_namespace() -> dict:
 
 
 _CANONICAL = load_engine_namespace()
-
-evaluate = _CANONICAL["evaluate"]
 allowed_window = _CANONICAL["allowed_window"]
 market_phase = _CANONICAL["market_phase"]
+
+
+def evaluate(payload: dict, prior: dict | None = None, recent: list[dict] | None = None, latched_go: dict | None = None) -> dict:
+    """Call the canonical engine while preserving the older two-argument test API."""
+    return _CANONICAL["evaluate"](payload, prior, recent or [], latched_go)
 
 
 def main() -> None:
