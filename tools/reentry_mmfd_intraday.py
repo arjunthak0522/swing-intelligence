@@ -101,7 +101,15 @@ def extract_ticker_closes(frame: pd.DataFrame, ticker: str) -> pd.Series:
             except Exception:
                 pass
     if "Close" in frame.columns:
-        return pd.to_numeric(frame["Close"], errors="coerce").dropna()
+        close = frame["Close"]
+        if isinstance(close, pd.DataFrame):
+            if ticker in close.columns:
+                close = close[ticker]
+            elif close.shape[1] == 1:
+                close = close.iloc[:, 0]
+            else:
+                return pd.Series(dtype=float)
+        return pd.to_numeric(close, errors="coerce").dropna()
     return pd.Series(dtype=float)
 
 
@@ -184,7 +192,7 @@ def calculate_mmfd(universe: list[str], market_date: str) -> dict:
 def fetch_vendor_mmfd() -> dict | None:
     url = f"https://stockcharts.com/quotebrain/quotes?s={quote('$MMFD')}&f=json&randomNumber={int(time.time()*1000)}"
     req = Request(url, headers={"User-Agent": "Mozilla/5.0 RE-ENTRY-mmfd-validation/1.0"})
-    with urlopen(req, timeout=20) as resp:  # nosec - fixed StockCharts endpoint
+    with urlopen(req, timeout=20) as resp:
         payload = json.loads(resp.read().decode("utf-8"))
     if not payload:
         return None
@@ -244,29 +252,35 @@ def calculate_vvix(now: datetime) -> dict:
     direction = "RISING" if delta > 0.25 else "FALLING" if delta < -0.25 else "FLAT"
     state = classify_vvix_level(current)
     return {
-        "symbol": "^VVIX", "name": "Volatility of VIX", "value": current, "prior_close": prior_close,
-        "change_points_vs_prior_close": delta, "direction_vs_prior_close": direction,
-        "historical_percentile_2m": percentile_2m, "recent_percentile_sessions": int(len(recent)),
-        "historical_percentile_2y": percentile_2y, "completed_history_sessions": int(len(completed)),
-        "state": state, "provisional_intraday": True,
-        "source": "Yahoo Finance intraday VVIX quote and daily history", "timestamp_et": now.isoformat(),
+        "symbol": "^VVIX",
+        "name": "Volatility of VIX",
+        "value": current,
+        "prior_close": prior_close,
+        "change_points_vs_prior_close": delta,
+        "direction_vs_prior_close": direction,
+        "historical_percentile_2m": percentile_2m,
+        "recent_percentile_sessions": int(len(recent)),
+        "historical_percentile_2y": percentile_2y,
+        "completed_history_sessions": int(len(completed)),
+        "state": state,
+        "provisional_intraday": True,
+        "source": "Yahoo Finance intraday VVIX quote and daily history",
+        "timestamp_et": now.isoformat(),
     }
 
 
 def main() -> None:
     now = datetime.now(timezone.utc).astimezone(ET)
-    force_live = os.environ.get('REENTRY_FORCE_LIVE', '').lower() == 'true'
+    force_live = os.environ.get("REENTRY_FORCE_LIVE", "").lower() == "true"
     if not market_is_open(now) and not force_live:
         print(json.dumps({"status": "SKIPPED_OUTSIDE_REFRESH_WINDOW", "timestamp_et": now.isoformat()}))
         return
     if not CURRENT.exists():
         raise SystemExit(f"Missing {CURRENT}")
 
-    market_date = now.date().isoformat()
+    payload = json.loads(CURRENT.read_text(encoding="utf-8"))
+    market_date = str((payload.get("values") or {}).get("market_date") or now.date().isoformat())
 
-    # LIVE path: use the direct published $MMFD reading first. The full-universe
-    # reconstruction is retained only as a fallback so thousands of Yahoo
-    # downloads cannot block an on-demand RE-ENTRY refresh.
     try:
         vendor = fetch_vendor_mmfd()
     except Exception as exc:
@@ -276,7 +290,7 @@ def main() -> None:
         value = float(vendor["value"])
         result = {
             "formula_version": "STOCKCHARTS_MMFD_DIRECT_v1",
-            "provisional_intraday": True,
+            "provisional_intraday": market_date == now.date().isoformat(),
             "primary_source": "StockCharts $MMFD",
             "source_mode": "DIRECT_VENDOR",
             "mmfd_live": value,
@@ -284,23 +298,9 @@ def main() -> None:
             "reference_scale": {"extreme_oversold_below": 15.0, "oversold_below": 30.0, "neutral_center": 50.0, "strong_above": 70.0, "extreme_overbought_above": 85.0},
         }
     else:
-        if force_live:
-            payload = json.loads(CURRENT.read_text(encoding="utf-8"))
-            payload.setdefault("values", {})["MMFD"] = None
-            payload["values"]["MMFD_STATE"] = "UNAVAILABLE"
-            payload["mmfd_live"] = {
-                "formula_version": "STOCKCHARTS_MMFD_DIRECT_v1",
-                "provisional_intraday": False,
-                "primary_source": "StockCharts $MMFD",
-                "source_mode": "DIRECT_VENDOR_UNAVAILABLE",
-                "mmfd_live": None,
-                "state": "UNAVAILABLE",
-                "timestamp_et": now.isoformat(),
-                "vendor_crosscheck": vendor,
-            }
-            CURRENT.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-            print(json.dumps(payload["mmfd_live"], indent=2))
-            return
+        # Explicit/manual after-close refreshes must not turn off the robust
+        # reconstruction. The direct vendor quote is preferred for speed, but
+        # failure now falls through to the full U.S. equity universe in every mode.
         universe = load_us_equity_universe()
         result = calculate_mmfd(universe, market_date)
         value = float(result["mmfd_live"])
@@ -310,7 +310,6 @@ def main() -> None:
     result["state"] = classify(value)
     result["timestamp_et"] = now.isoformat()
 
-    payload = json.loads(CURRENT.read_text(encoding="utf-8"))
     payload.setdefault("values", {})["MMFD"] = value
     payload["values"]["MMFD_STATE"] = result["state"]
     payload["mmfd_live"] = result
