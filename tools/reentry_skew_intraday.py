@@ -4,6 +4,7 @@ from __future__ import annotations
 import csv
 import json
 import math
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -33,6 +34,12 @@ def refresh_window(now: datetime) -> bool:
         return False
     m = now.hour * 60 + now.minute
     return 9 * 60 + 30 <= m <= 16 * 60 + 45
+
+
+def explicit_refresh_requested() -> bool:
+    if os.environ.get("REENTRY_FORCE_LIVE", "").lower() == "true":
+        return True
+    return os.environ.get("GITHUB_EVENT_NAME", "").lower() in {"workflow_dispatch", "push"}
 
 
 def norm_cdf(x: float) -> float:
@@ -241,13 +248,14 @@ def live_proxy(now: datetime) -> dict:
 
 def main() -> None:
     now = datetime.now(timezone.utc).astimezone(ET)
-    if not refresh_window(now):
+    if not refresh_window(now) and not explicit_refresh_requested():
         print(json.dumps({"status": "SKIPPED_OUTSIDE_REFRESH_WINDOW", "timestamp_et": now.isoformat()}))
         return
     if not CURRENT.exists():
         raise SystemExit(f"Missing {CURRENT}")
 
-    market_date = now.date().isoformat()
+    payload = json.loads(CURRENT.read_text(encoding="utf-8"))
+    market_date = str((payload.get("values") or {}).get("market_date") or now.date().isoformat())
     official = official_skew_close()
     proxy_error = None
     try:
@@ -296,7 +304,6 @@ def main() -> None:
         "timestamp_et": now.isoformat(),
     }
 
-    payload = json.loads(CURRENT.read_text(encoding="utf-8"))
     values = payload.setdefault("values", {})
     values["SKEW_LIVE_PROXY"] = proxy["spread"]
     values["SKEW_LIVE_PROXY_RATIO"] = proxy["ratio"]
