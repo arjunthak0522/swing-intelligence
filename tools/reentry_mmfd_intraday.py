@@ -255,7 +255,8 @@ def calculate_vvix(now: datetime) -> dict:
 
 def main() -> None:
     now = datetime.now(timezone.utc).astimezone(ET)
-    if not market_is_open(now):
+    force_live = os.environ.get('REENTRY_FORCE_LIVE', '').lower() == 'true'
+    if not market_is_open(now) and not force_live:
         print(json.dumps({"status": "SKIPPED_OUTSIDE_REFRESH_WINDOW", "timestamp_et": now.isoformat()}))
         return
     if not CURRENT.exists():
