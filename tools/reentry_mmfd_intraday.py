@@ -284,6 +284,23 @@ def main() -> None:
             "reference_scale": {"extreme_oversold_below": 15.0, "oversold_below": 30.0, "neutral_center": 50.0, "strong_above": 70.0, "extreme_overbought_above": 85.0},
         }
     else:
+        if force_live:
+            payload = json.loads(CURRENT.read_text(encoding="utf-8"))
+            payload.setdefault("values", {})["MMFD"] = None
+            payload["values"]["MMFD_STATE"] = "UNAVAILABLE"
+            payload["mmfd_live"] = {
+                "formula_version": "STOCKCHARTS_MMFD_DIRECT_v1",
+                "provisional_intraday": False,
+                "primary_source": "StockCharts $MMFD",
+                "source_mode": "DIRECT_VENDOR_UNAVAILABLE",
+                "mmfd_live": None,
+                "state": "UNAVAILABLE",
+                "timestamp_et": now.isoformat(),
+                "vendor_crosscheck": vendor,
+            }
+            CURRENT.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+            print(json.dumps(payload["mmfd_live"], indent=2))
+            return
         universe = load_us_equity_universe()
         result = calculate_mmfd(universe, market_date)
         value = float(result["mmfd_live"])
