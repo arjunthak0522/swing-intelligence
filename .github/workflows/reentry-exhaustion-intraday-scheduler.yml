@@ -267,6 +267,8 @@ jobs:
 
       - name: Calculate the single RE-ENTRY decision
         if: steps.window.outputs.active == 'true'
+        env:
+          REENTRY_FORCE_LIVE: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
         run: python tools/reentry_unified_engine.py
 
       - name: Validate unified decision or restore prior canonical snapshot
@@ -277,17 +279,32 @@ jobs:
           python - <<'PY'
           import json
           import os
-          import shutil
           from pathlib import Path
 
           current = Path('data/reentry/exhaustion_intraday_current.json')
-          backup = Path('/tmp/reentry-canonical-before-run.json')
           payload = json.loads(current.read_text(encoding='utf-8'))
           unified = payload.get('unified_engine') or {}
-          valid = bool(unified.get('engine_version') and unified.get('deployment_signal') and unified.get('market_phase'))
+          current_date = (payload.get('values') or {}).get('market_date')
+          valid = bool(
+              unified.get('engine_version')
+              and unified.get('deployment_signal')
+              and unified.get('market_phase')
+              and unified.get('market_date') == current_date
+          )
           if not valid:
-              shutil.copyfile(backup, current)
-              print('Unified engine did not produce a complete decision; restored the prior canonical snapshot.')
+              payload['unified_engine'] = {
+                  'engine_version': 'REENTRY_UNIFIED_v1',
+                  'market_date': current_date,
+                  'timestamp_et': (payload.get('values') or {}).get('timestamp_et'),
+                  'deployment_signal': 'UNAVAILABLE',
+                  'state': 'INCOMPLETE',
+                  'decision': 'INCOMPLETE',
+                  'market_phase': 'DATA_INCOMPLETE',
+                  'data_quality': 'INCOMPLETE',
+                  'reason': 'Fresh-session decision could not be completed. Prior-session decisions are never substituted.'
+              }
+              current.write_text(json.dumps(payload, indent=2) + '\n', encoding='utf-8')
+              print('Fresh-session decision incomplete; retained current-session indicators and marked decision UNAVAILABLE. No prior-session restore.')
           with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as handle:
               handle.write(f"valid={'true' if valid else 'false'}\n")
           PY
