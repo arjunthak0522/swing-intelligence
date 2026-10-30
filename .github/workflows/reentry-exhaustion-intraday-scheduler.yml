@@ -98,6 +98,7 @@ jobs:
         if: steps.window.outputs.active == 'true'
         env:
           REENTRY_CURRENT_PATH: ${{ github.workspace }}/data/reentry/exhaustion_intraday_current.json
+          REENTRY_FORCE_LIVE: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
         run: python _main/tools/reentry_mmfd_intraday.py
 
       - name: Calculate NYSE context indicators
