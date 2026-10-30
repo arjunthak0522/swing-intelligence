@@ -4,6 +4,7 @@ from __future__ import annotations
 import csv
 import json
 import math
+import os
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -407,7 +408,8 @@ def evaluate(payload: dict, prior: dict | None, recent: list[dict], latched_go: 
 
 def main() -> None:
     now = datetime.now(timezone.utc).astimezone(ET)
-    if not allowed_window(now):
+    force_live = os.environ.get('REENTRY_FORCE_LIVE', '').lower() == 'true'
+    if not allowed_window(now) and not force_live:
         print(json.dumps({"status": "OUTSIDE_REFRESH_WINDOW", "timestamp_et": now.isoformat()}))
         return
     if not CURRENT.exists():
