@@ -1,0 +1,136 @@
+name: RE-ENTRY Fast Live Core
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/reentry-fast-live-core.yml'
+  schedule:
+    - cron: '*/5 13-22 * * 1-5'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: reentry-fast-live-core
+  cancel-in-progress: true
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Check live session
+        id: window
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+          now = datetime.now(ZoneInfo('America/New_York'))
+          minute = now.hour * 60 + now.minute
+          manual = os.environ.get('GITHUB_EVENT_NAME') in {'workflow_dispatch','push'}
+          active = manual or (now.weekday() < 5 and 9*60+30 <= minute <= 16*60+45)
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as f:
+              f.write(f"active={'true' if active else 'false'}\n")
+          print(f"Fast live active={active} at {now.isoformat()}")
+          PY
+
+      - name: Checkout live data branch
+        if: steps.window.outputs.active == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: intraday-signal-research
+          fetch-depth: 0
+
+      - name: Checkout canonical source
+        if: steps.window.outputs.active == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: _main
+          fetch-depth: 1
+
+      - name: Set up Python
+        if: steps.window.outputs.active == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        if: steps.window.outputs.active == 'true'
+        run: python -m pip install --quiet pandas yfinance
+
+      - name: Capture core breadth now
+        if: steps.window.outputs.active == 'true'
+        env:
+          REENTRY_FORCE_LIVE: 'true'
+        run: python tools/reentry_exhaustion_intraday.py
+
+      - name: Try MMFD and VVIX without blocking
+        if: steps.window.outputs.active == 'true'
+        env:
+          REENTRY_CURRENT_PATH: ${{ github.workspace }}/data/reentry/exhaustion_intraday_current.json
+          REENTRY_FORCE_LIVE: 'true'
+        shell: bash
+        run: timeout 20s python _main/tools/reentry_mmfd_intraday.py || echo 'MMFD/VVIX unavailable within live budget'
+
+      - name: Try NYSE context without blocking
+        if: steps.window.outputs.active == 'true'
+        shell: bash
+        run: timeout 15s python _main/tools/reentry_nyse_context.py --snapshot data/reentry/exhaustion_intraday_current.json --history data/reentry/nyse_context_history.csv || echo 'NYSE context unavailable within live budget'
+
+      - name: Try SPX skew without blocking
+        if: steps.window.outputs.active == 'true'
+        shell: bash
+        run: timeout 20s python tools/reentry_skew_intraday.py || echo 'SPX skew unavailable within live budget'
+
+      - name: Calculate current-session decision
+        if: steps.window.outputs.active == 'true'
+        env:
+          REENTRY_FORCE_LIVE: 'true'
+        run: python tools/reentry_unified_engine.py
+
+      - name: Refresh fast context without blocking
+        if: steps.window.outputs.active == 'true'
+        shell: bash
+        run: |
+          timeout 15s python _main/tools/reentry_options_sentiment_live.py --snapshot data/reentry/exhaustion_intraday_current.json || echo 'Options context unavailable within live budget'
+          timeout 15s python _main/tools/reentry_leading_indicators.py --snapshot data/reentry/exhaustion_intraday_current.json --breadth-history data/reentry/exhaustion_intraday_history.csv || echo 'Leading context unavailable within live budget'
+          timeout 10s python _main/tools/reentry_indicator_completeness.py --snapshot data/reentry/exhaustion_intraday_current.json || echo 'Completeness refresh unavailable within live budget'
+
+      - name: Reject stale session data
+        if: steps.window.outputs.active == 'true'
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from datetime import datetime
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+          p = Path('data/reentry/exhaustion_intraday_current.json')
+          payload = json.loads(p.read_text(encoding='utf-8'))
+          today = datetime.now(ZoneInfo('America/New_York')).date().isoformat()
+          market_date = (payload.get('values') or {}).get('market_date')
+          if market_date != today:
+              raise SystemExit(f'Refusing stale live snapshot: market_date={market_date}, today={today}')
+          print(f'Fresh same-session snapshot verified for {today}')
+          PY
+
+      - name: Persist fresh same-session snapshot
+        if: steps.window.outputs.active == 'true'
+        shell: bash
+        run: |
+          git config user.name 're-entry-live[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/reentry/exhaustion_intraday_current.json data/reentry/exhaustion_intraday_history.csv
+          git add data/reentry/skew_intraday_history.csv data/reentry/unified_engine_history.csv data/reentry/nyse_context_history.csv 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo 'No live snapshot change'
+            exit 0
+          fi
+          git commit -m 'Record fast live RE-ENTRY snapshot [skip ci]'
+          git push origin HEAD:intraday-signal-research
