@@ -1,0 +1,58 @@
+name: RE-ENTRY Intraday Dispatcher
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/reentry-intraday-dispatcher.yml'
+  schedule:
+    # Every 5 minutes across the U.S. regular-session UTC envelope.
+    # The ET gate below handles EDT/EST and prevents off-session dispatches.
+    - cron: '*/5 13-22 * * 1-5'
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: reentry-intraday-dispatcher
+  cancel-in-progress: true
+
+jobs:
+  dispatch-live-engine:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check live-session window
+        id: window
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+
+          now = datetime.now(ZoneInfo('America/New_York'))
+          minute = now.hour * 60 + now.minute
+          event = os.environ.get('GITHUB_EVENT_NAME', '')
+          if event == 'workflow_dispatch':
+              active = True
+          else:
+              active = now.weekday() < 5 and 9 * 60 + 30 <= minute <= 16 * 60 + 45
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as handle:
+              handle.write(f"active={'true' if active else 'false'}\n")
+          print(f"RE-ENTRY intraday dispatcher active={active} at {now.isoformat()}")
+          PY
+
+      - name: Dispatch canonical RE-ENTRY engine
+        if: steps.window.outputs.active == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          gh api --method POST \
+            -H 'Accept: application/vnd.github+json' \
+            "/repos/${GITHUB_REPOSITORY}/actions/workflows/reentry-exhaustion-intraday-scheduler.yml/dispatches" \
+            -f ref=main
+          echo 'Canonical RE-ENTRY live engine dispatched.'
