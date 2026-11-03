@@ -1,3 +1,4 @@
 market_date,nyse_advances,nyse_declines,advance_share,nyse_tick,tick_session_high,tick_session_low,new_highs,new_lows,source_timestamp
 2026-10-30,1005.0,1715.0,0.3694852941176471,,,,92.0,169.0,2026-10-30 16:00:00
 2026-11-02,1722.0,989.0,0.6351899668019181,,,,82.0,96.0,2026-11-02 16:00:00
+2026-11-03,1187.0,1498.0,0.44208566108007447,,,,37.0,113.0,2026-11-03 14:47:00
